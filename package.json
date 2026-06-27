@@ -1,0 +1,59 @@
+{
+  "name": "ajnas-agent-crawler",
+  "version": "0.1.0",
+  "description": "Fast, respectful web crawler for agent workflows with robots.txt, sitemap discovery, markdown extraction, and JSONL output.",
+  "license": "MIT",
+  "author": {
+    "name": "Ajnas",
+    "email": "ajnasnb@gmail.com"
+  },
+  "type": "module",
+  "bin": {
+    "ajnas-crawl": "bin/ajnas-crawl.js",
+    "ajnas-agent-crawler": "bin/ajnas-crawl.js"
+  },
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "crawl": "node bin/ajnas-crawl.js"
+  },
+  "keywords": [
+    "crawler",
+    "agent",
+    "web-crawler",
+    "scraper",
+    "robots.txt",
+    "sitemap",
+    "markdown",
+    "jsonl",
+    "research"
+  ],
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "robots-parser": "^3.0.1",
+    "turndown": "^7.2.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AjnasNB/ajnas-agent-crawler.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AjnasNB/ajnas-agent-crawler/issues"
+  },
+  "homepage": "https://github.com/AjnasNB/ajnas-agent-crawler#readme",
+  "publishConfig": {
+    "access": "public"
+  }
+}
