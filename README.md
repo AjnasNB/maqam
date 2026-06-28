@@ -1,8 +1,8 @@
 # Ajnas Agent Crawler
 
-A fast, respectful web crawler for agent workflows. It extracts page title, description, text, markdown, links, status, content type, and fetch timestamps into JSON or JSONL.
+Maqam is the enterprise agent framework console built on Ajnas Agent Crawler. The name comes from the idea of composing smaller trusted units into a larger controlled system: skills, tools, policy, evidence, and runtime traces become one governed workflow.
 
-This package is designed for research agents, RAG ingestion, documentation indexing, QA crawling, and content inventory jobs that need a clean Node.js API and a simple CLI.
+The package still includes a fast, respectful crawler, but it now also ships local framework primitives and a runnable Maqam console for governed research runs.
 
 ## Principles
 
@@ -44,6 +44,24 @@ Options:
 - `--output <file>`: write output to a file
 - `--user-agent <ua>`: custom user agent
 
+## Maqam Console
+
+```bash
+npm run maqam
+```
+
+Then open `http://127.0.0.1:8787`.
+
+The console runs a governed research workflow through:
+
+- `PolicyEngine`: allows or denies goals and tool calls.
+- `ToolGateway`: routes all external work through policy checks.
+- `EvidenceLedger`: records source-backed evidence and claim support.
+- `AgentRuntime`: executes workflow tasks with traces and retries.
+- `createResearchWorkflow`: composes crawler collection, synthesis, and quality checks.
+
+Brand assets live in `app/assets/`, including `maqam-logo.svg` and the generated `maqam-brand-board.png`.
+
 ## Library API
 
 ```js
@@ -60,6 +78,42 @@ const pages = await crawl({
 });
 
 console.log(pages[0].markdown);
+```
+
+## Framework SDK
+
+```js
+import {
+  AgentRuntime,
+  EvidenceLedger,
+  PolicyEngine,
+  ToolGateway,
+  createCrawlerTool,
+  createResearchWorkflow
+} from "ajnas-agent-crawler";
+
+const evidenceLedger = new EvidenceLedger();
+const policyEngine = new PolicyEngine({
+  allowedTools: ["crawler"],
+  allowedOrigins: ["https://github.com", "https://www.npmjs.com"]
+});
+const gateway = new ToolGateway({ policyEngine, evidenceLedger });
+gateway.registerTool("crawler", createCrawlerTool());
+
+const runtime = new AgentRuntime({ policyEngine, evidenceLedger, toolGateway: gateway });
+const result = await runtime.runWorkflow(
+  createResearchWorkflow({
+    seeds: ["https://github.com/apify/crawlee"],
+    maxPages: 5
+  }),
+  {
+    objective: "Research permissive OSS agent framework projects",
+    allowedTools: ["crawler"],
+    allowedOrigins: ["https://github.com"]
+  }
+);
+
+console.log(result.outputs.synthesize_report.candidates);
 ```
 
 ## Output shape

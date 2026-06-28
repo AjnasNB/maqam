@@ -10,13 +10,15 @@
   "type": "module",
   "bin": {
     "ajnas-crawl": "bin/ajnas-crawl.js",
-    "ajnas-agent-crawler": "bin/ajnas-crawl.js"
+    "ajnas-agent-crawler": "bin/ajnas-crawl.js",
+    "maqam": "bin/maqam.js"
   },
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js"
   },
   "files": [
+    "app/",
     "bin/",
     "src/",
     "README.md",
@@ -24,9 +26,15 @@
   ],
   "scripts": {
     "test": "node --test",
-    "crawl": "node bin/ajnas-crawl.js"
+    "crawl": "node bin/ajnas-crawl.js",
+    "maqam": "node bin/maqam.js"
   },
   "keywords": [
+    "maqam",
+    "agent-framework",
+    "agent-runtime",
+    "policy-engine",
+    "evidence-ledger",
     "crawler",
     "agent",
     "web-crawler",

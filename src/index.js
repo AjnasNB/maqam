@@ -333,3 +333,19 @@ export async function crawl(input = {}) {
 }
 
 export { discoverSitemapUrls, normalizeUrl };
+export { AjnasFrameworkError, ApprovalRequiredError, PolicyDeniedError, toErrorRecord } from "./framework/errors.js";
+export { PolicyEngine } from "./framework/policy.js";
+export { EvidenceLedger } from "./framework/evidence-ledger.js";
+export { ToolGateway } from "./framework/tool-gateway.js";
+export { SkillRegistry } from "./framework/skill-registry.js";
+export { AgentRuntime } from "./framework/runtime.js";
+export { createResearchWorkflow } from "./framework/research-workflow.js";
+
+export function createCrawlerTool(defaultOptions = {}) {
+  return async function crawlerTool(input = {}) {
+    return crawl({
+      ...defaultOptions,
+      ...input
+    });
+  };
+}

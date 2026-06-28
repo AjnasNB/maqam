@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Maqam is an enterprise agent framework console for governed research workflows.">
+    <title>Maqam | Compose governed agents</title>
+    <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Maqam home">
+          <img src="/assets/maqam-logo.svg" alt="" width="44" height="44">
+          <span>
+            <strong>Maqam</strong>
+            <small>Compose governed agents</small>
+          </span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#run">Run</a>
+          <a href="#evidence">Evidence</a>
+          <a href="#policy">Policy</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="kicker">Enterprise agent framework</p>
+            <h1 id="hero-title">Build agent workflows that can be inspected, governed, and trusted.</h1>
+            <p class="lede">Maqam composes skills, tools, policy, evidence, and runtime traces into one controlled workflow surface.</p>
+          </div>
+          <div class="run-panel" id="run">
+            <div class="panel-header">
+              <span>Governed research run</span>
+              <strong id="run-status">Ready</strong>
+            </div>
+            <form id="research-form">
+              <label for="seed-url">Seed URL</label>
+              <input id="seed-url" name="seed" type="url" value="https://github.com/apify/crawlee" autocomplete="url" required>
+              <div class="form-grid">
+                <label>
+                  Max pages
+                  <input name="maxPages" type="number" min="1" max="25" value="2" autocomplete="off">
+                </label>
+                <label>
+                  Same origin
+                  <select name="sameOrigin">
+                    <option value="true" selected>On</option>
+                    <option value="false">Off</option>
+                  </select>
+                </label>
+              </div>
+              <button type="submit">Run governed workflow</button>
+              <p class="hint">The server enforces policy before tool execution and records evidence for the synthesized result.</p>
+            </form>
+          </div>
+        </section>
+
+        <section class="metrics" aria-label="Run metrics">
+          <article>
+            <span>Runtime</span>
+            <strong id="metric-runtime">Idle</strong>
+          </article>
+          <article>
+            <span>Evidence</span>
+            <strong id="metric-evidence">0 records</strong>
+          </article>
+          <article>
+            <span>Claims</span>
+            <strong id="metric-claims">0 checked</strong>
+          </article>
+          <article>
+            <span>Gateway</span>
+            <strong id="metric-tools">0 calls</strong>
+          </article>
+        </section>
+
+        <section class="workspace">
+          <div class="column">
+            <div class="section-heading">
+              <h2>Candidates</h2>
+              <p>What the workflow produced from governed source collection.</p>
+            </div>
+            <div id="candidates" class="stack empty">Run a workflow to inspect candidates.</div>
+          </div>
+          <div class="column">
+            <div class="section-heading" id="evidence">
+              <h2>Evidence ledger</h2>
+              <p>Source-backed records linked to claims.</p>
+            </div>
+            <div id="evidence-list" class="stack empty">Evidence records will appear here.</div>
+          </div>
+        </section>
+
+        <section class="policy-band" id="policy">
+          <div>
+            <h2>Policy path</h2>
+            <p>Goal preflight, tool authorization, evidence capture, synthesis, and quality checks are first-class run steps.</p>
+          </div>
+          <ol id="trace-list">
+            <li>Preflight waiting</li>
+            <li>Tool gateway waiting</li>
+            <li>Evidence ledger waiting</li>
+          </ol>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
