@@ -6,6 +6,8 @@ Maqam is an MIT-licensed Ajnas agent framework for governed workflows. It combin
 
 The crawler is no longer the product center; it is the first governed connector. Maqam is meant for enterprise agent workflows that need inspectable runs, source-backed outputs, compliance-friendly defaults, and no required hosted service.
 
+Full documentation: [docs/usage.md](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md)
+
 ![Maqam system map](app/assets/maqam-system-map.svg)
 
 ## What Ships
