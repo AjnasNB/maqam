@@ -1,6 +1,6 @@
 {
   "name": "maqam",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Maqam is an MIT-licensed Ajnas agent framework for governed workflows, policy, evidence, skills, and crawler-backed research.",
   "license": "MIT",
   "author": {

@@ -44,10 +44,10 @@ maqam
 
 Then open `http://127.0.0.1:8787`.
 
-Run without global install:
+Use inside a project:
 
 ```bash
-npx maqam --port 8787
+npm install maqam
 ```
 
 ## Crawler CLI

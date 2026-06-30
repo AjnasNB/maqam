@@ -7,7 +7,7 @@ const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.1.0");
+  assert.equal(packageJson.version, "0.1.1");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.type, "module");
   assert.equal(packageJson.bin.maqam, "bin/maqam.js");
