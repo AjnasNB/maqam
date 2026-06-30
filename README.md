@@ -1,36 +1,49 @@
-# Ajnas Agent Crawler
+# Maqam
 
-Maqam is the enterprise agent framework console built on Ajnas Agent Crawler. The name comes from the idea of composing smaller trusted units into a larger controlled system: skills, tools, policy, evidence, and runtime traces become one governed workflow.
+![Maqam logo](app/assets/maqam-logo.svg)
 
-The package still includes a fast, respectful crawler, but it now also ships local framework primitives and a runnable Maqam console for governed research runs.
+Maqam is an MIT-licensed Ajnas agent framework for governed workflows. It combines a local agent runtime, policy engine, evidence ledger, skill registry, tool gateway, human-review-ready approval errors, and a crawler-backed research workflow.
 
-## Principles
+The crawler is no longer the product center; it is the first governed connector. Maqam is meant for enterprise agent workflows that need inspectable runs, source-backed outputs, compliance-friendly defaults, and no required hosted service.
 
-- Respect `robots.txt` by default.
-- Use a clear user agent.
-- Rate-limit per origin.
-- Avoid bypassing access controls, paywalls, anti-bot systems, or private content.
-- No AI dependency.
-- No external hosted service.
-- JSON/JSONL output that agents can consume directly.
+## What Ships
+
+- `AgentRuntime`: sequential workflow execution with retries, trace events, task outputs, and policy preflight.
+- `PolicyEngine`: deterministic goal and tool-call decisions for allowed tools, origins, limits, and approval gates.
+- `EvidenceLedger`: provenance records, claim links, source hashes, confidence, and unsupported-claim checks.
+- `ToolGateway`: one governed path for external tool execution.
+- `SkillRegistry`: lightweight skill metadata registration and selection.
+- `createResearchWorkflow`: crawler-backed source collection, synthesis, and quality checks.
+- `maqam`: local web console for running governed research workflows.
+- `maqam-crawl`: respectful crawler CLI that obeys `robots.txt` by default.
 
 ## Install
 
 ```bash
-npm install -g ajnas-agent-crawler
+npm install -g maqam
 ```
 
-Or run without global install:
+Run the local console:
 
 ```bash
-npx ajnas-agent-crawler https://example.com --max-pages 20 --jsonl
+maqam
 ```
 
-## CLI
+Then open `http://127.0.0.1:8787`.
+
+Run without global install:
 
 ```bash
-ajnas-crawl https://example.com --max-pages 50 --jsonl --output crawl.jsonl
+npx maqam --port 8787
 ```
+
+## Crawler CLI
+
+```bash
+maqam-crawl https://example.com --max-pages 50 --jsonl --output crawl.jsonl
+```
+
+Legacy aliases `ajnas-crawl` and `ajnas-agent-crawler` are kept for compatibility.
 
 Options:
 
@@ -44,42 +57,6 @@ Options:
 - `--output <file>`: write output to a file
 - `--user-agent <ua>`: custom user agent
 
-## Maqam Console
-
-```bash
-npm run maqam
-```
-
-Then open `http://127.0.0.1:8787`.
-
-The console runs a governed research workflow through:
-
-- `PolicyEngine`: allows or denies goals and tool calls.
-- `ToolGateway`: routes all external work through policy checks.
-- `EvidenceLedger`: records source-backed evidence and claim support.
-- `AgentRuntime`: executes workflow tasks with traces and retries.
-- `createResearchWorkflow`: composes crawler collection, synthesis, and quality checks.
-
-Brand assets live in `app/assets/`, including `maqam-logo.svg` and the generated `maqam-brand-board.png`.
-
-## Library API
-
-```js
-import { crawl } from "ajnas-agent-crawler";
-
-const pages = await crawl({
-  seeds: ["https://example.com"],
-  maxPages: 25,
-  concurrency: 4,
-  includeSitemaps: true,
-  onPage(page) {
-    console.log(page.url, page.title);
-  }
-});
-
-console.log(pages[0].markdown);
-```
-
 ## Framework SDK
 
 ```js
@@ -90,13 +67,14 @@ import {
   ToolGateway,
   createCrawlerTool,
   createResearchWorkflow
-} from "ajnas-agent-crawler";
+} from "maqam";
 
 const evidenceLedger = new EvidenceLedger();
 const policyEngine = new PolicyEngine({
   allowedTools: ["crawler"],
   allowedOrigins: ["https://github.com", "https://www.npmjs.com"]
 });
+
 const gateway = new ToolGateway({ policyEngine, evidenceLedger });
 gateway.registerTool("crawler", createCrawlerTool());
 
@@ -116,33 +94,60 @@ const result = await runtime.runWorkflow(
 console.log(result.outputs.synthesize_report.candidates);
 ```
 
-## Output shape
+## Crawler API
 
-```json
-{
-  "url": "https://example.com/",
-  "canonical": "https://example.com/",
-  "title": "Example",
-  "description": "Example description",
-  "h1": "Example",
-  "text": "Readable text...",
-  "markdown": "# Example\n\nReadable markdown...",
-  "links": ["https://example.com/about"],
-  "fetchedAt": "2026-06-27T00:00:00.000Z",
-  "status": 200,
-  "contentType": "text/html; charset=utf-8"
-}
+```js
+import { crawl } from "maqam";
+
+const pages = await crawl({
+  seeds: ["https://example.com"],
+  maxPages: 25,
+  concurrency: 4,
+  includeSitemaps: true,
+  onPage(page) {
+    console.log(page.url, page.title);
+  }
+});
+
+console.log(pages[0].markdown);
 ```
 
-## What this is not
+## Maqam Console
 
-This is not a stealth scraper and does not include bypass tooling. It will not help evade login walls, paywalls, anti-bot protections, CAPTCHA, robots.txt, or authorization boundaries.
+```bash
+npm run maqam
+```
+
+The console runs a governed research workflow through:
+
+- `PolicyEngine`: allows or denies goals and tool calls.
+- `ToolGateway`: routes all external work through policy checks.
+- `EvidenceLedger`: records source-backed evidence and claim support.
+- `AgentRuntime`: executes workflow tasks with traces and retries.
+- `createResearchWorkflow`: composes crawler collection, synthesis, and quality checks.
+
+Brand assets live in `app/assets/`, including `maqam-logo.svg` and `maqam-brand-board.png`.
+
+## Principles
+
+- Respect `robots.txt` by default.
+- Use a clear user agent.
+- Rate-limit per origin.
+- Avoid bypassing access controls, paywalls, anti-bot systems, or private content.
+- No required AI provider dependency.
+- No required external hosted service.
+- Produce JSON/JSONL output that agents can consume directly.
+
+## What This Is Not
+
+Maqam is not a stealth scraper and does not include bypass tooling. It will not help evade login walls, paywalls, anti-bot protections, CAPTCHA, robots.txt, or authorization boundaries.
 
 ## Development
 
 ```bash
 npm install
 npm test
+npm pack --dry-run
 ```
 
 ## Publish
@@ -150,6 +155,8 @@ npm test
 ```bash
 npm publish --access public
 ```
+
+Publishing requires an authenticated npm session with permission to publish the `maqam` package.
 
 ## License
 

@@ -2,7 +2,7 @@ import * as cheerio from "cheerio";
 import robotsParser from "robots-parser";
 import TurndownService from "turndown";
 
-const DEFAULT_USER_AGENT = "AjnasAgentCrawler/0.1 (+https://github.com/AjnasNB/ajnas-agent-crawler)";
+const DEFAULT_USER_AGENT = "Maqam/0.1 (+https://github.com/AjnasNB/maqam)";
 const DEFAULT_MAX_BYTES = 3 * 1024 * 1024;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

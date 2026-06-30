@@ -4,10 +4,10 @@ import { crawl } from "../src/index.js";
 
 function usage() {
   console.log(`
-Ajnas Agent Crawler
+Maqam Crawler
 
 Usage:
-  ajnas-crawl <url> [more urls...] [options]
+  maqam-crawl <url> [more urls...] [options]
 
 Options:
   --max-pages <n>       Maximum pages to return. Default: 50
@@ -21,7 +21,7 @@ Options:
   --user-agent <ua>     Custom user agent
   --help                Show this help
 
-This crawler respects robots.txt by default and does not bypass access controls.
+This crawler is Maqam's first governed connector. It respects robots.txt by default and does not bypass access controls.
 `);
 }
 

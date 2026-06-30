@@ -1,7 +1,7 @@
 {
-  "name": "ajnas-agent-crawler",
+  "name": "maqam",
   "version": "0.1.0",
-  "description": "Fast, respectful web crawler for agent workflows with robots.txt, sitemap discovery, markdown extraction, and JSONL output.",
+  "description": "Maqam is an MIT-licensed Ajnas agent framework for governed workflows, policy, evidence, skills, and crawler-backed research.",
   "license": "MIT",
   "author": {
     "name": "Ajnas",
@@ -9,9 +9,10 @@
   },
   "type": "module",
   "bin": {
+    "maqam": "bin/maqam.js",
+    "maqam-crawl": "bin/ajnas-crawl.js",
     "ajnas-crawl": "bin/ajnas-crawl.js",
-    "ajnas-agent-crawler": "bin/ajnas-crawl.js",
-    "maqam": "bin/maqam.js"
+    "ajnas-agent-crawler": "bin/ajnas-crawl.js"
   },
   "main": "src/index.js",
   "exports": {
@@ -26,6 +27,7 @@
   ],
   "scripts": {
     "test": "node --test",
+    "start": "node bin/maqam.js",
     "crawl": "node bin/ajnas-crawl.js",
     "maqam": "node bin/maqam.js"
   },
@@ -33,8 +35,13 @@
     "maqam",
     "agent-framework",
     "agent-runtime",
+    "governance",
     "policy-engine",
     "evidence-ledger",
+    "provenance",
+    "skills",
+    "tool-orchestration",
+    "human-approval",
     "crawler",
     "agent",
     "web-crawler",
@@ -55,12 +62,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AjnasNB/ajnas-agent-crawler.git"
+    "url": "git+https://github.com/AjnasNB/maqam.git"
   },
   "bugs": {
-    "url": "https://github.com/AjnasNB/ajnas-agent-crawler/issues"
+    "url": "https://github.com/AjnasNB/maqam/issues"
   },
-  "homepage": "https://github.com/AjnasNB/ajnas-agent-crawler#readme",
+  "homepage": "https://github.com/AjnasNB/maqam#readme",
   "publishConfig": {
     "access": "public"
   }
