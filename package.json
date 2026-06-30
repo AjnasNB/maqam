@@ -1,6 +1,6 @@
 {
   "name": "maqam",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Maqam is an MIT-licensed agent framework for governed workflows, policy, evidence, skills, CLI workers, and crawler-backed research.",
   "license": "MIT",
   "author": {

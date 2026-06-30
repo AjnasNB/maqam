@@ -14,7 +14,7 @@ Maqam
 Usage:
   maqam [--port 8787]
 
-Starts the local Maqam enterprise agent framework console.
+Starts the local Maqam agent framework console.
 `);
   process.exit(0);
 }

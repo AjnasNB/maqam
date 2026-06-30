@@ -5,10 +5,11 @@ import { test } from "node:test";
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
 const usageGuide = readFileSync(new URL("../docs/usage.md", import.meta.url), "utf8");
+const maqamBin = readFileSync(new URL("../bin/maqam.js", import.meta.url), "utf8");
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.1.5");
+  assert.equal(packageJson.version, "0.1.6");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.type, "module");
   assert.equal(packageJson.bin.maqam, "bin/maqam.js");
@@ -38,6 +39,7 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(usageGuide, /Control CLI Workers/);
   assert.match(usageGuide, /createAgentTool/);
   assert.match(usageGuide, /createCliAgentTool/);
+  assert.match(maqamBin, /Maqam agent framework console/);
   assert.ok(existsSync(new URL("../app/assets/maqam-logo.svg", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-brand-board.png", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-readme-hero.png", import.meta.url)));
