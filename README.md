@@ -1,10 +1,12 @@
 # Maqam
 
-![Maqam logo](app/assets/maqam-logo.svg)
+![Maqam governed agent framework hero](app/assets/maqam-readme-hero.png)
 
 Maqam is an MIT-licensed Ajnas agent framework for governed workflows. It combines a local agent runtime, policy engine, evidence ledger, skill registry, tool gateway, human-review-ready approval errors, and a crawler-backed research workflow.
 
 The crawler is no longer the product center; it is the first governed connector. Maqam is meant for enterprise agent workflows that need inspectable runs, source-backed outputs, compliance-friendly defaults, and no required hosted service.
+
+![Maqam system map](app/assets/maqam-system-map.svg)
 
 ## What Ships
 
@@ -16,6 +18,17 @@ The crawler is no longer the product center; it is the first governed connector.
 - `createResearchWorkflow`: crawler-backed source collection, synthesis, and quality checks.
 - `maqam`: local web console for running governed research workflows.
 - `maqam-crawl`: respectful crawler CLI that obeys `robots.txt` by default.
+
+## Why It Matters
+
+Agent systems fail in production when tools run outside policy, outputs cannot be traced to sources, and risky actions happen without approval. Maqam makes those control points explicit:
+
+- Every workflow starts with policy preflight.
+- Every tool call goes through `ToolGateway`.
+- Every source-backed claim can be recorded in `EvidenceLedger`.
+- Every run returns trace data for inspection and replay.
+- Approval-required actions fail closed with `ApprovalRequiredError`.
+- The crawler supports research and ingestion while preserving compliance defaults.
 
 ## Install
 

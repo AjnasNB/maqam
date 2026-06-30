@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Maqam system map</title>
+  <desc id="desc">A governed agent workflow from goal intake through policy, runtime, tools, evidence, approvals, and verified output.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#070A0D"/>
+      <stop offset="0.52" stop-color="#0B0D10"/>
+      <stop offset="1" stop-color="#111816"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" x2="1">
+      <stop offset="0" stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" x2="1">
+      <stop offset="0" stop-color="#16A34A"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .label{font:700 20px Segoe UI,Arial,sans-serif;fill:#F5F6F8}
+      .small{font:500 14px Segoe UI,Arial,sans-serif;fill:#A9B7B0}
+      .tiny{font:600 12px Segoe UI,Arial,sans-serif;fill:#A9B7B0;letter-spacing:.08em}
+      .panel{fill:#111816;stroke:#2D3935;stroke-width:1.5}
+      .line{fill:none;stroke:#334155;stroke-width:2}
+      .blueLine{fill:none;stroke:#2563EB;stroke-width:3}
+      .greenLine{fill:none;stroke:#22C55E;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="1200" height="630" rx="28" fill="url(#bg)"/>
+  <path d="M0 126H1200M0 252H1200M0 378H1200M0 504H1200M200 0V630M400 0V630M600 0V630M800 0V630M1000 0V630" stroke="#1F2937" stroke-width="1" opacity=".32"/>
+
+  <g transform="translate(54 46)">
+    <path d="M0 70V10L100 68V168H20V92L100 138" fill="none" stroke="url(#blue)" stroke-width="12" stroke-linejoin="round" filter="url(#glow)"/>
+    <path d="M204 70V10L104 68V168H184V92L104 138" fill="none" stroke="url(#green)" stroke-width="12" stroke-linejoin="round" filter="url(#glow)"/>
+    <rect x="92" y="102" width="20" height="20" fill="#F5F6F8" rx="2"/>
+  </g>
+
+  <text x="54" y="288" class="tiny" fill="#3B82F6">MAQAM</text>
+  <text x="54" y="328" class="label" font-size="44">Compose governed agents</text>
+  <text x="54" y="364" class="small">Small, trusted skills. One controlled workflow.</text>
+
+  <g transform="translate(360 70)">
+    <rect class="panel" width="232" height="86" rx="14"/>
+    <text x="24" y="36" class="label">PolicyEngine</text>
+    <text x="24" y="62" class="small">allow, deny, limit, approve</text>
+  </g>
+  <g transform="translate(360 210)">
+    <rect class="panel" width="232" height="86" rx="14"/>
+    <text x="24" y="36" class="label">AgentRuntime</text>
+    <text x="24" y="62" class="small">tasks, retries, traces</text>
+  </g>
+  <g transform="translate(360 350)">
+    <rect class="panel" width="232" height="86" rx="14"/>
+    <text x="24" y="36" class="label">SkillRegistry</text>
+    <text x="24" y="62" class="small">skills, triggers, scores</text>
+  </g>
+
+  <g transform="translate(704 70)">
+    <rect class="panel" width="232" height="86" rx="14"/>
+    <text x="24" y="36" class="label">ToolGateway</text>
+    <text x="24" y="62" class="small">crawler and connectors</text>
+  </g>
+  <g transform="translate(704 210)">
+    <rect class="panel" width="232" height="86" rx="14"/>
+    <text x="24" y="36" class="label">EvidenceLedger</text>
+    <text x="24" y="62" class="small">sources, claims, hashes</text>
+  </g>
+  <g transform="translate(704 350)">
+    <rect class="panel" width="232" height="86" rx="14"/>
+    <text x="24" y="36" class="label">Human Review</text>
+    <text x="24" y="62" class="small">approval-ready gates</text>
+  </g>
+
+  <g transform="translate(508 495)">
+    <rect width="320" height="72" rx="16" fill="#0B1220" stroke="#2563EB" stroke-width="1.5"/>
+    <text x="24" y="31" class="label">Verified Output</text>
+    <text x="24" y="54" class="small">auditable reports, JSON, and run traces</text>
+  </g>
+
+  <path class="blueLine" d="M592 113H704"/>
+  <path class="blueLine" d="M592 253H704"/>
+  <path class="greenLine" d="M592 393H704"/>
+  <path class="line" d="M476 156V210"/>
+  <path class="line" d="M476 296V350"/>
+  <path class="line" d="M820 156V210"/>
+  <path class="line" d="M820 296V350"/>
+  <path class="greenLine" d="M820 436V495"/>
+  <path class="blueLine" d="M476 436V531H508"/>
+
+  <circle cx="592" cy="113" r="7" fill="#2563EB"/>
+  <circle cx="704" cy="113" r="7" fill="#22C55E"/>
+  <circle cx="592" cy="253" r="7" fill="#2563EB"/>
+  <circle cx="704" cy="253" r="7" fill="#22C55E"/>
+  <circle cx="592" cy="393" r="7" fill="#2563EB"/>
+  <circle cx="704" cy="393" r="7" fill="#22C55E"/>
+  <circle cx="820" cy="495" r="7" fill="#22C55E"/>
+
+  <g transform="translate(990 112)">
+    <rect class="panel" width="142" height="320" rx="16"/>
+    <text x="22" y="42" class="tiny">POLICY CHIPS</text>
+    <text x="22" y="82" class="small">Access Control</text>
+    <text x="22" y="122" class="small">PII Protection</text>
+    <text x="22" y="162" class="small">Tool Allowlist</text>
+    <text x="22" y="202" class="small">Rate Limits</text>
+    <text x="22" y="262" class="tiny">STATE</text>
+    <text x="22" y="300" class="small" fill="#22C55E">Governed</text>
+  </g>
+</svg>

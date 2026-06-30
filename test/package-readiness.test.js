@@ -22,8 +22,12 @@ test("package metadata is ready for Maqam npm publishing", () => {
 
 test("public docs and brand assets match Maqam identity", () => {
   assert.match(readme, /^# Maqam/m);
+  assert.match(readme, /maqam-readme-hero\.png/);
+  assert.match(readme, /maqam-system-map\.svg/);
   assert.match(readme, /npm install -g maqam/);
   assert.match(readme, /MIT/);
   assert.ok(existsSync(new URL("../app/assets/maqam-logo.svg", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-brand-board.png", import.meta.url)));
+  assert.ok(existsSync(new URL("../app/assets/maqam-readme-hero.png", import.meta.url)));
+  assert.ok(existsSync(new URL("../app/assets/maqam-system-map.svg", import.meta.url)));
 });
