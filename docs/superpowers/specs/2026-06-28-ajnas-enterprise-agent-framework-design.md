@@ -1,8 +1,8 @@
-# Ajnas Enterprise Agent Framework Design
+# Maqam Agent Framework Design
 
 ## Summary
 
-Ajnas should evolve from a respectful crawler package into an enterprise agent framework. The crawler remains useful, but it becomes one tool inside a larger system for running governed, auditable, multi-agent workflows. The core product is the framework: runtime, skills, tool gateway, policy engine, evidence ledger, evaluation harness, human approval, and enterprise observability.
+Maqam should evolve from a respectful crawler package into an agent framework. The crawler remains useful, but it becomes one tool inside a larger system for running governed, auditable, multi-agent workflows. The core product is the framework: runtime, skills, tool gateway, policy engine, evidence ledger, evaluation harness, human approval, and operational observability.
 
 The first build should not attempt to create a full hosted platform. The first build should create a local, testable Node.js framework layer that preserves the existing crawler API and adds enterprise-grade primitives around it.
 
@@ -11,7 +11,7 @@ The first build should not attempt to create a full hosted platform. The first b
 - Provide a reusable agent runtime that can execute typed workflows with clear task state, retries, budgets, and trace events.
 - Provide a policy engine that decides whether an agent may use a tool, access a URL or origin, emit output, or require human approval.
 - Provide an evidence ledger that records claims, sources, excerpts, timestamps, tool calls, and confidence so research outputs are auditable.
-- Provide a skill registry that can install, validate, score, and select agent skills without binding Ajnas to one assistant runtime.
+- Provide a skill registry that can install, validate, score, and select agent skills without binding Maqam to one runtime.
 - Provide a tool gateway that wraps browser, crawler, search, GitHub, npm, internal docs, and enterprise SaaS connectors behind one governed interface.
 - Provide an evaluation harness that checks workflow correctness, citation quality, policy decisions, and regression behavior.
 - Keep crawling as a supporting capability for research and ingestion workflows, not as the product identity.

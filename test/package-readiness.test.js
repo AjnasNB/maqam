@@ -8,7 +8,7 @@ const usageGuide = readFileSync(new URL("../docs/usage.md", import.meta.url), "u
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.1.4");
+  assert.equal(packageJson.version, "0.1.5");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.type, "module");
   assert.equal(packageJson.bin.maqam, "bin/maqam.js");
@@ -33,6 +33,7 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(usageGuide, /^# Maqam Usage Guide/m);
   assert.match(usageGuide, /AgentRuntime/);
   assert.match(usageGuide, /PolicyEngine/);
+  assert.match(usageGuide, /Universal Agent Control/);
   assert.match(usageGuide, /Control Any Agent/);
   assert.match(usageGuide, /Control CLI Workers/);
   assert.match(usageGuide, /createAgentTool/);

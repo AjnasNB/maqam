@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Maqam is an enterprise agent framework console for governed research workflows.">
+    <meta name="description" content="Maqam is an agent framework console for governed workflows, CLI workers, connectors, and evidence-backed runs.">
     <title>Maqam | Compose governed agents</title>
     <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/styles.css">
@@ -28,9 +28,9 @@
       <main>
         <section class="hero" aria-labelledby="hero-title">
           <div class="hero-copy">
-            <p class="kicker">Enterprise agent framework</p>
+            <p class="kicker">Agent framework</p>
             <h1 id="hero-title">Build agent workflows that can be inspected, governed, and trusted.</h1>
-            <p class="lede">Maqam composes skills, tools, policy, evidence, and runtime traces into one controlled workflow surface.</p>
+            <p class="lede">Maqam composes agents, CLI workers, connectors, policy, evidence, and runtime traces into one controlled workflow surface.</p>
           </div>
           <div class="run-panel" id="run">
             <div class="panel-header">
@@ -76,6 +76,45 @@
             <span>Gateway</span>
             <strong id="metric-tools">0 calls</strong>
           </article>
+        </section>
+
+        <section class="control-map" aria-labelledby="control-map-title">
+          <div class="section-heading">
+            <h2 id="control-map-title">Agent control map</h2>
+            <p>Every worker enters through the same governed path before it can read, write, crawl, call, or publish.</p>
+          </div>
+          <div class="control-grid">
+            <article>
+              <span>01</span>
+              <strong>Function agents</strong>
+              <p>Wrap local functions with `createAgentTool` and record their evidence and claims.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <strong>Object agents</strong>
+              <p>Control existing workers that expose `run`, `invoke`, or `call` methods.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <strong>CLI workers</strong>
+              <p>Run fixed commands with timeout, input-token, output-byte, and exit-code controls.</p>
+            </article>
+            <article>
+              <span>04</span>
+              <strong>Connectors</strong>
+              <p>Route crawlers, browser tools, SaaS APIs, and internal services through `ToolGateway`.</p>
+            </article>
+            <article>
+              <span>05</span>
+              <strong>Approvals</strong>
+              <p>Fail closed when a workflow reaches a write, publish, send, or modify action.</p>
+            </article>
+            <article>
+              <span>06</span>
+              <strong>Evidence</strong>
+              <p>Attach source records to claims so each run can be reviewed and audited.</p>
+            </article>
+          </div>
         </section>
 
         <section class="workspace">

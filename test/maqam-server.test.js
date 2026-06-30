@@ -29,6 +29,8 @@ test("Maqam server exposes health and console shell", async () => {
     assert.equal(health.product.name, "Maqam");
     assert.match(html, /Maqam/);
     assert.match(html, /Compose governed agents/);
+    assert.match(html, /Agent control map/);
+    assert.match(html, /CLI workers/);
   } finally {
     await close(server);
   }

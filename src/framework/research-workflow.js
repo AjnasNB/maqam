@@ -58,7 +58,7 @@ export function createResearchWorkflow(options = {}) {
               name,
               url: page.url,
               whatItDoes: page.description || page.text?.slice(0, 240) || page.title || "",
-              whyUseful: "Potential source or reference for enterprise agent framework capabilities.",
+              whyUseful: "Potential source or reference for governed agent framework capabilities.",
               risks: ["Requires license and maintenance review before reuse."],
               recommendation: "inspiration_first",
               evidenceIds: [evidenceId]

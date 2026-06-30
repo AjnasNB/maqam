@@ -2,15 +2,37 @@
 
 ![Maqam governed agent framework hero](app/assets/maqam-readme-hero.png)
 
-Maqam is an MIT-licensed Ajnas agent framework for governed workflows. It combines a local agent runtime, policy engine, evidence ledger, skill registry, tool gateway, generic agent adapter, human-review-ready approval errors, and a crawler-backed research workflow.
+Maqam is an MIT-licensed agent framework for governed workflows. It combines a local agent runtime, policy engine, evidence ledger, skill registry, tool gateway, generic agent adapter, CLI worker adapter, human-review-ready approval errors, and a crawler-backed research workflow.
 
-The crawler is not the product center; it is only the first built-in connector. Maqam can govern any agent or tool you register through `ToolGateway`, including function agents, object agents with `run`/`invoke`/`call`, browser agents, research agents, internal SaaS connectors, and write-action agents that need human approval.
+The crawler is not the product center; it is only one built-in connector. Maqam can govern any agent or tool you register through `ToolGateway`, including function agents, object agents with `run`/`invoke`/`call`, command-line workers, browser agents, research agents, internal SaaS connectors, and write-action agents that need human approval.
 
 Full documentation: [docs/usage.md](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md)
 
 ![Maqam system map](app/assets/maqam-system-map.svg)
 
 ![Maqam governed CLI worker flow](app/assets/maqam-cli-agent-flow.png)
+
+## Universal Agent Control
+
+Maqam controls agents by putting every worker behind the same gateway:
+
+```mermaid
+flowchart LR
+  Goal["Goal"] --> Policy["PolicyEngine"]
+  Policy --> Runtime["AgentRuntime"]
+  Runtime --> Gateway["ToolGateway"]
+  Gateway --> FunctionAgent["Function agent"]
+  Gateway --> ObjectAgent["run / invoke / call agent"]
+  Gateway --> CliWorker["CLI worker"]
+  Gateway --> Connector["Crawler or SaaS connector"]
+  FunctionAgent --> Evidence["EvidenceLedger"]
+  ObjectAgent --> Evidence
+  CliWorker --> Evidence
+  Connector --> Evidence
+  Evidence --> Review["Trace, claims, approval path"]
+```
+
+That means Maqam is not limited to crawling. If an agent can be called as a function, object method, HTTP/SDK connector, or fixed command-line worker, Maqam can route it through policy, limits, trace capture, evidence, and human approval gates.
 
 ## What Ships
 

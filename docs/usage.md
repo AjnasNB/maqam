@@ -1,6 +1,6 @@
 # Maqam Usage Guide
 
-Maqam is an MIT-licensed Ajnas agent framework for governed workflows. It gives you a small local runtime for building agent systems that can be inspected, policy-checked, and connected to evidence. The crawler is only one built-in connector; Maqam can also govern arbitrary agents and tools through `createAgentTool` and `ToolGateway`.
+Maqam is an MIT-licensed agent framework for governed workflows. It gives you a small local runtime for building agent systems that can be inspected, policy-checked, and connected to evidence. The crawler is only one built-in connector; Maqam can also govern arbitrary agents and tools through `createAgentTool`, `createCliAgentTool`, and `ToolGateway`.
 
 This guide covers installation, CLI usage, SDK usage, the local console, crawler usage, API reference, common patterns, and troubleshooting.
 
@@ -14,6 +14,7 @@ This guide covers installation, CLI usage, SDK usage, the local console, crawler
 - [Architecture](#architecture)
 - [API Reference](#api-reference)
 - [Build A Custom Workflow](#build-a-custom-workflow)
+- [Universal Agent Control](#universal-agent-control)
 - [Control Any Agent](#control-any-agent)
 - [Control CLI Workers](#control-cli-workers)
 - [Register A Custom Tool](#register-a-custom-tool)
@@ -758,7 +759,7 @@ Candidate shape:
   "name": "Maqam",
   "url": "https://github.com/AjnasNB/maqam",
   "whatItDoes": "Summary excerpt...",
-  "whyUseful": "Potential source or reference for enterprise agent framework capabilities.",
+  "whyUseful": "Potential source or reference for governed agent framework capabilities.",
   "risks": ["Requires license and maintenance review before reuse."],
   "recommendation": "inspiration_first",
   "evidenceIds": ["ev_1"]
@@ -910,6 +911,46 @@ const result = await runtime.runWorkflow(workflow, {
 console.log(result.outputs.record_summary);
 console.log(result.evidence.unsupportedClaims);
 ```
+
+## Universal Agent Control
+
+Maqam is designed to control workers through stable adapter boundaries, not through one specific agent implementation.
+
+```mermaid
+flowchart LR
+  Goal["Goal"] --> Policy["PolicyEngine"]
+  Policy --> Runtime["AgentRuntime"]
+  Runtime --> Gateway["ToolGateway"]
+  Gateway --> FunctionAgent["Function agent"]
+  Gateway --> ObjectAgent["Object agent: run / invoke / call"]
+  Gateway --> CliWorker["Fixed CLI worker"]
+  Gateway --> Connector["Crawler, browser, SaaS, or internal connector"]
+  FunctionAgent --> Evidence["EvidenceLedger"]
+  ObjectAgent --> Evidence
+  CliWorker --> Evidence
+  Connector --> Evidence
+  Evidence --> Trace["Trace, claims, approval, review"]
+```
+
+Adapter matrix:
+
+| Worker shape | Maqam adapter | Best for |
+| --- | --- | --- |
+| Function agent | `createAgentTool(fn)` | Small local agents, scoring functions, synthesis, transforms. |
+| Object agent with `run`, `invoke`, or `call` | `createAgentTool(objectAgent)` | Existing agent frameworks and SDK objects. |
+| Command-line worker | `createCliAgentTool(options)` | Local CLIs, sandboxed scripts, code tools, packaged executables. |
+| HTTP or SDK connector | Custom `ToolGateway` tool function | SaaS tools, internal APIs, browser services, queues, storage. |
+| Crawler-backed public research | `createCrawlerTool()` and `createResearchWorkflow()` | Source collection, discovery, evidence-backed research. |
+
+Control path:
+
+1. `PolicyEngine` checks whether the goal, tool, origin, and budget are allowed.
+2. `AgentRuntime` executes workflow tasks in order and records task traces.
+3. `ToolGateway` is the only path to external work.
+4. Agent outputs can add evidence and claims to `EvidenceLedger`.
+5. Risky tools can be configured as approval-required and fail closed until a human approves.
+
+What this proves in practice: Maqam does not need the worker to be written for Maqam. The worker only needs a stable callable boundary. That boundary can be a JavaScript function, an object method, a CLI command, or a connector function.
 
 ## Control Any Agent
 
@@ -1167,7 +1208,7 @@ Use evidence for source facts:
 const evidence = evidenceLedger.addEvidence({
   sourceType: "url",
   source: "https://github.com/AjnasNB/maqam",
-  excerpt: "Maqam is an MIT-licensed Ajnas agent framework...",
+  excerpt: "Maqam is an MIT-licensed agent framework...",
   tool: "crawler",
   confidence: 0.85
 });
@@ -1238,7 +1279,7 @@ Response:
   "product": {
     "name": "Maqam",
     "tagline": "Compose governed agents",
-    "description": "Enterprise agent framework console for policy-bound research, evidence capture, and auditable workflow runs."
+    "description": "Agent framework console for policy-bound workflows, evidence capture, CLI workers, connectors, and auditable runs."
   },
   "status": "ok"
 }

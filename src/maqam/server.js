@@ -14,7 +14,7 @@ import {
 const PRODUCT = {
   name: "Maqam",
   tagline: "Compose governed agents",
-  description: "Enterprise agent framework console for policy-bound research, evidence capture, and auditable workflow runs."
+  description: "Agent framework console for policy-bound workflows, evidence capture, CLI workers, connectors, and auditable runs."
 };
 
 const DEFAULT_PUBLIC_DIR = fileURLToPath(new URL("../../app/", import.meta.url));

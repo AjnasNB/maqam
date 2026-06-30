@@ -1,8 +1,8 @@
-# Ajnas Enterprise Agent Framework Implementation Plan
+# Maqam Agent Framework Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the first local SDK slice of the Ajnas enterprise agent framework while preserving the existing crawler API and CLI.
+**Goal:** Build the first local SDK slice of the Maqam agent framework while preserving the existing crawler API and CLI.
 
 **Architecture:** Keep `crawl` as the first governed tool connector. Add framework modules under `src/framework/` for policy, evidence, tool gateway, skill registry, runtime, and a stubbed research workflow. Export the new framework primitives from `src/index.js` without changing existing crawler behavior.
 
@@ -1133,7 +1133,7 @@ export function createResearchWorkflow(options = {}) {
               name: candidateNameFromPage(page),
               url: page.url,
               whatItDoes: page.description || page.text?.slice(0, 240) || page.title || "",
-              whyUseful: "Potential source or reference for enterprise agent framework capabilities.",
+              whyUseful: "Potential source or reference for governed agent framework capabilities.",
               risks: ["Requires license and maintenance review before reuse."],
               recommendation: "inspiration_first",
               evidenceIds: [evidenceId]
@@ -1264,7 +1264,7 @@ Replace the first two paragraphs with:
 ```md
 # Ajnas Agent Crawler
 
-Ajnas Agent Crawler is the crawler-backed seed of the Ajnas enterprise agent framework. The current package provides a respectful crawler plus local SDK primitives for governed agent workflows: policy checks, evidence capture, tool execution, skill selection, and runtime orchestration.
+Maqam is the crawler-backed seed of a governed agent framework. The current package provides a respectful crawler plus local SDK primitives for governed agent workflows: policy checks, evidence capture, tool execution, skill selection, and runtime orchestration.
 
 The crawler remains the first built-in connector. It is designed for research agents, RAG ingestion, documentation indexing, QA crawling, and content inventory jobs that need a clean Node.js API, JSON/JSONL output, and compliance-friendly defaults.
 ```
