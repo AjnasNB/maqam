@@ -7,6 +7,7 @@ import {
   SkillRegistry,
   ToolGateway,
   createAgentTool,
+  createCliAgentTool,
   createCrawlerTool,
   createResearchWorkflow,
   crawl
@@ -20,6 +21,7 @@ test("framework primitives are exported without removing crawler exports", () =>
   assert.equal(typeof SkillRegistry, "function");
   assert.equal(typeof ToolGateway, "function");
   assert.equal(typeof createAgentTool, "function");
+  assert.equal(typeof createCliAgentTool, "function");
   assert.equal(typeof createResearchWorkflow, "function");
   assert.equal(typeof createCrawlerTool, "function");
 });

@@ -10,6 +10,8 @@ Full documentation: [docs/usage.md](https://github.com/AjnasNB/maqam/blob/main/d
 
 ![Maqam system map](app/assets/maqam-system-map.svg)
 
+![Maqam governed CLI worker flow](app/assets/maqam-cli-agent-flow.png)
+
 ## What Ships
 
 - `AgentRuntime`: sequential workflow execution with retries, trace events, task outputs, and policy preflight.
@@ -17,6 +19,7 @@ Full documentation: [docs/usage.md](https://github.com/AjnasNB/maqam/blob/main/d
 - `EvidenceLedger`: provenance records, claim links, source hashes, confidence, and unsupported-claim checks.
 - `ToolGateway`: one governed path for external tool execution.
 - `createAgentTool`: wraps any function agent or object agent so Maqam can control it through policy, trace, approval, and evidence.
+- `createCliAgentTool`: wraps fixed command-line workers with timeout, approximate input-token limits, output byte limits, and no shell execution by default.
 - `SkillRegistry`: lightweight skill metadata registration and selection.
 - `createResearchWorkflow`: crawler-backed source collection, synthesis, and quality checks.
 - `maqam`: local web console for running governed research workflows.
@@ -82,6 +85,7 @@ import {
   PolicyEngine,
   ToolGateway,
   createAgentTool,
+  createCliAgentTool,
   createCrawlerTool,
   createResearchWorkflow
 } from "maqam";
@@ -97,6 +101,15 @@ gateway.registerTool("crawler", createCrawlerTool());
 gateway.registerTool("summarizer", createAgentTool(async (input) => ({
   summary: `Reviewed ${input.topic}`
 }), { name: "summarizer" }));
+gateway.registerTool("localWorker", createCliAgentTool({
+  name: "localWorker",
+  command: process.execPath,
+  args: ["--version"],
+  stdin: "none",
+  timeoutMs: 5000,
+  maxInputTokens: 20,
+  maxOutputBytes: 2048
+}));
 
 const runtime = new AgentRuntime({ policyEngine, evidenceLedger, toolGateway: gateway });
 const result = await runtime.runWorkflow(
@@ -154,7 +167,7 @@ Brand assets live in `app/assets/`, including `maqam-logo.svg` and `maqam-brand-
 - Use a clear user agent.
 - Rate-limit per origin.
 - Avoid bypassing access controls, paywalls, anti-bot systems, or private content.
-- No required AI provider dependency.
+- No required model provider dependency.
 - No required external hosted service.
 - Produce JSON/JSONL output that agents can consume directly.
 
@@ -181,3 +194,7 @@ Publishing requires an authenticated npm session with permission to publish the 
 ## License
 
 MIT
+
+## Open Development
+
+Maqam is open source under MIT and open for development, issues, ideas, and contributions.

@@ -8,7 +8,7 @@ const usageGuide = readFileSync(new URL("../docs/usage.md", import.meta.url), "u
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.1.3");
+  assert.equal(packageJson.version, "0.1.4");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.type, "module");
   assert.equal(packageJson.bin.maqam, "bin/maqam.js");
@@ -26,6 +26,7 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(readme, /^# Maqam/m);
   assert.match(readme, /maqam-readme-hero\.png/);
   assert.match(readme, /maqam-system-map\.svg/);
+  assert.match(readme, /maqam-cli-agent-flow\.png/);
   assert.match(readme, /Full documentation/);
   assert.match(readme, /npm install -g maqam/);
   assert.match(readme, /MIT/);
@@ -33,9 +34,12 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(usageGuide, /AgentRuntime/);
   assert.match(usageGuide, /PolicyEngine/);
   assert.match(usageGuide, /Control Any Agent/);
+  assert.match(usageGuide, /Control CLI Workers/);
   assert.match(usageGuide, /createAgentTool/);
+  assert.match(usageGuide, /createCliAgentTool/);
   assert.ok(existsSync(new URL("../app/assets/maqam-logo.svg", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-brand-board.png", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-readme-hero.png", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-system-map.svg", import.meta.url)));
+  assert.ok(existsSync(new URL("../app/assets/maqam-cli-agent-flow.png", import.meta.url)));
 });

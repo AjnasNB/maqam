@@ -15,6 +15,7 @@ This guide covers installation, CLI usage, SDK usage, the local console, crawler
 - [API Reference](#api-reference)
 - [Build A Custom Workflow](#build-a-custom-workflow)
 - [Control Any Agent](#control-any-agent)
+- [Control CLI Workers](#control-cli-workers)
 - [Register A Custom Tool](#register-a-custom-tool)
 - [Use Policy And Approvals](#use-policy-and-approvals)
 - [Use Evidence And Claims](#use-evidence-and-claims)
@@ -79,6 +80,7 @@ import {
   PolicyEngine,
   ToolGateway,
   createAgentTool,
+  createCliAgentTool,
   createCrawlerTool,
   createResearchWorkflow
 } from "maqam";
@@ -94,6 +96,15 @@ toolGateway.registerTool("crawler", createCrawlerTool());
 toolGateway.registerTool("summarizer", createAgentTool(async (input) => ({
   summary: `Reviewed ${input.topic}`
 }), { name: "summarizer" }));
+toolGateway.registerTool("localWorker", createCliAgentTool({
+  name: "localWorker",
+  command: process.execPath,
+  args: ["--version"],
+  stdin: "none",
+  timeoutMs: 5000,
+  maxInputTokens: 20,
+  maxOutputBytes: 2048
+}));
 
 const runtime = new AgentRuntime({ policyEngine, evidenceLedger, toolGateway });
 const result = await runtime.runWorkflow(
@@ -216,6 +227,7 @@ import {
   ToolGateway,
   SkillRegistry,
   createAgentTool,
+  createCliAgentTool,
   createCrawlerTool,
   createResearchWorkflow,
   crawl,
@@ -252,6 +264,7 @@ Core objects:
 - `PolicyEngine`: decides what is allowed, denied, or approval-gated.
 - `ToolGateway`: routes all external tool calls through policy.
 - `createAgentTool`: wraps arbitrary agents so they can be governed like any other tool.
+- `createCliAgentTool`: wraps fixed command-line workers with timeout, approximate input-token limits, output byte limits, and no shell execution by default.
 - `EvidenceLedger`: stores source evidence and claim support.
 - `SkillRegistry`: stores skill metadata and selects matching skills.
 - `createResearchWorkflow`: bundled workflow for public web research.
@@ -643,6 +656,93 @@ const workflow = createResearchWorkflow({
 });
 ```
 
+### `createCliAgentTool(options)`
+
+Wraps a fixed command-line worker so it can run through Maqam policy and trace capture.
+
+```js
+const localWorker = createCliAgentTool({
+  name: "localWorker",
+  command: process.execPath,
+  args: ["--input-type=module", "-e", "let body=''; for await (const c of process.stdin) body += c; const input = JSON.parse(body); console.log(JSON.stringify({ artifact: `built:${input.name}` }));"],
+  stdin: "json",
+  parseJson: true,
+  timeoutMs: 5000,
+  maxInputTokens: 50,
+  maxOutputBytes: 2048
+});
+
+toolGateway.registerTool("localWorker", localWorker);
+
+const result = await toolGateway.call("localWorker", {
+  name: "demo-widget"
+});
+
+console.log(result.json.artifact);
+```
+
+Options:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Name used in result metadata. |
+| `command` | `string` | Fixed executable path or command. Required. |
+| `args` | `string[]` | Fixed argument list. Dynamic user input should go through stdin, not command args. |
+| `cwd` | `string` | Optional working directory. |
+| `env` | `object` | Extra environment variables. |
+| `inheritEnv` | `boolean` | Inherit `process.env`. Default: `true`. |
+| `stdin` | `"json" | "text" | "none"` | How input is passed to the worker. Default: `"json"`. |
+| `parseJson` | `boolean` | Parse stdout as JSON and expose it as `result.json`. |
+| `timeoutMs` | `number` | Hard runtime timeout. Default: `30000`. |
+| `maxInputTokens` | `number` | Approximate input token limit. Default: `4000`. |
+| `maxOutputBytes` | `number` | Maximum combined stdout/stderr bytes. Default: `65536`. |
+| `rejectOnNonZero` | `boolean` | Reject when exit code is not zero. Default: `true`. |
+| `shell` | `boolean` | Run through a shell. Default: `false`. Use only when a platform wrapper requires it. |
+
+Result shape:
+
+```json
+{
+  "name": "localWorker",
+  "command": "node",
+  "args": ["--version"],
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "stdout": "v20.0.0\n",
+  "stderr": "",
+  "durationMs": 42,
+  "approxInputTokens": 0,
+  "outputBytes": 9,
+  "limits": {
+    "maxInputTokens": 50,
+    "maxOutputBytes": 2048,
+    "timeoutMs": 5000
+  }
+}
+```
+
+Limit errors:
+
+| Code | Meaning |
+| --- | --- |
+| `CLI_INPUT_LIMIT_EXCEEDED` | Input was too large before execution. |
+| `CLI_OUTPUT_LIMIT_EXCEEDED` | stdout/stderr exceeded the configured byte limit. |
+| `CLI_TIMEOUT` | Process exceeded `timeoutMs`. |
+| `CLI_EXIT_NONZERO` | Process exited with a non-zero code. |
+| `CLI_JSON_PARSE_FAILED` | `parseJson` was enabled but stdout was not valid JSON. |
+| `CLI_SPAWN_FAILED` | The process could not be started. |
+
+Security notes:
+
+- Maqam does not use a shell for CLI workers by default.
+- Keep `command` and `args` fixed in code.
+- Send user input through stdin.
+- Use narrow `allowedTools`.
+- Set short `timeoutMs` and small `maxOutputBytes` for untrusted workers.
+- Use approval gates for workers that write, publish, send, or modify state.
+- Prefer direct executable paths over platform wrapper scripts. On Windows, some `.cmd` or `.ps1` shims may require `shell: true` or a direct underlying executable path.
+
 Tasks:
 
 | Task ID | Purpose |
@@ -895,7 +995,7 @@ What Maqam can control:
 
 - Function agents.
 - LangChain/LangGraph-style agents if exposed through `invoke` or wrapped in a function.
-- OpenAI Agents SDK-style functions if wrapped in a function.
+- External SDK-style functions if wrapped in a function.
 - Browser agents.
 - Research agents.
 - GitHub/npm/internal API agents.
@@ -906,6 +1006,91 @@ What Maqam cannot do automatically:
 - It cannot control an agent you do not route through `ToolGateway`.
 - It cannot make an unsafe third-party agent safe if that agent bypasses the wrapper and performs side effects internally.
 - It cannot approve risky actions by itself; approval-gated actions should be routed to humans.
+
+## Control CLI Workers
+
+Maqam can govern command-line workers the same way it governs function agents.
+
+The pattern is:
+
+1. Create a fixed CLI adapter with `createCliAgentTool`.
+2. Register it with `ToolGateway`.
+3. Add the worker name to `allowedTools`.
+4. Configure `timeoutMs`, `maxInputTokens`, and `maxOutputBytes`.
+5. Call the worker from a workflow task.
+
+Example workflow:
+
+```js
+import {
+  AgentRuntime,
+  EvidenceLedger,
+  PolicyEngine,
+  ToolGateway,
+  createCliAgentTool
+} from "maqam";
+
+const evidenceLedger = new EvidenceLedger();
+const policyEngine = new PolicyEngine({
+  allowedTools: ["builderWorker"]
+});
+const toolGateway = new ToolGateway({ policyEngine, evidenceLedger });
+
+toolGateway.registerTool("builderWorker", createCliAgentTool({
+  name: "builderWorker",
+  command: process.execPath,
+  args: ["--input-type=module", "-e", "let body=''; for await (const c of process.stdin) body += c; const input = JSON.parse(body); console.log(JSON.stringify({ fileName: `${input.name}.txt`, content: `Built ${input.name}` }));"],
+  stdin: "json",
+  parseJson: true,
+  timeoutMs: 5000,
+  maxInputTokens: 100,
+  maxOutputBytes: 4096
+}));
+
+const workflow = {
+  name: "governed_cli_build",
+  tasks: [
+    {
+      id: "build",
+      run: (context) => context.tools.call("builderWorker", {
+        name: "demo-widget"
+      }, context)
+    },
+    {
+      id: "record",
+      run: (context) => {
+        const output = context.outputs.build.json;
+        const evidence = context.evidence.addEvidence({
+          runId: context.runId,
+          taskId: "record",
+          sourceType: "cli_worker_output",
+          source: "builderWorker",
+          excerpt: output.content,
+          tool: "builderWorker",
+          confidence: 0.8
+        });
+        context.evidence.addClaim({
+          runId: context.runId,
+          taskId: "record",
+          text: `The worker created ${output.fileName}.`,
+          evidenceIds: [evidence.evidenceId],
+          confidence: 0.8
+        });
+        return output;
+      }
+    }
+  ]
+};
+
+const runtime = new AgentRuntime({ policyEngine, evidenceLedger, toolGateway });
+const result = await runtime.runWorkflow(workflow, {
+  objective: "Build a small artifact through a governed CLI worker",
+  allowedTools: ["builderWorker"]
+});
+
+console.log(result.outputs.record);
+console.log(result.evidence.unsupportedClaims);
+```
 
 ## Register A Custom Tool
 
@@ -1258,3 +1443,7 @@ Useful next packages or modules:
 - Browser automation connector.
 - GitHub and npm metadata connectors.
 - Tenant-aware configuration and audit export.
+
+## Open Development
+
+Maqam is open source under MIT and open for development, issues, ideas, and contributions.
