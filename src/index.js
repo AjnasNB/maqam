@@ -339,6 +339,7 @@ export { EvidenceLedger } from "./framework/evidence-ledger.js";
 export { ToolGateway } from "./framework/tool-gateway.js";
 export { SkillRegistry } from "./framework/skill-registry.js";
 export { AgentRuntime } from "./framework/runtime.js";
+export { createAgentTool } from "./framework/agent-tool.js";
 export { createResearchWorkflow } from "./framework/research-workflow.js";
 
 export function createCrawlerTool(defaultOptions = {}) {

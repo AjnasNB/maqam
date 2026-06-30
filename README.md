@@ -2,9 +2,9 @@
 
 ![Maqam governed agent framework hero](app/assets/maqam-readme-hero.png)
 
-Maqam is an MIT-licensed Ajnas agent framework for governed workflows. It combines a local agent runtime, policy engine, evidence ledger, skill registry, tool gateway, human-review-ready approval errors, and a crawler-backed research workflow.
+Maqam is an MIT-licensed Ajnas agent framework for governed workflows. It combines a local agent runtime, policy engine, evidence ledger, skill registry, tool gateway, generic agent adapter, human-review-ready approval errors, and a crawler-backed research workflow.
 
-The crawler is no longer the product center; it is the first governed connector. Maqam is meant for enterprise agent workflows that need inspectable runs, source-backed outputs, compliance-friendly defaults, and no required hosted service.
+The crawler is not the product center; it is only the first built-in connector. Maqam can govern any agent or tool you register through `ToolGateway`, including function agents, object agents with `run`/`invoke`/`call`, browser agents, research agents, internal SaaS connectors, and write-action agents that need human approval.
 
 Full documentation: [docs/usage.md](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md)
 
@@ -16,6 +16,7 @@ Full documentation: [docs/usage.md](https://github.com/AjnasNB/maqam/blob/main/d
 - `PolicyEngine`: deterministic goal and tool-call decisions for allowed tools, origins, limits, and approval gates.
 - `EvidenceLedger`: provenance records, claim links, source hashes, confidence, and unsupported-claim checks.
 - `ToolGateway`: one governed path for external tool execution.
+- `createAgentTool`: wraps any function agent or object agent so Maqam can control it through policy, trace, approval, and evidence.
 - `SkillRegistry`: lightweight skill metadata registration and selection.
 - `createResearchWorkflow`: crawler-backed source collection, synthesis, and quality checks.
 - `maqam`: local web console for running governed research workflows.
@@ -80,18 +81,22 @@ import {
   EvidenceLedger,
   PolicyEngine,
   ToolGateway,
+  createAgentTool,
   createCrawlerTool,
   createResearchWorkflow
 } from "maqam";
 
 const evidenceLedger = new EvidenceLedger();
 const policyEngine = new PolicyEngine({
-  allowedTools: ["crawler"],
+  allowedTools: ["crawler", "summarizer"],
   allowedOrigins: ["https://github.com", "https://www.npmjs.com"]
 });
 
 const gateway = new ToolGateway({ policyEngine, evidenceLedger });
 gateway.registerTool("crawler", createCrawlerTool());
+gateway.registerTool("summarizer", createAgentTool(async (input) => ({
+  summary: `Reviewed ${input.topic}`
+}), { name: "summarizer" }));
 
 const runtime = new AgentRuntime({ policyEngine, evidenceLedger, toolGateway: gateway });
 const result = await runtime.runWorkflow(
@@ -101,7 +106,7 @@ const result = await runtime.runWorkflow(
   }),
   {
     objective: "Research permissive OSS agent framework projects",
-    allowedTools: ["crawler"],
+    allowedTools: ["crawler", "summarizer"],
     allowedOrigins: ["https://github.com"]
   }
 );

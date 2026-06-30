@@ -1,6 +1,6 @@
 # Maqam Usage Guide
 
-Maqam is an MIT-licensed Ajnas agent framework for governed workflows. It gives you a small local runtime for building agent systems that can be inspected, policy-checked, and connected to evidence.
+Maqam is an MIT-licensed Ajnas agent framework for governed workflows. It gives you a small local runtime for building agent systems that can be inspected, policy-checked, and connected to evidence. The crawler is only one built-in connector; Maqam can also govern arbitrary agents and tools through `createAgentTool` and `ToolGateway`.
 
 This guide covers installation, CLI usage, SDK usage, the local console, crawler usage, API reference, common patterns, and troubleshooting.
 
@@ -14,6 +14,7 @@ This guide covers installation, CLI usage, SDK usage, the local console, crawler
 - [Architecture](#architecture)
 - [API Reference](#api-reference)
 - [Build A Custom Workflow](#build-a-custom-workflow)
+- [Control Any Agent](#control-any-agent)
 - [Register A Custom Tool](#register-a-custom-tool)
 - [Use Policy And Approvals](#use-policy-and-approvals)
 - [Use Evidence And Claims](#use-evidence-and-claims)
@@ -77,18 +78,22 @@ import {
   EvidenceLedger,
   PolicyEngine,
   ToolGateway,
+  createAgentTool,
   createCrawlerTool,
   createResearchWorkflow
 } from "maqam";
 
 const evidenceLedger = new EvidenceLedger();
 const policyEngine = new PolicyEngine({
-  allowedTools: ["crawler"],
+  allowedTools: ["crawler", "summarizer"],
   allowedOrigins: ["https://github.com"]
 });
 
 const toolGateway = new ToolGateway({ policyEngine, evidenceLedger });
 toolGateway.registerTool("crawler", createCrawlerTool());
+toolGateway.registerTool("summarizer", createAgentTool(async (input) => ({
+  summary: `Reviewed ${input.topic}`
+}), { name: "summarizer" }));
 
 const runtime = new AgentRuntime({ policyEngine, evidenceLedger, toolGateway });
 const result = await runtime.runWorkflow(
@@ -98,7 +103,7 @@ const result = await runtime.runWorkflow(
   }),
   {
     objective: "Research Maqam from public sources",
-    allowedTools: ["crawler"],
+    allowedTools: ["crawler", "summarizer"],
     allowedOrigins: ["https://github.com"],
     budget: { maxToolCalls: 20, maxRuntimeMs: 120_000 }
   }
@@ -210,6 +215,7 @@ import {
   PolicyEngine,
   ToolGateway,
   SkillRegistry,
+  createAgentTool,
   createCrawlerTool,
   createResearchWorkflow,
   crawl,
@@ -245,6 +251,7 @@ Core objects:
 - `AgentRuntime`: owns workflow execution.
 - `PolicyEngine`: decides what is allowed, denied, or approval-gated.
 - `ToolGateway`: routes all external tool calls through policy.
+- `createAgentTool`: wraps arbitrary agents so they can be governed like any other tool.
 - `EvidenceLedger`: stores source evidence and claim support.
 - `SkillRegistry`: stores skill metadata and selects matching skills.
 - `createResearchWorkflow`: bundled workflow for public web research.
@@ -560,6 +567,69 @@ await toolGateway.call("crawler", {
 });
 ```
 
+### `createAgentTool(agent, options)`
+
+Wraps an arbitrary agent so it can be controlled by Maqam policy and executed through `ToolGateway`.
+
+Supported agent shapes:
+
+- Function agent: `async (input, context) => output`
+- Object agent with `run(input, context)`
+- Object agent with `invoke(input, context)`
+- Object agent with `call(input, context)`
+
+```js
+const summarizer = createAgentTool(async (input, context) => {
+  return {
+    summary: `Reviewed ${input.topic}`,
+    evidence: [
+      {
+        evidenceId: "ev_agent_1",
+        sourceType: "agent_output",
+        source: "summarizer",
+        excerpt: "The agent reviewed policy and evidence controls.",
+        confidence: 0.8
+      }
+    ],
+    claims: [
+      {
+        text: "The summarizer reviewed policy and evidence controls.",
+        evidenceIds: ["ev_agent_1"],
+        confidence: 0.8
+      }
+    ]
+  };
+}, { name: "summarizer" });
+
+toolGateway.registerTool("summarizer", summarizer);
+
+const result = await toolGateway.call("summarizer", {
+  topic: "Maqam"
+}, {
+  runId: "run_1",
+  taskId: "summarize"
+});
+```
+
+If the agent output includes `evidence` or `claims` arrays, Maqam records them into the active `EvidenceLedger`.
+
+Object-agent example:
+
+```js
+const browserAgent = {
+  async run(input) {
+    return {
+      url: input.url,
+      result: "Browser task completed"
+    };
+  }
+};
+
+toolGateway.registerTool("browserAgent", createAgentTool(browserAgent, {
+  name: "browserAgent"
+}));
+```
+
 ### `createResearchWorkflow(options)`
 
 Creates the bundled public research workflow.
@@ -740,6 +810,102 @@ const result = await runtime.runWorkflow(workflow, {
 console.log(result.outputs.record_summary);
 console.log(result.evidence.unsupportedClaims);
 ```
+
+## Control Any Agent
+
+Yes, Maqam can control agents beyond crawling. The pattern is:
+
+1. Wrap the agent with `createAgentTool`.
+2. Register it in `ToolGateway`.
+3. Put the agent name in `PolicyEngine.allowedTools`.
+4. Add it to `approvalRequiredTools` if it can write, publish, send, modify, or spend.
+5. Call it from an `AgentRuntime` workflow task.
+
+Example with multiple agents:
+
+```js
+import {
+  AgentRuntime,
+  EvidenceLedger,
+  PolicyEngine,
+  ToolGateway,
+  createAgentTool
+} from "maqam";
+
+const evidenceLedger = new EvidenceLedger();
+const policyEngine = new PolicyEngine({
+  allowedTools: ["researchAgent", "reviewAgent", "publishAgent"],
+  approvalRequiredTools: ["publishAgent"]
+});
+const toolGateway = new ToolGateway({ policyEngine, evidenceLedger });
+
+toolGateway.registerTool("researchAgent", createAgentTool(async (input) => ({
+  notes: `Researched ${input.topic}`,
+  evidence: [
+    {
+      evidenceId: "ev_research_1",
+      sourceType: "agent_output",
+      source: "researchAgent",
+      excerpt: `Researched ${input.topic}`,
+      confidence: 0.7
+    }
+  ]
+}), { name: "researchAgent" }));
+
+toolGateway.registerTool("reviewAgent", createAgentTool({
+  async run(input) {
+    return { approvedForDraft: Boolean(input.notes) };
+  }
+}, { name: "reviewAgent" }));
+
+toolGateway.registerTool("publishAgent", createAgentTool(async () => ({
+  published: true
+}), { name: "publishAgent" }));
+
+const workflow = {
+  name: "multi_agent_governed_flow",
+  tasks: [
+    {
+      id: "research",
+      run: (context) => context.tools.call("researchAgent", { topic: "Maqam" }, context)
+    },
+    {
+      id: "review",
+      run: (context) => context.tools.call("reviewAgent", context.outputs.research, context)
+    },
+    {
+      id: "publish",
+      run: (context) => context.tools.call("publishAgent", context.outputs.review, context)
+    }
+  ]
+};
+
+const runtime = new AgentRuntime({ policyEngine, evidenceLedger, toolGateway });
+const result = await runtime.runWorkflow(workflow, {
+  objective: "Run a governed multi-agent workflow",
+  allowedTools: ["researchAgent", "reviewAgent", "publishAgent"]
+});
+
+console.log(result.status);
+```
+
+In this example, `publishAgent` will throw `ApprovalRequiredError` because it is approval-gated. That is intentional: Maqam controls the agent rather than letting it publish directly.
+
+What Maqam can control:
+
+- Function agents.
+- LangChain/LangGraph-style agents if exposed through `invoke` or wrapped in a function.
+- OpenAI Agents SDK-style functions if wrapped in a function.
+- Browser agents.
+- Research agents.
+- GitHub/npm/internal API agents.
+- Email, Slack, Jira, database, or release agents when registered as tools.
+
+What Maqam cannot do automatically:
+
+- It cannot control an agent you do not route through `ToolGateway`.
+- It cannot make an unsafe third-party agent safe if that agent bypasses the wrapper and performs side effects internally.
+- It cannot approve risky actions by itself; approval-gated actions should be routed to humans.
 
 ## Register A Custom Tool
 
