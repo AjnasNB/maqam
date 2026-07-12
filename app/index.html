@@ -20,21 +20,22 @@
         </a>
         <nav class="nav" aria-label="Primary">
           <a href="#run">Run</a>
+          <a href="#governance">Governance</a>
           <a href="#evidence">Evidence</a>
-          <a href="#policy">Policy</a>
+          <a href="#trace">Trace</a>
         </nav>
       </header>
 
       <main>
         <section class="hero" aria-labelledby="hero-title">
           <div class="hero-copy">
-            <p class="kicker">Agent framework</p>
-            <h1 id="hero-title">Build agent workflows that can be inspected, governed, and trusted.</h1>
-            <p class="lede">Maqam composes agents, CLI workers, connectors, policy, evidence, and runtime traces into one controlled workflow surface.</p>
+            <p class="kicker">Governance console</p>
+            <h1 id="hero-title">One policy path for every connected agent.</h1>
+            <p class="lede">Run functions, command-line agents, and service connectors with bounded permissions, exact approvals, runtime budgets, evidence, and a reviewable trace.</p>
           </div>
           <div class="run-panel" id="run">
             <div class="panel-header">
-              <span>Governed research run</span>
+              <span>Research connector example</span>
               <strong id="run-status">Ready</strong>
             </div>
             <form id="research-form">
@@ -53,8 +54,8 @@
                   </select>
                 </label>
               </div>
-              <button type="submit">Run governed workflow</button>
-              <p class="hint">The server enforces policy before tool execution and records evidence for the synthesized result.</p>
+              <button type="submit">Run research workflow</button>
+              <p class="hint">This is one connector workflow. External coding-agent execution is available through the package API and is not exposed by this local HTTP console.</p>
             </form>
           </div>
         </section>
@@ -78,43 +79,53 @@
           </article>
         </section>
 
-        <section class="control-map" aria-labelledby="control-map-title">
+        <section class="control-map" id="governance" aria-labelledby="control-map-title">
           <div class="section-heading">
-            <h2 id="control-map-title">Agent control map</h2>
-            <p>Every worker enters through the same governed path before it can read, write, crawl, call, or publish.</p>
+            <h2 id="control-map-title">Governance path</h2>
+            <p>Each stage adds an enforceable decision or an audit record.</p>
           </div>
-          <div class="control-grid">
-            <article>
-              <span>01</span>
-              <strong>Function agents</strong>
-              <p>Wrap local functions with `createAgentTool` and record their evidence and claims.</p>
-            </article>
-            <article>
-              <span>02</span>
-              <strong>Object agents</strong>
-              <p>Control existing workers that expose `run`, `invoke`, or `call` methods.</p>
-            </article>
-            <article>
-              <span>03</span>
-              <strong>CLI workers</strong>
-              <p>Run fixed commands with timeout, input-token, output-byte, and exit-code controls.</p>
-            </article>
-            <article>
-              <span>04</span>
-              <strong>Connectors</strong>
-              <p>Route crawlers, browser tools, SaaS APIs, and internal services through `ToolGateway`.</p>
-            </article>
-            <article>
-              <span>05</span>
-              <strong>Approvals</strong>
-              <p>Fail closed when a workflow reaches a write, publish, send, or modify action.</p>
-            </article>
-            <article>
-              <span>06</span>
-              <strong>Evidence</strong>
-              <p>Attach source records to claims so each run can be reviewed and audited.</p>
-            </article>
+          <ol class="governance-flow" aria-label="Agent governance sequence">
+            <li><span>1</span><strong>Goal</strong><small>Declared scope and budget</small></li>
+            <li><span>2</span><strong>Policy</strong><small>Tools, origins, effects</small></li>
+            <li><span>3</span><strong>Approval</strong><small>Exact action binding</small></li>
+            <li><span>4</span><strong>Adapter</strong><small>Function, CLI, connector</small></li>
+            <li><span>5</span><strong>Boundary</strong><small>Sandbox and environment</small></li>
+            <li><span>6</span><strong>Record</strong><small>Trace, usage, evidence</small></li>
+          </ol>
+
+          <div class="coverage-heading">
+            <div>
+              <h3>Adapter coverage</h3>
+              <p>Preventive controls stop actions before execution. Observed controls verify what the connected agent reported afterward.</p>
+            </div>
+            <span class="status-badge" id="capability-status">Checking</span>
           </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Adapter</th>
+                  <th scope="col">Boundary</th>
+                  <th scope="col">Preventive</th>
+                  <th scope="col">Observed</th>
+                  <th scope="col">Default</th>
+                </tr>
+              </thead>
+              <tbody id="capability-table">
+                <tr><td colspan="5">Loading governance capabilities...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <aside class="boundary-note" aria-labelledby="boundary-title">
+            <div>
+              <h3 id="boundary-title">Enforcement boundary</h3>
+              <p>Maqam governs agents that enter through a registered adapter. It cannot control an unregistered process or replace operating-system isolation.</p>
+            </div>
+            <ul id="capability-limitations">
+              <li>Use a container or virtual machine when a hard host boundary is required.</li>
+            </ul>
+          </aside>
         </section>
 
         <section class="workspace">
@@ -134,7 +145,7 @@
           </div>
         </section>
 
-        <section class="policy-band" id="policy">
+        <section class="policy-band" id="trace">
           <div>
             <h2>Policy path</h2>
             <p>Goal preflight, tool authorization, evidence capture, synthesis, and quality checks are first-class run steps.</p>

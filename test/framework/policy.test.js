@@ -54,3 +54,57 @@ test("authorizeToolCall requests approval for configured approval tools", () => 
   assert.equal(decision.status, "needs_approval");
   assert.deepEqual(decision.requiredApprovals, ["tool:github"]);
 });
+
+test("goal budgets can lower but cannot raise tenant limits", () => {
+  const policy = new PolicyEngine({
+    maxToolCalls: 10,
+    defaultLimits: { maxRuntimeMs: 5000 }
+  });
+
+  const raised = policy.evaluateGoal({ budget: { maxToolCalls: 1000, maxRuntimeMs: 60_000 } });
+  const lowered = policy.evaluateGoal({ budget: { maxToolCalls: 3, maxRuntimeMs: 1200 } });
+
+  assert.equal(raised.limits.maxToolCalls, 10);
+  assert.equal(raised.limits.maxRuntimeMs, 5000);
+  assert.equal(lowered.limits.maxToolCalls, 3);
+  assert.equal(lowered.limits.maxRuntimeMs, 1200);
+});
+
+test("denied effects and origins fail before approval evaluation", () => {
+  const policy = new PolicyEngine({
+    allowedTools: ["publisher"],
+    allowedOrigins: ["https://example.com"],
+    approvalRequiredTools: ["publisher"],
+    deniedEffects: ["billing"]
+  });
+
+  assert.equal(policy.authorizeToolCall({
+    toolName: "publisher",
+    input: { url: "https://example.com" },
+    metadata: { effects: ["billing"] }
+  }).status, "deny");
+
+  assert.equal(policy.authorizeToolCall({
+    toolName: "publisher",
+    input: { url: "https://not-allowed.example" },
+    metadata: { effects: ["write"] }
+  }).status, "deny");
+});
+
+test("tool calls cannot exceed the goal's narrower tool and origin scope", () => {
+  const policy = new PolicyEngine({
+    allowedTools: ["reader", "writer"],
+    allowedOrigins: ["https://one.example", "https://two.example"]
+  });
+
+  assert.equal(policy.authorizeToolCall({
+    goal: { allowedTools: ["reader"] },
+    toolName: "writer"
+  }).status, "deny");
+
+  assert.equal(policy.authorizeToolCall({
+    goal: { allowedOrigins: ["https://one.example"] },
+    toolName: "reader",
+    input: { url: "https://two.example/path" }
+  }).status, "deny");
+});

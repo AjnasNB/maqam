@@ -5,13 +5,18 @@ import { test } from "node:test";
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
 const usageGuide = readFileSync(new URL("../docs/usage.md", import.meta.url), "utf8");
+const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
+const provenanceGuide = readFileSync(new URL("../docs/provenance-and-licenses.md", import.meta.url), "utf8");
+const releaseGuide = readFileSync(new URL("../docs/release-checklist.md", import.meta.url), "utf8");
 const maqamBin = readFileSync(new URL("../bin/maqam.js", import.meta.url), "utf8");
+const security = readFileSync(new URL("../SECURITY.md", import.meta.url), "utf8");
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.1.6");
+  assert.equal(packageJson.version, "0.2.0");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.type, "module");
+  assert.equal(packageJson.types, "src/index.d.ts");
   assert.equal(packageJson.bin.maqam, "bin/maqam.js");
   assert.equal(packageJson.bin["maqam-crawl"], "bin/ajnas-crawl.js");
   assert.equal(packageJson.repository.url, "git+https://github.com/AjnasNB/maqam.git");
@@ -19,8 +24,17 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.files.includes("app/"));
   assert.ok(packageJson.files.includes("src/"));
   assert.ok(packageJson.files.includes("docs/usage.md"));
+  assert.ok(packageJson.files.includes("docs/external-agents.md"));
+  assert.ok(packageJson.files.includes("docs/release-checklist.md"));
+  assert.ok(packageJson.files.includes("docs/provenance-and-licenses.md"));
+  assert.ok(packageJson.files.includes("examples/"));
+  assert.ok(packageJson.files.includes("CHANGELOG.md"));
+  assert.ok(packageJson.files.includes("SECURITY.md"));
+  assert.ok(packageJson.files.includes("RELEASE_CHECKLIST.md"));
+  assert.ok(packageJson.files.includes("LICENSE_AUDIT.md"));
   assert.ok(packageJson.keywords.includes("agent-framework"));
   assert.ok(packageJson.keywords.includes("governance"));
+  assert.ok(packageJson.keywords.includes("release-gate"));
 });
 
 test("public docs and brand assets match Maqam identity", () => {
@@ -29,6 +43,8 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(readme, /maqam-system-map\.svg/);
   assert.match(readme, /maqam-cli-agent-flow\.png/);
   assert.match(readme, /Full documentation/);
+  assert.match(readme, /Release checklist/);
+  assert.match(readme, /Provenance and license notes/);
   assert.match(readme, /npm install -g maqam/);
   assert.match(readme, /MIT/);
   assert.match(usageGuide, /^# Maqam Usage Guide/m);
@@ -39,10 +55,36 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(usageGuide, /Control CLI Workers/);
   assert.match(usageGuide, /createAgentTool/);
   assert.match(usageGuide, /createCliAgentTool/);
+  assert.match(usageGuide, /ApprovalQueue/);
+  assert.match(usageGuide, /createReleaseGateReport/);
   assert.match(maqamBin, /Maqam agent framework console/);
+  assert.ok(existsSync(new URL("../src/index.d.ts", import.meta.url)));
+  assert.ok(existsSync(new URL("../examples/governed-release.mjs", import.meta.url)));
+  assert.ok(existsSync(new URL("../examples/govern-coding-agent.mjs", import.meta.url)));
+  assert.ok(existsSync(new URL("../examples/govern-approved-write.mjs", import.meta.url)));
+  assert.ok(existsSync(new URL("../docs/external-agents.md", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-logo.svg", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-brand-board.png", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-readme-hero.png", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-system-map.svg", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-cli-agent-flow.png", import.meta.url)));
+});
+
+test("release governance docs require approval before publishing", () => {
+  assert.match(changelog, /^# Changelog/m);
+  assert.match(changelog, /## 0\.2\.0 - 2026-07-12/);
+  assert.match(changelog, /Release candidate/);
+  assert.match(releaseGuide, /^# Maqam Release Checklist/m);
+  assert.match(releaseGuide, /npm test/);
+  assert.match(releaseGuide, /npm pack --dry-run/);
+  assert.match(releaseGuide, /npm publish --access public/);
+  assert.match(releaseGuide, /explicit user approval/);
+  assert.match(provenanceGuide, /^# Provenance and License Notes/m);
+  assert.match(provenanceGuide, /Original implementation/);
+  assert.match(provenanceGuide, /No third-party source code/);
+  assert.match(provenanceGuide, /Qwen-Agent/);
+  assert.match(provenanceGuide, /PageAgent/);
+  assert.match(provenanceGuide, /MIT/);
+  assert.match(security, /^# Security Policy/m);
+  assert.match(security, /approval/i);
 });

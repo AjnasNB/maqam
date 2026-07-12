@@ -1,6 +1,6 @@
 {
   "name": "maqam",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Maqam is an MIT-licensed agent framework for governed workflows, policy, evidence, skills, CLI workers, and crawler-backed research.",
   "license": "MIT",
   "author": {
@@ -15,13 +15,25 @@
     "ajnas-agent-crawler": "bin/ajnas-crawl.js"
   },
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "exports": {
-    ".": "./src/index.js"
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    }
   },
   "files": [
     "app/",
     "bin/",
+    "docs/external-agents.md",
+    "docs/provenance-and-licenses.md",
+    "docs/release-checklist.md",
     "docs/usage.md",
+    "examples/",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "RELEASE_CHECKLIST.md",
+    "LICENSE_AUDIT.md",
     "src/",
     "README.md",
     "LICENSE"
@@ -30,7 +42,10 @@
     "test": "node --test",
     "start": "node bin/maqam.js",
     "crawl": "node bin/ajnas-crawl.js",
-    "maqam": "node bin/maqam.js"
+    "maqam": "node bin/maqam.js",
+    "smoke:codex": "node examples/govern-coding-agent.mjs codex",
+    "smoke:claude": "node examples/govern-coding-agent.mjs claude",
+    "smoke:approved-write": "node examples/govern-approved-write.mjs"
   },
   "keywords": [
     "maqam",
@@ -43,8 +58,11 @@
     "skills",
     "tool-orchestration",
     "human-approval",
+    "release-gate",
     "cli-agent",
     "command-runner",
+    "codex-cli",
+    "claude-code",
     "crawler",
     "agent",
     "web-crawler",

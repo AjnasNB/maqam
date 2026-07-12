@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, resolve } from "node:path";
+import { extname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   AgentRuntime,
@@ -15,6 +15,66 @@ const PRODUCT = {
   name: "Maqam",
   tagline: "Compose governed agents",
   description: "Agent framework console for policy-bound workflows, evidence capture, CLI workers, connectors, and auditable runs."
+};
+
+const CAPABILITIES = {
+  adapters: [
+    {
+      id: "function",
+      name: "Functions and objects",
+      boundary: "In-process adapter",
+      preventive: "Registry, policy, call budget, deadline",
+      observed: "Task trace, evidence, claims",
+      defaultPosture: "Explicit registration"
+    },
+    {
+      id: "cli",
+      name: "Generic CLI workers",
+      boundary: "Isolated child process",
+      preventive: "Fixed command, cwd roots, env allowlist, timeout",
+      observed: "Exit, duration, output limits",
+      defaultPosture: "No shell"
+    },
+    {
+      id: "codex",
+      name: "Codex CLI",
+      boundary: "Process plus provider sandbox",
+      preventive: "Read-only default, ephemeral run, environment allowlist",
+      observed: "JSONL actions and token usage",
+      defaultPosture: "Read-only"
+    },
+    {
+      id: "claude-code",
+      name: "Claude Code",
+      boundary: "Process plus permission mode",
+      preventive: "Plan default, tool allowlist, max turns and spend",
+      observed: "Stream events, token usage, cost",
+      defaultPosture: "Plan, no tools"
+    },
+    {
+      id: "connector",
+      name: "HTTP and SDK connectors",
+      boundary: "Tool gateway",
+      preventive: "Tool, origin, effect, approval policy",
+      observed: "Call trace and evidence",
+      defaultPosture: "Explicit registration"
+    },
+    {
+      id: "crawler",
+      name: "Research connectors",
+      boundary: "Tool gateway plus crawler limits",
+      preventive: "Origin policy, robots rules, page and byte limits",
+      observed: "Sources, excerpts, claims",
+      defaultPosture: "Public sources only"
+    }
+  ],
+  controls: ["policy", "budgets", "approvals", "environment", "sandbox", "trace", "evidence"],
+  limitations: [
+    "Only registered adapters are governed.",
+    "Provider-internal actions rely on the provider sandbox or permission system.",
+    "Observed token ceilings are post-run unless the provider exposes a hard budget.",
+    "Use a container or virtual machine for hard operating-system isolation."
+  ]
 };
 
 const DEFAULT_PUBLIC_DIR = fileURLToPath(new URL("../../app/", import.meta.url));
@@ -125,8 +185,9 @@ async function serveStatic(request, response, publicDir) {
   const pathname = url.pathname === "/" ? "/index.html" : url.pathname;
   const root = resolve(publicDir);
   const filePath = resolve(root, `.${decodeURIComponent(pathname)}`);
+  const pathFromRoot = relative(root, filePath);
 
-  if (!filePath.startsWith(root)) {
+  if (pathFromRoot.startsWith("..") || isAbsolute(pathFromRoot)) {
     sendJson(response, 403, { error: "Forbidden" });
     return;
   }
@@ -152,6 +213,11 @@ export function createMaqamServer(options = {}) {
 
       if (request.method === "GET" && url.pathname === "/api/health") {
         sendJson(response, 200, { product: PRODUCT, status: "ok" });
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/capabilities") {
+        sendJson(response, 200, { product: PRODUCT, capabilities: CAPABILITIES });
         return;
       }
 
@@ -186,4 +252,4 @@ export function startMaqamServer(options = {}) {
   return server;
 }
 
-export { PRODUCT as MAQAM_PRODUCT };
+export { CAPABILITIES as MAQAM_CAPABILITIES, PRODUCT as MAQAM_PRODUCT };

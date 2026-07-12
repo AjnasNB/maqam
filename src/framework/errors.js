@@ -7,7 +7,16 @@ export class AjnasFrameworkError extends Error {
   }
 }
 
-export class PolicyDeniedError extends AjnasFrameworkError {
+export class MaqamError extends AjnasFrameworkError {
+  constructor(message, options = {}) {
+    super(message, {
+      ...options,
+      code: options.code || "MAQAM_ERROR"
+    });
+  }
+}
+
+export class PolicyDeniedError extends MaqamError {
   constructor(message, options = {}) {
     super(message, {
       ...options,
@@ -16,7 +25,7 @@ export class PolicyDeniedError extends AjnasFrameworkError {
   }
 }
 
-export class ApprovalRequiredError extends AjnasFrameworkError {
+export class ApprovalRequiredError extends MaqamError {
   constructor(message, options = {}) {
     super(message, {
       ...options,

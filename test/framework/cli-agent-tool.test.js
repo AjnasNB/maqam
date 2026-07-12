@@ -94,3 +94,42 @@ test("createCliAgentTool reports spawn failures as framework errors", async () =
     (error) => error instanceof AjnasFrameworkError && error.code === "CLI_SPAWN_FAILED"
   );
 });
+
+test("createCliAgentTool parses JSON Lines and enforces output token limits", async () => {
+  const parsed = createCliAgentTool({
+    name: "events",
+    ...nodeCli("console.log(JSON.stringify({type:'start'})); console.log(JSON.stringify({type:'done'}));"),
+    parseJsonLines: true,
+    maxOutputTokens: 100
+  });
+  const result = await parsed();
+  assert.deepEqual(result.jsonLines.map((event) => event.type), ["start", "done"]);
+
+  const limited = createCliAgentTool({
+    name: "token-limited",
+    ...nodeCli("console.log('x'.repeat(1000))"),
+    maxOutputBytes: 10_000,
+    maxOutputTokens: 10
+  });
+  await assert.rejects(
+    () => limited(),
+    (error) => error.code === "CLI_OUTPUT_TOKEN_LIMIT_EXCEEDED"
+  );
+});
+
+test("createCliAgentTool only inherits explicitly allowlisted environment variables", async () => {
+  process.env.MAQAM_TEST_SECRET = "must-not-leak";
+  try {
+    const cli = createCliAgentTool({
+      name: "isolated-env",
+      ...nodeCli("console.log(JSON.stringify({secret: process.env.MAQAM_TEST_SECRET || null}))"),
+      parseJson: true,
+      inheritEnv: true,
+      envAllowlist: ["PATH", "Path", "SystemRoot"]
+    });
+    const result = await cli();
+    assert.equal(result.json.secret, null);
+  } finally {
+    delete process.env.MAQAM_TEST_SECRET;
+  }
+});

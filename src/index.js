@@ -333,14 +333,22 @@ export async function crawl(input = {}) {
 }
 
 export { discoverSitemapUrls, normalizeUrl };
-export { AjnasFrameworkError, ApprovalRequiredError, PolicyDeniedError, toErrorRecord } from "./framework/errors.js";
+export { AjnasFrameworkError, MaqamError, ApprovalRequiredError, PolicyDeniedError, toErrorRecord } from "./framework/errors.js";
 export { PolicyEngine } from "./framework/policy.js";
 export { EvidenceLedger } from "./framework/evidence-ledger.js";
 export { ToolGateway } from "./framework/tool-gateway.js";
 export { SkillRegistry } from "./framework/skill-registry.js";
 export { AgentRuntime } from "./framework/runtime.js";
+export { ApprovalQueue } from "./framework/approval-queue.js";
 export { createAgentTool } from "./framework/agent-tool.js";
-export { createCliAgentTool, estimateCliInputTokens } from "./framework/cli-agent-tool.js";
+export { createCliAgentTool, estimateCliInputTokens, parseCliJsonLines } from "./framework/cli-agent-tool.js";
+export {
+  createCodexAgentTool,
+  createClaudeCodeAgentTool,
+  normalizeCodexEvents,
+  normalizeClaudeCodeEvents
+} from "./framework/provider-agent-tool.js";
+export { createReleaseGateReport } from "./framework/release-gate.js";
 export { createResearchWorkflow } from "./framework/research-workflow.js";
 
 export function createCrawlerTool(defaultOptions = {}) {

@@ -2,11 +2,17 @@
 
 ![Maqam governed agent framework hero](app/assets/maqam-readme-hero.png)
 
-Maqam is an MIT-licensed agent framework for governed workflows. It combines a local agent runtime, policy engine, evidence ledger, skill registry, tool gateway, generic agent adapter, CLI worker adapter, human-review-ready approval errors, and a crawler-backed research workflow.
+Maqam is an MIT-licensed agent framework for governed workflows. It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, and a crawler-backed research workflow.
 
-The crawler is not the product center; it is only one built-in connector. Maqam can govern any agent or tool you register through `ToolGateway`, including function agents, object agents with `run`/`invoke`/`call`, command-line workers, browser agents, research agents, internal SaaS connectors, and write-action agents that need human approval.
+The crawler is not the product center; it is only one built-in connector. Maqam governs workers that enter through `ToolGateway`, including function agents, object agents with `run`/`invoke`/`call`, Codex CLI, Claude Code, generic command-line workers, browser agents, research agents, internal services, and write actions that need human approval.
 
 Full documentation: [docs/usage.md](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md)
+
+Coding-agent guide: [docs/external-agents.md](https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md)
+
+Release checklist: [docs/release-checklist.md](https://github.com/AjnasNB/maqam/blob/main/docs/release-checklist.md)
+
+Provenance and license notes: [docs/provenance-and-licenses.md](https://github.com/AjnasNB/maqam/blob/main/docs/provenance-and-licenses.md)
 
 ![Maqam system map](app/assets/maqam-system-map.svg)
 
@@ -23,25 +29,33 @@ flowchart LR
   Runtime --> Gateway["ToolGateway"]
   Gateway --> FunctionAgent["Function agent"]
   Gateway --> ObjectAgent["run / invoke / call agent"]
-  Gateway --> CliWorker["CLI worker"]
+  Gateway --> Codex["Codex CLI adapter"]
+  Gateway --> Claude["Claude Code adapter"]
+  Gateway --> CliWorker["Generic CLI worker"]
   Gateway --> Connector["Crawler or SaaS connector"]
   FunctionAgent --> Evidence["EvidenceLedger"]
   ObjectAgent --> Evidence
+  Codex --> Evidence
+  Claude --> Evidence
   CliWorker --> Evidence
   Connector --> Evidence
   Evidence --> Review["Trace, claims, approval path"]
 ```
 
-That means Maqam is not limited to crawling. If an agent can be called as a function, object method, HTTP/SDK connector, or fixed command-line worker, Maqam can route it through policy, limits, trace capture, evidence, and human approval gates.
+That means Maqam is not limited to crawling. If an agent can be called as a function, object method, HTTP/SDK connector, or fixed command-line worker, Maqam can route it through policy, enforced budgets, trace capture, evidence, and human approval gates. Only registered adapters are governed; use a container or virtual machine when a hard operating-system boundary is required.
 
 ## What Ships
 
-- `AgentRuntime`: sequential workflow execution with retries, trace events, task outputs, and policy preflight.
-- `PolicyEngine`: deterministic goal and tool-call decisions for allowed tools, origins, limits, and approval gates.
+- `AgentRuntime`: sequential workflow execution with retries, enforced run deadlines, trace events, task outputs, and policy preflight.
+- `PolicyEngine`: deterministic goal and tool-call decisions for allowed tools, origins, effects, clamped tenant limits, and approval gates.
 - `EvidenceLedger`: provenance records, claim links, source hashes, confidence, and unsupported-claim checks.
-- `ToolGateway`: one governed path for external tool execution.
+- `ToolGateway`: one governed path with call ceilings, redacted traces, effect policy, and exact one-time approval binding.
 - `createAgentTool`: wraps any function agent or object agent so Maqam can control it through policy, trace, approval, and evidence.
-- `createCliAgentTool`: wraps fixed command-line workers with timeout, approximate input-token limits, output byte limits, and no shell execution by default.
+- `createCliAgentTool`: wraps fixed command-line workers with cwd roots, environment allowlists, cancellation, timeout, approximate token limits, JSONL parsing, and no shell execution by default.
+- `createCodexAgentTool`: runs Codex non-interactively with a read-only default, ephemeral sessions, JSONL activity, and normalized token usage.
+- `createClaudeCodeAgentTool`: runs Claude Code with plan mode by default, no tools by default, max turns, spend limits, stream events, and normalized usage.
+- `ApprovalQueue`: durable human approval requests for release gates, external writes, and high-risk actions.
+- `createReleaseGateReport`: production-readiness and publish-approval reporting for package releases.
 - `SkillRegistry`: lightweight skill metadata registration and selection.
 - `createResearchWorkflow`: crawler-backed source collection, synthesis, and quality checks.
 - `maqam`: local web console for running governed research workflows.
@@ -52,10 +66,12 @@ That means Maqam is not limited to crawling. If an agent can be called as a func
 Agent systems fail in production when tools run outside policy, outputs cannot be traced to sources, and risky actions happen without approval. Maqam makes those control points explicit:
 
 - Every workflow starts with policy preflight.
-- Every tool call goes through `ToolGateway`.
+- Tenant budgets cannot be raised by a workflow.
+- Every connected tool call goes through `ToolGateway` and is counted per run.
 - Every source-backed claim can be recorded in `EvidenceLedger`.
 - Every run returns trace data for inspection and replay.
 - Approval-required actions fail closed with `ApprovalRequiredError`.
+- Approval records are bound to the exact run, tool, and input hash, then consumed once by default.
 - The crawler supports research and ingestion while preserving compliance defaults.
 
 ## Install
@@ -149,6 +165,40 @@ const result = await runtime.runWorkflow(
 console.log(result.outputs.synthesize_report.candidates);
 ```
 
+## Coding Agent Adapters
+
+```js
+import {
+  PolicyEngine,
+  ToolGateway,
+  createClaudeCodeAgentTool,
+  createCodexAgentTool
+} from "maqam";
+
+const policyEngine = new PolicyEngine({
+  allowedTools: ["codex", "claude"],
+  approvalRequiredEffects: ["write"]
+});
+const gateway = new ToolGateway({ policyEngine });
+
+gateway.registerTool("codex", createCodexAgentTool({
+  cwd: process.cwd(),
+  sandbox: "read-only",
+  timeoutMs: 120_000,
+  maxTotalTokens: 50_000
+}));
+
+gateway.registerTool("claude", createClaudeCodeAgentTool({
+  cwd: process.cwd(),
+  permissionMode: "plan",
+  tools: [],
+  maxTurns: 2,
+  maxBudgetUsd: 0.25
+}));
+```
+
+Both adapters isolate inherited environment variables, pass prompts over stdin, reject dangerous modes unless explicitly unlocked, normalize provider events, and support explicit outcome checks. Codex token ceilings are observed after the run because its CLI does not expose a hard token-budget flag; Claude Code can additionally enforce max turns and a spend ceiling. See [docs/external-agents.md](docs/external-agents.md) for complete setup, write-mode approvals, verification, limits, and security boundaries.
+
 ## Crawler API
 
 ```js
@@ -206,6 +256,8 @@ npm pack --dry-run
 ```
 
 ## Publish
+
+Publishing is approval-gated. Do not publish a release until the current release checklist is complete and the package owner has explicitly approved that exact version.
 
 ```bash
 npm publish --access public

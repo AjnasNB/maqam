@@ -24,13 +24,17 @@ test("Maqam server exposes health and console shell", async () => {
   const baseUrl = await listen(server);
   try {
     const health = await fetch(`${baseUrl}/api/health`).then((response) => response.json());
+    const capabilities = await fetch(`${baseUrl}/api/capabilities`).then((response) => response.json());
     const html = await fetch(`${baseUrl}/`).then((response) => response.text());
 
     assert.equal(health.product.name, "Maqam");
     assert.match(html, /Maqam/);
     assert.match(html, /Compose governed agents/);
-    assert.match(html, /Agent control map/);
-    assert.match(html, /CLI workers/);
+    assert.match(html, /Governance path/);
+    assert.match(html, /Adapter coverage/);
+    assert.ok(capabilities.capabilities.adapters.some((adapter) => adapter.id === "codex"));
+    assert.ok(capabilities.capabilities.adapters.some((adapter) => adapter.id === "claude-code"));
+    assert.match(capabilities.capabilities.limitations.join(" "), /registered adapters/i);
   } finally {
     await close(server);
   }

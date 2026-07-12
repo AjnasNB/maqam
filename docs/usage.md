@@ -1,6 +1,6 @@
 # Maqam Usage Guide
 
-Maqam is an MIT-licensed agent framework for governed workflows. It gives you a small local runtime for building agent systems that can be inspected, policy-checked, and connected to evidence. The crawler is only one built-in connector; Maqam can also govern arbitrary agents and tools through `createAgentTool`, `createCliAgentTool`, and `ToolGateway`.
+Maqam is an MIT-licensed agent framework for governed workflows. It gives you a small local runtime for building agent systems that can be inspected, policy-checked, and connected to evidence. The crawler is only one built-in connector; Maqam also governs registered functions, objects, command-line agents, and service connectors through stable adapter boundaries.
 
 This guide covers installation, CLI usage, SDK usage, the local console, crawler usage, API reference, common patterns, and troubleshooting.
 
@@ -17,6 +17,7 @@ This guide covers installation, CLI usage, SDK usage, the local console, crawler
 - [Universal Agent Control](#universal-agent-control)
 - [Control Any Agent](#control-any-agent)
 - [Control CLI Workers](#control-cli-workers)
+- [Govern External Coding Agents](#govern-external-coding-agents)
 - [Register A Custom Tool](#register-a-custom-tool)
 - [Use Policy And Approvals](#use-policy-and-approvals)
 - [Use Evidence And Claims](#use-evidence-and-claims)
@@ -81,7 +82,9 @@ import {
   PolicyEngine,
   ToolGateway,
   createAgentTool,
+  createClaudeCodeAgentTool,
   createCliAgentTool,
+  createCodexAgentTool,
   createCrawlerTool,
   createResearchWorkflow
 } from "maqam";
@@ -235,7 +238,7 @@ import {
   extractPage,
   normalizeUrl,
   discoverSitemapUrls,
-  AjnasFrameworkError,
+  MaqamError,
   PolicyDeniedError,
   ApprovalRequiredError,
   toErrorRecord
@@ -264,8 +267,10 @@ Core objects:
 - `AgentRuntime`: owns workflow execution.
 - `PolicyEngine`: decides what is allowed, denied, or approval-gated.
 - `ToolGateway`: routes all external tool calls through policy.
-- `createAgentTool`: wraps arbitrary agents so they can be governed like any other tool.
-- `createCliAgentTool`: wraps fixed command-line workers with timeout, approximate input-token limits, output byte limits, and no shell execution by default.
+- `createAgentTool`: wraps registered function or object workers so they can use the same gateway.
+- `createCliAgentTool`: wraps fixed command-line workers with cwd, environment, cancellation, timeout, token, byte, and JSONL controls.
+- `createCodexAgentTool`: applies safe Codex CLI defaults and normalizes JSONL activity and usage.
+- `createClaudeCodeAgentTool`: applies safe Claude Code defaults and normalizes stream activity, usage, and cost.
 - `EvidenceLedger`: stores source evidence and claim support.
 - `SkillRegistry`: stores skill metadata and selects matching skills.
 - `createResearchWorkflow`: bundled workflow for public web research.
@@ -690,15 +695,20 @@ Options:
 | `command` | `string` | Fixed executable path or command. Required. |
 | `args` | `string[]` | Fixed argument list. Dynamic user input should go through stdin, not command args. |
 | `cwd` | `string` | Optional working directory. |
+| `allowedCwdRoots` | `string[]` | Reject a configured cwd outside these roots. |
 | `env` | `object` | Extra environment variables. |
 | `inheritEnv` | `boolean` | Inherit `process.env`. Default: `true`. |
+| `envAllowlist` | `string[]` | When inheriting, copy only these environment keys. |
 | `stdin` | `"json" | "text" | "none"` | How input is passed to the worker. Default: `"json"`. |
 | `parseJson` | `boolean` | Parse stdout as JSON and expose it as `result.json`. |
+| `parseJsonLines` | `boolean` | Parse stdout as JSON Lines and expose `result.jsonLines`. |
 | `timeoutMs` | `number` | Hard runtime timeout. Default: `30000`. |
 | `maxInputTokens` | `number` | Approximate input token limit. Default: `4000`. |
+| `maxOutputTokens` | `number` | Approximate streaming output-token ceiling. |
 | `maxOutputBytes` | `number` | Maximum combined stdout/stderr bytes. Default: `65536`. |
 | `rejectOnNonZero` | `boolean` | Reject when exit code is not zero. Default: `true`. |
-| `shell` | `boolean` | Run through a shell. Default: `false`. Use only when a platform wrapper requires it. |
+| `shell` | `boolean` | Run through a shell. Default: `false`. |
+| `allowUnsafeShell` | `boolean` | Required together with `shell: true`. Avoid for agent input. |
 
 Result shape:
 
@@ -714,9 +724,11 @@ Result shape:
   "stderr": "",
   "durationMs": 42,
   "approxInputTokens": 0,
+  "approxOutputTokens": 3,
   "outputBytes": 9,
   "limits": {
     "maxInputTokens": 50,
+    "maxOutputTokens": null,
     "maxOutputBytes": 2048,
     "timeoutMs": 5000
   }
@@ -729,9 +741,12 @@ Limit errors:
 | --- | --- |
 | `CLI_INPUT_LIMIT_EXCEEDED` | Input was too large before execution. |
 | `CLI_OUTPUT_LIMIT_EXCEEDED` | stdout/stderr exceeded the configured byte limit. |
+| `CLI_OUTPUT_TOKEN_LIMIT_EXCEEDED` | Approximate streamed output exceeded the token ceiling. |
 | `CLI_TIMEOUT` | Process exceeded `timeoutMs`. |
+| `CLI_ABORTED` | The parent workflow cancelled the process. |
 | `CLI_EXIT_NONZERO` | Process exited with a non-zero code. |
 | `CLI_JSON_PARSE_FAILED` | `parseJson` was enabled but stdout was not valid JSON. |
+| `CLI_JSONL_PARSE_FAILED` | `parseJsonLines` was enabled but a non-empty line was not JSON. |
 | `CLI_SPAWN_FAILED` | The process could not be started. |
 
 Security notes:
@@ -742,7 +757,7 @@ Security notes:
 - Use narrow `allowedTools`.
 - Set short `timeoutMs` and small `maxOutputBytes` for untrusted workers.
 - Use approval gates for workers that write, publish, send, or modify state.
-- Prefer direct executable paths over platform wrapper scripts. On Windows, some `.cmd` or `.ps1` shims may require `shell: true` or a direct underlying executable path.
+- Prefer direct executable paths over platform wrapper scripts. If a platform shim requires a shell, resolve the underlying executable instead of passing agent input through a shell.
 
 Tasks:
 
@@ -812,7 +827,7 @@ Input fields:
 
 ```js
 import {
-  AjnasFrameworkError,
+  MaqamError,
   PolicyDeniedError,
   ApprovalRequiredError,
   toErrorRecord
@@ -923,10 +938,14 @@ flowchart LR
   Runtime --> Gateway["ToolGateway"]
   Gateway --> FunctionAgent["Function agent"]
   Gateway --> ObjectAgent["Object agent: run / invoke / call"]
+  Gateway --> Codex["Codex CLI"]
+  Gateway --> Claude["Claude Code"]
   Gateway --> CliWorker["Fixed CLI worker"]
   Gateway --> Connector["Crawler, browser, SaaS, or internal connector"]
   FunctionAgent --> Evidence["EvidenceLedger"]
   ObjectAgent --> Evidence
+  Codex --> Evidence
+  Claude --> Evidence
   CliWorker --> Evidence
   Connector --> Evidence
   Evidence --> Trace["Trace, claims, approval, review"]
@@ -939,6 +958,8 @@ Adapter matrix:
 | Function agent | `createAgentTool(fn)` | Small local agents, scoring functions, synthesis, transforms. |
 | Object agent with `run`, `invoke`, or `call` | `createAgentTool(objectAgent)` | Existing agent frameworks and SDK objects. |
 | Command-line worker | `createCliAgentTool(options)` | Local CLIs, sandboxed scripts, code tools, packaged executables. |
+| Codex CLI | `createCodexAgentTool(options)` | Read-only review or approval-gated workspace edits with JSONL usage. |
+| Claude Code | `createClaudeCodeAgentTool(options)` | Plan/read workflows or approval-gated tool profiles with turn and spend limits. |
 | HTTP or SDK connector | Custom `ToolGateway` tool function | SaaS tools, internal APIs, browser services, queues, storage. |
 | Crawler-backed public research | `createCrawlerTool()` and `createResearchWorkflow()` | Source collection, discovery, evidence-backed research. |
 
@@ -950,7 +971,7 @@ Control path:
 4. Agent outputs can add evidence and claims to `EvidenceLedger`.
 5. Risky tools can be configured as approval-required and fail closed until a human approves.
 
-What this proves in practice: Maqam does not need the worker to be written for Maqam. The worker only needs a stable callable boundary. That boundary can be a JavaScript function, an object method, a CLI command, or a connector function.
+What this proves in practice: Maqam does not need the worker to be written for Maqam. The worker only needs a stable callable boundary. Only calls made through that boundary are governed.
 
 ## Control Any Agent
 
@@ -1133,6 +1154,47 @@ console.log(result.outputs.record);
 console.log(result.evidence.unsupportedClaims);
 ```
 
+## Govern External Coding Agents
+
+Use the provider adapters for safe defaults and normalized event records:
+
+```js
+import {
+  PolicyEngine,
+  ToolGateway,
+  createClaudeCodeAgentTool,
+  createCodexAgentTool
+} from "maqam";
+
+const policyEngine = new PolicyEngine({
+  allowedTools: ["codex", "claude"],
+  approvalRequiredEffects: ["write"]
+});
+const toolGateway = new ToolGateway({ policyEngine });
+
+toolGateway.registerTool("codex", createCodexAgentTool({
+  cwd: process.cwd(),
+  sandbox: "read-only",
+  maxTotalTokens: 50_000
+}));
+
+toolGateway.registerTool("claude", createClaudeCodeAgentTool({
+  cwd: process.cwd(),
+  permissionMode: "plan",
+  tools: ["Read", "Glob", "Grep"],
+  maxTurns: 2,
+  maxBudgetUsd: 0.25
+}));
+```
+
+`createCodexAgentTool` defaults to a read-only sandbox, an ephemeral run, ignored user config, preserved project execution rules, and JSON Lines event capture. `danger-full-access` requires a separate explicit unlock.
+
+`createClaudeCodeAgentTool` defaults to plan mode, no tools, strict MCP configuration, no session persistence, three turns, and a USD 0.25 ceiling. `bypassPermissions` requires a separate explicit unlock.
+
+Both adapters use fixed arguments, prompts over stdin, cwd roots, an environment allowlist, process-tree cancellation, approximate input/output ceilings, and normalized usage. The provider's own sandbox and permissions remain required.
+
+For complete option tables, write-mode approval/resume code, token-limit semantics, provider setup, and the security boundary, read [Governing External Coding Agents](external-agents.md).
+
 ## Register A Custom Tool
 
 Tools should be small and explicit. The gateway handles policy and trace capture.
@@ -1199,6 +1261,70 @@ await toolGateway.call("github", { action: "create_release" });
 ```
 
 The call throws `ApprovalRequiredError`. Your application can catch it and place a human approval request in a queue.
+
+Queue an approval request:
+
+```js
+import { ApprovalQueue } from "maqam";
+
+const approvals = new ApprovalQueue();
+const approval = approvals.requestApproval({
+  action: "publish:npm",
+  requestedBy: "release-runner",
+  reason: "maqam@0.2.0 passed verification and needs owner approval.",
+  risk: "high",
+  subject: {
+    packageName: "maqam",
+    version: "0.2.0"
+  },
+  evidence: ["npm test: pass", "npm pack --dry-run: pass"]
+});
+
+console.log(approval.status); // "pending"
+console.log(approvals.toJSON());
+```
+
+Create a release gate report:
+
+```js
+import { ApprovalQueue, createReleaseGateReport } from "maqam";
+
+const approvals = new ApprovalQueue();
+const approval = approvals.requestApproval({
+  action: "publish:npm",
+  reason: "Release candidate is ready."
+});
+
+const report = createReleaseGateReport({
+  packageName: "maqam",
+  version: "0.2.0",
+  license: "MIT",
+  publishCommand: "npm publish --access public",
+  requiredFiles: {
+    readme: true,
+    license: true,
+    changelog: true,
+    security: true,
+    releaseChecklist: true,
+    licenseAudit: true,
+    types: true,
+    examples: true
+  },
+  verification: [
+    { command: "npm test", status: "pass" },
+    { command: "npm pack --dry-run", status: "pass" }
+  ],
+  provenance: {
+    inspectedProjects: [],
+    copiedThirdPartyCode: false
+  },
+  approval
+});
+
+console.log(report.status); // "waiting_for_approval"
+```
+
+Only an approved report should be used to run the publish command.
 
 ## Use Evidence And Claims
 
@@ -1268,7 +1394,7 @@ Recommended metadata:
 
 ## HTTP API
 
-The local Maqam server exposes two API endpoints.
+The local Maqam server exposes three API endpoints. It intentionally does not expose an endpoint that launches external coding agents.
 
 ### `GET /api/health`
 
@@ -1283,6 +1409,14 @@ Response:
   },
   "status": "ok"
 }
+```
+
+### `GET /api/capabilities`
+
+Returns the adapter coverage shown in the dashboard, including each boundary, preventive controls, observed controls, safe default, and known limitations.
+
+```bash
+curl http://127.0.0.1:8787/api/capabilities
 ```
 
 ### `POST /api/runs/research`
@@ -1342,6 +1476,9 @@ Use these defaults:
 
 - Keep `allowedTools` narrow.
 - Keep `allowedOrigins` narrow.
+- Keep provider sandboxes and permission modes enabled.
+- Use environment allowlists so unrelated credentials do not reach child processes.
+- Use a container or virtual machine for hard host isolation.
 - Require approval for write actions such as email, PR creation, release creation, publishing, customer data access, and production changes.
 - Store secrets outside workflow input.
 - Record evidence for every claim that may be used in a report.
@@ -1438,7 +1575,7 @@ Check:
 
 ### Tool call throws `ApprovalRequiredError`
 
-The tool is configured in `approvalRequiredTools`. Catch the error and route it to a human approval queue.
+The tool or one of its effects requires approval. When `ToolGateway` has an `ApprovalQueue`, the error includes an exact pending request. Approve it, then rerun the same run id, tool, and input with that `approvalId`. A changed or consumed approval fails closed.
 
 ### Crawler returns fewer pages than expected
 
@@ -1461,29 +1598,29 @@ npm publish --access public --otp=123456
 
 ## Current Limitations
 
-Maqam `0.1.x` is intentionally small:
+Maqam `0.2.x` is still a local framework core:
 
-- Evidence storage is in memory.
+- Evidence and approval queues are serializable but not backed by a durable database.
 - Workflow execution is sequential.
-- Human approval is represented by errors, not a full approval UI.
-- Skill registry is metadata-only.
-- The bundled console runs one research workflow.
-- No model provider is bundled.
-- No hosted control plane is included.
-
-These constraints keep the package easy to inspect and extend.
+- The bundled console runs one research workflow and shows governance coverage; it does not launch coding agents over HTTP.
+- Provider adapters require separately installed, authenticated CLIs and depend on their supported non-interactive flags.
+- Codex total-token ceilings are observed after a run because its CLI does not expose a hard model-token budget.
+- Provider-internal actions are bounded by provider sandboxes and permissions, not intercepted individually by Maqam.
+- No container, virtual machine, hosted control plane, tenant RBAC, or policy administration service is bundled.
+- The skill registry is metadata-only and a general evaluation harness is not yet included.
 
 ## Next Extensions
 
 Useful next packages or modules:
 
-- Persistent evidence storage with SQLite or Postgres.
-- First-class human approval queue.
+- Persistent evidence and approval storage with SQLite or Postgres.
+- Human approval inbox with authentication, expiry, revocation, and separation of duties.
 - MCP-compatible connector framework.
-- Evaluation harness for policy and evidence quality.
+- Evaluation harness for policy, adapter, evidence, and regression quality.
 - Browser automation connector.
 - GitHub and npm metadata connectors.
-- Tenant-aware configuration and audit export.
+- Container-backed execution workers and network egress policy.
+- Tenant-aware configuration, OpenTelemetry export, and signed audit bundles.
 
 ## Open Development
 

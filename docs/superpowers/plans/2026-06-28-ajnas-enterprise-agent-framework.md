@@ -20,7 +20,7 @@
 - Create `src/framework/runtime.js`: sequential task graph runtime with retries, timeout, trace, and budget checks.
 - Create `src/framework/research-workflow.js`: first enterprise research workflow that uses the gateway and evidence ledger.
 - Modify `src/index.js`: preserve crawler exports and add framework exports.
-- Modify `README.md`: position the package as the crawler-backed seed of the Ajnas framework.
+- Modify `README.md`: position the package as the crawler-backed seed of the Maqam framework.
 - Create tests under `test/framework/` for every new module.
 
 ## Task 1: Framework Errors
