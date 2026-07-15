@@ -9,6 +9,7 @@ Use this checklist before publishing any Maqam release.
 - License: MIT
 - Registry target: npm public registry
 - Publish command: `npm publish --access public`
+- Artifact identity: exact `.tgz` filename, positive byte size, SHA-256 or canonical npm SHA-512 integrity, and full Git commit
 
 ## Required Checks
 
@@ -18,13 +19,16 @@ Run these commands from the repository root:
 npm ci
 npm test
 npm pack --dry-run
+npm audit --omit=dev
 ```
 
 Expected result:
 
 - `npm ci` installs from `package-lock.json` without dependency resolution changes.
 - `npm test` reports all tests passing with zero failures.
-- `npm pack --dry-run` includes source, type declarations, examples, app assets, docs, README, CHANGELOG, SECURITY, release checklist, license audit, package metadata, and LICENSE.
+- `npm pack --dry-run` includes source, root and server declarations, examples, required console files, docs, README, CHANGELOG, SECURITY, release checklist, license audit, package metadata, and LICENSE.
+- Only the console HTML, JavaScript, CSS, and SVG logo ship from `app/`; large brand/presentation PNGs remain repository-only.
+- `npm audit --omit=dev` reports no known production dependency vulnerabilities.
 
 ## Manual Review
 
@@ -38,19 +42,36 @@ Confirm before release:
 - `examples/governed-release.mjs` demonstrates `ApprovalQueue` and `createReleaseGateReport`.
 - No secrets, private credentials, generated tokens, or local-only files are included in the package tarball.
 - No third-party project branding, copied examples, copied docs, or pasted source code are included.
+- The exact tarball filename, positive size, integrity, and full Git commit have been captured, and the reviewed worktree is clean.
 
 ## Approval Gate
 
-Publishing requires explicit user approval for the exact package and version in the current run. Approval must name `maqam@0.2.0` or a later reviewed version.
+Publishing requires explicit user approval for the exact package, version, registry, command, artifact identity, and Git commit in the current run. Approval must name `maqam@0.2.0` or a later reviewed version and use the `publish:npm` action.
+
+When represented as an `ApprovalQueue` record, the subject must exactly match:
+
+```js
+{
+  packageName: "maqam",
+  version: "0.2.0",
+  registry: "https://registry.npmjs.org/",
+  publishCommand: "npm publish --access public",
+  artifactFilename: "maqam-0.2.0.tgz",
+  artifactSizeBytes: 123456,
+  artifactIntegrity: "sha512-...",
+  gitCommit: "0123456789abcdef0123456789abcdef01234567"
+}
+```
+
+The values above are illustrative. Record the actual packed artifact values; never approve placeholders.
 
 Do not publish automatically from an automation, background run, scheduled job, or release-preparation task.
 
 ## Publish Steps After Approval
 
 ```bash
-npm login
 npm publish --access public
-npm view maqam version
+npm view maqam@0.2.0 version dist.integrity
 ```
 
-After publishing, create a GitHub release with the `0.2.0` changelog entry and attach the npm package URL.
+Use an authenticated npm session or short-lived release token without storing credentials in repository files, shell history, logs, package metadata, or evidence. After publishing, verify the registry version and integrity, then create a GitHub release with the `0.2.0` changelog entry and npm package URL.

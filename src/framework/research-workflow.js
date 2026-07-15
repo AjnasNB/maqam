@@ -8,13 +8,15 @@ function candidateNameFromPage(page) {
 export function createResearchWorkflow(options = {}) {
   const seeds = options.seeds || [];
   const maxPages = options.maxPages || 10;
+  const maxEvidenceChars = Number.isInteger(options.maxEvidenceChars)
+    ? Math.max(256, Math.min(100_000, options.maxEvidenceChars))
+    : 20_000;
 
   return {
     name: "enterprise_research",
     tasks: [
       {
         id: "collect_sources",
-        retries: 1,
         run: async (context) => {
           const pages = await context.tools.call("crawler", {
             seeds,
@@ -29,7 +31,7 @@ export function createResearchWorkflow(options = {}) {
               taskId: "collect_sources",
               sourceType: "url",
               source: page.url,
-              excerpt: page.text || page.markdown || page.title || "",
+              excerpt: String(page.text || page.markdown || page.title || "").slice(0, maxEvidenceChars),
               tool: "crawler",
               confidence: page.status === 200 ? 0.85 : 0.5
             });

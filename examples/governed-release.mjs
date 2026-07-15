@@ -1,26 +1,48 @@
 import { ApprovalQueue, createReleaseGateReport } from "maqam";
 
+const [filename, rawSizeBytes, integrity, gitCommit] = process.argv.slice(2);
+if (!filename || !rawSizeBytes || !integrity || !gitCommit) {
+  throw new Error(
+    "Usage: node examples/governed-release.mjs <artifact.tgz> <size-bytes> <sha256:hex-or-sha512-base64> <40-char-git-commit>"
+  );
+}
+
+const artifact = {
+  filename,
+  sizeBytes: Number(rawSizeBytes),
+  integrity,
+  gitCommit
+};
+const release = {
+  packageName: "maqam",
+  version: "0.2.0",
+  registry: "https://registry.npmjs.org/",
+  publishCommand: "npm publish --access public"
+};
+
 const approvals = new ApprovalQueue();
 const approval = approvals.requestApproval({
   action: "publish:npm",
-  requestedBy: "release-bot",
-  reason: "Maqam release candidate passed local verification and needs owner approval.",
-  risk: "high",
+  requestedBy: "release-preparer",
+  reason: "The exact Maqam artifact passed local verification and needs owner approval.",
+  risk: "critical",
   subject: {
-    packageName: "maqam",
-    version: "0.2.0"
+    ...release,
+    artifactFilename: artifact.filename,
+    artifactSizeBytes: artifact.sizeBytes,
+    artifactIntegrity: artifact.integrity,
+    gitCommit: artifact.gitCommit
   },
   evidence: [
-    "npm test",
-    "npm pack --dry-run"
+    "npm test: pass",
+    "npm pack --dry-run: pass"
   ]
 });
 
 const report = createReleaseGateReport({
-  packageName: "maqam",
-  version: "0.2.0",
+  ...release,
   license: "MIT",
-  publishCommand: "npm publish --access public",
+  artifact,
   requiredFiles: {
     readme: true,
     license: true,
@@ -32,8 +54,8 @@ const report = createReleaseGateReport({
     examples: true
   },
   verification: [
-    { command: "npm test", status: "pass", summary: "Run this before publishing." },
-    { command: "npm pack --dry-run", status: "pass", summary: "Run this before publishing." }
+    { command: "npm test", status: "pass", summary: "Recorded from the reviewed release run." },
+    { command: "npm pack --dry-run", status: "pass", summary: "Recorded from the reviewed release run." }
   ],
   provenance: {
     inspectedProjects: [],

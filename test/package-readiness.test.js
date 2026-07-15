@@ -15,18 +15,28 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
   assert.equal(packageJson.version, "0.2.0");
   assert.equal(packageJson.license, "MIT");
+  assert.equal(packageJson.author, "Ajnas NB");
   assert.equal(packageJson.type, "module");
+  assert.equal(packageJson.sideEffects, false);
   assert.equal(packageJson.types, "src/index.d.ts");
   assert.equal(packageJson.bin.maqam, "bin/maqam.js");
   assert.equal(packageJson.bin["maqam-crawl"], "bin/ajnas-crawl.js");
   assert.equal(packageJson.repository.url, "git+https://github.com/AjnasNB/maqam.git");
   assert.equal(packageJson.publishConfig.access, "public");
-  assert.ok(packageJson.files.includes("app/"));
+  assert.equal(packageJson.exports["./server"].types, "./src/maqam/server.d.ts");
+  assert.equal(packageJson.exports["./server"].default, "./src/maqam/server.js");
+  assert.ok(packageJson.files.includes("app/index.html"));
+  assert.ok(packageJson.files.includes("app/app.js"));
+  assert.ok(packageJson.files.includes("app/styles.css"));
+  assert.ok(packageJson.files.includes("app/assets/maqam-logo.svg"));
+  assert.equal(packageJson.files.includes("app/"), false);
   assert.ok(packageJson.files.includes("src/"));
   assert.ok(packageJson.files.includes("docs/usage.md"));
   assert.ok(packageJson.files.includes("docs/external-agents.md"));
   assert.ok(packageJson.files.includes("docs/release-checklist.md"));
   assert.ok(packageJson.files.includes("docs/provenance-and-licenses.md"));
+  assert.ok(packageJson.files.includes("docs/comparison.md"));
+  assert.ok(packageJson.files.includes("docs/migration-0.2.md"));
   assert.ok(packageJson.files.includes("examples/"));
   assert.ok(packageJson.files.includes("CHANGELOG.md"));
   assert.ok(packageJson.files.includes("SECURITY.md"));
@@ -35,6 +45,9 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.keywords.includes("agent-framework"));
   assert.ok(packageJson.keywords.includes("governance"));
   assert.ok(packageJson.keywords.includes("release-gate"));
+  assert.equal(packageJson.dependencies["ipaddr.js"], "^2.4.0");
+  assert.equal(packageJson.dependencies.undici, "^7.28.0");
+  assert.equal(packageJson.engines.node, ">=20.18.1");
 });
 
 test("public docs and brand assets match Maqam identity", () => {
@@ -57,7 +70,9 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(usageGuide, /createCliAgentTool/);
   assert.match(usageGuide, /ApprovalQueue/);
   assert.match(usageGuide, /createReleaseGateReport/);
-  assert.match(maqamBin, /Maqam agent framework console/);
+  assert.match(maqamBin, /startMaqamServer/);
+  assert.match(maqamBin, /--allow-private-networks/);
+  assert.match(maqamBin, /MAQAM_API_TOKEN/);
   assert.ok(existsSync(new URL("../src/index.d.ts", import.meta.url)));
   assert.ok(existsSync(new URL("../examples/governed-release.mjs", import.meta.url)));
   assert.ok(existsSync(new URL("../examples/govern-coding-agent.mjs", import.meta.url)));
@@ -72,19 +87,24 @@ test("public docs and brand assets match Maqam identity", () => {
 
 test("release governance docs require approval before publishing", () => {
   assert.match(changelog, /^# Changelog/m);
-  assert.match(changelog, /## 0\.2\.0 - 2026-07-12/);
-  assert.match(changelog, /Release candidate/);
+  assert.match(changelog, /## 0\.2\.0 - 2026-07-15/);
+  assert.match(changelog, /Fail-closed governance/);
   assert.match(releaseGuide, /^# Maqam Release Checklist/m);
   assert.match(releaseGuide, /npm test/);
   assert.match(releaseGuide, /npm pack --dry-run/);
   assert.match(releaseGuide, /npm publish --access public/);
   assert.match(releaseGuide, /explicit user approval/);
   assert.match(provenanceGuide, /^# Provenance and License Notes/m);
-  assert.match(provenanceGuide, /Original implementation/);
-  assert.match(provenanceGuide, /No third-party source code/);
+  assert.match(provenanceGuide, /original Ajnas NB implementation/i);
+  assert.match(provenanceGuide, /No source code[\s\S]*was copied into Maqam/i);
+  assert.match(provenanceGuide, /ipaddr\.js/);
+  assert.match(provenanceGuide, /undici/);
   assert.match(provenanceGuide, /Qwen-Agent/);
   assert.match(provenanceGuide, /PageAgent/);
   assert.match(provenanceGuide, /MIT/);
+  assert.match(releaseGuide, /artifactFilename/);
+  assert.match(releaseGuide, /artifactSizeBytes/);
+  assert.match(releaseGuide, /artifactIntegrity/);
   assert.match(security, /^# Security Policy/m);
   assert.match(security, /approval/i);
 });

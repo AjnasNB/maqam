@@ -1,7 +1,61 @@
+import { randomUUID } from "node:crypto";
 import { MaqamError, toErrorRecord } from "./errors.js";
+import { redactSensitive, redactText } from "./audit.js";
+
+function safeErrorRecord(error) {
+  const record = toErrorRecord(error);
+  return {
+    ...record,
+    message: redactText(record.message),
+    details: redactSensitive(record.details)
+  };
+}
 
 function workflowError(message, code = "WORKFLOW_INVALID") {
   return new MaqamError(message, { code });
+}
+
+function shouldRetry(task, error, attempt, maxAttempts) {
+  if (attempt >= maxAttempts) return false;
+  const code = String(error?.code || "");
+  const neverRetry = new Set([
+    "APPROVAL_REQUIRED",
+    "APPROVAL_SCOPE_MISMATCH",
+    "APPROVAL_INPUT_INVALID",
+    "APPROVAL_INVALID",
+    "POLICY_DENIED",
+    "GOAL_SCOPE_CONFLICT",
+    "TOOL_CALL_LIMIT_EXCEEDED",
+    "TASK_TIMEOUT",
+    "RUN_TIMEOUT",
+    "RUN_ABORTED",
+    "CLI_ABORTED",
+    "CLI_TIMEOUT",
+    "CLI_INPUT_LIMIT_EXCEEDED",
+    "CLI_OUTPUT_LIMIT_EXCEEDED",
+    "CLI_OUTPUT_TOKEN_LIMIT_EXCEEDED",
+    "CLI_JSON_PARSE_FAILED",
+    "CLI_JSONL_PARSE_FAILED",
+    "CLI_EXIT_NONZERO",
+    "CLI_SPAWN_FAILED",
+    "CRAWLER_URL_BLOCKED",
+    "CRAWL_REQUEST_LIMIT",
+    "CRAWL_DURATION_LIMIT",
+    "CRAWL_ABORTED"
+  ]);
+  if (neverRetry.has(code)
+    || code.startsWith("AGENT_")
+    || code.startsWith("APPROVAL_")
+    || code.startsWith("CLI_")
+    || code.startsWith("POLICY_")) return false;
+  if (typeof task.retryOn === "function") {
+    return task.retryOn(error, attempt) === true;
+  }
+  if (Array.isArray(task.retryOn)) {
+    return typeof error?.code === "string" && task.retryOn.includes(error.code);
+  }
+  // Retries are opt-in because repeating a denied or effectful task is unsafe.
+  return task.retryable === true || error?.retryable === true || error?.details?.retryable === true;
 }
 
 function validateTasks(tasks = []) {
@@ -15,7 +69,23 @@ function validateTasks(tasks = []) {
   }
 }
 
-async function runWithTimeout(run, timeoutMs, taskId, parentSignal) {
+function settlesWithin(operation, timeoutMs) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(false), timeoutMs);
+    operation.then(
+      () => {
+        clearTimeout(timer);
+        resolve(true);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(true);
+      }
+    );
+  });
+}
+
+async function runWithTimeout(run, timeoutMs, taskId, parentSignal, cancellationGraceMs) {
   const controller = new AbortController();
   const signals = parentSignal ? [parentSignal, controller.signal] : [controller.signal];
   const signal = signals.length === 1 ? signals[0] : AbortSignal.any(signals);
@@ -44,9 +114,19 @@ async function runWithTimeout(run, timeoutMs, taskId, parentSignal) {
     else signal.addEventListener("abort", onAbort, { once: true });
   });
 
+  const operation = Promise.resolve().then(() => run(signal));
   try {
-    const operation = Promise.resolve().then(() => run(signal));
     return await Promise.race([operation, aborted, ...(timeout ? [timeout] : [])]);
+  } catch (error) {
+    if (error?.code === "TASK_TIMEOUT" || error?.code === "RUN_TIMEOUT") {
+      const settled = await settlesWithin(operation, cancellationGraceMs);
+      error.details = {
+        ...(error.details || {}),
+        cancellationGraceMs,
+        operationMayStillBeRunning: !settled
+      };
+    }
+    throw error;
   } finally {
     if (timer) clearTimeout(timer);
     signal.removeEventListener("abort", onAbort);
@@ -60,10 +140,40 @@ export class AgentRuntime {
     this.toolGateway = options.toolGateway || null;
     this.approvalQueue = options.approvalQueue || null;
     this.clock = options.clock || (() => new Date());
+    this.cancellationGraceMs = Number.isFinite(options.cancellationGraceMs)
+      ? Math.max(0, options.cancellationGraceMs)
+      : 1_000;
+    this.activeRunIds = new Set();
   }
 
   async runWorkflow(workflow, goal = {}) {
-    const runId = goal.runId || `run_${this.clock().getTime()}`;
+    const runId = goal.runId || `run_${randomUUID()}`;
+    if (this.activeRunIds.has(runId)) {
+      const now = this.clock().toISOString();
+      return {
+        runId,
+        status: "failed",
+        error: safeErrorRecord(new MaqamError(`Run id '${runId}' is already active.`, {
+          code: "RUN_ID_ACTIVE",
+          details: { runId }
+        })),
+        limits: {},
+        trace: [],
+        outputs: {},
+        startedAt: now,
+        finishedAt: now
+      };
+    }
+
+    this.activeRunIds.add(runId);
+    try {
+      return await this.#executeWorkflow(workflow, goal, runId);
+    } finally {
+      this.activeRunIds.delete(runId);
+    }
+  }
+
+  async #executeWorkflow(workflow, goal, runId) {
     const startedAt = this.clock().toISOString();
     const preflight = this.policyEngine?.evaluateGoal(goal) || {
       status: "allow",
@@ -90,7 +200,7 @@ export class AgentRuntime {
       return {
         runId,
         status: "failed",
-        error: toErrorRecord(error),
+        error: safeErrorRecord(error),
         limits: preflight.limits,
         trace: [],
         outputs: {},
@@ -135,9 +245,13 @@ export class AgentRuntime {
           const taskStartedAt = this.clock().toISOString();
           try {
             const remainingMs = deadlineAt === null ? null : Math.max(1, deadlineAt - Date.now());
+            // Let the run controller own the tenant deadline so it is reported
+            // as RUN_TIMEOUT. A task timer is only installed when it is the
+            // earlier, task-specific boundary.
             const timeoutMs = Number.isFinite(task.timeoutMs)
-              ? (remainingMs === null ? task.timeoutMs : Math.min(task.timeoutMs, remainingMs))
-              : remainingMs;
+              && (remainingMs === null || task.timeoutMs < remainingMs)
+              ? task.timeoutMs
+              : null;
             const output = await runWithTimeout(
               (signal) => {
                 context.signal = signal;
@@ -145,7 +259,8 @@ export class AgentRuntime {
               },
               timeoutMs,
               task.id,
-              runController.signal
+              runController.signal,
+              this.cancellationGraceMs
             );
             context.outputs[task.id] = output;
             context.trace.push({
@@ -165,9 +280,9 @@ export class AgentRuntime {
               attempt,
               startedAt: taskStartedAt,
               finishedAt: this.clock().toISOString(),
-              error: toErrorRecord(error)
+              error: safeErrorRecord(error)
             });
-            if (error?.code === "APPROVAL_REQUIRED" || runController.signal.aborted) break;
+            if (!shouldRetry(task, error, attempt, maxAttempts) || runController.signal.aborted) break;
           }
         }
 
@@ -175,7 +290,7 @@ export class AgentRuntime {
           return {
             runId,
             status: lastError.code === "APPROVAL_REQUIRED" ? "needs_approval" : "failed",
-            error: toErrorRecord(lastError),
+            error: safeErrorRecord(lastError),
             limits: context.limits,
             trace: context.trace,
             outputs: context.outputs,

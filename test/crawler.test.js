@@ -64,7 +64,8 @@ test("crawler respects robots.txt and extracts linked pages", async () => {
     seeds: [`${baseUrl}/`],
     maxPages: 5,
     concurrency: 2,
-    delayMs: 0
+    delayMs: 0,
+    allowPrivateNetworks: true
   });
 
   const urls = pages.map((page) => new URL(page.url).pathname).sort();
@@ -77,7 +78,8 @@ test("crawler can discover sitemap URLs", async () => {
     seeds: [`${baseUrl}/`],
     includeSitemaps: true,
     maxPages: 2,
-    delayMs: 0
+    delayMs: 0,
+    allowPrivateNetworks: true
   });
 
   assert.ok(pages.some((page) => page.url.endsWith("/about")));

@@ -29,7 +29,7 @@ This guide covers installation, CLI usage, SDK usage, the local console, crawler
 
 ## Install
 
-Maqam requires Node.js 20 or newer.
+Maqam requires Node.js 20.18.1 or newer.
 
 Global install:
 
@@ -147,7 +147,7 @@ The console lets you:
 
 - Enter a seed URL.
 - Choose the maximum pages to crawl.
-- Keep crawling on the same origin or allow wider origin discovery.
+- Keep crawling on the same origin or request wider discovery when the server was started with an explicit cross-origin allowlist.
 - Run a governed workflow through policy, tool gateway, evidence, runtime, and synthesis.
 - Inspect candidates, evidence records, claims, runtime trace, and tool trace.
 
@@ -194,12 +194,21 @@ Each crawled page has this shape:
   "title": "Example",
   "description": "Example description",
   "h1": "Example",
+  "language": "en",
   "text": "Readable text...",
   "markdown": "# Example\n\nReadable markdown...",
   "links": ["https://example.com/about"],
   "fetchedAt": "2026-06-30T00:00:00.000Z",
   "status": 200,
-  "contentType": "text/html; charset=utf-8"
+  "contentType": "text/html; charset=utf-8",
+  "bytes": 1250,
+  "contentHash": "sha256:...",
+  "depth": 0,
+  "discoveredFrom": null,
+  "redirectChain": [],
+  "etag": null,
+  "lastModified": null,
+  "robotsAllowed": true
 }
 ```
 
@@ -209,9 +218,14 @@ The crawler:
 
 - Uses `robots.txt` by default.
 - Rate-limits per origin.
-- Limits response size.
+- Resolves and validates every destination, rejects embedded URL credentials, and pins each connection to a validated address.
+- Re-authorizes every redirect against the origin and network policy.
+- Blocks private, loopback, link-local, reserved, multicast, and other special-purpose address ranges by default.
+- Limits seeds, requests, queue entries, depth, links, sitemaps, URLs per sitemap, redirects, retries, duration, and response size.
 - Avoids non-HTTP URLs.
 - Does not bypass login walls, paywalls, CAPTCHA, anti-bot systems, or authorization boundaries.
+
+`allowPrivateNetworks: true` is a trusted local opt-in for supported private ranges. It does not permit link-local metadata endpoints or otherwise unsafe ranges. Robots retrieval fails closed except when the origin definitively returns `404` or `410`.
 
 ## Framework SDK
 
@@ -235,9 +249,13 @@ import {
   createCrawlerTool,
   createResearchWorkflow,
   crawl,
+  crawlDetailed,
   extractPage,
   normalizeUrl,
   discoverSitemapUrls,
+  classifyIpAddress,
+  isPublicIpAddress,
+  resolveUrlTarget,
   MaqamError,
   PolicyDeniedError,
   ApprovalRequiredError,
@@ -300,11 +318,15 @@ Config fields:
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `allowedTools` | `string[]` | If non-empty, only these tools may run. |
+| `allowedTools` | `string[]` | Tools that may run. An empty list denies all tools unless `allowAllTools` is true. |
 | `deniedTools` | `string[]` | Tools that must never run. |
-| `allowedOrigins` | `string[]` | If non-empty, only these URL origins may be used. |
+| `allowedOrigins` | `string[]` | URL origins that may be used. An empty list denies URL origins unless `allowAllOrigins` is true. |
 | `deniedOrigins` | `string[]` | URL origins that must never be used. |
 | `approvalRequiredTools` | `string[]` | Tools that return `needs_approval`. |
+| `approvalRequiredEffects` | `string[]` | Tool effects that require approval. |
+| `deniedEffects` | `string[]` | Tool effects that must never run. |
+| `allowAllTools` | `boolean` | Explicitly allow tools when `allowedTools` is empty. Default: `false`. |
+| `allowAllOrigins` | `boolean` | Explicitly allow origins when `allowedOrigins` is empty. Default: `false`. |
 | `maxToolCalls` | `number` | Shortcut for default `limits.maxToolCalls`. |
 | `defaultLimits` | `object` | Default runtime and tool limits. |
 
@@ -315,6 +337,7 @@ policyEngine.evaluateGoal(goal);
 policyEngine.authorizeToolCall({ toolName, input, context });
 policyEngine.isToolAllowed("crawler");
 policyEngine.isOriginAllowed("https://github.com");
+policyEngine.authorizationScope(goal);
 ```
 
 Decision shape:
@@ -327,7 +350,12 @@ Decision shape:
     "maxToolCalls": 100,
     "maxRuntimeMs": 600000
   },
-  "requiredApprovals": []
+  "requiredApprovals": [],
+  "scope": {
+    "allowedOrigins": ["https://github.com"],
+    "originsExplicit": true,
+    "originsUnrestricted": false
+  }
 }
 ```
 
@@ -391,7 +419,7 @@ Evidence record shape:
 }
 ```
 
-Unsupported claims are claims with no evidence IDs or with evidence IDs that do not exist in the ledger.
+Evidence ids and claim ids must be unique. Evidence hashes are computed from the normalized source and excerpt; a mismatching caller-supplied hash is rejected. Returned records are defensive copies. Unsupported claims are claims with no evidence IDs, missing evidence, or evidence from a different run.
 
 ### `new ToolGateway(options)`
 
@@ -430,7 +458,11 @@ The handler context includes:
 
 - `toolName`
 - `evidenceLedger`
-- Any workflow context passed to `call`
+- the exact effective `goal`
+- `authorizedOrigins` and `authorizationScope` from policy
+- safe workflow context passed to `call`
+
+`ToolGateway` requires a `policyEngine`. For deliberately ungoverned local code only, opt in with `new ToolGateway({ allowUngoverned: true })`.
 
 If policy denies the call, `ToolGateway` throws `PolicyDeniedError`.
 
@@ -463,6 +495,7 @@ const workflow = {
     {
       id: "first_task",
       retries: 1,
+      retryOn: ["TEMPORARY_UPSTREAM_ERROR"],
       timeoutMs: 5000,
       run: async (context) => {
         return { ok: true };
@@ -515,6 +548,8 @@ Runtime result shape:
 }
 ```
 
+`retries` only sets the maximum additional attempts. Retrying is opt-in: set `retryable: true`, provide a `retryOn` error-code array or predicate, or throw an error explicitly marked retryable. Approval, policy, timeout, and other errors are not retried merely because `retries` is nonzero. Tasks receive an `AbortSignal`; timeout results identify when a task did not settle during `cancellationGraceMs` and may still be running.
+
 Task context fields:
 
 - `runId`
@@ -540,7 +575,7 @@ registry.register({
   trustLevel: "verified",
   evalScore: 0.9,
   metadata: {
-    owner: "Ajnas"
+    owner: "Ajnas NB"
   }
 });
 
@@ -557,9 +592,11 @@ registry.register(skill);
 registry.get("oss-research");
 registry.list();
 registry.find({ text, capabilities });
+registry.findByCapability("research");
+registry.select({ trigger: "oss", capabilities: ["research"] });
 ```
 
-Selection sorts by `evalScore` descending, then by `id`.
+`register()` returns a normalized copy of the stored skill. `get()`, `list()`, `find()`, `findByCapability()`, and `select()` also return copies. Selection sorts by `evalScore` descending, then by `id`.
 
 ### `createCrawlerTool(defaultOptions)`
 
@@ -569,7 +606,9 @@ Wraps the low-level crawler as a `ToolGateway` handler.
 const crawlerTool = createCrawlerTool({
   concurrency: 2,
   delayMs: 250,
-  timeoutMs: 12_000
+  timeoutMs: 12_000,
+  maxPages: 10,
+  allowedOrigins: ["https://example.com"]
 });
 
 toolGateway.registerTool("crawler", crawlerTool);
@@ -585,6 +624,8 @@ await toolGateway.call("crawler", {
   includeSitemaps: false
 });
 ```
+
+Tool input can lower configured crawler ceilings but cannot raise them. The effective origin list is the intersection of the tool configuration, workflow goal, and gateway authorization scope. Cross-origin mode requires an explicit trusted origin allowlist. A caller cannot enable private-network access; it must be enabled in trusted `defaultOptions`.
 
 ### `createAgentTool(agent, options)`
 
@@ -697,8 +738,9 @@ Options:
 | `cwd` | `string` | Optional working directory. |
 | `allowedCwdRoots` | `string[]` | Reject a configured cwd outside these roots. |
 | `env` | `object` | Extra environment variables. |
-| `inheritEnv` | `boolean` | Inherit `process.env`. Default: `true`. |
-| `envAllowlist` | `string[]` | When inheriting, copy only these environment keys. |
+| `inheritEnv` | `boolean` | Request inherited environment values. Default: `false`; a small operational allowlist is still available so executables can run. |
+| `envAllowlist` | `string[]` | Copy only these parent environment keys. When omitted, Maqam uses its small operational allowlist. |
+| `allowUnsafeEnvInheritance` | `boolean` | Required with `inheritEnv: true` to copy the entire parent environment when no allowlist is supplied. Avoid when the parent holds credentials. |
 | `stdin` | `"json" | "text" | "none"` | How input is passed to the worker. Default: `"json"`. |
 | `parseJson` | `boolean` | Parse stdout as JSON and expose it as `result.json`. |
 | `parseJsonLines` | `boolean` | Parse stdout as JSON Lines and expose `result.jsonLines`. |
@@ -752,6 +794,8 @@ Limit errors:
 Security notes:
 
 - Maqam does not use a shell for CLI workers by default.
+- The default cwd and allowed root are `process.cwd()` and are checked through real paths before the worker starts.
+- Full parent-environment inheritance is disabled unless separately and explicitly unlocked.
 - Keep `command` and `args` fixed in code.
 - Send user input through stdin.
 - Use narrow `allowedTools`.
@@ -781,7 +825,7 @@ Candidate shape:
 }
 ```
 
-### `crawl(input)`
+### `crawl(input)` and `crawlDetailed(input)`
 
 Runs the low-level crawler.
 
@@ -789,8 +833,12 @@ Runs the low-level crawler.
 const pages = await crawl({
   seeds: ["https://example.com"],
   maxPages: 25,
+  maxRequests: 200,
+  maxQueue: 500,
+  maxDepth: 8,
   concurrency: 4,
   sameOrigin: true,
+  allowedOrigins: ["https://example.com"],
   includeSitemaps: false,
   obeyRobots: true,
   userAgent: "MyCrawler/1.0 (+https://example.com)",
@@ -806,22 +854,62 @@ const pages = await crawl({
 });
 ```
 
+`crawl()` returns the page array. `crawlDetailed()` accepts the same input and returns `{ pages, failures, stats }`, including request/retry/robots/origin/queue counts and crawl timestamps.
+
 Input fields:
 
 | Field | Type | Description |
 | --- | --- | --- |
 | `seeds` or `urls` | `string[]` | Starting URLs. At least one HTTP(S) URL is required. |
 | `maxPages` | `number` | Maximum pages to return. |
+| `maxSeeds` | `number` | Maximum unique seed URLs accepted. |
+| `maxRequests` | `number` | Maximum network requests, including robots, sitemap, redirect, and retry requests. |
+| `maxQueue` | `number` | Maximum pending discovered URLs. |
+| `maxLinksPerPage` | `number` | Maximum links extracted from one page. |
+| `maxDepth` | `number` | Maximum discovery depth. |
 | `concurrency` | `number` | Number of workers. |
 | `sameOrigin` | `boolean` | Restrict discovered links to seed origins. |
+| `allowedOrigins` | `string[]` | Optional explicit HTTP(S) origin allowlist. |
 | `includeSitemaps` | `boolean` | Discover URLs from sitemaps. |
+| `maxSitemaps` | `number` | Maximum sitemap documents. |
+| `maxUrlsPerSitemap` | `number` | Maximum URL and nested-sitemap entries accepted per document. |
 | `obeyRobots` | `boolean` | Respect `robots.txt`. |
+| `allowPrivateNetworks` | `boolean` | Trusted opt-in for supported private ranges. Link-local and unsafe special ranges remain blocked. |
 | `userAgent` | `string` | Custom user agent. |
 | `delayMs` | `number` | Per-origin delay. |
 | `timeoutMs` | `number` | Request timeout. |
+| `maxDurationMs` | `number` | Total crawl duration ceiling. |
 | `maxBytes` | `number` | Maximum response body bytes. |
+| `maxRedirects` | `number` | Maximum manually validated redirect hops. |
+| `maxRetries` | `number` | Maximum retries for retryable network/HTTP failures. |
+| `retryDelayMs` | `number` | Initial retry delay; backoff is bounded. |
+| `signal` | `AbortSignal` | Cancels DNS resolution, delays, and requests. |
 | `onPage` | `function` | Optional callback for each page. |
-| `onError` | `function` | Optional callback for crawl failures. |
+| `onError` | `function` | Optional callback receiving `{ url, phase, code, error }`. |
+
+Security, request-budget, duration, and abort failures reject the crawl. Ordinary page and sitemap failures are reported by `crawlDetailed()` and `onError` while other eligible URLs continue.
+
+### Crawler utilities
+
+The root package also exports the extraction and destination-policy helpers used by the crawler:
+
+```js
+const page = extractPage(html, "https://example.com", {
+  maxLinksPerPage: 500
+});
+
+const normalized = normalizeUrl("https://example.com:443/docs#section");
+const sitemapEntries = await discoverSitemapUrls(
+  "https://example.com/sitemap.xml",
+  { allowedOrigins: ["https://example.com"] }
+);
+
+const classification = classifyIpAddress("203.0.113.10");
+const publicAddress = isPublicIpAddress("8.8.8.8");
+const target = await resolveUrlTarget("https://example.com");
+```
+
+`classifyIpAddress()` and `isPublicIpAddress()` classify literal addresses without DNS. `resolveUrlTarget()` validates the protocol, embedded credentials, all DNS results, and address ranges and returns the selected validated address. Calling it does not fetch content. `discoverSitemapUrls()` applies the same destination and response limits to one sitemap document.
 
 ### Error Classes
 
@@ -1269,15 +1357,15 @@ import { ApprovalQueue } from "maqam";
 
 const approvals = new ApprovalQueue();
 const approval = approvals.requestApproval({
-  action: "publish:npm",
+  action: "deploy:staging",
   requestedBy: "release-runner",
-  reason: "maqam@0.2.0 passed verification and needs owner approval.",
+  reason: "The staging deployment needs owner approval.",
   risk: "high",
   subject: {
-    packageName: "maqam",
-    version: "0.2.0"
+    service: "example-service",
+    environment: "staging"
   },
-  evidence: ["npm test: pass", "npm pack --dry-run: pass"]
+  evidence: ["test suite: pass"]
 });
 
 console.log(approval.status); // "pending"
@@ -1290,9 +1378,25 @@ Create a release gate report:
 import { ApprovalQueue, createReleaseGateReport } from "maqam";
 
 const approvals = new ApprovalQueue();
+const artifact = {
+  filename: "maqam-0.2.0.tgz",
+  sizeBytes: 123456,
+  integrity: `sha256:${"a".repeat(64)}`,
+  gitCommit: "0123456789abcdef0123456789abcdef01234567"
+};
 const approval = approvals.requestApproval({
   action: "publish:npm",
-  reason: "Release candidate is ready."
+  reason: "Release candidate is ready.",
+  subject: {
+    packageName: "maqam",
+    version: "0.2.0",
+    registry: "https://registry.npmjs.org/",
+    publishCommand: "npm publish --access public",
+    artifactFilename: artifact.filename,
+    artifactSizeBytes: artifact.sizeBytes,
+    artifactIntegrity: artifact.integrity,
+    gitCommit: artifact.gitCommit
+  }
 });
 
 const report = createReleaseGateReport({
@@ -1300,6 +1404,8 @@ const report = createReleaseGateReport({
   version: "0.2.0",
   license: "MIT",
   publishCommand: "npm publish --access public",
+  registry: "https://registry.npmjs.org/",
+  artifact,
   requiredFiles: {
     readme: true,
     license: true,
@@ -1324,7 +1430,7 @@ const report = createReleaseGateReport({
 console.log(report.status); // "waiting_for_approval"
 ```
 
-Only an approved report should be used to run the publish command.
+The artifact values above are illustrative; use the exact packed tarball and full current commit. After an authorized reviewer approves the matching record, rebuild the report and require `readyToPublish === true`. The report validates supplied release evidence; it does not execute or cryptographically enforce the publish command.
 
 ## Use Evidence And Claims
 
@@ -1396,6 +1502,12 @@ Recommended metadata:
 
 The local Maqam server exposes three API endpoints. It intentionally does not expose an endpoint that launches external coding agents.
 
+The typed embedding API is exported from `maqam/server`:
+
+```js
+import { createMaqamServer, startMaqamServer } from "maqam/server";
+```
+
 ### `GET /api/health`
 
 Response:
@@ -1428,7 +1540,6 @@ Request:
   "seeds": ["https://github.com/AjnasNB/maqam"],
   "maxPages": 2,
   "sameOrigin": true,
-  "allowedOrigins": ["https://github.com"],
   "objective": "Research Maqam from public sources"
 }
 ```
@@ -1436,9 +1547,20 @@ Request:
 Rules:
 
 - `seeds` must be an array of HTTP(S) URLs.
-- `maxPages` is clamped from 1 to 25.
-- If `allowedOrigins` is omitted, Maqam derives origins from `seeds`.
+- `maxPages` is clamped from 1 to 10.
+- `allowedOrigins` and `allowPrivateNetworks` are rejected in the request body. Network authority comes only from trusted server startup configuration.
+- By default, origins are derived from the seed list and same-origin crawling is enforced.
+- Cross-origin crawling requires both trusted `allowCrossOriginCrawls: true` configuration and a non-empty server `allowedOrigins` list.
 - The server only registers the `crawler` tool for this endpoint.
+- The content type must be `application/json`; the Host header and browser origin/site metadata are checked.
+
+Trusted startup example:
+
+```bash
+maqam --allowed-origin https://github.com
+```
+
+Non-loopback binding additionally requires `MAQAM_API_TOKEN` and at least one `--allowed-host`. Send the token as `Authorization: Bearer ...`; never put it in a URL or command-line option. The bundled browser page does not store or inject a bearer token, so authenticated remote API deployments should use a controlled client or authentication-aware reverse proxy and deployment egress restrictions.
 
 Example:
 
@@ -1539,10 +1661,14 @@ npm publish --access public
 Before publishing:
 
 ```bash
+npm ci
 npm test
 npm pack --dry-run
+npm audit --omit=dev
 git status --short
 ```
+
+Capture the exact tarball filename, positive byte size, SHA integrity, and full Git commit, then obtain approval for that exact artifact. Use an authenticated npm session or short-lived release token without storing credentials in repository files, package metadata, logs, or release evidence. Follow [the release checklist](release-checklist.md).
 
 ## Troubleshooting
 
@@ -1572,6 +1698,7 @@ Check:
 - The URL origin is present in `allowedOrigins`.
 - The tool is not present in `deniedTools`.
 - The origin is not present in `deniedOrigins`.
+- If an allowlist is intentionally empty, `allowAllTools` or `allowAllOrigins` is explicitly true. Empty allowlists deny by default.
 
 ### Tool call throws `ApprovalRequiredError`
 
@@ -1582,7 +1709,9 @@ The tool or one of its effects requires approval. When `ToolGateway` has an `App
 Common causes:
 
 - `robots.txt` disallows the page.
+- `robots.txt` could not be retrieved and the crawler failed closed.
 - `sameOrigin` blocks off-origin links.
+- The destination or redirect resolved to a private or special-purpose address.
 - The page is not HTML/text/XML.
 - The response is too large.
 - The request timed out.
@@ -1590,11 +1719,13 @@ Common causes:
 
 ### `npm publish` asks for OTP
 
-The npm account has two-factor authentication enabled. Re-run with a current OTP:
+If the npm account or organization requires a one-time password, re-run with a current OTP from the configured authenticator:
 
 ```bash
 npm publish --access public --otp=123456
 ```
+
+Do not paste authentication tokens or OTP values into source files, package metadata, issue comments, or release evidence. Follow the current npm account policy; Maqam cannot bypass registry authentication requirements.
 
 ## Current Limitations
 

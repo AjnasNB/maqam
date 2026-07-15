@@ -14,8 +14,16 @@ function nextIdFromApprovals(approvals) {
   return highest + 1;
 }
 
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value === null || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.keys(value).sort().map((key) => [key, canonicalize(value[key])])
+  );
+}
+
 function sameSubject(left = {}, right = {}) {
-  return JSON.stringify(left) === JSON.stringify(right);
+  return JSON.stringify(canonicalize(left)) === JSON.stringify(canonicalize(right));
 }
 
 export class ApprovalQueue {
@@ -33,8 +41,8 @@ export class ApprovalQueue {
       requestedBy: input.requestedBy || "system",
       reason: input.reason || "Approval requested.",
       risk: input.risk || "medium",
-      subject: input.subject || {},
-      evidence: input.evidence || [],
+      subject: clone(input.subject || {}),
+      evidence: clone(input.evidence || []),
       reusable: input.reusable === true,
       consumptions: [],
       requestedAt: isoNow(this.clock)
@@ -74,33 +82,55 @@ export class ApprovalQueue {
   }
 
   consume(approvalId, usage = {}) {
-    const index = this.approvals.findIndex((approval) => approval.approvalId === approvalId);
-    if (index === -1) throw new Error(`Approval '${approvalId}' was not found.`);
+    return this.consumeMany([{ approvalId, usage }])[0];
+  }
 
-    const current = this.approvals[index];
-    if (current.status !== "approved") {
-      throw new Error(`Approval '${approvalId}' is ${current.status}, not approved.`);
-    }
+  consumeMany(requests = []) {
+    if (!Array.isArray(requests) || requests.length === 0) return [];
 
-    const consumptions = current.consumptions || [];
-    if (!current.reusable && consumptions.length) {
-      throw new Error(`Approval '${approvalId}' has already been consumed.`);
-    }
+    const seen = new Set();
+    const prepared = requests.map((request) => {
+      const approvalId = request?.approvalId;
+      if (!approvalId || seen.has(approvalId)) {
+        throw new Error(`Approval consumption requires unique approval ids; received '${approvalId || "unknown"}'.`);
+      }
+      seen.add(approvalId);
 
-    const updated = {
-      ...current,
-      consumptions: [
-        ...consumptions,
-        {
-          consumedAt: isoNow(this.clock),
-          consumedBy: usage.consumedBy || "tool-gateway",
-          runId: usage.runId || null,
-          toolName: usage.toolName || null
-        }
-      ]
-    };
-    this.approvals[index] = updated;
-    return clone(updated);
+      const index = this.approvals.findIndex((approval) => approval.approvalId === approvalId);
+      if (index === -1) throw new Error(`Approval '${approvalId}' was not found.`);
+
+      const current = this.approvals[index];
+      if (current.status !== "approved") {
+        throw new Error(`Approval '${approvalId}' is ${current.status}, not approved.`);
+      }
+
+      const consumptions = current.consumptions || [];
+      if (!current.reusable && consumptions.length) {
+        throw new Error(`Approval '${approvalId}' has already been consumed.`);
+      }
+
+      return { index, current, usage: request.usage || {} };
+    });
+
+    const consumedAt = isoNow(this.clock);
+    const updated = prepared.map(({ index, current, usage }) => {
+      const approval = {
+        ...current,
+        consumptions: [
+          ...(current.consumptions || []),
+          {
+            consumedAt,
+            consumedBy: usage.consumedBy || "tool-gateway",
+            runId: usage.runId || null,
+            toolName: usage.toolName || null
+          }
+        ]
+      };
+      this.approvals[index] = approval;
+      return clone(approval);
+    });
+
+    return updated;
   }
 
   #decide(approvalId, status, decision) {

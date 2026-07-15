@@ -1,17 +1,68 @@
-import { hashValue, redactSensitive } from "./audit.js";
+import { hashValue, redactSensitive, redactText } from "./audit.js";
 import { ApprovalRequiredError, PolicyDeniedError, toErrorRecord } from "./errors.js";
 
 function safeErrorRecord(error) {
   const record = toErrorRecord(error);
-  return { ...record, details: redactSensitive(record.details) };
+  return {
+    ...record,
+    message: redactText(record.message),
+    details: redactSensitive(record.details)
+  };
+}
+
+function cloneGoal(goal) {
+  if (!goal) return {};
+  try {
+    return structuredClone(goal);
+  } catch {
+    throw new TypeError("ToolGateway goals must contain structured-clone-safe values.");
+  }
+}
+
+function intersectScope(configured, requested, name) {
+  const left = Array.isArray(configured) ? [...new Set(configured)] : [];
+  const right = Array.isArray(requested) ? [...new Set(requested)] : [];
+  if (!left.length) return { values: right, conflict: false };
+  if (!right.length) return { values: left, conflict: false };
+  const values = left.filter((value) => right.includes(value));
+  return { values, conflict: values.length === 0, name };
+}
+
+function combineGoals(configuredGoal, requestedGoal) {
+  const configured = cloneGoal(configuredGoal);
+  const requested = cloneGoal(requestedGoal);
+  const tools = intersectScope(configured.allowedTools, requested.allowedTools, "allowedTools");
+  const origins = intersectScope(configured.allowedOrigins, requested.allowedOrigins, "allowedOrigins");
+  const configuredBudget = configured.budget && typeof configured.budget === "object" ? configured.budget : {};
+  const requestedBudget = requested.budget && typeof requested.budget === "object" ? requested.budget : {};
+  const budget = { ...requestedBudget, ...configuredBudget };
+  for (const key of new Set([...Object.keys(configuredBudget), ...Object.keys(requestedBudget)])) {
+    const left = configuredBudget[key];
+    const right = requestedBudget[key];
+    if (Number.isFinite(left) && Number.isFinite(right)) budget[key] = Math.min(left, right);
+    else if (right !== undefined && left === undefined) budget[key] = right;
+  }
+  return {
+    goal: {
+      ...requested,
+      ...configured,
+      ...(tools.values.length ? { allowedTools: tools.values } : {}),
+      ...(origins.values.length ? { allowedOrigins: origins.values } : {}),
+      ...(Object.keys(budget).length ? { budget } : {})
+    },
+    conflicts: [tools, origins].filter((scope) => scope.conflict).map((scope) => scope.name)
+  };
 }
 
 export class ToolGateway {
   constructor(options = {}) {
+    if (!options.policyEngine && options.allowUngoverned !== true) {
+      throw new TypeError("ToolGateway requires a policyEngine. Set allowUngoverned: true only for explicitly ungoverned use.");
+    }
     this.policyEngine = options.policyEngine || null;
     this.evidenceLedger = options.evidenceLedger || null;
     this.approvalQueue = options.approvalQueue || null;
-    this.goal = options.goal || null;
+    this.goal = options.goal ? cloneGoal(options.goal) : null;
     this.clock = options.clock || (() => new Date());
     this.tools = new Map();
     this.trace = [];
@@ -53,8 +104,18 @@ export class ToolGateway {
       throw error;
     }
 
+    const combinedGoal = combineGoals(this.goal, context.goal);
+    const effectiveGoal = combinedGoal.goal;
+    if (combinedGoal.conflicts.length) {
+      const error = new PolicyDeniedError("Caller goal has no overlap with the gateway goal scope.", {
+        code: "GOAL_SCOPE_CONFLICT",
+        details: { scopes: combinedGoal.conflicts, toolName }
+      });
+      this.#recordTrace(traceBase, "denied", { error: safeErrorRecord(error) });
+      throw error;
+    }
     const decision = this.policyEngine?.authorizeToolCall({
-      goal: context.goal || this.goal,
+      goal: effectiveGoal,
       toolName,
       input,
       context,
@@ -85,10 +146,10 @@ export class ToolGateway {
       try {
         approvals = this.#resolveApprovals({ toolName, input, context, decision });
       } catch (error) {
-        this.#recordTrace(traceBase, "needs_approval", {
+        this.#recordTrace(traceBase, error?.code === "APPROVAL_INPUT_INVALID" ? "denied" : "needs_approval", {
           decision,
           error: safeErrorRecord(error),
-          approvalRequests: error.details?.approvalRequests || []
+          approvalRequests: redactSensitive(error.details?.approvalRequests || [])
         });
         throw error;
       }
@@ -98,6 +159,11 @@ export class ToolGateway {
     try {
       const result = await tool.handler(input, {
         ...context,
+        // Always pass the exact goal and origin scope that were authorized. A
+        // caller-provided context must not be able to broaden either value.
+        goal: effectiveGoal,
+        authorizedOrigins: [...(decision.scope?.allowedOrigins || [])],
+        authorizationScope: decision.scope || null,
         toolName,
         toolMetadata: tool.metadata,
         approvals,
@@ -138,9 +204,17 @@ export class ToolGateway {
       ? decision.requiredApprovals
       : [`tool:${toolName}`];
     const approvalIds = [context.approvalId, ...(context.approvalIds || [])].filter(Boolean);
-    const inputHash = hashValue(input);
+    let inputHash;
+    try {
+      inputHash = hashValue(input);
+    } catch (error) {
+      throw new PolicyDeniedError("Approval-gated tool input is not safely canonicalizable.", {
+        code: "APPROVAL_INPUT_INVALID",
+        details: { toolName, reason: error.message }
+      });
+    }
     const subject = { runId: context.runId || "default", toolName, inputHash };
-    const approved = [];
+    const consumptionRequests = [];
     const approvalRequests = [];
 
     for (const action of actions) {
@@ -174,18 +248,14 @@ export class ToolGateway {
         });
       }
 
-      try {
-        approved.push(this.approvalQueue.consume(candidate.approvalId, {
+      consumptionRequests.push({
+        approvalId: candidate.approvalId,
+        usage: {
           runId: subject.runId,
           toolName,
           consumedBy: context.requestedBy || "tool-gateway"
-        }));
-      } catch (error) {
-        throw new ApprovalRequiredError(error.message, {
-          code: "APPROVAL_INVALID",
-          details: { toolName, action, approvalId: candidate.approvalId }
-        });
-      }
+        }
+      });
     }
 
     if (approvalRequests.length) {
@@ -199,7 +269,25 @@ export class ToolGateway {
       });
     }
 
-    return approved;
+    try {
+      if (consumptionRequests.length > 1) {
+        if (typeof this.approvalQueue.consumeMany !== "function") {
+          throw new Error("The approval queue must support atomic consumeMany() for multi-approval calls.");
+        }
+        return this.approvalQueue.consumeMany(consumptionRequests);
+      }
+      return consumptionRequests.map(({ approvalId, usage }) => (
+        this.approvalQueue.consume(approvalId, usage)
+      ));
+    } catch (error) {
+      throw new ApprovalRequiredError(error.message, {
+        code: "APPROVAL_INVALID",
+        details: {
+          toolName,
+          approvalIds: consumptionRequests.map((request) => request.approvalId)
+        }
+      });
+    }
   }
 
   #recordTrace(base, status, extra = {}) {

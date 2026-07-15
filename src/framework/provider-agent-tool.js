@@ -1,5 +1,6 @@
 import { createCliAgentTool } from "./cli-agent-tool.js";
 import { MaqamError } from "./errors.js";
+import { redactSensitive, redactText } from "./audit.js";
 import { existsSync } from "node:fs";
 import { delimiter, join } from "node:path";
 
@@ -64,7 +65,7 @@ function codexLaunch(options) {
 function processSummary(result) {
   return {
     command: result.command,
-    args: result.args,
+    args: redactSensitive(result.args),
     exitCode: result.exitCode,
     signal: result.signal,
     timedOut: result.timedOut,
@@ -72,8 +73,8 @@ function processSummary(result) {
     approxInputTokens: result.approxInputTokens,
     approxOutputTokens: result.approxOutputTokens,
     outputBytes: result.outputBytes,
-    stderr: result.stderr,
-    limits: result.limits
+    stderr: redactText(result.stderr),
+    limits: redactSensitive(result.limits)
   };
 }
 
@@ -86,6 +87,53 @@ function hasObservedActivity(activity = {}) {
     (Number.isFinite(value) && value > 0)
     || (Array.isArray(value) && value.length > 0)
   ));
+}
+
+function isEventRecord(event) {
+  return event !== null && typeof event === "object" && !Array.isArray(event);
+}
+
+function incompleteProviderStream(provider, message, details) {
+  return new MaqamError(message, {
+    code: "AGENT_PROVIDER_INCOMPLETE_STREAM",
+    details: redactSensitive({ provider, ...details })
+  });
+}
+
+function requireCodexCompletion(events) {
+  const threadStarted = events.some((event) => isEventRecord(event) && event.type === "thread.started");
+  const turnCompleted = events.some((event) => isEventRecord(event) && event.type === "turn.completed");
+  const terminalTurnCompleted = isEventRecord(events.at(-1)) && events.at(-1).type === "turn.completed";
+
+  if (!threadStarted || !terminalTurnCompleted) {
+    throw incompleteProviderStream(
+      "codex",
+      "codex JSONL stream was incomplete: expected thread.started and a terminal turn.completed event.",
+      {
+        eventCount: events.length,
+        threadStarted,
+        turnCompleted,
+        terminalTurnCompleted
+      }
+    );
+  }
+}
+
+function requireClaudeCompletion(events) {
+  const resultObserved = events.some((event) => isEventRecord(event) && event.type === "result");
+  const terminalResult = isEventRecord(events.at(-1)) && events.at(-1).type === "result";
+
+  if (!terminalResult) {
+    throw incompleteProviderStream(
+      "claude-code",
+      "claude-code stream-json output was incomplete: expected a terminal result event.",
+      {
+        eventCount: events.length,
+        resultObserved,
+        terminalResult
+      }
+    );
+  }
 }
 
 function enforceObservedBudget(provider, normalized, maxTotalTokens, maxCostUsd = null) {
@@ -162,6 +210,7 @@ export function normalizeCodexEvents(events = []) {
   let failure = null;
 
   for (const event of events) {
+    if (!isEventRecord(event)) continue;
     if (event.type === "thread.started") sessionId = event.thread_id || sessionId;
     if (event.type === "turn.completed") {
       failure = null;
@@ -184,7 +233,7 @@ export function normalizeCodexEvents(events = []) {
 }
 
 export function normalizeClaudeCodeEvents(events = []) {
-  const resultEvent = [...events].reverse().find((event) => event.type === "result") || {};
+  const resultEvent = [...events].reverse().find((event) => isEventRecord(event) && event.type === "result") || {};
   const rawUsage = resultEvent.usage || {};
   const usage = {
     inputTokens: numeric(rawUsage.input_tokens),
@@ -201,6 +250,7 @@ export function normalizeClaudeCodeEvents(events = []) {
   let sessionId = resultEvent.session_id || null;
 
   for (const event of events) {
+    if (!isEventRecord(event)) continue;
     if (event.type === "system" && event.session_id) sessionId = event.session_id;
     const content = event.message?.content;
     if (!Array.isArray(content)) continue;
@@ -281,6 +331,7 @@ export function createCodexAgentTool(options = {}) {
         details: { provider: "codex", failure: normalized.failure, activity: normalized.activity, usage: normalized.usage }
       });
     }
+    requireCodexCompletion(events);
     enforceObservedBudget("codex", normalized, maxTotalTokens);
     enforceExpectedOutput("codex", normalized.output, options.expectedOutput);
     if (options.requireFileChanges === true && normalized.activity.fileChanges < 1) {
@@ -377,6 +428,7 @@ export function createClaudeCodeAgentTool(options = {}) {
         details: { provider: "claude-code", failure: normalized.failure, activity: normalized.activity, usage: normalized.usage }
       });
     }
+    requireClaudeCompletion(events);
     enforceObservedBudget("claude-code", normalized, maxTotalTokens, maxBudgetUsd);
     enforceExpectedOutput("claude-code", normalized.output, options.expectedOutput);
     if (Number.isFinite(options.minToolCalls) && normalized.activity.toolCalls < options.minToolCalls) {

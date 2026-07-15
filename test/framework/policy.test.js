@@ -43,6 +43,7 @@ test("authorizeToolCall denies disallowed tools and origins", () => {
 test("authorizeToolCall requests approval for configured approval tools", () => {
   const policy = new PolicyEngine({
     allowedTools: ["github"],
+    allowedOrigins: ["https://github.com"],
     approvalRequiredTools: ["github"]
   });
 
@@ -53,6 +54,23 @@ test("authorizeToolCall requests approval for configured approval tools", () => 
 
   assert.equal(decision.status, "needs_approval");
   assert.deepEqual(decision.requiredApprovals, ["tool:github"]);
+});
+
+test("empty allowlists deny tools and URL origins by default", () => {
+  const empty = new PolicyEngine();
+  assert.equal(empty.authorizeToolCall({ toolName: "reader" }).status, "deny");
+
+  const toolOnly = new PolicyEngine({ allowedTools: ["reader"] });
+  assert.equal(toolOnly.authorizeToolCall({
+    toolName: "reader",
+    input: { url: "https://example.com" }
+  }).status, "deny");
+
+  const explicit = new PolicyEngine({ allowAllTools: true, allowAllOrigins: true });
+  assert.equal(explicit.authorizeToolCall({
+    toolName: "reader",
+    input: { url: "https://example.com" }
+  }).status, "allow");
 });
 
 test("goal budgets can lower but cannot raise tenant limits", () => {

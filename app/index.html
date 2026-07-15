@@ -31,7 +31,7 @@
           <div class="hero-copy">
             <p class="kicker">Governance console</p>
             <h1 id="hero-title">One policy path for every connected agent.</h1>
-            <p class="lede">Run functions, command-line agents, and service connectors with bounded permissions, exact approvals, runtime budgets, evidence, and a reviewable trace.</p>
+            <p class="lede">Run functions, command-line agents, and service connectors through explicit policy, bounded runtime and call budgets, configured exact approvals, evidence, and a reviewable trace.</p>
           </div>
           <div class="run-panel" id="run">
             <div class="panel-header">
@@ -44,18 +44,18 @@
               <div class="form-grid">
                 <label>
                   Max pages
-                  <input name="maxPages" type="number" min="1" max="25" value="2" autocomplete="off">
+                  <input name="maxPages" type="number" min="1" max="10" value="2" autocomplete="off">
                 </label>
                 <label>
                   Same origin
                   <select name="sameOrigin">
                     <option value="true" selected>On</option>
-                    <option value="false">Off</option>
+                    <option value="false">Off (server opt-in required)</option>
                   </select>
                 </label>
               </div>
               <button type="submit">Run research workflow</button>
-              <p class="hint">This is one connector workflow. External coding-agent execution is available through the package API and is not exposed by this local HTTP console.</p>
+              <p class="hint">This public-network research example is capped at 10 pages. External coding-agent execution is available through the package API and is not exposed by this local HTTP console.</p>
             </form>
           </div>
         </section>
@@ -82,7 +82,7 @@
         <section class="control-map" id="governance" aria-labelledby="control-map-title">
           <div class="section-heading">
             <h2 id="control-map-title">Governance path</h2>
-            <p>Each stage adds an enforceable decision or an audit record.</p>
+            <p>Configured stages add a preventive decision, bounded adapter, or audit record.</p>
           </div>
           <ol class="governance-flow" aria-label="Agent governance sequence">
             <li><span>1</span><strong>Goal</strong><small>Declared scope and budget</small></li>

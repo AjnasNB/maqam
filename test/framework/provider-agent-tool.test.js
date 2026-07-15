@@ -49,6 +49,7 @@ test("createCodexAgentTool rejects dangerous sandbox defaults and observed token
     command: process.execPath,
     commandPrefixArgs: nodePrefix(`
       for await (const chunk of process.stdin) {}
+      console.log(JSON.stringify({ type: "thread.started", thread_id: "budget-session" }));
       console.log(JSON.stringify({ type: "item.completed", item: { type: "file_change", path: "proof.txt" } }));
       console.log(JSON.stringify({ type: "turn.completed", usage: { input_tokens: 30, output_tokens: 5 } }));
     `),
@@ -71,6 +72,7 @@ test("createCodexAgentTool rejects dangerous sandbox defaults and observed token
     command: process.execPath,
     commandPrefixArgs: nodePrefix(`
       for await (const chunk of process.stdin) {}
+      console.log(JSON.stringify({ type: "thread.started", thread_id: "no-write-session" }));
       console.log(JSON.stringify({ type: "item.completed", item: { type: "agent_message", text: "no changes" } }));
       console.log(JSON.stringify({ type: "turn.completed", usage: { input_tokens: 3, output_tokens: 2 } }));
     `),
@@ -137,4 +139,111 @@ test("provider-reported failures are not treated as successful runs", async () =
     () => codex("run"),
     (error) => error.code === "AGENT_PROVIDER_REPORTED_FAILURE"
   );
+});
+
+test("createCodexAgentTool rejects empty, partial, and non-terminal completion streams", async () => {
+  const cases = [
+    {
+      name: "empty",
+      code: `for await (const chunk of process.stdin) {}`,
+      expected: { eventCount: 0, threadStarted: false, turnCompleted: false, terminalTurnCompleted: false }
+    },
+    {
+      name: "missing thread start",
+      code: `
+        for await (const chunk of process.stdin) {}
+        console.log(JSON.stringify({ type: "turn.completed", usage: { input_tokens: 1, output_tokens: 1 } }));
+      `,
+      expected: { eventCount: 1, threadStarted: false, turnCompleted: true, terminalTurnCompleted: true }
+    },
+    {
+      name: "truncated",
+      code: `
+        for await (const chunk of process.stdin) {}
+        console.log(JSON.stringify({ type: "thread.started", thread_id: "partial" }));
+        console.log(JSON.stringify({ type: "item.completed", item: { type: "agent_message", text: "npm_AAAAAAAAAAAAAAAAAAAAAAAA" } }));
+      `,
+      expected: { eventCount: 2, threadStarted: true, turnCompleted: false, terminalTurnCompleted: false }
+    },
+    {
+      name: "completion is not terminal",
+      code: `
+        for await (const chunk of process.stdin) {}
+        console.log(JSON.stringify({ type: "thread.started", thread_id: "trailing" }));
+        console.log(JSON.stringify({ type: "turn.completed", usage: { input_tokens: 1, output_tokens: 1 } }));
+        console.log(JSON.stringify({ type: "item.completed", item: { type: "agent_message", text: "late output" } }));
+      `,
+      expected: { eventCount: 3, threadStarted: true, turnCompleted: true, terminalTurnCompleted: false }
+    }
+  ];
+
+  for (const testCase of cases) {
+    const tool = createCodexAgentTool({
+      command: process.execPath,
+      commandPrefixArgs: nodePrefix(testCase.code),
+      cwd: process.cwd(),
+      timeoutMs: 5000
+    });
+
+    await assert.rejects(
+      () => tool("run"),
+      (error) => {
+        assert.ok(error instanceof MaqamError, testCase.name);
+        assert.equal(error.code, "AGENT_PROVIDER_INCOMPLETE_STREAM", testCase.name);
+        assert.match(error.message, /thread\.started.*terminal turn\.completed/, testCase.name);
+        assert.deepEqual(error.details, { provider: "codex", ...testCase.expected }, testCase.name);
+        assert.doesNotMatch(JSON.stringify(error.details), /npm_AAAAAAAAAAAAAAAAAAAAAAAA/);
+        return true;
+      }
+    );
+  }
+});
+
+test("createClaudeCodeAgentTool rejects empty, partial, and non-terminal result streams", async () => {
+  const cases = [
+    {
+      name: "empty",
+      code: `for await (const chunk of process.stdin) {}`,
+      expected: { eventCount: 0, resultObserved: false, terminalResult: false }
+    },
+    {
+      name: "truncated",
+      code: `
+        for await (const chunk of process.stdin) {}
+        console.log(JSON.stringify({ type: "system", session_id: "partial" }));
+        console.log(JSON.stringify({ type: "assistant", message: { content: [{ type: "text", text: "working" }] } }));
+      `,
+      expected: { eventCount: 2, resultObserved: false, terminalResult: false }
+    },
+    {
+      name: "result is not terminal",
+      code: `
+        for await (const chunk of process.stdin) {}
+        console.log(JSON.stringify({ type: "system", session_id: "trailing" }));
+        console.log(JSON.stringify({ type: "result", session_id: "trailing", result: "done", usage: { input_tokens: 1, output_tokens: 1 } }));
+        console.log(JSON.stringify({ type: "assistant", message: { content: [{ type: "text", text: "late output" }] } }));
+      `,
+      expected: { eventCount: 3, resultObserved: true, terminalResult: false }
+    }
+  ];
+
+  for (const testCase of cases) {
+    const tool = createClaudeCodeAgentTool({
+      command: process.execPath,
+      commandPrefixArgs: nodePrefix(testCase.code),
+      cwd: process.cwd(),
+      timeoutMs: 5000
+    });
+
+    await assert.rejects(
+      () => tool("run"),
+      (error) => {
+        assert.ok(error instanceof MaqamError, testCase.name);
+        assert.equal(error.code, "AGENT_PROVIDER_INCOMPLETE_STREAM", testCase.name);
+        assert.match(error.message, /terminal result/, testCase.name);
+        assert.deepEqual(error.details, { provider: "claude-code", ...testCase.expected }, testCase.name);
+        return true;
+      }
+    );
+  }
 });

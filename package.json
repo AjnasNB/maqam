@@ -1,13 +1,11 @@
 {
   "name": "maqam",
   "version": "0.2.0",
-  "description": "Maqam is an MIT-licensed agent framework for governed workflows, policy, evidence, skills, CLI workers, and crawler-backed research.",
+  "description": "Provider-neutral governance for agent workflows, tools, exact approvals, evidence, CLI workers, and secure web research.",
   "license": "MIT",
-  "author": {
-    "name": "Ajnas",
-    "email": "ajnasnb@gmail.com"
-  },
+  "author": "Ajnas NB",
   "type": "module",
+  "sideEffects": false,
   "bin": {
     "maqam": "bin/maqam.js",
     "maqam-crawl": "bin/ajnas-crawl.js",
@@ -20,12 +18,21 @@
     ".": {
       "types": "./src/index.d.ts",
       "default": "./src/index.js"
+    },
+    "./server": {
+      "types": "./src/maqam/server.d.ts",
+      "default": "./src/maqam/server.js"
     }
   },
   "files": [
-    "app/",
+    "app/index.html",
+    "app/app.js",
+    "app/styles.css",
+    "app/assets/maqam-logo.svg",
     "bin/",
+    "docs/comparison.md",
     "docs/external-agents.md",
+    "docs/migration-0.2.md",
     "docs/provenance-and-licenses.md",
     "docs/release-checklist.md",
     "docs/usage.md",
@@ -40,6 +47,7 @@
   ],
   "scripts": {
     "test": "node --test",
+    "prepublishOnly": "npm test",
     "start": "node bin/maqam.js",
     "crawl": "node bin/ajnas-crawl.js",
     "maqam": "node bin/maqam.js",
@@ -75,11 +83,13 @@
   ],
   "dependencies": {
     "cheerio": "^1.0.0",
+    "ipaddr.js": "^2.4.0",
     "robots-parser": "^3.0.1",
-    "turndown": "^7.2.0"
+    "turndown": "^7.2.0",
+    "undici": "^7.28.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.18.1"
   },
   "repository": {
     "type": "git",

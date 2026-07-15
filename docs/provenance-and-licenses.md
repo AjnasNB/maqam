@@ -1,43 +1,53 @@
 # Provenance and License Notes
 
-Maqam is an original Ajnas implementation under the MIT license.
+Last reviewed: 2026-07-15.
 
-## Original implementation
+Maqam is an original Ajnas NB implementation distributed under the MIT license. The package implementation, API names, documentation, examples, tests, command-line behavior, product identity, and visual assets are maintained as Maqam work.
 
-The package source, docs, examples, CLI behavior, runtime APIs, policy checks, evidence ledger, skill registry, and crawler integration are written as original Ajnas work.
+## Source Boundary
 
-The design is informed by public patterns in agent runtimes, tool gateways, MCP-style connectors, policy gates, human approval workflows, evidence capture, and compliant crawling, but Maqam does not vendor or paste third-party source code.
+Public projects may be examined to understand the state of the market, compare documented behavior, identify security lessons, and design interoperable adapters. Inspection is not incorporation.
 
-## Third-Party Source Boundary
+No source code, documentation text, examples, tests, prompts, generated assets, logos, or branding from the projects in the inspection log below was copied into Maqam. Project names and links appear only as nominative references for comparison and attribution; they do not imply affiliation or endorsement.
 
-No third-party source code, documentation, examples, logos, generated assets, proprietary names, or project branding should be copied into this package.
-
-Permissive open-source projects may be cloned or installed for inspection, testing, comparison, and learning during research. That inspection must preserve upstream license and NOTICE files in the review area and must not strip attribution.
+If a future change adds, vendors, modifies, links, or distributes third-party code, its exact version, source, license, notices, modifications, and distribution obligations must be reviewed and recorded before release. A network adapter to an independently installed or hosted service does not, by itself, mean that service's source is incorporated into Maqam, but the final architecture and use still require license review.
 
 ## Runtime Dependencies
 
-Maqam uses npm dependencies declared in `package.json`. Their resolved package licenses are recorded by npm in `package-lock.json`.
+Maqam's direct runtime dependencies are declared in `package.json` and resolved in `package-lock.json`:
 
-Current direct dependencies:
+- `cheerio`: MIT; HTML parsing for crawler extraction.
+- `ipaddr.js`: MIT; IP address parsing and special-range classification for crawler destination policy.
+- `robots-parser`: MIT; robots.txt parsing.
+- `turndown`: MIT; HTML-to-Markdown conversion.
+- `undici`: MIT; HTTP transport with a per-request dispatcher used to pin validated DNS destinations.
 
-- `cheerio`: HTML parsing for crawler extraction.
-- `robots-parser`: robots.txt compliance checks.
-- `turndown`: HTML-to-Markdown conversion for agent-friendly output.
+The installed package manifests and lockfile must be re-audited for every release. Transitive dependencies are not covered merely by listing the direct packages here.
+
+## Upstream Inspection Log
+
+The following entries record reference inspection only. None is a Maqam runtime dependency, and no code from them was copied into this package.
+
+| Project | Upstream license observed | What was inspected |
+| --- | --- | --- |
+| [Crawl4AI](https://github.com/unclecode/crawl4ai) | Its [license file](https://github.com/unclecode/crawl4ai/blob/main/LICENSE) contains Apache-2.0 text plus an additional prominent-attribution requirement. | Browser crawling, deep-crawl strategies, extraction, deployment, robots configuration, and the security boundary described in its [v0.9.0 release notes](https://github.com/unclecode/crawl4ai/blob/main/docs/blog/release-v0.9.0.md). |
+| [Firecrawl](https://github.com/firecrawl/firecrawl) | Primarily AGPL-3.0; SDKs and some UI components are MIT, as stated in its [license notice](https://github.com/firecrawl/firecrawl#license). | Search/scrape/interact/crawl/map product surface, self-hosting, webhook integrity, robots behavior, and cloud-versus-self-host boundaries. |
+| [Crawlee](https://github.com/apify/crawlee) | [Apache-2.0](https://github.com/apify/crawlee/blob/master/LICENSE.md). | HTTP/browser crawler architecture, queues, storage, sessions, retries, proxy rotation, and deployment patterns. |
+| [Browser Use](https://github.com/browser-use/browser-use) | [MIT](https://github.com/browser-use/browser-use/blob/main/LICENSE). | Browser-agent actions, custom tools, domain restrictions, sensitive-data scoping, persistent profiles, and local/cloud boundaries. |
+| [LangGraph](https://github.com/langchain-ai/langgraph) | [MIT](https://github.com/langchain-ai/langgraph/blob/main/LICENSE). | Durable execution, persistence, checkpoints, conditional human review, and pause/resume semantics. |
+| [Qwen-Agent](https://github.com/QwenLM/Qwen-Agent) | Apache-2.0. | Public agent, tool, model, MCP, and application separation patterns. |
+| [PageAgent](https://github.com/alibaba/page-agent) | MIT. | Public in-page browser-agent boundaries and MCP positioning. Earlier audit text that called this project Apache-2.0 was incorrect and has been corrected. |
+| [Qwen Code](https://github.com/QwenLM/qwen-code) | Apache-2.0. | Public terminal-agent and provider-neutral model configuration patterns. |
+
+See [comparison.md](comparison.md) for the evidence-linked product comparison derived from this inspection.
 
 ## Compliance Rules
 
 - Respect robots.txt by default.
 - Do not bypass login walls, paywalls, anti-bot systems, CAPTCHA, private content, or authorization boundaries.
-- Do not publish from an automation without explicit user approval for the exact release.
-- Keep release evidence: tests, package dry run output, changelog, and publish command.
-- Keep Maqam's license as MIT unless the package owner explicitly approves a different license before release.
+- Do not publish from automation without explicit approval for the exact release.
+- Keep release evidence for tests, package contents, dependency audit, provenance, and the publish decision.
+- Keep Maqam under MIT unless the package owner explicitly approves a change after compatibility review.
+- Do not describe inspection as a license to copy. Ideas and documented behavior may inform an original implementation; copied expression or code carries its own obligations.
 
-## Inspiration Log
-
-Recent Ajnas research reviewed permissive OSS patterns around agent runtimes, policy layers, provenance, evaluation, MCP tooling, browser agents, and crawler infrastructure. Those projects are used as inspiration for original APIs and product direction, not as copied implementation.
-
-Verified inspiration references:
-
-- Qwen-Agent: Apache-2.0, used only as inspiration for agent runtime/product framing.
-- PageAgent: MIT, used only as inspiration for browser-agent and release-gate evaluation framing.
-- Qwen Code: Apache-2.0, noted as a public terminal coding-agent reference for provider-neutral model configuration. No source code, docs, examples, or branding are copied.
+This file records engineering provenance and is not legal advice.

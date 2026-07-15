@@ -19,23 +19,29 @@ function containsAny(text, values) {
   return values.some((value) => haystack.includes(String(value).toLowerCase()));
 }
 
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
 export class SkillRegistry {
-  constructor() {
+  constructor(options = {}) {
     this.skills = new Map();
+    for (const skill of options.skills || []) this.register(skill);
   }
 
   register(input) {
     const skill = normalizeSkill(input);
-    this.skills.set(skill.id, skill);
-    return skill;
+    this.skills.set(skill.id, clone(skill));
+    return clone(skill);
   }
 
   get(id) {
-    return this.skills.get(id) || null;
+    const skill = this.skills.get(id);
+    return skill ? clone(skill) : null;
   }
 
   list() {
-    return [...this.skills.values()];
+    return [...this.skills.values()].map(clone);
   }
 
   find(query = {}) {
@@ -48,5 +54,16 @@ export class SkillRegistry {
         return triggerMatch && capabilityMatch;
       })
       .sort((a, b) => b.evalScore - a.evalScore || a.id.localeCompare(b.id));
+  }
+
+  findByCapability(capability) {
+    return this.find({ capabilities: [capability] });
+  }
+
+  select(query = {}) {
+    return this.find({
+      text: query.trigger || query.text || "",
+      capabilities: query.capabilities || []
+    });
   }
 }

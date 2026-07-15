@@ -13,6 +13,7 @@ Report security issues privately to the package owner before public disclosure. 
 ## Required Controls
 
 - Route write, publish, send, billing, account, and production-change actions through `ToolGateway`.
+- Configure explicit `allowedTools` and `allowedOrigins`; empty allowlists deny by default. Use `allowAllTools` and `allowAllOrigins` only for an intentional unrestricted policy.
 - Configure `PolicyEngine.approvalRequiredTools` or `approvalRequiredEffects` for high-risk actions.
 - Use `ApprovalQueue` to bind approval to the exact run, tool, and input hash. Keep approvals one-time unless reuse is an explicit policy decision.
 - Set tenant `maxToolCalls` and `maxRuntimeMs`; workflow budgets can lower but cannot raise those limits.
@@ -20,7 +21,9 @@ Report security issues privately to the package owner before public disclosure. 
 - Keep coding-agent sandboxes, permission modes, tool restrictions, turn limits, and spend limits enabled.
 - Use `createReleaseGateReport` before publishing packages or triggering external release channels.
 - Keep credentials outside workflow input and out of provenance excerpts.
-- Respect robots.txt and authorization boundaries for crawler-backed research.
+- Keep private-network crawler access disabled for untrusted input. Maqam validates all DNS answers, pins each connection, re-authorizes redirects, rejects embedded URL credentials, and never permits link-local metadata ranges through the private-network opt-in.
+- Respect robots.txt and authorization boundaries for crawler-backed research. Robots retrieval failures deny crawling for that origin except for definite `404` or `410` responses.
+- Do not let an HTTP request choose server `allowedOrigins` or private-network authority. Non-loopback servers require bearer authentication, an explicit Host allowlist, trusted UI origins, and deployment-level egress controls.
 - Use a container, virtual machine, restricted operating-system account, and egress controls when a hard host boundary is required.
 - Treat post-run token or cost violations as potentially side-effecting. Inspect and explicitly roll back the workspace when the error reports observed activity.
 
@@ -30,4 +33,4 @@ Maqam governs only calls routed through registered adapters. Provider event reco
 
 ## Release Approval
 
-Publishing is blocked unless the exact package and version have explicit user approval. Automation runs may prepare release artifacts, but must not publish to npm, GitHub, social channels, or other external systems without that approval.
+Publishing is blocked unless the exact package, version, registry, command, artifact filename/size/integrity, and Git commit have explicit user approval. Automation runs may prepare release artifacts, but must not publish to npm, GitHub, social channels, or other external systems without that approval.

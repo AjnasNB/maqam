@@ -12,18 +12,18 @@ function recordAgentEvidence(result, context, agentName) {
 
   for (const item of result.evidence || []) {
     ledger.addEvidence({
-      runId: context.runId || item.runId || null,
-      taskId: context.taskId || item.taskId || null,
-      tool: context.toolName || agentName,
-      ...item
+      ...item,
+      runId: context.runId || null,
+      taskId: context.taskId || null,
+      tool: context.toolName || agentName
     });
   }
 
   for (const item of result.claims || []) {
     ledger.addClaim({
-      runId: context.runId || item.runId || null,
-      taskId: context.taskId || item.taskId || null,
-      ...item
+      ...item,
+      runId: context.runId || null,
+      taskId: context.taskId || null
     });
   }
 }

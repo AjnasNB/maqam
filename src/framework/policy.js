@@ -31,6 +31,10 @@ function isHttpUrl(value) {
 
 function collectUrls(value, urls = [], seen = new WeakSet()) {
   if (!value) return urls;
+  if (value instanceof URL) {
+    if (isHttpUrl(value.toString())) urls.push(value.toString());
+    return urls;
+  }
   if (typeof value === "string") {
     if (isHttpUrl(value)) urls.push(value);
     return urls;
@@ -66,6 +70,8 @@ export class PolicyEngine {
     this.approvalRequiredTools = asSet(config.approvalRequiredTools);
     this.approvalRequiredEffects = asSet(config.approvalRequiredEffects);
     this.deniedEffects = asSet(config.deniedEffects);
+    this.allowAllTools = config.allowAllTools === true;
+    this.allowAllOrigins = config.allowAllOrigins === true;
     this.defaultLimits = {
       ...DEFAULT_LIMITS,
       ...(config.defaultLimits || {}),
@@ -126,21 +132,39 @@ export class PolicyEngine {
     requiredApprovals.push(...approvalEffects.map((effect) => `effect:${effect}`));
     if (requiredApprovals.length) {
       return this.decision("needs_approval", `Tool '${toolName}' requires approval.`, {
-        requiredApprovals
+        requiredApprovals,
+        scope: this.authorizationScope(goal)
       });
     }
 
-    return this.decision("allow", "Tool call is allowed.");
+    return this.decision("allow", "Tool call is allowed.", {
+      scope: this.authorizationScope(goal)
+    });
+  }
+
+  authorizationScope(goal = {}) {
+    const tenantOrigins = [...this.allowedOrigins];
+    const goalOrigins = [...new Set((goal?.allowedOrigins || []).map(toOrigin))];
+    const allowedOrigins = tenantOrigins.length && goalOrigins.length
+      ? tenantOrigins.filter((origin) => goalOrigins.includes(origin))
+      : tenantOrigins.length ? tenantOrigins : goalOrigins;
+    return {
+      allowedOrigins,
+      originsExplicit: tenantOrigins.length > 0 || goalOrigins.length > 0,
+      originsUnrestricted: tenantOrigins.length === 0
+        && goalOrigins.length === 0
+        && this.allowAllOrigins
+    };
   }
 
   isToolAllowed(toolName) {
     if (!toolName || this.deniedTools.has(toolName)) return false;
-    return this.allowedTools.size === 0 || this.allowedTools.has(toolName);
+    return this.allowedTools.has(toolName) || (this.allowedTools.size === 0 && this.allowAllTools);
   }
 
   isOriginAllowed(origin) {
     if (!origin || this.deniedOrigins.has(origin)) return false;
-    return this.allowedOrigins.size === 0 || this.allowedOrigins.has(origin);
+    return this.allowedOrigins.has(origin) || (this.allowedOrigins.size === 0 && this.allowAllOrigins);
   }
 
   decision(status, reason, extra = {}) {
@@ -148,7 +172,8 @@ export class PolicyEngine {
       status,
       reason,
       limits: extra.limits || { ...this.defaultLimits },
-      requiredApprovals: extra.requiredApprovals || []
+      requiredApprovals: extra.requiredApprovals || [],
+      ...(extra.scope ? { scope: extra.scope } : {})
     };
   }
 }

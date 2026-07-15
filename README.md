@@ -1,6 +1,6 @@
 # Maqam
 
-![Maqam governed agent framework hero](app/assets/maqam-readme-hero.png)
+![Maqam governed agent framework hero](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-readme-hero.png)
 
 Maqam is an MIT-licensed agent framework for governed workflows. It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, and a crawler-backed research workflow.
 
@@ -14,9 +14,13 @@ Release checklist: [docs/release-checklist.md](https://github.com/AjnasNB/maqam/
 
 Provenance and license notes: [docs/provenance-and-licenses.md](https://github.com/AjnasNB/maqam/blob/main/docs/provenance-and-licenses.md)
 
-![Maqam system map](app/assets/maqam-system-map.svg)
+Comparison with related open-source tools: [docs/comparison.md](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md)
 
-![Maqam governed CLI worker flow](app/assets/maqam-cli-agent-flow.png)
+Migration guide for 0.2: [docs/migration-0.2.md](https://github.com/AjnasNB/maqam/blob/main/docs/migration-0.2.md)
+
+![Maqam system map](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-system-map.svg)
+
+![Maqam governed CLI worker flow](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-cli-agent-flow.png)
 
 ## Universal Agent Control
 
@@ -42,39 +46,41 @@ flowchart LR
   Evidence --> Review["Trace, claims, approval path"]
 ```
 
-That means Maqam is not limited to crawling. If an agent can be called as a function, object method, HTTP/SDK connector, or fixed command-line worker, Maqam can route it through policy, enforced budgets, trace capture, evidence, and human approval gates. Only registered adapters are governed; use a container or virtual machine when a hard operating-system boundary is required.
+That means Maqam is not limited to crawling. If an agent can be called as a function, object method, HTTP/SDK connector, or fixed command-line worker, Maqam can route it through policy, runtime and call ceilings, trace capture, evidence, and configured human approval gates. Only registered adapters are governed; provider-reported token ceilings may be post-run, and a container or virtual machine is still needed for a hard operating-system boundary.
 
 ## What Ships
 
-- `AgentRuntime`: sequential workflow execution with retries, enforced run deadlines, trace events, task outputs, and policy preflight.
-- `PolicyEngine`: deterministic goal and tool-call decisions for allowed tools, origins, effects, clamped tenant limits, and approval gates.
-- `EvidenceLedger`: provenance records, claim links, source hashes, confidence, and unsupported-claim checks.
-- `ToolGateway`: one governed path with call ceilings, redacted traces, effect policy, and exact one-time approval binding.
+- `AgentRuntime`: sequential workflow execution with opt-in retries, cancellation-aware deadlines, trace events, unique run ids, task outputs, and policy preflight.
+- `PolicyEngine`: fail-closed goal and tool-call decisions for allowed tools, origins, effects, clamped tenant limits, and approval gates.
+- `EvidenceLedger`: copied provenance records, computed source hashes, same-run claim links, confidence, and unsupported-claim checks.
+- `ToolGateway`: a policy-required path with call ceilings, redacted traces, effective origin scope, effect policy, and exact one-time approval binding.
 - `createAgentTool`: wraps any function agent or object agent so Maqam can control it through policy, trace, approval, and evidence.
 - `createCliAgentTool`: wraps fixed command-line workers with cwd roots, environment allowlists, cancellation, timeout, approximate token limits, JSONL parsing, and no shell execution by default.
 - `createCodexAgentTool`: runs Codex non-interactively with a read-only default, ephemeral sessions, JSONL activity, and normalized token usage.
 - `createClaudeCodeAgentTool`: runs Claude Code with plan mode by default, no tools by default, max turns, spend limits, stream events, and normalized usage.
-- `ApprovalQueue`: durable human approval requests for release gates, external writes, and high-risk actions.
-- `createReleaseGateReport`: production-readiness and publish-approval reporting for package releases.
+- `ApprovalQueue`: in-memory, serializable human approval records for release gates, external writes, and high-risk actions.
+- `createReleaseGateReport`: release-evidence and exact publish-approval reporting; it reports readiness but does not execute publishing.
 - `SkillRegistry`: lightweight skill metadata registration and selection.
 - `createResearchWorkflow`: crawler-backed source collection, synthesis, and quality checks.
 - `maqam`: local web console for running governed research workflows.
-- `maqam-crawl`: respectful crawler CLI that obeys `robots.txt` by default.
+- `maqam-crawl`: bounded crawler CLI with per-origin delay, robots.txt enforcement, redirect validation, DNS pinning, and public-network-only defaults.
 
 ## Why It Matters
 
 Agent systems fail in production when tools run outside policy, outputs cannot be traced to sources, and risky actions happen without approval. Maqam makes those control points explicit:
 
 - Every workflow starts with policy preflight.
-- Tenant budgets cannot be raised by a workflow.
+- Tenant budgets and origin scope cannot be raised by a workflow.
 - Every connected tool call goes through `ToolGateway` and is counted per run.
 - Every source-backed claim can be recorded in `EvidenceLedger`.
-- Every run returns trace data for inspection and replay.
+- Every run returns trace data for inspection; Maqam does not yet provide durable replay or restart-safe checkpoints.
 - Approval-required actions fail closed with `ApprovalRequiredError`.
 - Approval records are bound to the exact run, tool, and input hash, then consumed once by default.
-- The crawler supports research and ingestion while preserving compliance defaults.
+- The crawler blocks private and special-purpose destinations by default and validates every redirect hop.
 
 ## Install
+
+Maqam requires Node.js 20.18.1 or later.
 
 ```bash
 npm install -g maqam
@@ -113,6 +119,8 @@ Options:
 - `--jsonl`: output JSON Lines instead of a JSON array
 - `--output <file>`: write output to a file
 - `--user-agent <ua>`: custom user agent
+
+The CLI accepts public HTTP(S) targets only. It validates every DNS result and redirect, rejects embedded credentials and special-purpose address ranges, obeys robots.txt by default, and caps each response. `--all-origins` removes the same-origin link restriction, so use it only when that wider public-network scope is intended.
 
 ## Framework SDK
 
@@ -217,6 +225,24 @@ const pages = await crawl({
 console.log(pages[0].markdown);
 ```
 
+Private, loopback, link-local, reserved, and other special-purpose destinations are blocked by default. Every redirect is re-authorized and each connection is pinned to a validated DNS result. `allowPrivateNetworks: true` is a trusted local opt-in for supported private ranges; it does not allow link-local metadata endpoints or other unsafe ranges.
+
+For failures and budget statistics, use `crawlDetailed`:
+
+```js
+import { crawlDetailed } from "maqam";
+
+const result = await crawlDetailed({
+  seeds: ["https://example.com"],
+  allowedOrigins: ["https://example.com"],
+  maxPages: 10,
+  maxRequests: 80,
+  maxDepth: 5
+});
+
+console.log(result.pages, result.failures, result.stats);
+```
+
 ## Maqam Console
 
 ```bash
@@ -233,11 +259,26 @@ The console runs a governed research workflow through:
 
 Brand assets live in `app/assets/`, including `maqam-logo.svg` and `maqam-brand-board.png`.
 
+Applications can import the typed server API from `maqam/server`:
+
+```js
+import { startMaqamServer } from "maqam/server";
+
+startMaqamServer({
+  host: "127.0.0.1",
+  allowedOrigins: ["https://example.com"]
+});
+```
+
+The console accepts crawl authority only from trusted startup options. Request bodies cannot enable private networks or add origins. Binding beyond loopback requires `MAQAM_API_TOKEN` (or `apiToken`) plus an explicit Host allowlist.
+
 ## Principles
 
 - Respect `robots.txt` by default.
 - Use a clear user agent.
 - Rate-limit per origin.
+- Validate DNS results and each redirect before connecting.
+- Keep private-network crawling disabled unless a trusted local deployment explicitly needs it.
 - Avoid bypassing access controls, paywalls, anti-bot systems, or private content.
 - No required model provider dependency.
 - No required external hosted service.
@@ -254,6 +295,8 @@ npm install
 npm test
 npm pack --dry-run
 ```
+
+The npm tarball intentionally excludes the large brand-board and presentation PNG files; those remain in the source repository. Only the logo and files required by the local console ship as runtime app assets.
 
 ## Publish
 

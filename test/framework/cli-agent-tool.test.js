@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 import { AjnasFrameworkError } from "../../src/framework/errors.js";
 import { createCliAgentTool } from "../../src/framework/cli-agent-tool.js";
@@ -131,5 +134,81 @@ test("createCliAgentTool only inherits explicitly allowlisted environment variab
     assert.equal(result.json.secret, null);
   } finally {
     delete process.env.MAQAM_TEST_SECRET;
+  }
+});
+
+test("createCliAgentTool does not inherit arbitrary secrets by default or from inheritEnv alone", async () => {
+  process.env.MAQAM_TEST_SECRET = "must-not-leak";
+  try {
+    for (const options of [{}, { inheritEnv: true }]) {
+      const cli = createCliAgentTool({
+        name: "safe-default-env",
+        ...nodeCli("console.log(JSON.stringify({secret: process.env.MAQAM_TEST_SECRET || null}))"),
+        parseJson: true,
+        ...options
+      });
+      assert.equal((await cli()).json.secret, null);
+    }
+
+    const explicitlyUnsafe = createCliAgentTool({
+      name: "explicit-full-env",
+      ...nodeCli("console.log(JSON.stringify({secret: process.env.MAQAM_TEST_SECRET || null}))"),
+      parseJson: true,
+      inheritEnv: true,
+      allowUnsafeEnvInheritance: true
+    });
+    assert.equal((await explicitlyUnsafe()).json.secret, "must-not-leak");
+  } finally {
+    delete process.env.MAQAM_TEST_SECRET;
+  }
+});
+
+test("createCliAgentTool validates explicit and default cwd roots", async () => {
+  const outside = mkdtempSync(join(tmpdir(), "maqam-cli-outside-"));
+  try {
+    assert.throws(() => createCliAgentTool({
+      name: "escaped-cwd",
+      ...nodeCli("console.log('must not run')"),
+      cwd: outside,
+      allowedCwdRoots: [process.cwd()]
+    }), /outside allowedCwdRoots/);
+
+    const defaultCwd = createCliAgentTool({
+      name: "default-cwd",
+      ...nodeCli("console.log(process.cwd())")
+    });
+    const result = await defaultCwd();
+    assert.equal(result.stdout.trim(), process.cwd());
+  } finally {
+    rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("createCliAgentTool resolves symlinks before enforcing cwd containment", (context) => {
+  const fixture = mkdtempSync(join(tmpdir(), "maqam-cli-roots-"));
+  const allowed = join(fixture, "allowed");
+  const outside = join(fixture, "outside");
+  const link = join(allowed, "escape");
+  mkdirSync(allowed);
+  mkdirSync(outside);
+  try {
+    try {
+      symlinkSync(outside, link, process.platform === "win32" ? "junction" : "dir");
+    } catch (error) {
+      if (["EPERM", "EACCES", "ENOTSUP"].includes(error.code)) {
+        context.skip(`symlink fixture unavailable: ${error.code}`);
+        return;
+      }
+      throw error;
+    }
+
+    assert.throws(() => createCliAgentTool({
+      name: "symlink-escape",
+      ...nodeCli("console.log('must not run')"),
+      cwd: link,
+      allowedCwdRoots: [allowed]
+    }), /outside allowedCwdRoots/);
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
   }
 });

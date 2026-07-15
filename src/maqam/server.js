@@ -10,6 +10,7 @@ import {
   createCrawlerTool,
   createResearchWorkflow
 } from "../index.js";
+import { redactText } from "../framework/audit.js";
 
 const PRODUCT = {
   name: "Maqam",
@@ -63,9 +64,9 @@ const CAPABILITIES = {
       id: "crawler",
       name: "Research connectors",
       boundary: "Tool gateway plus crawler limits",
-      preventive: "Origin policy, robots rules, page and byte limits",
-      observed: "Sources, excerpts, claims",
-      defaultPosture: "Public sources only"
+      preventive: "Origin policy, DNS pinning, redirect and robots checks, request and byte limits",
+      observed: "Sources, digests, excerpts, claims",
+      defaultPosture: "Public networks only"
     }
   ],
   controls: ["policy", "budgets", "approvals", "environment", "sandbox", "trace", "evidence"],
@@ -73,6 +74,7 @@ const CAPABILITIES = {
     "Only registered adapters are governed.",
     "Provider-internal actions rely on the provider sandbox or permission system.",
     "Observed token ceilings are post-run unless the provider exposes a hard budget.",
+    "Run, approval, and evidence state is in-process unless the host persists exported records.",
     "Use a container or virtual machine for hard operating-system isolation."
   ]
 };
@@ -89,7 +91,12 @@ const CONTENT_TYPES = {
 };
 
 function sendJson(response, statusCode, payload) {
-  response.writeHead(statusCode, { "content-type": CONTENT_TYPES[".json"] });
+  response.writeHead(statusCode, {
+    "content-type": CONTENT_TYPES[".json"],
+    "cache-control": "no-store",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY"
+  });
   response.end(JSON.stringify(payload, null, 2));
 }
 
@@ -115,8 +122,9 @@ async function readJsonBody(request) {
   }
 }
 
-function normalizeSeeds(seeds) {
+function normalizeSeeds(seeds, maxSeeds) {
   if (!Array.isArray(seeds)) throw httpError(400, "`seeds` must be an array of URLs.");
+  if (seeds.length > maxSeeds) throw httpError(400, `No more than ${maxSeeds} seed URLs are allowed.`);
   const normalized = seeds.map((seed) => {
     try {
       const url = new URL(seed);
@@ -134,19 +142,61 @@ function normalizeSeeds(seeds) {
 function clampMaxPages(value) {
   const maxPages = Number(value || 5);
   if (!Number.isFinite(maxPages)) return 5;
-  return Math.max(1, Math.min(25, Math.floor(maxPages)));
+  return Math.max(1, Math.min(10, Math.floor(maxPages)));
 }
 
 function deriveOrigins(seeds) {
   return [...new Set(seeds.map((seed) => new URL(seed).origin))];
 }
 
-async function runResearch(body, crawlerTool) {
-  const seeds = normalizeSeeds(body.seeds || []);
+function normalizedConfiguredOrigins(values = []) {
+  if (!Array.isArray(values)) throw new TypeError("allowedOrigins server option must be an array.");
+  return [...new Set(values.map((value) => {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new TypeError("allowedOrigins server option accepts only HTTP(S) origins.");
+    }
+    return url.origin;
+  }))];
+}
+
+function compactPage(page) {
+  return {
+    ...page,
+    text: String(page.text || "").slice(0, 20_000),
+    markdown: String(page.markdown || "").slice(0, 20_000),
+    links: Array.isArray(page.links) ? page.links.slice(0, 200) : []
+  };
+}
+
+function compactRun(run) {
+  const pages = run.outputs?.collect_sources?.pages;
+  if (Array.isArray(pages)) {
+    run.outputs.collect_sources.pages = pages.map(compactPage);
+  }
+  return run;
+}
+
+async function runResearch(body, crawlerTool, serverOptions = {}) {
+  if (body.allowedOrigins !== undefined || body.allowPrivateNetworks !== undefined) {
+    throw httpError(400, "Network policy is configured by the server and cannot be broadened by a request.");
+  }
+  const maxSeeds = Math.max(1, Math.min(100, Number(serverOptions.maxSeeds) || 10));
+  const seeds = normalizeSeeds(body.seeds || [], maxSeeds);
   const maxPages = clampMaxPages(body.maxPages);
-  const allowedOrigins = Array.isArray(body.allowedOrigins) && body.allowedOrigins.length
-    ? body.allowedOrigins
-    : deriveOrigins(seeds);
+  const configuredOrigins = normalizedConfiguredOrigins(serverOptions.allowedOrigins || []);
+  const seedOrigins = deriveOrigins(seeds);
+  if (configuredOrigins.length && seedOrigins.some((origin) => !configuredOrigins.includes(origin))) {
+    throw httpError(403, "One or more seed origins are outside the server allowlist.");
+  }
+  const sameOrigin = body.sameOrigin !== false;
+  if (!sameOrigin && serverOptions.allowCrossOriginCrawls !== true) {
+    throw httpError(400, "Cross-origin crawling is disabled by the server.");
+  }
+  if (!sameOrigin && configuredOrigins.length === 0) {
+    throw httpError(500, "Cross-origin crawling requires a non-empty server allowedOrigins list.");
+  }
+  const allowedOrigins = configuredOrigins.length ? configuredOrigins : seedOrigins;
 
   const evidenceLedger = new EvidenceLedger();
   const policyEngine = new PolicyEngine({
@@ -158,12 +208,22 @@ async function runResearch(body, crawlerTool) {
   toolGateway.registerTool("crawler", crawlerTool || createCrawlerTool({
     concurrency: 2,
     delayMs: 250,
-    timeoutMs: 12_000
+    timeoutMs: 12_000,
+    maxPages: 10,
+    maxSeeds,
+    maxRequests: Math.min(500, Math.max(40, maxPages * 8)),
+    maxQueue: 500,
+    maxDepth: 10,
+    maxBytes: 512 * 1024,
+    sameOrigin,
+    allowedOrigins,
+    allowPrivateNetworks: serverOptions.allowPrivateNetworks === true,
+    signal: serverOptions.signal || null
   }));
 
   const runtime = new AgentRuntime({ policyEngine, evidenceLedger, toolGateway });
   const run = await runtime.runWorkflow(
-    createResearchWorkflow({ seeds, maxPages, sameOrigin: body.sameOrigin ?? true }),
+    createResearchWorkflow({ seeds, maxPages, sameOrigin }),
     {
       objective: body.objective || "Run a governed public research workflow.",
       allowedTools: ["crawler"],
@@ -174,7 +234,7 @@ async function runResearch(body, crawlerTool) {
 
   return {
     product: PRODUCT,
-    run,
+    run: compactRun(run),
     toolTrace: toolGateway.trace,
     generatedAt: new Date().toISOString()
   };
@@ -195,7 +255,11 @@ async function serveStatic(request, response, publicDir) {
   try {
     const file = await readFile(filePath);
     response.writeHead(200, {
-      "content-type": CONTENT_TYPES[extname(filePath)] || "application/octet-stream"
+      "content-type": CONTENT_TYPES[extname(filePath)] || "application/octet-stream",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "content-security-policy": "default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'"
     });
     response.end(file);
   } catch {
@@ -206,10 +270,33 @@ async function serveStatic(request, response, publicDir) {
 export function createMaqamServer(options = {}) {
   const publicDir = options.publicDir || DEFAULT_PUBLIC_DIR;
   const crawlerTool = options.crawlerTool || null;
+  const allowedHostValues = Array.isArray(options.allowedHosts) && options.allowedHosts.length
+    ? options.allowedHosts
+    : ["127.0.0.1", "localhost", "::1"];
+  const allowedHosts = new Set(allowedHostValues
+    .map((host) => String(host).replace(/^\[|\]$/g, "").toLowerCase()));
+  const apiToken = options.apiToken || null;
 
   return createServer(async (request, response) => {
     try {
       const url = new URL(request.url, "http://localhost");
+      const hostHeader = request.headers.host;
+      if (!hostHeader) throw httpError(400, "Host header is required.");
+      if (/[/?#@\\]/.test(hostHeader)) throw httpError(400, "Host header is invalid.");
+      let requestHostname;
+      try {
+        requestHostname = new URL(`http://${hostHeader}`).hostname.replace(/^\[|\]$/g, "").toLowerCase();
+      } catch {
+        throw httpError(400, "Host header is invalid.");
+      }
+      if (!allowedHosts.has(requestHostname)) throw httpError(403, "Host is not allowed.");
+
+      if (url.pathname.startsWith("/api/") && apiToken) {
+        if (request.headers.authorization !== `Bearer ${apiToken}`) {
+          response.setHeader("www-authenticate", "Bearer");
+          throw httpError(401, "API authentication is required.");
+        }
+      }
 
       if (request.method === "GET" && url.pathname === "/api/health") {
         sendJson(response, 200, { product: PRODUCT, status: "ok" });
@@ -222,8 +309,28 @@ export function createMaqamServer(options = {}) {
       }
 
       if (request.method === "POST" && url.pathname === "/api/runs/research") {
+        const contentType = String(request.headers["content-type"] || "").toLowerCase();
+        if (!/^application\/(?:json|[a-z0-9!#$&^_.+-]+\+json)(?:\s*;|$)/i.test(contentType)) {
+          throw httpError(415, "Content-Type must be application/json.");
+        }
+        const origin = request.headers.origin;
+        if (origin && origin !== `http://${hostHeader}` && !(options.allowedUiOrigins || []).includes(origin)) {
+          throw httpError(403, "Cross-origin API requests are not allowed.");
+        }
+        if (request.headers["sec-fetch-site"] === "cross-site") {
+          throw httpError(403, "Cross-site API requests are not allowed.");
+        }
         const body = await readJsonBody(request);
-        sendJson(response, 200, await runResearch(body, crawlerTool));
+        const disconnectController = new AbortController();
+        const onAborted = () => disconnectController.abort(new Error("HTTP client disconnected."));
+        request.once("aborted", onAborted);
+        response.once("close", () => {
+          if (!response.writableEnded) onAborted();
+        });
+        sendJson(response, 200, await runResearch(body, crawlerTool, {
+          ...options,
+          signal: disconnectController.signal
+        }));
         return;
       }
 
@@ -235,18 +342,29 @@ export function createMaqamServer(options = {}) {
       sendJson(response, 405, { error: "Method not allowed" });
     } catch (error) {
       sendJson(response, error.statusCode || 500, {
-        error: error.message || "Unexpected server error"
+        error: redactText(error.message || "Unexpected server error")
       });
     }
   });
 }
 
 export function startMaqamServer(options = {}) {
-  const port = Number(options.port || process.env.PORT || 8787);
+  const port = Number(options.port ?? process.env.PORT ?? 8787);
   const host = options.host || process.env.HOST || "127.0.0.1";
-  const server = createMaqamServer(options);
+  const apiToken = options.apiToken || process.env.MAQAM_API_TOKEN || null;
+  const loopback = new Set(["127.0.0.1", "localhost", "::1"]);
+  if (!loopback.has(host) && !apiToken) {
+    throw new Error("Binding Maqam beyond loopback requires MAQAM_API_TOKEN or options.apiToken.");
+  }
+  if (!loopback.has(host) && !(options.allowedHosts || []).length) {
+    throw new Error("Binding Maqam beyond loopback requires an explicit allowedHosts list.");
+  }
+  const server = createMaqamServer({ ...options, apiToken });
   server.listen(port, host, () => {
-    const address = `http://${host}:${port}`;
+    const bound = server.address();
+    const actualPort = typeof bound === "object" && bound ? bound.port : port;
+    const displayHost = host.includes(":") ? `[${host}]` : host;
+    const address = `http://${displayHost}:${actualPort}`;
     process.stdout.write(`Maqam console running at ${address}\n`);
   });
   return server;

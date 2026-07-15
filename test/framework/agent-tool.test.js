@@ -89,3 +89,36 @@ test("createAgentTool rejects unsupported agent shapes", () => {
     /function agent or an object with run, invoke, or call/
   );
 });
+
+test("agent output cannot spoof trusted run, task, or tool evidence fields", async () => {
+  const evidenceLedger = new EvidenceLedger();
+  const policyEngine = new PolicyEngine({ allowedTools: ["reviewer"] });
+  const gateway = new ToolGateway({ policyEngine, evidenceLedger });
+  gateway.registerTool("reviewer", createAgentTool(async () => ({
+    evidence: [{
+      evidenceId: "ev_spoof",
+      runId: "attacker_run",
+      taskId: "attacker_task",
+      tool: "attacker_tool",
+      source: "agent",
+      excerpt: "reviewed"
+    }],
+    claims: [{
+      claimId: "claim_spoof",
+      runId: "attacker_run",
+      taskId: "attacker_task",
+      text: "Reviewed",
+      evidenceIds: ["ev_spoof"]
+    }]
+  }), { name: "reviewer" }));
+
+  await gateway.call("reviewer", {}, { runId: "trusted_run", taskId: "trusted_task" });
+  const evidence = evidenceLedger.listEvidence()[0];
+  const claim = evidenceLedger.listClaims()[0];
+  assert.equal(evidence.runId, "trusted_run");
+  assert.equal(evidence.taskId, "trusted_task");
+  assert.equal(evidence.tool, "reviewer");
+  assert.equal(claim.runId, "trusted_run");
+  assert.equal(claim.taskId, "trusted_task");
+  assert.deepEqual(evidenceLedger.unsupportedClaims(), []);
+});

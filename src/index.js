@@ -1,11 +1,39 @@
+import { createHash } from "node:crypto";
 import * as cheerio from "cheerio";
 import robotsParser from "robots-parser";
 import TurndownService from "turndown";
+import { createCrawlerSecurityError, withPinnedFetch } from "./crawler/security.js";
 
-const DEFAULT_USER_AGENT = "Maqam/0.1 (+https://github.com/AjnasNB/maqam)";
+const DEFAULT_USER_AGENT = "Maqam/0.2 (+https://github.com/AjnasNB/maqam)";
 const DEFAULT_MAX_BYTES = 3 * 1024 * 1024;
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+function abortError(signal) {
+  if (signal?.reason instanceof Error) return signal.reason;
+  const error = new Error("Crawler operation was aborted.");
+  error.name = "AbortError";
+  error.code = "CRAWL_ABORTED";
+  return error;
+}
+
+function sleep(ms, signal) {
+  if (ms <= 0) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(abortError(signal));
+      return;
+    }
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(abortError(signal));
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
 
 function toUrl(value, base) {
   try {
@@ -37,126 +65,282 @@ function sameOrigin(a, b) {
   return new URL(a).origin === new URL(b).origin;
 }
 
-async function fetchText(url, options) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
-  try {
-    const response = await fetch(url, {
-      headers: {
-        "user-agent": options.userAgent,
-        accept: options.accept || "text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.5"
-      },
-      redirect: "follow",
-      signal: controller.signal
-    });
+function integerOption(value, name, fallback, minimum, maximum) {
+  const candidate = value === undefined ? fallback : Number(value);
+  if (!Number.isInteger(candidate) || candidate < minimum || candidate > maximum) {
+    throw new TypeError(`${name} must be an integer from ${minimum} to ${maximum}.`);
+  }
+  return candidate;
+}
 
-    const contentType = response.headers.get("content-type") || "";
-    const length = Number(response.headers.get("content-length") || 0);
-    if (length > options.maxBytes) {
-      throw new Error(`Response too large: ${length} bytes`);
+function normalizeAllowedOrigins(values = []) {
+  if (!Array.isArray(values)) throw new TypeError("allowedOrigins must be an array of HTTP(S) origins.");
+  return [...new Set(values.map((value) => {
+    if (!isHttpUrl(value)) throw new TypeError(`Invalid allowed origin '${value}'.`);
+    return new URL(value).origin;
+  }))];
+}
+
+function normalizeOptions(input, seedCount) {
+  const maxPages = integerOption(input.maxPages, "maxPages", 50, 1, 10_000);
+  const maxSeeds = integerOption(input.maxSeeds, "maxSeeds", 100, 1, 1_000);
+  if (seedCount > maxSeeds) throw new TypeError(`seeds exceeds maxSeeds (${seedCount} > ${maxSeeds}).`);
+  const userAgent = String(input.userAgent || DEFAULT_USER_AGENT);
+  if (!userAgent || userAgent.length > 256 || /[\r\n]/.test(userAgent)) {
+    throw new TypeError("userAgent must be 1-256 characters without line breaks.");
+  }
+
+  return {
+    maxPages,
+    maxSeeds,
+    maxRequests: integerOption(input.maxRequests, "maxRequests", Math.min(50_000, Math.max(50, maxPages * 8)), 1, 50_000),
+    maxQueue: integerOption(input.maxQueue, "maxQueue", Math.min(100_000, Math.max(100, maxPages * 20)), 1, 100_000),
+    maxLinksPerPage: integerOption(input.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 20_000),
+    maxDepth: integerOption(input.maxDepth, "maxDepth", 20, 0, 100),
+    concurrency: integerOption(input.concurrency, "concurrency", 4, 1, 64),
+    sameOrigin: input.sameOrigin !== false,
+    allowedOrigins: normalizeAllowedOrigins(input.allowedOrigins || []),
+    includeSitemaps: input.includeSitemaps === true,
+    maxSitemaps: integerOption(input.maxSitemaps, "maxSitemaps", 20, 0, 1_000),
+    maxUrlsPerSitemap: integerOption(input.maxUrlsPerSitemap, "maxUrlsPerSitemap", 5_000, 1, 50_000),
+    obeyRobots: input.obeyRobots !== false,
+    allowPrivateNetworks: input.allowPrivateNetworks === true,
+    userAgent,
+    delayMs: integerOption(input.delayMs, "delayMs", 250, 0, 60_000),
+    timeoutMs: integerOption(input.timeoutMs, "timeoutMs", 15_000, 100, 120_000),
+    maxDurationMs: integerOption(input.maxDurationMs, "maxDurationMs", 600_000, 100, 3_600_000),
+    maxBytes: integerOption(input.maxBytes, "maxBytes", DEFAULT_MAX_BYTES, 1_024, 50 * 1024 * 1024),
+    maxRedirects: integerOption(input.maxRedirects, "maxRedirects", 5, 0, 10),
+    maxRetries: integerOption(input.maxRetries, "maxRetries", 2, 0, 5),
+    retryDelayMs: integerOption(input.retryDelayMs, "retryDelayMs", 250, 0, 30_000),
+    onPage: typeof input.onPage === "function" ? input.onPage : null,
+    onError: typeof input.onError === "function" ? input.onError : null,
+    signal: input.signal || null,
+    dnsLookup: input.dnsLookup || null
+  };
+}
+
+async function readResponseBody(response, maxBytes) {
+  const declaredLength = Number(response.headers.get("content-length") || 0);
+  if (declaredLength > maxBytes) {
+    await response.body?.cancel();
+    throw new Error(`Response too large: ${declaredLength} bytes`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    const text = await response.text();
+    const bytes = Buffer.byteLength(text);
+    if (bytes > maxBytes) throw new Error(`Response exceeded maxBytes: ${maxBytes}`);
+    return { text, bytes };
+  }
+
+  const chunks = [];
+  let received = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    received += value.byteLength;
+    if (received > maxBytes) {
+      await reader.cancel();
+      throw new Error(`Response exceeded maxBytes: ${maxBytes}`);
     }
+    chunks.push(Buffer.from(value));
+  }
+  return { text: Buffer.concat(chunks).toString("utf8"), bytes: received };
+}
 
-    const reader = response.body?.getReader();
-    if (!reader) {
-      return { response, text: await response.text(), contentType };
+async function fetchText(startUrl, options) {
+  let currentUrl = normalizeUrl(startUrl);
+  const redirectChain = [];
+
+  for (let hop = 0; ; hop += 1) {
+    if (options.signal?.aborted) throw abortError(options.signal);
+    if (!options.isUrlAllowed(currentUrl)) {
+      throw createCrawlerSecurityError("Crawler URL is outside the configured origin policy.", {
+        url: currentUrl,
+        origin: new URL(currentUrl).origin
+      });
     }
+    await options.beforeRequest?.(currentUrl);
 
-    const chunks = [];
-    let received = 0;
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      received += value.byteLength;
-      if (received > options.maxBytes) {
-        throw new Error(`Response exceeded maxBytes: ${options.maxBytes}`);
+    const controller = new AbortController();
+    const remainingMs = Math.max(1, options.deadlineAt - Date.now());
+    const timeoutMs = Math.min(options.timeoutMs, remainingMs);
+    const timeout = setTimeout(() => controller.abort(new Error(`Request timed out after ${timeoutMs}ms.`)), timeoutMs);
+    const signal = options.signal
+      ? AbortSignal.any([options.signal, controller.signal])
+      : controller.signal;
+
+    try {
+      const result = await withPinnedFetch(currentUrl, {
+        headers: {
+          "user-agent": options.userAgent,
+          accept: options.accept || "text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.5"
+        },
+        signal
+      }, {
+        allowPrivateNetworks: options.allowPrivateNetworks,
+        lookup: options.dnsLookup || undefined,
+        signal
+      }, async (response, target) => {
+        if (REDIRECT_STATUSES.has(response.status)) {
+          const location = response.headers.get("location");
+          await response.body?.cancel();
+          if (!location) throw new Error(`Redirect response ${response.status} did not include Location.`);
+          return {
+            redirect: normalizeUrl(new URL(location, target.url)),
+            status: response.status
+          };
+        }
+
+        const { text, bytes } = await readResponseBody(response, options.maxBytes);
+        return {
+          status: response.status,
+          ok: response.ok,
+          text,
+          bytes,
+          contentType: response.headers.get("content-type") || "",
+          retryAfter: response.headers.get("retry-after"),
+          etag: response.headers.get("etag"),
+          lastModified: response.headers.get("last-modified")
+        };
+      });
+
+      if (!result.redirect) {
+        return { ...result, finalUrl: currentUrl, redirectChain };
       }
-      chunks.push(value);
+      if (hop >= options.maxRedirects) {
+        throw new Error(`Redirect limit exceeded (${options.maxRedirects}).`);
+      }
+      if (!options.isUrlAllowed(result.redirect)) {
+        throw createCrawlerSecurityError("Redirect target is outside the configured origin policy.", {
+          from: currentUrl,
+          to: result.redirect,
+          status: result.status
+        });
+      }
+      redirectChain.push({ from: currentUrl, to: result.redirect, status: result.status });
+      currentUrl = result.redirect;
+    } finally {
+      clearTimeout(timeout);
     }
-    const buffer = Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)));
-    return { response, text: buffer.toString("utf8"), contentType };
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
-function parseRobotsSitemaps(robotsText) {
+function parseRobotsSitemaps(robotsText, robotsUrl, limit) {
   return robotsText
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => /^sitemap:/i.test(line))
-    .map((line) => line.replace(/^sitemap:\s*/i, "").trim())
-    .filter(Boolean);
+    .map((line) => toUrl(line.replace(/^sitemap:\s*/i, "").trim(), robotsUrl))
+    .filter((value) => value && isHttpUrl(value))
+    .map(normalizeUrl)
+    .slice(0, limit);
 }
 
 async function loadRobots(origin, options) {
   const robotsUrl = new URL("/robots.txt", origin).toString();
+  const denyAll = () => ({
+    parser: robotsParser(robotsUrl, "User-agent: *\nDisallow: /\n"),
+    sitemaps: [],
+    unavailable: true
+  });
   try {
-    const { response, text } = await fetchText(robotsUrl, {
+    const result = await fetchText(robotsUrl, {
       ...options,
       accept: "text/plain,*/*;q=0.5",
-      maxBytes: Math.min(options.maxBytes, 512 * 1024)
+      maxBytes: Math.min(options.maxBytes, 512 * 1024),
+      beforeRequest: options.beforeNetworkRequest
     });
-    if (!response.ok) {
-      return {
-        parser: robotsParser(robotsUrl, ""),
-        sitemaps: []
-      };
+    if (result.status === 404 || result.status === 410) {
+      return { parser: robotsParser(robotsUrl, ""), sitemaps: [] };
     }
+    if (!result.ok) return denyAll();
     return {
-      parser: robotsParser(robotsUrl, text),
-      sitemaps: parseRobotsSitemaps(text)
+      parser: robotsParser(robotsUrl, result.text),
+      sitemaps: parseRobotsSitemaps(result.text, robotsUrl, options.maxSitemaps)
     };
-  } catch {
-    return {
-      parser: robotsParser(robotsUrl, ""),
-      sitemaps: []
-    };
+  } catch (error) {
+    if (error?.code === "CRAWLER_URL_BLOCKED" || error?.code === "CRAWL_REQUEST_LIMIT" || options.signal?.aborted) {
+      throw error;
+    }
+    return denyAll();
   }
 }
 
-async function discoverSitemapUrls(sitemapUrl, options) {
-  const discovered = [];
-  try {
-    const { response, text, contentType } = await fetchText(sitemapUrl, {
-      ...options,
-      accept: "application/xml,text/xml,*/*;q=0.5"
-    });
-    if (!response.ok) return discovered;
-    if (!contentType.includes("xml") && !text.trim().startsWith("<")) return discovered;
-
-    const $ = cheerio.load(text, { xmlMode: true });
-    $("url > loc").each((_, el) => {
-      const value = $(el).text().trim();
-      if (isHttpUrl(value)) discovered.push(normalizeUrl(value));
-    });
-    $("sitemap > loc").each((_, el) => {
-      const value = $(el).text().trim();
-      if (isHttpUrl(value)) discovered.push(normalizeUrl(value));
-    });
-  } catch {
-    return discovered;
-  }
-  return discovered;
-}
-
-function extractLinks($, baseUrl) {
-  const links = [];
-  $("a[href]").each((_, el) => {
-    const href = $(el).attr("href");
-    const resolved = toUrl(href, baseUrl);
-    if (resolved && isHttpUrl(resolved)) {
-      links.push(normalizeUrl(resolved));
-    }
+function parseSitemap(text, maxUrls) {
+  const $ = cheerio.load(text, { xmlMode: true });
+  const urls = new Set();
+  const sitemaps = new Set();
+  $("urlset > url > loc").each((_, element) => {
+    if (urls.size + sitemaps.size >= maxUrls) return false;
+    const value = $(element).text().trim();
+    if (isHttpUrl(value)) urls.add(normalizeUrl(value));
+    return undefined;
   });
-  return [...new Set(links)];
+  $("sitemapindex > sitemap > loc").each((_, element) => {
+    if (urls.size + sitemaps.size >= maxUrls) return false;
+    const value = $(element).text().trim();
+    if (isHttpUrl(value)) sitemaps.add(normalizeUrl(value));
+    return undefined;
+  });
+  return { urls: [...urls], sitemaps: [...sitemaps] };
+}
+
+async function discoverSitemapDocument(sitemapUrl, options) {
+  try {
+    const result = await fetchText(sitemapUrl, {
+      ...options,
+      accept: "application/xml,text/xml,*/*;q=0.5",
+      beforeRequest: options.beforeNetworkRequest
+    });
+    if (!result.ok || (!result.contentType.includes("xml") && !result.text.trim().startsWith("<"))) {
+      return { urls: [], sitemaps: [] };
+    }
+    return parseSitemap(result.text, options.maxUrlsPerSitemap);
+  } catch (error) {
+    await options.recordFailure?.(sitemapUrl, error, "sitemap");
+    if (isFatalCrawlError(error)) throw error;
+    return { urls: [], sitemaps: [] };
+  }
+}
+
+async function discoverSitemapUrls(sitemapUrl, options = {}) {
+  const normalized = normalizeOptions({ ...options, maxPages: options.maxPages || 50 }, 1);
+  const seedOrigin = new URL(sitemapUrl).origin;
+  const isUrlAllowed = (url) => (
+    (!normalized.allowedOrigins.length || normalized.allowedOrigins.includes(new URL(url).origin))
+    && (!normalized.sameOrigin || new URL(url).origin === seedOrigin)
+  );
+  const deadlineAt = Date.now() + normalized.maxDurationMs;
+  const result = await discoverSitemapDocument(sitemapUrl, {
+    ...normalized,
+    deadlineAt,
+    isUrlAllowed,
+    beforeNetworkRequest: null,
+    recordFailure: null
+  });
+  return [...result.urls, ...result.sitemaps];
+}
+
+function extractLinks($, baseUrl, maxLinks) {
+  const links = new Set();
+  $("a[href]").each((_, element) => {
+    if (links.size >= maxLinks) return false;
+    const resolved = toUrl($(element).attr("href"), baseUrl);
+    if (resolved && isHttpUrl(resolved)) links.add(normalizeUrl(resolved));
+    return undefined;
+  });
+  return [...links];
 }
 
 function cleanForExtraction($) {
-  $("script, style, noscript, template, svg, canvas, iframe").remove();
+  $("script, style, noscript, template, svg, canvas, iframe, object, embed").remove();
   $("[hidden], [aria-hidden='true']").remove();
 }
 
-export function extractPage(html, url) {
+export function extractPage(html, url, options = {}) {
   const $ = cheerio.load(html);
   cleanForExtraction($);
 
@@ -164,9 +348,11 @@ export function extractPage(html, url) {
   const description = ($("meta[name='description']").attr("content") || "").trim();
   const h1 = $("h1").first().text().trim().replace(/\s+/g, " ");
   const canonical = toUrl($("link[rel='canonical']").attr("href") || url, url);
-  const links = extractLinks($, url);
+  const maxLinks = integerOption(options.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 20_000);
+  const links = extractLinks($, url, maxLinks);
+  const language = ($("html").attr("lang") || "").trim() || null;
 
-  const main = $("main").first();
+  const main = $("main, article, [role='main']").first();
   const contentRoot = main.length ? main : $("body");
   const htmlFragment = contentRoot.html() || "";
   const text = contentRoot.text().replace(/\s+/g, " ").trim();
@@ -184,6 +370,7 @@ export function extractPage(html, url) {
     title,
     description,
     h1,
+    language,
     text,
     markdown,
     links,
@@ -197,15 +384,15 @@ class CrawlQueue {
     this.offset = 0;
   }
 
-  push(url) {
-    this.items.push(url);
+  push(item) {
+    this.items.push(item);
   }
 
   shift() {
     if (this.offset >= this.items.length) return null;
     const value = this.items[this.offset];
     this.offset += 1;
-    if (this.offset > 1000 && this.offset * 2 > this.items.length) {
+    if (this.offset > 1_000 && this.offset * 2 > this.items.length) {
       this.items = this.items.slice(this.offset);
       this.offset = 0;
     }
@@ -217,119 +404,277 @@ class CrawlQueue {
   }
 }
 
-export async function crawl(input = {}) {
-  const seeds = (input.seeds || input.urls || [])
-    .map((seed) => (isHttpUrl(seed) ? normalizeUrl(seed) : null))
-    .filter(Boolean);
-
-  if (!seeds.length) {
-    throw new Error("At least one http(s) seed URL is required.");
+function retryDelay(error, attempt, options) {
+  if (error?.retryAfter) {
+    const seconds = Number(error.retryAfter);
+    if (Number.isFinite(seconds)) return Math.min(30_000, Math.max(0, seconds * 1_000));
+    const date = Date.parse(error.retryAfter);
+    if (Number.isFinite(date)) return Math.min(30_000, Math.max(0, date - Date.now()));
   }
+  return Math.min(30_000, options.retryDelayMs * (2 ** attempt));
+}
 
-  const options = {
-    maxPages: input.maxPages ?? 50,
-    concurrency: input.concurrency ?? 4,
-    sameOrigin: input.sameOrigin ?? true,
-    includeSitemaps: input.includeSitemaps ?? false,
-    obeyRobots: input.obeyRobots ?? true,
-    userAgent: input.userAgent || DEFAULT_USER_AGENT,
-    delayMs: input.delayMs ?? 250,
-    timeoutMs: input.timeoutMs ?? 15_000,
-    maxBytes: input.maxBytes ?? DEFAULT_MAX_BYTES,
-    onPage: input.onPage || null,
-    onError: input.onError || null
-  };
+function isRetryable(error) {
+  if (["CRAWLER_URL_BLOCKED", "ROBOTS_DENIED", "CRAWL_REQUEST_LIMIT", "CRAWL_ABORTED"].includes(error?.code)) {
+    return false;
+  }
+  return !Number.isFinite(error?.status) || error.status === 408 || error.status === 429 || error.status >= 500;
+}
 
+function isFatalCrawlError(error) {
+  return [
+    "CRAWLER_URL_BLOCKED",
+    "CRAWL_REQUEST_LIMIT",
+    "CRAWL_DURATION_LIMIT",
+    "CRAWL_ABORTED"
+  ].includes(error?.code) || error?.name === "AbortError";
+}
+
+export async function crawlDetailed(input = {}) {
+  const rawSeeds = input.seeds || input.urls || [];
+  if (!Array.isArray(rawSeeds) || rawSeeds.length === 0) {
+    throw new TypeError("At least one http(s) seed URL is required.");
+  }
+  const seeds = rawSeeds.map((seed) => {
+    if (!isHttpUrl(seed)) throw new TypeError(`Invalid HTTP(S) seed URL '${seed}'.`);
+    return normalizeUrl(seed);
+  });
+  const uniqueSeeds = [...new Set(seeds)];
+  const options = normalizeOptions(input, uniqueSeeds.length);
+  const startedAtMs = Date.now();
+  const deadlineAt = startedAtMs + options.maxDurationMs;
   const queue = new CrawlQueue();
   const seen = new Set();
+  const seenFinal = new Set();
   const enqueued = new Set();
-  const results = [];
+  const pages = [];
+  const failures = [];
   const robotsByOrigin = new Map();
   const lastFetchByOrigin = new Map();
-  const seedOrigins = new Set(seeds.map((seed) => new URL(seed).origin));
-
-  const enqueue = (url) => {
-    if (!url || enqueued.has(url) || seen.has(url)) return;
-    if (options.sameOrigin && ![...seedOrigins].some((origin) => sameOrigin(url, origin))) return;
-    enqueued.add(url);
-    queue.push(url);
+  const originGates = new Map();
+  const seedOrigins = new Set(uniqueSeeds.map((seed) => new URL(seed).origin));
+  const allowedOrigins = new Set(options.allowedOrigins);
+  const stats = {
+    requests: 0,
+    retries: 0,
+    skippedByRobots: 0,
+    skippedByOrigin: 0,
+    queueDropped: 0
   };
 
-  for (const seed of seeds) enqueue(seed);
+  const isUrlAllowed = (url) => {
+    const origin = new URL(url).origin;
+    if (allowedOrigins.size && !allowedOrigins.has(origin)) return false;
+    return !options.sameOrigin || seedOrigins.has(origin);
+  };
+
+  const enqueue = (url, depth = 0, discoveredFrom = null) => {
+    if (!url || depth > options.maxDepth || enqueued.has(url) || seen.has(url)) return false;
+    if (!isUrlAllowed(url)) {
+      stats.skippedByOrigin += 1;
+      return false;
+    }
+    if (queue.length >= options.maxQueue) {
+      stats.queueDropped += 1;
+      return false;
+    }
+    enqueued.add(url);
+    queue.push({ url, depth, discoveredFrom });
+    return true;
+  };
+
+  for (const seed of uniqueSeeds) enqueue(seed);
+
+  async function waitForOrigin(url) {
+    const origin = new URL(url).origin;
+    const previous = originGates.get(origin) || Promise.resolve();
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    originGates.set(origin, previous.catch(() => {}).then(() => gate));
+    await previous.catch(() => {});
+    try {
+      const nextAt = (lastFetchByOrigin.get(origin) || 0) + options.delayMs;
+      await sleep(Math.max(0, nextAt - Date.now()), options.signal);
+      lastFetchByOrigin.set(origin, Date.now());
+    } finally {
+      release();
+    }
+  }
+
+  async function beforeNetworkRequest(url) {
+    if (options.signal?.aborted) throw abortError(options.signal);
+    if (Date.now() >= deadlineAt) {
+      const error = new Error(`Crawl exceeded maxDurationMs (${options.maxDurationMs}).`);
+      error.code = "CRAWL_DURATION_LIMIT";
+      throw error;
+    }
+    if (stats.requests >= options.maxRequests) {
+      const error = new Error(`Crawl exceeded maxRequests (${options.maxRequests}).`);
+      error.code = "CRAWL_REQUEST_LIMIT";
+      throw error;
+    }
+    stats.requests += 1;
+    await waitForOrigin(url);
+  }
 
   async function getRobots(url) {
     const origin = new URL(url).origin;
     if (!robotsByOrigin.has(origin)) {
-      robotsByOrigin.set(origin, await loadRobots(origin, options));
+      robotsByOrigin.set(origin, loadRobots(origin, {
+        ...options,
+        deadlineAt,
+        isUrlAllowed,
+        beforeNetworkRequest
+      }));
     }
     return robotsByOrigin.get(origin);
   }
 
-  if (options.includeSitemaps) {
-    for (const seed of seeds) {
+  async function recordFailure(url, error, phase = "page") {
+    const failure = {
+      url,
+      phase,
+      code: error?.code || "CRAWL_ERROR",
+      error: error?.message || String(error)
+    };
+    failures.push(failure);
+    if (options.onError) await options.onError({ ...failure });
+  }
+
+  if (options.includeSitemaps && options.maxSitemaps > 0) {
+    const sitemapQueue = [];
+    const queuedSitemaps = new Set();
+    const enqueueSitemap = (value) => {
+      if (queuedSitemaps.size >= options.maxSitemaps) return;
+      const normalized = normalizeUrl(value);
+      if (queuedSitemaps.has(normalized) || !isUrlAllowed(normalized)) return;
+      queuedSitemaps.add(normalized);
+      sitemapQueue.push(normalized);
+    };
+    for (const seed of uniqueSeeds) {
       const robots = await getRobots(seed);
-      const sitemapUrls = robots.sitemaps.length
+      for (const sitemap of (robots.sitemaps.length
         ? robots.sitemaps
-        : [new URL("/sitemap.xml", new URL(seed).origin).toString()];
-      for (const sitemapUrl of sitemapUrls) {
-        const urls = await discoverSitemapUrls(sitemapUrl, options);
-        for (const url of urls) enqueue(url);
+        : [new URL("/sitemap.xml", new URL(seed).origin).toString()])) enqueueSitemap(sitemap);
+    }
+    const visitedSitemaps = new Set();
+    while (sitemapQueue.length && visitedSitemaps.size < options.maxSitemaps) {
+      const sitemapUrl = normalizeUrl(sitemapQueue.shift());
+      if (visitedSitemaps.has(sitemapUrl) || !isUrlAllowed(sitemapUrl)) continue;
+      visitedSitemaps.add(sitemapUrl);
+      const document = await discoverSitemapDocument(sitemapUrl, {
+        ...options,
+        deadlineAt,
+        isUrlAllowed,
+        beforeNetworkRequest,
+        recordFailure
+      });
+      for (const url of document.urls) enqueue(url, 0, sitemapUrl);
+      for (const nested of document.sitemaps) {
+        if (!visitedSitemaps.has(nested)) enqueueSitemap(nested);
       }
     }
   }
 
-  async function waitForOrigin(url) {
-    const origin = new URL(url).origin;
-    const last = lastFetchByOrigin.get(origin) || 0;
-    const waitMs = Math.max(0, last + options.delayMs - Date.now());
-    if (waitMs) await sleep(waitMs);
-    lastFetchByOrigin.set(origin, Date.now());
-  }
+  async function processItem(item) {
+    if (seen.has(item.url)) return null;
+    seen.add(item.url);
 
-  async function worker() {
-    while (results.length < options.maxPages) {
-      const url = queue.shift();
-      if (!url) return;
-      if (seen.has(url)) continue;
-      seen.add(url);
-
+    for (let attempt = 0; attempt <= options.maxRetries; attempt += 1) {
       try {
-        if (options.obeyRobots) {
-          const robots = await getRobots(url);
-          if (robots.parser && !robots.parser.isAllowed(url, options.userAgent)) {
-            continue;
+        const result = await fetchText(item.url, {
+          ...options,
+          deadlineAt,
+          isUrlAllowed,
+          beforeRequest: async (url) => {
+            if (options.obeyRobots) {
+              const robots = await getRobots(url);
+              if (robots.parser && robots.parser.isAllowed(url, options.userAgent) === false) {
+                stats.skippedByRobots += 1;
+                const error = new Error(`robots.txt disallows ${url}`);
+                error.code = "ROBOTS_DENIED";
+                throw error;
+              }
+            }
+            await beforeNetworkRequest(url);
           }
-        }
+        });
 
-        await waitForOrigin(url);
-        const { response, text, contentType } = await fetchText(url, options);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+        if (!result.ok) {
+          const error = new Error(`HTTP ${result.status}`);
+          error.status = result.status;
+          error.retryAfter = result.retryAfter;
+          throw error;
         }
-        if (!/html|xml|text\//i.test(contentType)) {
+        if (result.contentType && !/html|xml|text\//i.test(result.contentType)) return null;
+        if (seenFinal.has(result.finalUrl)) return null;
+        seenFinal.add(result.finalUrl);
+
+        const page = extractPage(result.text, result.finalUrl, {
+          maxLinksPerPage: options.maxLinksPerPage
+        });
+        page.status = result.status;
+        page.contentType = result.contentType;
+        page.bytes = result.bytes;
+        page.contentHash = `sha256:${createHash("sha256").update(result.text).digest("hex")}`;
+        page.depth = item.depth;
+        page.discoveredFrom = item.discoveredFrom;
+        page.redirectChain = result.redirectChain;
+        page.etag = result.etag;
+        page.lastModified = result.lastModified;
+        page.robotsAllowed = true;
+        return page;
+      } catch (error) {
+        if (options.signal?.aborted) throw abortError(options.signal);
+        if (attempt < options.maxRetries && isRetryable(error) && Date.now() < deadlineAt) {
+          stats.retries += 1;
+          await sleep(retryDelay(error, attempt, options), options.signal);
           continue;
         }
+        if (error?.code !== "ROBOTS_DENIED") await recordFailure(item.url, error, "page");
+        if (isFatalCrawlError(error)) throw error;
+        return null;
+      }
+    }
+    return null;
+  }
 
-        const page = extractPage(text, response.url || url);
-        page.status = response.status;
-        page.contentType = contentType;
-        results.push(page);
-        if (options.onPage) await options.onPage(page);
-
-        for (const link of page.links) {
-          if (results.length + queue.length >= options.maxPages * 6) break;
-          enqueue(link);
-        }
-      } catch (error) {
-        const failure = { url, error: error.message || String(error) };
-        if (options.onError) await options.onError(failure);
+  while (queue.length && pages.length < options.maxPages) {
+    if (options.signal?.aborted) throw abortError(options.signal);
+    if (Date.now() >= deadlineAt || stats.requests >= options.maxRequests) break;
+    const batch = [];
+    const batchSize = Math.min(options.concurrency, options.maxPages - pages.length);
+    while (batch.length < batchSize && queue.length) batch.push(queue.shift());
+    const batchPages = await Promise.all(batch.map(processItem));
+    for (const page of batchPages) {
+      if (!page || pages.length >= options.maxPages) continue;
+      pages.push(page);
+      if (options.onPage) await options.onPage({ ...page, links: [...page.links] });
+      if (page.depth < options.maxDepth) {
+        for (const link of page.links) enqueue(link, page.depth + 1, page.url);
       }
     }
   }
 
-  const workerCount = Math.max(1, Math.min(options.concurrency, options.maxPages));
-  await Promise.all(Array.from({ length: workerCount }, () => worker()));
-  return results.slice(0, options.maxPages);
+  const finishedAtMs = Date.now();
+  return {
+    pages,
+    failures,
+    stats: {
+      ...stats,
+      pages: pages.length,
+      failures: failures.length,
+      queued: enqueued.size,
+      seen: seen.size,
+      durationMs: finishedAtMs - startedAtMs,
+      startedAt: new Date(startedAtMs).toISOString(),
+      finishedAt: new Date(finishedAtMs).toISOString()
+    }
+  };
+}
+
+export async function crawl(input = {}) {
+  return (await crawlDetailed(input)).pages;
 }
 
 export { discoverSitemapUrls, normalizeUrl };
@@ -350,12 +695,94 @@ export {
 } from "./framework/provider-agent-tool.js";
 export { createReleaseGateReport } from "./framework/release-gate.js";
 export { createResearchWorkflow } from "./framework/research-workflow.js";
+export { classifyIpAddress, isPublicIpAddress, resolveUrlTarget } from "./crawler/security.js";
+
+function boundedNumber(requested, configured, fallback, mode = "max") {
+  const boundary = configured ?? fallback;
+  if (!Number.isFinite(Number(requested))) return boundary;
+  return mode === "min"
+    ? Math.max(boundary, Number(requested))
+    : Math.min(boundary, Number(requested));
+}
 
 export function createCrawlerTool(defaultOptions = {}) {
-  return async function crawlerTool(input = {}) {
+  const tool = async function crawlerTool(input = {}, context = {}) {
+    const signals = [context.signal, defaultOptions.signal].filter(Boolean);
+    const configuredOrigins = normalizeAllowedOrigins(defaultOptions.allowedOrigins || []);
+    const authorizedOrigins = normalizeAllowedOrigins(context.authorizedOrigins || []);
+    const goalOrigins = normalizeAllowedOrigins(context.goal?.allowedOrigins || []);
+    const explicitScopes = [configuredOrigins, authorizedOrigins, goalOrigins]
+      .filter((origins) => origins.length > 0);
+    const allowedOrigins = explicitScopes.length
+      ? explicitScopes.slice(1).reduce(
+        (intersection, origins) => intersection.filter((origin) => origins.includes(origin)),
+        [...explicitScopes[0]]
+      )
+      : [];
+    if (explicitScopes.length > 1 && allowedOrigins.length === 0) {
+      throw createCrawlerSecurityError("Crawler origin policy has no overlap with the workflow goal.", {
+        configuredOrigins,
+        authorizedOrigins,
+        goalOrigins
+      });
+    }
+    const sameOrigin = defaultOptions.sameOrigin === false ? input.sameOrigin === true : true;
+    if (!sameOrigin && allowedOrigins.length === 0) {
+      throw createCrawlerSecurityError("Cross-origin crawling requires an explicit trusted origin allowlist.");
+    }
+    const maxPages = boundedNumber(
+      boundedNumber(input.maxPages, context.limits?.maxPages, defaultOptions.maxPages ?? 50),
+      defaultOptions.maxPages,
+      50
+    );
+    const maxRequests = boundedNumber(
+      boundedNumber(input.maxRequests, context.limits?.maxNetworkRequests, defaultOptions.maxRequests ?? 400),
+      defaultOptions.maxRequests,
+      400
+    );
+    const maxDurationMs = boundedNumber(
+      boundedNumber(input.maxDurationMs, context.limits?.maxRuntimeMs, defaultOptions.maxDurationMs ?? 600_000),
+      defaultOptions.maxDurationMs,
+      600_000
+    );
     return crawl({
-      ...defaultOptions,
-      ...input
+      ...input,
+      maxPages,
+      maxSeeds: boundedNumber(input.maxSeeds, defaultOptions.maxSeeds, 100),
+      maxRequests,
+      maxQueue: boundedNumber(input.maxQueue, defaultOptions.maxQueue, 1_000),
+      maxLinksPerPage: boundedNumber(input.maxLinksPerPage, defaultOptions.maxLinksPerPage, 2_000),
+      maxDepth: boundedNumber(input.maxDepth, defaultOptions.maxDepth, 20),
+      concurrency: boundedNumber(input.concurrency, defaultOptions.concurrency, 4),
+      delayMs: boundedNumber(input.delayMs, defaultOptions.delayMs, 250, "min"),
+      timeoutMs: boundedNumber(input.timeoutMs, defaultOptions.timeoutMs, 15_000),
+      maxDurationMs,
+      maxBytes: boundedNumber(input.maxBytes, defaultOptions.maxBytes, DEFAULT_MAX_BYTES),
+      maxRedirects: boundedNumber(input.maxRedirects, defaultOptions.maxRedirects, 5),
+      maxRetries: boundedNumber(input.maxRetries, defaultOptions.maxRetries, 2),
+      maxSitemaps: boundedNumber(input.maxSitemaps, defaultOptions.maxSitemaps, 20),
+      maxUrlsPerSitemap: boundedNumber(input.maxUrlsPerSitemap, defaultOptions.maxUrlsPerSitemap, 5_000),
+      retryDelayMs: boundedNumber(input.retryDelayMs, defaultOptions.retryDelayMs, 250, "min"),
+      sameOrigin,
+      obeyRobots: defaultOptions.obeyRobots === false ? input.obeyRobots === true : true,
+      allowPrivateNetworks: defaultOptions.allowPrivateNetworks === true,
+      allowedOrigins,
+      userAgent: defaultOptions.userAgent || input.userAgent,
+      includeSitemaps: input.includeSitemaps === true && defaultOptions.includeSitemaps !== false,
+      signal: signals.length > 1 ? AbortSignal.any(signals) : signals[0] || null,
+      dnsLookup: defaultOptions.dnsLookup || null,
+      onPage: defaultOptions.onPage || null,
+      onError: defaultOptions.onError || null
     });
   };
+  tool.governance = Object.freeze({
+    name: "crawler",
+    effects: ["network:read"],
+    safeDefaults: {
+      obeyRobots: defaultOptions.obeyRobots !== false,
+      sameOrigin: defaultOptions.sameOrigin !== false,
+      allowPrivateNetworks: defaultOptions.allowPrivateNetworks === true
+    }
+  });
+  return tool;
 }

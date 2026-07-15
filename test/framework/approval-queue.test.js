@@ -63,3 +63,36 @@ test("ApprovalQueue restores serialized queues for resumed product loops", () =>
   assert.equal(restored.pending().length, 1);
   assert.equal(restored.toJSON().approvals[0].approvalId, "approval_1");
 });
+
+test("ApprovalQueue clones mutable subjects and evidence at every boundary", () => {
+  const queue = new ApprovalQueue({ clock: fixedClock });
+  const subject = { release: { packageName: "maqam", version: "0.2.0" } };
+  const evidence = [{ command: "npm test", status: "pass" }];
+  const requested = queue.requestApproval({ action: "publish:npm", subject, evidence });
+
+  subject.release.version = "9.9.9";
+  evidence[0].status = "fail";
+  requested.subject.release.version = "8.8.8";
+  requested.evidence[0].status = "fail";
+
+  const stored = queue.get(requested.approvalId);
+  assert.equal(stored.subject.release.version, "0.2.0");
+  assert.equal(stored.evidence[0].status, "pass");
+});
+
+test("consumeMany is atomic when any approval is invalid", () => {
+  const queue = new ApprovalQueue({ clock: fixedClock });
+  const first = queue.requestApproval({ action: "tool:publisher" });
+  const second = queue.requestApproval({ action: "effect:publish" });
+  queue.approve(first.approvalId);
+  queue.approve(second.approvalId);
+  queue.consume(second.approvalId);
+
+  assert.throws(() => queue.consumeMany([
+    { approvalId: first.approvalId, usage: { runId: "release_1" } },
+    { approvalId: second.approvalId, usage: { runId: "release_1" } }
+  ]), /already been consumed/);
+
+  assert.deepEqual(queue.get(first.approvalId).consumptions, []);
+  assert.equal(queue.get(second.approvalId).consumptions.length, 1);
+});

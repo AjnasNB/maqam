@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { existsSync, statSync } from "node:fs";
+import { existsSync, realpathSync, statSync } from "node:fs";
 import { delimiter, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { redactText } from "./audit.js";
 import { MaqamError } from "./errors.js";
@@ -7,6 +7,11 @@ import { MaqamError } from "./errors.js";
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_INPUT_TOKENS = 4_000;
 const DEFAULT_MAX_OUTPUT_BYTES = 64 * 1024;
+const SAFE_ENV_KEYS = [
+  "PATH", "Path", "PATHEXT", "SystemRoot", "ComSpec", "WINDIR",
+  "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH",
+  "TEMP", "TMP", "TMPDIR", "LANG", "LC_ALL", "NO_COLOR", "CI"
+];
 
 function estimateTokens(value) {
   return Math.ceil(Buffer.byteLength(String(value || ""), "utf8") / 4);
@@ -45,25 +50,25 @@ function parseJsonLines(stdout, name) {
   return events;
 }
 
-function pickEnvironment({ inheritEnv, envAllowlist, env }) {
+function pickEnvironment({ inheritEnv, envAllowlist, env, allowUnsafeEnvInheritance }) {
   let base = {};
-  if (inheritEnv && Array.isArray(envAllowlist)) {
-    for (const key of envAllowlist) {
+  if (inheritEnv && allowUnsafeEnvInheritance && envAllowlist === undefined) {
+    base = { ...process.env };
+  } else {
+    const keys = Array.isArray(envAllowlist) ? envAllowlist : SAFE_ENV_KEYS;
+    for (const key of keys) {
       if (process.env[key] !== undefined) base[key] = process.env[key];
     }
-  } else if (inheritEnv) {
-    base = { ...process.env };
   }
   return { ...base, ...env };
 }
 
 function isWithin(root, target) {
-  const pathFromRoot = relative(resolve(root), resolve(target));
+  const pathFromRoot = relative(realpathSync(resolve(root)), realpathSync(resolve(target)));
   return pathFromRoot === "" || (!pathFromRoot.startsWith("..") && !isAbsolute(pathFromRoot));
 }
 
 function validateCwd(cwd, allowedCwdRoots) {
-  if (!cwd || !allowedCwdRoots?.length) return;
   if (!allowedCwdRoots.some((root) => isWithin(root, cwd))) {
     throw new TypeError(`CLI cwd '${cwd}' is outside allowedCwdRoots.`);
   }
@@ -88,22 +93,40 @@ function resolveCommand(command) {
   return command;
 }
 
-function terminateProcessTree(child) {
-  if (!child?.pid || child.killed) return;
-  if (process.platform === "win32") {
-    const killer = spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
-      windowsHide: true,
-      stdio: "ignore"
+function waitForChildClose(child, timeoutMs = 1_000) {
+  if (!child || child.exitCode !== null || child.signalCode !== null) return Promise.resolve();
+  return new Promise((resolvePromise) => {
+    const timer = setTimeout(resolvePromise, timeoutMs);
+    child.once("close", () => {
+      clearTimeout(timer);
+      resolvePromise();
     });
-    killer.on("error", () => child.kill("SIGKILL"));
-    return;
-  }
+  });
+}
 
-  try {
-    process.kill(-child.pid, "SIGKILL");
-  } catch {
-    child.kill("SIGKILL");
+async function terminateProcessTree(child) {
+  if (!child?.pid || child.exitCode !== null || child.signalCode !== null) return;
+  const closed = waitForChildClose(child);
+  if (process.platform === "win32") {
+    await new Promise((resolvePromise) => {
+      const killer = spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+        windowsHide: true,
+        stdio: "ignore"
+      });
+      killer.once("error", () => {
+        try { child.kill("SIGKILL"); } catch { /* process already exited */ }
+        resolvePromise();
+      });
+      killer.once("close", resolvePromise);
+    });
+  } else {
+    try {
+      process.kill(-child.pid, "SIGKILL");
+    } catch {
+      try { child.kill("SIGKILL"); } catch { /* process already exited */ }
+    }
   }
+  await closed;
 }
 
 export function createCliAgentTool(options = {}) {
@@ -111,11 +134,12 @@ export function createCliAgentTool(options = {}) {
     name = "cliAgent",
     command,
     args = [],
-    cwd,
-    allowedCwdRoots = [],
+    cwd = process.cwd(),
+    allowedCwdRoots = [process.cwd()],
     env = {},
-    inheritEnv = true,
+    inheritEnv = false,
     envAllowlist,
+    allowUnsafeEnvInheritance = false,
     stdin = "json",
     parseJson = false,
     parseJsonLines: shouldParseJsonLines = false,
@@ -163,7 +187,7 @@ export function createCliAgentTool(options = {}) {
       try {
         child = spawn(resolvedCommand, args, {
           cwd,
-          env: pickEnvironment({ inheritEnv, envAllowlist, env }),
+          env: pickEnvironment({ inheritEnv, envAllowlist, env, allowUnsafeEnvInheritance }),
           shell,
           detached: process.platform !== "win32",
           windowsHide: true,
@@ -182,6 +206,7 @@ export function createCliAgentTool(options = {}) {
       const stderr = [];
       let outputBytes = 0;
       let settled = false;
+      let stopping = false;
       let timer = null;
       const signal = context.signal || null;
 
@@ -198,8 +223,10 @@ export function createCliAgentTool(options = {}) {
       };
 
       const stopWithError = (error) => {
-        terminateProcessTree(child);
-        finish(rejectPromise, error);
+        if (settled || stopping) return;
+        stopping = true;
+        cleanup();
+        terminateProcessTree(child).finally(() => finish(rejectPromise, error));
       };
 
       const onAbort = () => stopWithError(cliError(`CLI agent '${name}' was aborted.`, "CLI_ABORTED", {
@@ -249,6 +276,7 @@ export function createCliAgentTool(options = {}) {
       child.stderr.on("data", (chunk) => collect(stderr, chunk));
 
       child.on("error", (error) => {
+        if (stopping) return;
         finish(rejectPromise, cliError(error.message, "CLI_SPAWN_FAILED", {
           name,
           command: resolvedCommand,
@@ -257,7 +285,7 @@ export function createCliAgentTool(options = {}) {
       });
 
       child.on("close", (exitCode, childSignal) => {
-        if (settled) return;
+        if (settled || stopping) return;
 
         const stdoutText = Buffer.concat(stdout).toString("utf8");
         const stderrText = Buffer.concat(stderr).toString("utf8");

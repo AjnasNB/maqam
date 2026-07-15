@@ -23,7 +23,7 @@ Preventive controls run before or during execution. Observed controls inspect pr
 
 ## Prerequisites
 
-- Node.js 20 or newer.
+- Node.js 20.18.1 or newer.
 - `maqam` installed in the project.
 - The provider CLI installed and authenticated through its own supported login flow.
 - A trusted Git working directory for coding-agent runs.
@@ -234,7 +234,7 @@ const worker = createCliAgentTool({
 });
 ```
 
-Keep the command and arguments fixed in trusted configuration. Pass user prompts over stdin. Shell execution requires the explicit `allowUnsafeShell: true` option and should be avoided for agent input.
+Keep the command and arguments fixed in trusted configuration. Pass user prompts over stdin. Generic workers inherit only Maqam's small operational environment allowlist by default; supply an explicit `envAllowlist` for provider credentials. Full inheritance requires the separate `allowUnsafeEnvInheritance: true` unlock. Shell execution requires `allowUnsafeShell: true` and should be avoided for agent input.
 
 ## Limit Semantics
 
@@ -255,7 +255,7 @@ A post-run budget failure does not roll back an already permitted file change or
 
 ## Outcome Validation
 
-A zero process exit means the provider session ended normally. It does not prove that the requested artifact exists or that its contents are correct.
+A zero process exit is not sufficient. Maqam also requires the provider's complete terminal stream (`thread.started` followed by a terminal `turn.completed` for Codex, or a terminal `result` for Claude Code); empty or truncated streams fail with `AGENT_PROVIDER_INCOMPLETE_STREAM`. Even a complete provider stream does not prove that the requested artifact exists or that its contents are correct.
 
 - Use `expectedOutput` for an exact string or regular-expression check on the final provider message.
 - Use `requireFileChanges: true` for Codex write tasks that must report at least one file change.
