@@ -67,14 +67,14 @@ test("crawler performs concurrent fetches while preserving per-origin start dela
     seeds: ["/a", "/b", "/c"].map((path) => `${baseUrl}${path}`),
     maxPages: 3,
     concurrency: 3,
-    delayMs: 35
+    delayMs: 80
   });
 
   assert.equal(pages.length, 3);
   assert.ok(maxActive >= 2, `expected overlapping requests, observed maxActive=${maxActive}`);
   const sorted = starts.toSorted((a, b) => a - b);
   for (let index = 1; index < sorted.length; index += 1) {
-    assert.ok(sorted[index] - sorted[index - 1] >= 25, `request gap was ${sorted[index] - sorted[index - 1]}ms`);
+    assert.ok(sorted[index] - sorted[index - 1] >= 35, `request gap was ${sorted[index] - sorted[index - 1]}ms`);
   }
 });
 
@@ -189,6 +189,72 @@ test("an aborted crawl stops before issuing network requests", async () => {
     /cancelled by test|aborted/i
   );
   assert.equal(hits, 0);
+});
+
+test("onPage callbacks are detached, frozen, and bounded by maxDurationMs", async () => {
+  const baseUrl = await listen((request, response) => {
+    response.setHeader("content-type", "text/html");
+    response.end('<main><a href="/next">next</a></main>');
+  });
+  const startedAt = Date.now();
+
+  await assert.rejects(
+    () => crawl({
+      ...localOptions,
+      seeds: [baseUrl],
+      maxDurationMs: 200,
+      onPage(page) {
+        assert.equal(Object.isFrozen(page), true);
+        assert.equal(Object.isFrozen(page.links), true);
+        return new Promise(() => {});
+      }
+    }),
+    (error) => error.code === "CRAWL_DURATION_LIMIT"
+  );
+  assert.ok(Date.now() - startedAt < 1_500, "onPage escaped the total crawl deadline");
+});
+
+test("onError callbacks are detached, frozen, and bounded by maxDurationMs", async () => {
+  const baseUrl = await listen((request, response) => {
+    response.statusCode = 500;
+    response.end("failed");
+  });
+  const startedAt = Date.now();
+
+  await assert.rejects(
+    () => crawlDetailed({
+      ...localOptions,
+      seeds: [baseUrl],
+      maxDurationMs: 200,
+      onError(failure) {
+        assert.equal(Object.isFrozen(failure), true);
+        return new Promise(() => {});
+      }
+    }),
+    (error) => error.code === "CRAWL_DURATION_LIMIT"
+  );
+  assert.ok(Date.now() - startedAt < 1_500, "onError escaped the total crawl deadline");
+});
+
+test("crawler callbacks stop waiting when the caller aborts", async () => {
+  const baseUrl = await listen((request, response) => {
+    response.setHeader("content-type", "text/html");
+    response.end("<main>ok</main>");
+  });
+  const controller = new AbortController();
+
+  await assert.rejects(
+    () => crawl({
+      ...localOptions,
+      seeds: [baseUrl],
+      signal: controller.signal,
+      onPage() {
+        setTimeout(() => controller.abort(new Error("callback cancelled")), 20);
+        return new Promise(() => {});
+      }
+    }),
+    /callback cancelled/
+  );
 });
 
 test("nested sitemap traversal obeys maxSitemaps exactly", async () => {

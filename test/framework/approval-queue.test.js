@@ -45,7 +45,7 @@ test("ApprovalQueue approves and rejects requests with immutable decision record
   assert.equal(approved.decision.decidedBy, "owner");
   assert.equal(rejected.status, "rejected");
   assert.equal(rejected.decision.note, "Announcement can wait.");
-  assert.deepEqual(queue.pending(), []);
+  assert.deepEqual([...queue.pending()], []);
   assert.throws(
     () => queue.approve(first.approvalId, { decidedBy: "owner" }),
     /already approved/
@@ -77,7 +77,7 @@ test("ApprovalQueue rejects malformed or semantically impossible restored state"
     () => ApprovalQueue.fromJSON({ ...pending, nextId: Number.MAX_SAFE_INTEGER }),
     /nextId/
   );
-  assert.throws(() => ApprovalQueue.fromJSON({ ...pending, unexpected: true }), /unknown fields/);
+  assert.throws(() => ApprovalQueue.fromJSON({ ...pending, unexpected: true }), /unknown.*field/i);
   assert.throws(() => ApprovalQueue.fromJSON({
     approvals: [structuredClone(pending.approvals[0]), structuredClone(pending.approvals[0])],
     nextId: 2
@@ -156,6 +156,34 @@ test("ApprovalQueue clone boundaries reject accessors, cycles, and malformed ris
   assert.equal(getterCalls, 0);
 });
 
+test("ApprovalQueue rejects accessors under descriptor prototype pollution", () => {
+  const queue = new ApprovalQueue({ clock: fixedClock });
+  let getterCalls = 0;
+  const subject = {};
+  Object.defineProperty(subject, "packageName", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "danger";
+    }
+  });
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, "value");
+  try {
+    Object.defineProperty(Object.prototype, "value", {
+      value: "polluted",
+      configurable: true
+    });
+    assert.throws(
+      () => queue.requestApproval({ action: "publish:npm", subject }),
+      /data property/
+    );
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, "value", previous);
+    else delete Object.prototype.value;
+  }
+  assert.equal(getterCalls, 0);
+});
+
 test("ApprovalQueue clones mutable subjects and evidence at every boundary", () => {
   const queue = new ApprovalQueue({ clock: fixedClock });
   const subject = { release: { packageName: "maqam", version: "0.2.0" } };
@@ -185,6 +213,79 @@ test("consumeMany is atomic when any approval is invalid", () => {
     { approvalId: second.approvalId, usage: { runId: "release_1" } }
   ]), /already been consumed/);
 
-  assert.deepEqual(queue.get(first.approvalId).consumptions, []);
+  assert.deepEqual([...queue.get(first.approvalId).consumptions], []);
   assert.equal(queue.get(second.approvalId).consumptions.length, 1);
+});
+
+test("ApprovalQueue rejects inherited authority fields and returns isolated safe snapshots", () => {
+  const queue = new ApprovalQueue({ clock: fixedClock });
+  const previousAction = Object.getOwnPropertyDescriptor(Object.prototype, "action");
+  try {
+    Object.defineProperty(Object.prototype, "action", {
+      value: "publish:npm",
+      configurable: true
+    });
+    assert.throws(
+      () => queue.requestApproval({}),
+      /Inherited Approval request field 'action'/
+    );
+  } finally {
+    if (previousAction) Object.defineProperty(Object.prototype, "action", previousAction);
+    else delete Object.prototype.action;
+  }
+
+  let getterCalls = 0;
+  const accessorRequest = {};
+  Object.defineProperty(accessorRequest, "action", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "publish:npm";
+    }
+  });
+  assert.throws(() => queue.requestApproval(accessorRequest), /data property/);
+  assert.equal(getterCalls, 0);
+
+  const subject = { packageName: "maqam" };
+  const evidence = ["verified"];
+  const request = queue.requestApproval({ action: "publish:npm", subject, evidence });
+  subject.packageName = "changed";
+  evidence[0] = "changed";
+
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, "authorized");
+  try {
+    Object.defineProperty(Object.prototype, "authorized", {
+      value: true,
+      configurable: true
+    });
+    const stored = queue.get(request.approvalId);
+    assert.equal(stored.subject.packageName, "maqam");
+    assert.equal(stored.evidence[0], "verified");
+    assert.equal(stored.subject.authorized, undefined);
+    assert.equal(stored.evidence.authorized, undefined);
+    assert.equal(Object.getPrototypeOf(stored), null);
+    assert.equal(Object.getPrototypeOf(stored.subject), null);
+    assert.notEqual(Object.getPrototypeOf(stored.evidence), Array.prototype);
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, "authorized", previous);
+    else delete Object.prototype.authorized;
+  }
+
+  const consumable = queue.requestApproval({ action: "tool:writer" });
+  queue.approve(consumable.approvalId, { decidedBy: "owner" });
+  const previousRunId = Object.getOwnPropertyDescriptor(Object.prototype, "runId");
+  try {
+    Object.defineProperty(Object.prototype, "runId", {
+      value: "forged_run",
+      configurable: true
+    });
+    assert.throws(
+      () => queue.consumeMany([{ approvalId: consumable.approvalId, usage: {} }]),
+      /Inherited Approval consumption usage field 'runId'/
+    );
+    assert.equal(queue.get(consumable.approvalId).consumptions.length, 0);
+  } finally {
+    if (previousRunId) Object.defineProperty(Object.prototype, "runId", previousRunId);
+    else delete Object.prototype.runId;
+  }
 });

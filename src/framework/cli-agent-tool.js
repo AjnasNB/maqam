@@ -2,6 +2,11 @@ import { spawn } from "node:child_process";
 import { existsSync, realpathSync, statSync } from "node:fs";
 import { delimiter, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { redactText } from "./audit.js";
+import {
+  snapshotJsonValue,
+  snapshotOwnDataArray,
+  snapshotOwnDataRecord
+} from "./boundary.js";
 import { MaqamError } from "./errors.js";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
@@ -12,6 +17,95 @@ const SAFE_ENV_KEYS = [
   "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH",
   "TEMP", "TMP", "TMPDIR", "LANG", "LC_ALL", "NO_COLOR", "CI"
 ];
+const CLI_OPTION_KEYS = [
+  "name", "command", "args", "cwd", "allowedCwdRoots", "env", "inheritEnv",
+  "envAllowlist", "allowUnsafeEnvInheritance", "stdin", "parseJson",
+  "parseJsonLines", "timeoutMs", "maxInputTokens", "maxOutputTokens",
+  "maxOutputBytes", "rejectOnNonZero", "shell", "allowUnsafeShell"
+];
+const AGENT_CONTEXT_KEYS = [
+  "runId", "taskId", "goal", "limits", "signal", "authorizedOrigins",
+  "authorizationScope", "approvalId", "approvalIds", "requestedBy",
+  "approvalEvidence", "evidence", "evidenceLedger", "approvals", "tools",
+  "outputs", "trace"
+];
+
+function snapshotStringArray(value, label) {
+  const snapshot = snapshotOwnDataArray(value, { label });
+  for (let index = 0; index < snapshot.length; index += 1) {
+    if (typeof snapshot[index] !== "string") {
+      throw new TypeError(`${label}[${index}] must be a string.`);
+    }
+  }
+  return Object.freeze(snapshot);
+}
+
+function snapshotEnvironment(value, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${label} must be an object of string values.`);
+  }
+  const keys = Reflect.ownKeys(Object.getOwnPropertyDescriptors(value));
+  const snapshot = snapshotOwnDataRecord(value, {
+    label,
+    recognizedKeys: keys.filter((key) => typeof key === "string")
+  });
+  for (const key of Object.keys(snapshot)) {
+    if (typeof snapshot[key] !== "string") {
+      throw new TypeError(`${label}.${key} must be a string.`);
+    }
+  }
+  return Object.freeze(snapshot);
+}
+
+function snapshotCliOptions(value = {}) {
+  const snapshot = snapshotOwnDataRecord(value, {
+    label: "CLI agent options",
+    recognizedKeys: CLI_OPTION_KEYS
+  });
+  if (snapshot.args !== undefined) snapshot.args = snapshotStringArray(snapshot.args, "CLI agent options.args");
+  if (snapshot.allowedCwdRoots !== undefined) {
+    snapshot.allowedCwdRoots = snapshotStringArray(
+      snapshot.allowedCwdRoots,
+      "CLI agent options.allowedCwdRoots"
+    );
+  }
+  if (snapshot.envAllowlist !== undefined) {
+    snapshot.envAllowlist = snapshotStringArray(snapshot.envAllowlist, "CLI agent options.envAllowlist");
+  }
+  if (snapshot.env !== undefined) snapshot.env = snapshotEnvironment(snapshot.env, "CLI agent options.env");
+  for (const key of [
+    "inheritEnv", "allowUnsafeEnvInheritance", "parseJson", "parseJsonLines",
+    "rejectOnNonZero", "shell", "allowUnsafeShell"
+  ]) {
+    if (snapshot[key] !== undefined && typeof snapshot[key] !== "boolean") {
+      throw new TypeError(`CLI agent options.${key} must be a boolean.`);
+    }
+  }
+  for (const key of ["name", "command", "cwd"]) {
+    if (snapshot[key] !== undefined && typeof snapshot[key] !== "string") {
+      throw new TypeError(`CLI agent options.${key} must be a string.`);
+    }
+  }
+  if (snapshot.stdin !== undefined && !["json", "text", "none"].includes(snapshot.stdin)) {
+    throw new TypeError("CLI agent options.stdin must be 'json', 'text', or 'none'.");
+  }
+  for (const key of ["timeoutMs", "maxInputTokens", "maxOutputTokens", "maxOutputBytes"]) {
+    const valueAtKey = snapshot[key];
+    if (valueAtKey !== undefined && valueAtKey !== null
+      && (typeof valueAtKey !== "number" || !Number.isFinite(valueAtKey) || valueAtKey < 0)) {
+      throw new TypeError(`CLI agent options.${key} must be a non-negative finite number or null.`);
+    }
+  }
+  return Object.freeze(snapshot);
+}
+
+function snapshotToolContext(value = {}) {
+  return Object.freeze(snapshotOwnDataRecord(value, {
+    label: "CLI agent context",
+    recognizedKeys: AGENT_CONTEXT_KEYS,
+    rejectUnknown: false
+  }));
+}
 
 function estimateTokens(value) {
   return Math.ceil(Buffer.byteLength(String(value || ""), "utf8") / 4);
@@ -21,9 +115,16 @@ function buildStdin(input, mode) {
   if (mode === "none") return null;
   if (mode === "text") {
     if (typeof input === "string") return input;
-    return String(input?.prompt ?? input?.text ?? "");
+    const record = snapshotOwnDataRecord(input ?? {}, {
+      label: "CLI text input",
+      recognizedKeys: ["prompt", "text"],
+      rejectUnknown: false
+    });
+    const text = record.prompt ?? record.text ?? "";
+    if (typeof text !== "string") throw new TypeError("CLI text input prompt/text must be a string.");
+    return text;
   }
-  return JSON.stringify(input);
+  return JSON.stringify(snapshotJsonValue(input, { label: "CLI JSON input" }));
 }
 
 function cliError(message, code, details = {}) {
@@ -37,7 +138,14 @@ function parseJsonLines(stdout, name) {
     const line = lines[index].trim();
     if (!line) continue;
     try {
-      events.push(JSON.parse(line));
+      const parsed = snapshotJsonValue(JSON.parse(line), {
+        label: `${name} JSONL event ${index + 1}`,
+        freeze: true
+      });
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new TypeError("JSON Lines events must be objects.");
+      }
+      events.push(parsed);
     } catch (error) {
       throw cliError("CLI stdout contained invalid JSON Lines output.", "CLI_JSONL_PARSE_FAILED", {
         name,
@@ -69,17 +177,19 @@ function isWithin(root, target) {
 }
 
 function validateCwd(cwd, allowedCwdRoots) {
-  if (!allowedCwdRoots.some((root) => isWithin(root, cwd))) {
+  const resolvedCwd = realpathSync(resolve(cwd));
+  if (!allowedCwdRoots.some((root) => isWithin(root, resolvedCwd))) {
     throw new TypeError(`CLI cwd '${cwd}' is outside allowedCwdRoots.`);
   }
+  return resolvedCwd;
 }
 
-function resolveCommand(command) {
+function resolveCommand(command, environment = process.env) {
   if (process.platform !== "win32" || isAbsolute(command) || /[\\/]/.test(command) || extname(command)) {
     return command;
   }
 
-  const pathValue = process.env.Path || process.env.PATH || "";
+  const pathValue = environment.Path || environment.PATH || "";
   for (const directory of pathValue.split(delimiter).filter(Boolean)) {
     for (const extension of [".exe", ".com"]) {
       const candidate = join(directory.replace(/^"|"$/g, ""), `${command}${extension}`);
@@ -130,6 +240,7 @@ async function terminateProcessTree(child) {
 }
 
 export function createCliAgentTool(options = {}) {
+  options = snapshotCliOptions(options);
   const {
     name = "cliAgent",
     command,
@@ -167,10 +278,27 @@ export function createCliAgentTool(options = {}) {
   if (envAllowlist !== undefined && (!Array.isArray(envAllowlist) || envAllowlist.some((key) => typeof key !== "string"))) {
     throw new TypeError("envAllowlist must be an array of environment variable names.");
   }
-  validateCwd(cwd, allowedCwdRoots);
-  const resolvedCommand = resolveCommand(command);
+  const resolvedCwd = validateCwd(cwd, allowedCwdRoots);
+  const resolvedEnvironment = Object.freeze(pickEnvironment({
+    inheritEnv,
+    envAllowlist,
+    env,
+    allowUnsafeEnvInheritance
+  }));
+  const resolvedCommand = resolveCommand(command, resolvedEnvironment);
 
   return async function cliAgentTool(input = {}, context = {}) {
+    context = snapshotToolContext(context);
+    const signal = context.signal || null;
+    if (signal !== null && !(signal instanceof AbortSignal)) {
+      throw new TypeError("CLI agent context.signal must be an AbortSignal.");
+    }
+    if (signal?.aborted) {
+      throw cliError(`CLI agent '${name}' was aborted before launch.`, "CLI_ABORTED", {
+        name,
+        reason: signal.reason?.message || String(signal.reason || "aborted")
+      });
+    }
     const stdinBody = buildStdin(input, stdin);
     const approxInputTokens = estimateTokens(stdinBody || "");
     if (Number.isFinite(maxInputTokens) && approxInputTokens > maxInputTokens) {
@@ -186,8 +314,8 @@ export function createCliAgentTool(options = {}) {
       let child;
       try {
         child = spawn(resolvedCommand, args, {
-          cwd,
-          env: pickEnvironment({ inheritEnv, envAllowlist, env, allowUnsafeEnvInheritance }),
+          cwd: resolvedCwd,
+          env: { ...resolvedEnvironment },
           shell,
           detached: process.platform !== "win32",
           windowsHide: true,
@@ -208,8 +336,6 @@ export function createCliAgentTool(options = {}) {
       let settled = false;
       let stopping = false;
       let timer = null;
-      const signal = context.signal || null;
-
       const cleanup = () => {
         if (timer) clearTimeout(timer);
         if (signal) signal.removeEventListener("abort", onAbort);
@@ -311,7 +437,12 @@ export function createCliAgentTool(options = {}) {
         };
 
         try {
-          if (parseJson && stdoutText.trim()) result.json = JSON.parse(stdoutText.trim());
+          if (parseJson && stdoutText.trim()) {
+            result.json = snapshotJsonValue(JSON.parse(stdoutText.trim()), {
+              label: `${name} JSON output`,
+              freeze: true
+            });
+          }
           if (shouldParseJsonLines) result.jsonLines = parseJsonLines(stdoutText, name);
         } catch (error) {
           if (error instanceof MaqamError) {

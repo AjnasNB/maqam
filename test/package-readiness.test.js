@@ -13,7 +13,7 @@ const security = readFileSync(new URL("../SECURITY.md", import.meta.url), "utf8"
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.2.1");
+  assert.equal(packageJson.version, "0.2.2");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.author, "Ajnas NB");
   assert.equal(packageJson.type, "module");
@@ -75,6 +75,7 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(usageGuide, /createReleaseGateReport/);
   assert.match(maqamBin, /startMaqamServer/);
   assert.match(maqamBin, /--allow-private-networks/);
+  assert.match(maqamBin, /--allowed-ui-origin/);
   assert.match(maqamBin, /MAQAM_API_TOKEN/);
   assert.ok(existsSync(new URL("../src/index.d.ts", import.meta.url)));
   assert.ok(existsSync(new URL("../examples/governed-release.mjs", import.meta.url)));

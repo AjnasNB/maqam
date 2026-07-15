@@ -53,7 +53,7 @@ test("authorizeToolCall requests approval for configured approval tools", () => 
   });
 
   assert.equal(decision.status, "needs_approval");
-  assert.deepEqual(decision.requiredApprovals, ["tool:github"]);
+  assert.deepEqual([...decision.requiredApprovals], ["tool:github"]);
 });
 
 test("empty allowlists deny tools and URL origins by default", () => {
@@ -125,4 +125,72 @@ test("tool calls cannot exceed the goal's narrower tool and origin scope", () =>
     toolName: "reader",
     input: { url: "https://two.example/path" }
   }).status, "deny");
+});
+
+test("PolicyEngine rejects inherited and accessor authority without retaining caller state", () => {
+  const previousAllowAllTools = Object.getOwnPropertyDescriptor(Object.prototype, "allowAllTools");
+  try {
+    Object.defineProperty(Object.prototype, "allowAllTools", {
+      value: true,
+      configurable: true
+    });
+    assert.throws(
+      () => new PolicyEngine({}),
+      /Inherited PolicyEngine config field 'allowAllTools'/
+    );
+  } finally {
+    if (previousAllowAllTools) {
+      Object.defineProperty(Object.prototype, "allowAllTools", previousAllowAllTools);
+    } else {
+      delete Object.prototype.allowAllTools;
+    }
+  }
+
+  const allowedTools = ["reader"];
+  const policy = new PolicyEngine({ allowedTools, allowAllOrigins: true });
+  allowedTools[0] = "writer";
+  assert.equal(policy.authorizeToolCall({ toolName: "reader" }).status, "allow");
+  assert.equal(policy.authorizeToolCall({ toolName: "writer" }).status, "deny");
+
+  const previousAllowedTools = Object.getOwnPropertyDescriptor(Object.prototype, "allowedTools");
+  try {
+    Object.defineProperty(Object.prototype, "allowedTools", {
+      value: ["reader"],
+      configurable: true
+    });
+    assert.throws(
+      () => policy.evaluateGoal({}),
+      /Inherited Workflow goal field 'allowedTools'/
+    );
+  } finally {
+    if (previousAllowedTools) Object.defineProperty(Object.prototype, "allowedTools", previousAllowedTools);
+    else delete Object.prototype.allowedTools;
+  }
+
+  const previousEffects = Object.getOwnPropertyDescriptor(Object.prototype, "effects");
+  try {
+    Object.defineProperty(Object.prototype, "effects", {
+      value: ["publish"],
+      configurable: true
+    });
+    assert.throws(
+      () => policy.authorizeToolCall({ toolName: "reader", metadata: {} }),
+      /Inherited Tool authorization metadata field 'effects'/
+    );
+  } finally {
+    if (previousEffects) Object.defineProperty(Object.prototype, "effects", previousEffects);
+    else delete Object.prototype.effects;
+  }
+
+  let getterCalls = 0;
+  const request = {};
+  Object.defineProperty(request, "toolName", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "reader";
+    }
+  });
+  assert.throws(() => policy.authorizeToolCall(request), /data property/);
+  assert.equal(getterCalls, 0);
 });

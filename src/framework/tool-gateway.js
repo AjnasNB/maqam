@@ -1,10 +1,30 @@
 import { redactSensitive, redactText, snapshotHashedValue } from "./audit.js";
+import {
+  deepFreezeSnapshot,
+  snapshotJsonValue,
+  snapshotOwnDataRecord
+} from "./boundary.js";
 import { ApprovalRequiredError, PolicyDeniedError, toErrorRecord } from "./errors.js";
+import { createScopedEvidenceFacade } from "./evidence-scope.js";
 
 const POLICY_STATUSES = new Set(["allow", "deny", "needs_approval"]);
 const RISK_LEVELS = ["low", "medium", "high", "critical"];
 const MAX_POLICY_LIST_ITEMS = 10_000;
 const MAX_POLICY_STRING_LENGTH = 10_000;
+const GATEWAY_OPTION_KEYS = new Set([
+  "policyEngine", "evidenceLedger", "approvalQueue", "goal", "clock", "allowUngoverned"
+]);
+const GOAL_KEYS = new Set([
+  "runId", "objective", "allowedTools", "allowedOrigins", "budget", "approvalId",
+  "approvalIds", "requestedBy", "approvalEvidence"
+]);
+const LIMIT_KEYS = new Set(["maxToolCalls", "maxRuntimeMs", "maxPages", "maxNetworkRequests"]);
+const CONTEXT_KEYS = new Set([
+  "runId", "taskId", "goal", "limits", "signal", "authorizedOrigins",
+  "authorizationScope", "approvalId", "approvalIds", "requestedBy",
+  "approvalEvidence", "evidence", "evidenceLedger", "approvals", "tools",
+  "outputs", "trace"
+]);
 
 function safeErrorRecord(error) {
   const record = toErrorRecord(error);
@@ -15,13 +35,98 @@ function safeErrorRecord(error) {
   };
 }
 
-function cloneGoal(goal) {
-  if (!goal) return {};
-  try {
-    return structuredClone(goal);
-  } catch {
-    throw new TypeError("ToolGateway goals must contain structured-clone-safe values.");
+function validateKnownLimits(record, label) {
+  for (const key of LIMIT_KEYS) {
+    if (!Object.hasOwn(record, key)) continue;
+    const value = record[key];
+    if (!Number.isFinite(value) || value < 0) {
+      throw new TypeError(`${label}.${key} must be a non-negative finite number.`);
+    }
+    if (key !== "maxRuntimeMs" && !Number.isInteger(value)) {
+      throw new TypeError(`${label}.${key} must be an integer.`);
+    }
   }
+  return record;
+}
+
+function cloneGoal(goal) {
+  if (!goal) return Object.create(null);
+  const record = snapshotOwnDataRecord(goal, {
+    label: "ToolGateway goal",
+    recognizedKeys: GOAL_KEYS,
+    rejectUnknown: false
+  });
+  for (const key of ["runId", "objective", "approvalId", "requestedBy"]) {
+    if (record[key] !== undefined
+      && (typeof record[key] !== "string" || record[key].trim() === "")) {
+      throw new TypeError(`ToolGateway goal.${key} must be a non-empty string.`);
+    }
+  }
+  for (const key of ["allowedTools", "allowedOrigins", "approvalIds", "approvalEvidence"]) {
+    if (record[key] !== undefined) {
+      record[key] = normalizeStringArray(record[key], `ToolGateway goal.${key}`);
+    }
+  }
+  if (record.budget !== undefined) {
+    record.budget = validateKnownLimits(snapshotOwnDataRecord(record.budget, {
+      label: "ToolGateway goal.budget",
+      recognizedKeys: LIMIT_KEYS,
+      rejectUnknown: false
+    }), "ToolGateway goal.budget");
+  }
+  return snapshotJsonValue(record, {
+    label: "ToolGateway goal",
+    allowNullPrototype: true,
+    freeze: true
+  });
+}
+
+function snapshotContext(context) {
+  const snapshot = snapshotOwnDataRecord(context, {
+    label: "ToolGateway context",
+    recognizedKeys: CONTEXT_KEYS,
+    rejectUnknown: false
+  });
+  for (const key of ["runId", "taskId", "requestedBy"]) {
+    if (snapshot[key] !== undefined
+      && (typeof snapshot[key] !== "string" || snapshot[key].trim() === "")) {
+      throw new TypeError(`ToolGateway context.${key} must be a non-empty string.`);
+    }
+  }
+  if (snapshot.approvalId !== undefined && snapshot.approvalId !== null
+    && (typeof snapshot.approvalId !== "string" || snapshot.approvalId.trim() === "")) {
+    throw new TypeError("ToolGateway context.approvalId must be null or a non-empty string.");
+  }
+  if (snapshot.goal !== undefined && snapshot.goal !== null) snapshot.goal = cloneGoal(snapshot.goal);
+  for (const key of ["approvalIds", "approvalEvidence", "authorizedOrigins"]) {
+    if (snapshot[key] !== undefined) {
+      snapshot[key] = snapshotJsonValue(normalizeStringArray(
+        snapshot[key],
+        `ToolGateway context.${key}`
+      ), {
+        label: `ToolGateway context.${key}`,
+        allowNullPrototype: true,
+        freeze: true
+      });
+    }
+  }
+  if (snapshot.limits !== undefined && snapshot.limits !== null) {
+    snapshot.limits = snapshotOwnDataRecord(snapshot.limits, {
+      label: "ToolGateway context.limits",
+      recognizedKeys: LIMIT_KEYS,
+      rejectUnknown: false
+    });
+  }
+  for (const key of ["limits", "authorizationScope"]) {
+    if (snapshot[key] !== undefined && snapshot[key] !== null) {
+      snapshot[key] = snapshotJsonValue(snapshot[key], {
+        label: `ToolGateway context.${key}`,
+        allowNullPrototype: true,
+        freeze: true
+      });
+    }
+  }
+  return snapshot;
 }
 
 function normalizeStringArray(value, source) {
@@ -38,7 +143,7 @@ function normalizeStringArray(value, source) {
   }
   const normalized = Array.from({ length: value.length }, (_, index) => {
     const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
-    if (!descriptor?.enumerable || !("value" in descriptor)
+    if (!descriptor?.enumerable || !Object.hasOwn(descriptor, "value")
       || typeof descriptor.value !== "string" || descriptor.value.trim() === ""
       || descriptor.value.length > MAX_POLICY_STRING_LENGTH) {
       throw new TypeError(`${source} must contain only enumerable non-empty string data properties.`);
@@ -82,7 +187,7 @@ function ownDataValue(record, key, required = false) {
     if (required) throw new TypeError(`Policy decision is missing '${key}'.`);
     return undefined;
   }
-  if (!("value" in descriptor) || !descriptor.enumerable) {
+  if (!Object.hasOwn(descriptor, "value") || !descriptor.enumerable) {
     throw new TypeError(`Policy decision '${key}' must be an enumerable data property.`);
   }
   return descriptor.value;
@@ -93,7 +198,7 @@ function copyDataRecord(value, name) {
     || ![Object.prototype, null].includes(Object.getPrototypeOf(value))) {
     throw new TypeError(`Policy decision '${name}' must be a plain object.`);
   }
-  const result = {};
+  const result = Object.create(null);
   const keys = Reflect.ownKeys(value);
   if (keys.length > MAX_POLICY_LIST_ITEMS) {
     throw new TypeError(`Policy decision '${name}' has too many properties.`);
@@ -101,7 +206,7 @@ function copyDataRecord(value, name) {
   for (const key of keys) {
     if (typeof key !== "string") throw new TypeError(`Policy decision '${name}' cannot contain symbol keys.`);
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (!descriptor?.enumerable || !("value" in descriptor)) {
+    if (!descriptor?.enumerable || !Object.hasOwn(descriptor, "value")) {
       throw new TypeError(`Policy decision '${name}.${key}' must be an enumerable data property.`);
     }
     Object.defineProperty(result, key, {
@@ -119,13 +224,18 @@ function copyRegistrationRecord(value, name) {
     || ![Object.prototype, null].includes(Object.getPrototypeOf(value))) {
     throw new TypeError(`${name} must be a plain object.`);
   }
-  const result = {};
+  const result = Object.create(null);
+  for (const key of ["effects", "risk"]) {
+    if (!Object.hasOwn(value, key) && key in value) {
+      throw new TypeError(`Inherited ${name} field '${key}' is not allowed.`);
+    }
+  }
   const keys = Reflect.ownKeys(value);
   if (keys.length > MAX_POLICY_LIST_ITEMS) throw new TypeError(`${name} has too many properties.`);
   for (const key of keys) {
     if (typeof key !== "string") throw new TypeError(`${name} cannot contain symbol keys.`);
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (!descriptor?.enumerable || !("value" in descriptor)) {
+    if (!descriptor?.enumerable || !Object.hasOwn(descriptor, "value")) {
       throw new TypeError(`${name}.${key} must be an enumerable data property.`);
     }
     Object.defineProperty(result, key, {
@@ -145,13 +255,18 @@ function deepFreeze(value) {
 }
 
 function snapshotToolMetadata(value) {
-  // Parse the canonical bytes themselves so validation and detachment are one
-  // operation, without a second serialization surface.
-  return deepFreeze(snapshotHashedValue(value).snapshot);
+  return deepFreeze(snapshotJsonValue(value, {
+    label: "Tool metadata",
+    allowNullPrototype: true,
+    sortKeys: true
+  }));
 }
 
 function cloneToolMetadata(value) {
-  return structuredClone(value);
+  return snapshotJsonValue(value, {
+    label: "Tool metadata",
+    allowNullPrototype: true
+  });
 }
 
 function effectiveToolCallLimit(context, decision) {
@@ -220,13 +335,13 @@ function normalizePolicyDecision(value) {
     };
   }
 
-  return {
+  return snapshotToolMetadata({
     status,
     reason,
     limits,
     requiredApprovals: [...normalizedApprovals],
     ...(scope ? { scope } : {})
-  };
+  });
 }
 
 function intersectScope(configured, requested, name) {
@@ -253,26 +368,38 @@ function combineGoals(configuredGoal, requestedGoal) {
     else if (right !== undefined && left === undefined) budget[key] = right;
   }
   return {
-    goal: {
+    goal: snapshotJsonValue({
       ...requested,
       ...configured,
       ...(tools.values.length ? { allowedTools: tools.values } : {}),
       ...(origins.values.length ? { allowedOrigins: origins.values } : {}),
       ...(Object.keys(budget).length ? { budget } : {})
-    },
+    }, { label: "Effective ToolGateway goal", allowNullPrototype: true, freeze: true }),
     conflicts: [tools, origins].filter((scope) => scope.conflict).map((scope) => scope.name)
   };
 }
 
 export class ToolGateway {
   constructor(options = {}) {
+    options = snapshotOwnDataRecord(options, {
+      label: "ToolGateway options",
+      recognizedKeys: GATEWAY_OPTION_KEYS
+    });
     if (!options.policyEngine && options.allowUngoverned !== true) {
       throw new TypeError("ToolGateway requires a policyEngine. Set allowUngoverned: true only for explicitly ungoverned use.");
+    }
+    if (options.allowUngoverned !== undefined && typeof options.allowUngoverned !== "boolean") {
+      throw new TypeError("ToolGateway allowUngoverned must be a boolean.");
     }
     this.policyEngine = options.policyEngine || null;
     this.evidenceLedger = options.evidenceLedger || null;
     this.approvalQueue = options.approvalQueue || null;
-    this.goal = options.goal ? cloneGoal(options.goal) : null;
+    this.goal = options.goal === undefined || options.goal === null
+      ? null
+      : cloneGoal(options.goal);
+    if (options.clock !== undefined && typeof options.clock !== "function") {
+      throw new TypeError("ToolGateway clock must be a function.");
+    }
     this.clock = options.clock || (() => new Date());
     this.tools = new Map();
     this.trace = [];
@@ -280,14 +407,14 @@ export class ToolGateway {
   }
 
   registerTool(name, handler, metadata = {}) {
-    if (!name || typeof handler !== "function") {
+    if (typeof name !== "string" || name.trim() === "" || typeof handler !== "function") {
       throw new TypeError("ToolGateway.registerTool requires a name and handler.");
     }
     const governanceDescriptor = Object.getOwnPropertyDescriptor(handler, "governance");
     if (!governanceDescriptor && "governance" in handler) {
       throw new TypeError("Handler governance must be an own data property.");
     }
-    if (governanceDescriptor && !("value" in governanceDescriptor)) {
+    if (governanceDescriptor && !Object.hasOwn(governanceDescriptor, "value")) {
       throw new TypeError("Handler governance must be a data property.");
     }
     const governance = copyRegistrationRecord(governanceDescriptor?.value || {}, "Handler governance");
@@ -315,6 +442,21 @@ export class ToolGateway {
   }
 
   async call(toolName, input = {}, context = {}) {
+    if (typeof toolName !== "string" || toolName.trim() === "") {
+      throw new TypeError("ToolGateway.call requires a non-empty string toolName.");
+    }
+    context = snapshotContext(context);
+    let inputHash;
+    try {
+      const approved = snapshotHashedValue(input);
+      input = deepFreezeSnapshot(approved.snapshot);
+      inputHash = approved.hash;
+    } catch (cause) {
+      throw new PolicyDeniedError("Tool input is not safely canonicalizable.", {
+        code: "APPROVAL_INPUT_INVALID",
+        details: { toolName, reason: redactText(cause?.message || "Tool input is invalid.") }
+      });
+    }
     const runId = context.runId || "default";
     const startedAt = this.clock().toISOString();
     const traceBase = {
@@ -401,7 +543,9 @@ export class ToolGateway {
     let handlerInput = input;
     if (decision.status === "needs_approval") {
       try {
-        const resolved = this.#resolveApprovals({ tool, toolName, input, context, decision });
+        const resolved = this.#resolveApprovals({
+          tool, toolName, input, inputHash, context, decision
+        });
         approvals = resolved.approvals;
         handlerInput = resolved.input;
       } catch (error) {
@@ -416,20 +560,36 @@ export class ToolGateway {
 
     this.runCallCounts.set(runId, callCount + 1);
     try {
-      const result = await tool.handler(handlerInput, {
-        ...context,
+      const scopedEvidence = createScopedEvidenceFacade(this.evidenceLedger, {
+        runId,
+        taskId: context.taskId || null,
+        toolName
+      });
+      const handlerContext = Object.assign(Object.create(null), context, {
         // Always pass the exact goal and origin scope that were authorized. A
         // caller-provided context must not be able to broaden either value.
         goal: effectiveGoal,
-        authorizedOrigins: [...(decision.scope?.allowedOrigins || [])],
-        authorizationScope: decision.scope || null,
+        authorizedOrigins: snapshotJsonValue(decision.scope?.allowedOrigins || [], {
+          label: "Authorized origins",
+          allowNullPrototype: true,
+          freeze: true
+        }),
+        authorizationScope: decision.scope
+          ? snapshotToolMetadata(decision.scope)
+          : null,
         toolName,
         // Handlers receive a detached snapshot. Mutating it cannot weaken the
         // metadata used to authorize later calls.
         toolMetadata: cloneToolMetadata(tool.metadata),
-        approvals,
-        evidenceLedger: this.evidenceLedger
+        approvals: snapshotJsonValue(approvals, {
+          label: "Consumed approvals",
+          allowNullPrototype: true,
+          freeze: true
+        }),
+        evidence: scopedEvidence,
+        evidenceLedger: scopedEvidence
       });
+      const result = await tool.handler(handlerInput, handlerContext);
 
       this.#recordTrace(traceBase, "completed", {
         decision,
@@ -454,10 +614,10 @@ export class ToolGateway {
     this.runCallCounts.delete(runId);
   }
 
-  #resolveApprovals({ tool, toolName, input, context, decision }) {
+  #resolveApprovals({ tool, toolName, input, inputHash, context, decision }) {
     if (!this.approvalQueue) {
       throw new ApprovalRequiredError(decision.reason, {
-        details: { toolName, requiredApprovals: decision.requiredApprovals, decision }
+        details: { toolName, requiredApprovals: [...decision.requiredApprovals], decision }
       });
     }
 
@@ -465,18 +625,6 @@ export class ToolGateway {
       ? decision.requiredApprovals
       : [`tool:${toolName}`];
     const approvalIds = [context.approvalId, ...(context.approvalIds || [])].filter(Boolean);
-    let approvedInput;
-    let inputHash;
-    try {
-      const approved = snapshotHashedValue(input);
-      approvedInput = approved.snapshot;
-      inputHash = approved.hash;
-    } catch (error) {
-      throw new PolicyDeniedError("Approval-gated tool input is not safely canonicalizable.", {
-        code: "APPROVAL_INPUT_INVALID",
-        details: { toolName, reason: error.message }
-      });
-    }
     const subject = { runId: context.runId || "default", toolName, inputHash };
     const consumptionRequests = [];
     const approvalRequests = [];
@@ -540,14 +688,14 @@ export class ToolGateway {
         }
         return {
           approvals: this.approvalQueue.consumeMany(consumptionRequests),
-          input: approvedInput
+          input
         };
       }
       return {
         approvals: consumptionRequests.map(({ approvalId, usage }) => (
           this.approvalQueue.consume(approvalId, usage)
         )),
-        input: approvedInput
+        input
       };
     } catch (error) {
       throw new ApprovalRequiredError(error.message, {

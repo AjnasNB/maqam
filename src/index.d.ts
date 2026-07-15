@@ -273,21 +273,98 @@ export interface EvidenceLedgerJson {
   unsupportedClaims: ClaimRecord[];
 }
 
-export class EvidenceLedger {
-  constructor(options?: { clock?: () => Date });
+export interface EvidenceBatchInput {
+  evidence?: EvidenceInput[];
+  claims?: ClaimInput[];
+}
+
+export interface EvidenceBatchResult {
+  evidence: EvidenceRecord[];
+  claims: ClaimRecord[];
+}
+
+export interface EvidenceLedgerView {
   addEvidence(input?: EvidenceInput): EvidenceRecord;
   addClaim(input?: ClaimInput): ClaimRecord;
+  addBatch(input?: EvidenceBatchInput): EvidenceBatchResult;
   listEvidence(): EvidenceRecord[];
   listClaims(): ClaimRecord[];
   unsupportedClaims(): ClaimRecord[];
   toJSON(): EvidenceLedgerJson;
 }
 
-export interface AgentToolContext extends JsonObject {
+export type ScopedEvidenceInput = Omit<EvidenceInput, "runId" | "taskId" | "tool"> & {
+  /** Attribution is supplied by the runtime capability and cannot be overridden. */
+  runId?: never;
+  /** Attribution is supplied by the runtime capability and cannot be overridden. */
+  taskId?: never;
+  /** Attribution is supplied by the runtime capability and cannot be overridden. */
+  tool?: never;
+};
+
+export type ScopedClaimInput = Omit<ClaimInput, "runId" | "taskId"> & {
+  /** Attribution is supplied by the runtime capability and cannot be overridden. */
+  runId?: never;
+  /** Attribution is supplied by the runtime capability and cannot be overridden. */
+  taskId?: never;
+};
+
+export interface ScopedEvidenceBatchInput {
+  evidence?: ScopedEvidenceInput[];
+  claims?: ScopedClaimInput[];
+}
+
+export type ScopedEvidenceRecord = Readonly<EvidenceRecord>;
+export type ScopedClaimRecord = Readonly<Omit<ClaimRecord, "evidenceIds">> & {
+  readonly evidenceIds: readonly string[];
+};
+
+export interface ScopedEvidenceBatchResult {
+  readonly evidence: readonly ScopedEvidenceRecord[];
+  readonly claims: readonly ScopedClaimRecord[];
+}
+
+export interface ScopedEvidenceLedgerJson {
+  readonly evidence: readonly ScopedEvidenceRecord[];
+  readonly claims: readonly ScopedClaimRecord[];
+  readonly unsupportedClaims: readonly ScopedClaimRecord[];
+}
+
+/** A run-scoped capability. Writes receive trusted run/task/tool attribution. */
+export interface ScopedEvidenceLedger {
+  addEvidence(input?: ScopedEvidenceInput): ScopedEvidenceRecord;
+  addClaim(input?: ScopedClaimInput): ScopedClaimRecord;
+  addBatch(input?: ScopedEvidenceBatchInput): ScopedEvidenceBatchResult;
+  listEvidence(): readonly ScopedEvidenceRecord[];
+  listClaims(): readonly ScopedClaimRecord[];
+  unsupportedClaims(): readonly ScopedClaimRecord[];
+  toJSON(): ScopedEvidenceLedgerJson;
+}
+
+export class EvidenceLedger implements EvidenceLedgerView {
+  constructor(options?: { clock?: () => Date });
+  addEvidence(input?: EvidenceInput): EvidenceRecord;
+  addClaim(input?: ClaimInput): ClaimRecord;
+  addBatch(input?: EvidenceBatchInput): EvidenceBatchResult;
+  listEvidence(): EvidenceRecord[];
+  listClaims(): ClaimRecord[];
+  unsupportedClaims(): ClaimRecord[];
+  toJSON(): EvidenceLedgerJson;
+}
+
+export interface ToolCaller {
+  call<TOutput = unknown, TInput = unknown>(
+    toolName: string,
+    input?: TInput
+  ): Promise<TOutput>;
+}
+
+/** Untrusted call metadata accepted at the ToolGateway boundary. */
+export interface ToolCallContext extends JsonObject {
   runId?: string;
   taskId?: string;
-  goal?: WorkflowGoal;
-  limits?: JsonObject;
+  goal?: WorkflowGoal | null;
+  limits?: JsonObject | null;
   signal?: AbortSignal;
   authorizedOrigins?: string[];
   authorizationScope?: PolicyAuthorizationScope | null;
@@ -295,24 +372,53 @@ export interface AgentToolContext extends JsonObject {
   approvalIds?: string[];
   requestedBy?: string;
   approvalEvidence?: string[];
-  evidence?: EvidenceLedger | null;
-  evidenceLedger?: EvidenceLedger | null;
-  approvals?: ApprovalQueue | null;
-  tools?: ToolGateway | null;
-  outputs?: JsonObject;
-  trace?: JsonObject[];
 }
+
+/** Context accepted when directly invoking an AgentTool wrapper. */
+export interface AgentToolInvocationContext extends ToolCallContext {
+  evidence?: EvidenceLedgerView | ScopedEvidenceLedger | null;
+  evidenceLedger?: EvidenceLedgerView | ScopedEvidenceLedger | null;
+}
+
+/** Capability-limited context passed to registered tool and agent handlers. */
+export interface AgentExecutionContext extends ToolCallContext {
+  readonly toolName?: string;
+  readonly toolMetadata?: Readonly<ToolMetadata>;
+  readonly agentName?: string;
+  /** Detached records for approvals already consumed by this exact call. */
+  readonly approvals?: readonly ApprovalRecord[];
+  readonly evidence?: ScopedEvidenceLedger | null;
+  readonly evidenceLedger?: ScopedEvidenceLedger | null;
+  tools?: ToolCaller | null;
+  outputs?: JsonObject;
+  trace?: readonly JsonObject[];
+}
+
+/** Capability-limited context passed to workflow tasks. It has no approval queue. */
+export interface WorkflowTaskContext extends ToolCallContext {
+  runId: string;
+  taskId: string;
+  goal: WorkflowGoal;
+  limits: JsonObject;
+  readonly evidence: ScopedEvidenceLedger | null;
+  readonly evidenceLedger: ScopedEvidenceLedger | null;
+  readonly tools: ToolCaller | null;
+  outputs: JsonObject;
+}
+
+/** @deprecated Use AgentExecutionContext, WorkflowTaskContext, or ToolCallContext. */
+export type AgentToolContext = AgentExecutionContext;
 
 export type AgentTool<TInput = unknown, TOutput = unknown> = ((
   input?: TInput,
-  context?: AgentToolContext
+  context?: AgentToolInvocationContext
 ) => Promise<TOutput>) & {
   governance?: Readonly<JsonObject>;
 };
 
 export type AgentHandler<TInput = unknown, TOutput = unknown> = ((
   input: TInput,
-  context: AgentToolContext
+  context: AgentExecutionContext
 ) => TOutput | Promise<TOutput>) & {
   governance?: Readonly<JsonObject>;
 };
@@ -339,7 +445,7 @@ export class ToolGateway {
   call<TOutput = unknown, TInput = unknown>(
     toolName: string,
     input?: TInput,
-    context?: AgentToolContext
+    context?: ToolCallContext
   ): Promise<TOutput>;
   getCallCount(runId?: string): number;
   resetRun(runId: string): void;
@@ -381,7 +487,7 @@ export interface WorkflowTask<TOutput = unknown> {
   retryable?: boolean;
   retryOn?: string[] | ((error: unknown, attempt: number) => boolean);
   timeoutMs?: number;
-  run: (context: AgentToolContext) => TOutput | Promise<TOutput>;
+  run: (context: WorkflowTaskContext) => TOutput | Promise<TOutput>;
 }
 
 export interface Workflow {
@@ -665,7 +771,7 @@ export interface ClaudeCodeAgentToolOptions extends ProviderAgentBaseOptions {
 
 export type AgentInvoker<TInput = unknown, TOutput = unknown> = (
   input: TInput,
-  context: AgentToolContext
+  context: AgentExecutionContext
 ) => TOutput | Promise<TOutput>;
 
 export type AgentLike<TInput = unknown, TOutput = unknown> = { name?: string } & (

@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, realpath } from "node:fs/promises";
 import { extname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { classifyIpAddress } from "../crawler/security.js";
@@ -12,6 +12,11 @@ import {
   createResearchWorkflow
 } from "../index.js";
 import { redactText } from "../framework/audit.js";
+import {
+  snapshotJsonValue,
+  snapshotOwnDataArray,
+  snapshotOwnDataRecord
+} from "../framework/boundary.js";
 
 const PRODUCT = {
   name: "Maqam",
@@ -81,6 +86,56 @@ const CAPABILITIES = {
 };
 
 const DEFAULT_PUBLIC_DIR = fileURLToPath(new URL("../../app/", import.meta.url));
+const SERVER_OPTION_KEYS = [
+  "publicDir", "crawlerTool", "allowedHosts", "allowedOrigins", "allowedUiOrigins",
+  "apiToken", "allowPrivateNetworks", "allowCrossOriginCrawls", "maxSeeds", "port", "host"
+];
+
+function snapshotStringArray(value, label) {
+  const snapshot = snapshotOwnDataArray(value, { label });
+  for (let index = 0; index < snapshot.length; index += 1) {
+    if (typeof snapshot[index] !== "string") {
+      throw new TypeError(`${label}[${index}] must be a string.`);
+    }
+  }
+  return Object.freeze(snapshot);
+}
+
+function snapshotServerOptions(value = {}) {
+  const snapshot = snapshotOwnDataRecord(value, {
+    label: "Maqam server options",
+    recognizedKeys: SERVER_OPTION_KEYS
+  });
+  for (const key of ["allowedHosts", "allowedOrigins", "allowedUiOrigins"]) {
+    if (snapshot[key] !== undefined) snapshot[key] = snapshotStringArray(snapshot[key], `Maqam server options.${key}`);
+  }
+  for (const key of ["allowPrivateNetworks", "allowCrossOriginCrawls"]) {
+    if (snapshot[key] !== undefined && typeof snapshot[key] !== "boolean") {
+      throw new TypeError(`Maqam server options.${key} must be a boolean.`);
+    }
+  }
+  for (const key of ["publicDir", "host"]) {
+    if (snapshot[key] !== undefined && typeof snapshot[key] !== "string") {
+      throw new TypeError(`Maqam server options.${key} must be a string.`);
+    }
+  }
+  if (snapshot.crawlerTool !== undefined && typeof snapshot.crawlerTool !== "function") {
+    throw new TypeError("Maqam server options.crawlerTool must be a function.");
+  }
+  if (snapshot.apiToken !== undefined && snapshot.apiToken !== null
+    && (typeof snapshot.apiToken !== "string" || snapshot.apiToken.length === 0)) {
+    throw new TypeError("Maqam server options.apiToken must be a non-empty string or null.");
+  }
+  if (snapshot.maxSeeds !== undefined
+    && (!Number.isInteger(snapshot.maxSeeds) || snapshot.maxSeeds < 1 || snapshot.maxSeeds > 100)) {
+    throw new TypeError("Maqam server options.maxSeeds must be an integer from 1 to 100.");
+  }
+  if (snapshot.port !== undefined
+    && (!Number.isInteger(snapshot.port) || snapshot.port < 0 || snapshot.port > 65_535)) {
+    throw new TypeError("Maqam server options.port must be an integer from 0 to 65535.");
+  }
+  return Object.freeze(snapshot);
+}
 
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -90,6 +145,9 @@ const CONTENT_TYPES = {
   ".png": "image/png",
   ".json": "application/json; charset=utf-8"
 };
+
+const CORS_ALLOW_METHODS = "GET,POST,OPTIONS";
+const CORS_ALLOW_HEADERS = "Authorization,Content-Type";
 
 function normalizeBindHost(value) {
   return (typeof value === "string" ? value : "")
@@ -144,7 +202,7 @@ function snapshotListenOptions(value) {
       throw new TypeError("Maqam listen options cannot contain symbol keys.");
     }
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (!descriptor || !("value" in descriptor)) {
+    if (!descriptor || !Object.hasOwn(descriptor, "value")) {
       throw new TypeError(`Maqam listen option '${key}' must be an own data property.`);
     }
     Object.defineProperty(snapshot, key, {
@@ -224,7 +282,11 @@ async function readJsonBody(request) {
   }
   if (!chunks.length) return {};
   try {
-    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+    const parsed = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new TypeError("Request body must be a JSON object.");
+    }
+    return snapshotJsonValue(parsed, { label: "Maqam request body" });
   } catch {
     throw httpError(400, "Request body must be valid JSON.");
   }
@@ -268,6 +330,82 @@ function normalizedConfiguredOrigins(values = []) {
   }))];
 }
 
+function normalizedUiOrigins(values = []) {
+  if (!Array.isArray(values)) throw new TypeError("allowedUiOrigins server option must be an array.");
+  return [...new Set(values.map((value) => {
+    let url;
+    try {
+      url = new URL(value);
+    } catch {
+      throw new TypeError("allowedUiOrigins entries must be exact HTTP(S) origins.");
+    }
+    if ((url.protocol !== "http:" && url.protocol !== "https:") || url.origin !== value) {
+      throw new TypeError("allowedUiOrigins entries must be exact HTTP(S) origins without paths, credentials, queries, or fragments.");
+    }
+    return value;
+  }))];
+}
+
+function appendVaryOrigin(response) {
+  const current = response.getHeader("vary");
+  const values = (Array.isArray(current) ? current : [current])
+    .filter((value) => value !== undefined)
+    .flatMap((value) => String(value).split(","))
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (!values.some((value) => value.toLowerCase() === "origin")) values.push("Origin");
+  response.setHeader("vary", values.join(", "));
+}
+
+function parseRequestOrigin(value) {
+  if (typeof value !== "string" || value === "null") {
+    throw httpError(403, "Cross-origin API requests are not allowed.");
+  }
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw httpError(403, "Cross-origin API requests are not allowed.");
+  }
+  if ((url.protocol !== "http:" && url.protocol !== "https:") || url.origin !== value) {
+    throw httpError(403, "Cross-origin API requests are not allowed.");
+  }
+  return value;
+}
+
+function applyApiCors(request, response, hostHeader, allowedUiOrigins) {
+  appendVaryOrigin(response);
+  const originHeader = request.headers.origin;
+  if (originHeader === undefined) {
+    if (request.method === "OPTIONS" || request.headers["sec-fetch-site"] === "cross-site") {
+      throw httpError(403, "Cross-origin API requests are not allowed.");
+    }
+    return;
+  }
+
+  const origin = parseRequestOrigin(originHeader);
+  const requestOrigin = new URL(`http://${hostHeader}`).origin;
+  if (origin !== requestOrigin && !allowedUiOrigins.has(origin)) {
+    throw httpError(403, "Cross-origin API requests are not allowed.");
+  }
+
+  // A browser-controlled Origin is the CORS authority. Sec-Fetch-Site remains
+  // useful for rejecting origin-less cross-site requests, but cannot override
+  // an exact origin that the operator explicitly allowed.
+  response.setHeader("access-control-allow-origin", origin);
+}
+
+function sendPreflight(response) {
+  response.writeHead(204, {
+    "access-control-allow-methods": CORS_ALLOW_METHODS,
+    "access-control-allow-headers": CORS_ALLOW_HEADERS,
+    "cache-control": "no-store",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY"
+  });
+  response.end();
+}
+
 function compactPage(page) {
   return {
     ...page,
@@ -278,14 +416,18 @@ function compactPage(page) {
 }
 
 function compactRun(run) {
-  const pages = run.outputs?.collect_sources?.pages;
+  const compacted = snapshotJsonValue(run, {
+    label: "Maqam research run response",
+    allowNullPrototype: true
+  });
+  const pages = compacted.outputs?.collect_sources?.pages;
   if (Array.isArray(pages)) {
-    run.outputs.collect_sources.pages = pages.map(compactPage);
+    compacted.outputs.collect_sources.pages = pages.map(compactPage);
   }
-  return run;
+  return compacted;
 }
 
-async function runResearch(body, crawlerTool, serverOptions = {}) {
+async function runResearch(body, crawlerTool, serverOptions = {}, signal = null) {
   if (body.allowedOrigins !== undefined || body.allowPrivateNetworks !== undefined) {
     throw httpError(400, "Network policy is configured by the server and cannot be broadened by a request.");
   }
@@ -326,7 +468,7 @@ async function runResearch(body, crawlerTool, serverOptions = {}) {
     sameOrigin,
     allowedOrigins,
     allowPrivateNetworks: serverOptions.allowPrivateNetworks === true,
-    signal: serverOptions.signal || null
+    signal
   }));
 
   const runtime = new AgentRuntime({ policyEngine, evidenceLedger, toolGateway });
@@ -351,9 +493,9 @@ async function runResearch(body, crawlerTool, serverOptions = {}) {
 async function serveStatic(request, response, publicDir) {
   const url = new URL(request.url, "http://localhost");
   const pathname = url.pathname === "/" ? "/index.html" : url.pathname;
-  const root = resolve(publicDir);
-  const filePath = resolve(root, `.${decodeURIComponent(pathname)}`);
-  const pathFromRoot = relative(root, filePath);
+  const root = await realpath(resolve(publicDir));
+  const candidatePath = resolve(root, `.${decodeURIComponent(pathname)}`);
+  const pathFromRoot = relative(root, candidatePath);
 
   if (pathFromRoot.startsWith("..") || isAbsolute(pathFromRoot)) {
     sendJson(response, 403, { error: "Forbidden" });
@@ -361,6 +503,12 @@ async function serveStatic(request, response, publicDir) {
   }
 
   try {
+    const filePath = await realpath(candidatePath);
+    const resolvedPathFromRoot = relative(root, filePath);
+    if (resolvedPathFromRoot.startsWith("..") || isAbsolute(resolvedPathFromRoot)) {
+      sendJson(response, 403, { error: "Forbidden" });
+      return;
+    }
     const file = await readFile(filePath);
     response.writeHead(200, {
       "content-type": CONTENT_TYPES[extname(filePath)] || "application/octet-stream",
@@ -376,6 +524,7 @@ async function serveStatic(request, response, publicDir) {
 }
 
 export function createMaqamServer(options = {}) {
+  options = snapshotServerOptions(options);
   const publicDir = options.publicDir || DEFAULT_PUBLIC_DIR;
   const crawlerTool = options.crawlerTool || null;
   const hasExplicitAllowedHosts = Array.isArray(options.allowedHosts) && options.allowedHosts.length > 0;
@@ -385,6 +534,7 @@ export function createMaqamServer(options = {}) {
   const allowedHosts = new Set(allowedHostValues
     .map((host) => String(host).replace(/^\[|\]$/g, "").toLowerCase()));
   const apiToken = options.apiToken || null;
+  const allowedUiOrigins = new Set(normalizedUiOrigins(options.allowedUiOrigins || []));
 
   const server = createServer(async (request, response) => {
     try {
@@ -400,8 +550,13 @@ export function createMaqamServer(options = {}) {
       }
       if (!allowedHosts.has(requestHostname)) throw httpError(403, "Host is not allowed.");
 
-      if (url.pathname.startsWith("/api/") && apiToken) {
-        if (request.headers.authorization !== `Bearer ${apiToken}`) {
+      if (url.pathname.startsWith("/api/")) {
+        applyApiCors(request, response, hostHeader, allowedUiOrigins);
+        if (request.method === "OPTIONS") {
+          sendPreflight(response);
+          return;
+        }
+        if (apiToken && request.headers.authorization !== `Bearer ${apiToken}`) {
           response.setHeader("www-authenticate", "Bearer");
           throw httpError(401, "API authentication is required.");
         }
@@ -422,13 +577,6 @@ export function createMaqamServer(options = {}) {
         if (!/^application\/(?:json|[a-z0-9!#$&^_.+-]+\+json)(?:\s*;|$)/i.test(contentType)) {
           throw httpError(415, "Content-Type must be application/json.");
         }
-        const origin = request.headers.origin;
-        if (origin && origin !== `http://${hostHeader}` && !(options.allowedUiOrigins || []).includes(origin)) {
-          throw httpError(403, "Cross-origin API requests are not allowed.");
-        }
-        if (request.headers["sec-fetch-site"] === "cross-site") {
-          throw httpError(403, "Cross-site API requests are not allowed.");
-        }
         const body = await readJsonBody(request);
         const disconnectController = new AbortController();
         const onAborted = () => disconnectController.abort(new Error("HTTP client disconnected."));
@@ -436,10 +584,7 @@ export function createMaqamServer(options = {}) {
         response.once("close", () => {
           if (!response.writableEnded) onAborted();
         });
-        sendJson(response, 200, await runResearch(body, crawlerTool, {
-          ...options,
-          signal: disconnectController.signal
-        }));
+        sendJson(response, 200, await runResearch(body, crawlerTool, options, disconnectController.signal));
         return;
       }
 
@@ -460,7 +605,12 @@ export function createMaqamServer(options = {}) {
 }
 
 export function startMaqamServer(options = {}) {
-  const port = Number(options.port ?? process.env.PORT ?? 8787);
+  options = snapshotServerOptions(options);
+  const environmentPort = process.env.PORT === undefined ? 8787 : Number(process.env.PORT);
+  const port = options.port ?? environmentPort;
+  if (!Number.isInteger(port) || port < 0 || port > 65_535) {
+    throw new TypeError("Maqam server port must be an integer from 0 to 65535.");
+  }
   const host = options.host || process.env.HOST || "127.0.0.1";
   const apiToken = options.apiToken || process.env.MAQAM_API_TOKEN || null;
   if (!isLoopbackBindHost(host) && !apiToken) {

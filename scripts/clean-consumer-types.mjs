@@ -80,7 +80,7 @@ try {
     join(consumerDirectory, "node_modules", "maqam", "package.json"),
     "utf8"
   ));
-  if (installed.version !== "0.2.1" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
+  if (installed.version !== "0.2.2" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
     throw new Error("The packed Maqam manifest does not expose the reviewed Node type dependency.");
   }
   run(process.execPath, [tscPath, "-p", join(consumerDirectory, "tsconfig.json")], {

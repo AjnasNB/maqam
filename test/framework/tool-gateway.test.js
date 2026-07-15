@@ -74,7 +74,7 @@ test("registration metadata can add but cannot erase handler-declared effects", 
   await assert.rejects(
     () => gateway.call("writer"),
     (error) => {
-      assert.deepEqual(error.details.requiredApprovals, ["effect:write", "effect:publish"]);
+      assert.deepEqual([...error.details.requiredApprovals], ["effect:write", "effect:publish"]);
       assert.ok(error.details.approvalRequests.every((request) => request.risk === "critical"));
       return error instanceof ApprovalRequiredError;
     }
@@ -138,6 +138,46 @@ test("registration metadata can add but cannot erase handler-declared effects", 
     /own data property/i
   );
   assert.equal(metadataGetterCalls, 0);
+});
+
+test("descriptor prototype pollution cannot forge tool metadata", () => {
+  const gateway = new ToolGateway({ allowUngoverned: true });
+  let getterCalls = 0;
+  const metadata = {};
+  Object.defineProperty(metadata, "risk", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "critical";
+    }
+  });
+  const handler = async () => ({});
+  Object.defineProperty(handler, "governance", {
+    configurable: true,
+    get() {
+      getterCalls += 1;
+      return { effects: [] };
+    }
+  });
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, "value");
+  try {
+    Object.defineProperty(Object.prototype, "value", {
+      value: "low",
+      configurable: true
+    });
+    assert.throws(
+      () => gateway.registerTool("polluted", async () => ({}), metadata),
+      /data property/i
+    );
+    assert.throws(
+      () => gateway.registerTool("polluted-handler", handler),
+      /data property/i
+    );
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, "value", previous);
+    else delete Object.prototype.value;
+  }
+  assert.equal(getterCalls, 0);
 });
 
 test("handler metadata mutation cannot weaken later authorization", async () => {
@@ -283,6 +323,48 @@ test("policy decision limits are accessor-free immutable audit snapshots", async
   assert.equal(Object.isFrozen(snapshotGateway.trace[0].decision.limits.custom), true);
 });
 
+test("handler scope mutation cannot falsify the frozen authorization decision", async () => {
+  const gateway = new ToolGateway({
+    policyEngine: {
+      authorizeToolCall: () => ({
+        status: "allow",
+        reason: "scoped",
+        limits: {},
+        requiredApprovals: [],
+        scope: {
+          allowedOrigins: ["https://safe.example"],
+          originsExplicit: true,
+          originsUnrestricted: false
+        }
+      })
+    }
+  });
+  gateway.registerTool("reader", async (_input, context) => {
+    let mutationBlocked = false;
+    try {
+      context.authorizationScope.allowedOrigins.push("https://evil.example");
+    } catch {
+      mutationBlocked = true;
+    }
+    return {
+      mutationBlocked,
+      scopeFrozen: Object.isFrozen(context.authorizationScope),
+      originsFrozen: Object.isFrozen(context.authorizationScope.allowedOrigins)
+    };
+  });
+
+  const result = await gateway.call("reader");
+  const decision = gateway.trace[0].decision;
+  assert.deepEqual(result, {
+    mutationBlocked: true,
+    scopeFrozen: true,
+    originsFrozen: true
+  });
+  assert.equal(Object.isFrozen(decision), true);
+  assert.equal(Object.isFrozen(decision.scope), true);
+  assert.deepEqual([...decision.scope.allowedOrigins], ["https://safe.example"]);
+});
+
 test("ToolGateway enforces per-run tool-call limits and redacts trace secrets", async () => {
   const policyEngine = new PolicyEngine({ allowedTools: ["echo"], maxToolCalls: 1 });
   const gateway = new ToolGateway({ policyEngine });
@@ -384,6 +466,128 @@ test("approval-gated handlers consume the exact detached input that was hashed",
   assert.equal(request.subject.inputHash, approvalQueue.get(request.approvalId).subject.inputHash);
 });
 
+test("ungated calls authorize and execute one immutable detached input snapshot", async () => {
+  let authorizedInput;
+  const policyEngine = {
+    authorizeToolCall({ input }) {
+      authorizedInput = input;
+      return {
+        status: "allow",
+        reason: "Allowed for snapshot regression.",
+        limits: {},
+        requiredApprovals: []
+      };
+    }
+  };
+  const gateway = new ToolGateway({ policyEngine });
+  let entered;
+  let release;
+  let handlerInput;
+  const handlerEntered = new Promise((resolve) => { entered = resolve; });
+  gateway.registerTool("reader", async (input) => {
+    handlerInput = input;
+    entered();
+    await new Promise((resolve) => { release = resolve; });
+    return { value: input.nested.value, inherited: input.nested.authorized };
+  });
+
+  const callerInput = { nested: { value: "safe" }, items: [{}] };
+  const call = gateway.call("reader", callerInput);
+  await handlerEntered;
+  callerInput.nested.value = "changed";
+  callerInput.items[0].changed = true;
+
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, "authorized");
+  try {
+    Object.defineProperty(Object.prototype, "authorized", {
+      value: true,
+      configurable: true
+    });
+    release();
+    assert.deepEqual(await call, { value: "safe", inherited: undefined });
+    assert.equal(authorizedInput, handlerInput);
+    assert.equal(handlerInput.items[0].changed, undefined);
+    assert.equal(Object.getPrototypeOf(handlerInput), null);
+    assert.equal(Object.getPrototypeOf(handlerInput.nested), null);
+    assert.notEqual(Object.getPrototypeOf(handlerInput.items), Array.prototype);
+    assert.equal(Object.isFrozen(handlerInput), true);
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, "authorized", previous);
+    else delete Object.prototype.authorized;
+  }
+});
+
+test("ToolGateway rejects input accessors before policy or handler evaluation", async () => {
+  let policyCalls = 0;
+  let handlerCalls = 0;
+  let getterCalls = 0;
+  const gateway = new ToolGateway({
+    policyEngine: {
+      authorizeToolCall() {
+        policyCalls += 1;
+        return { status: "allow", reason: "allow", limits: {}, requiredApprovals: [] };
+      }
+    }
+  });
+  gateway.registerTool("reader", async () => { handlerCalls += 1; });
+  const input = {};
+  Object.defineProperty(input, "target", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "danger";
+    }
+  });
+
+  await assert.rejects(
+    () => gateway.call("reader", input),
+    (error) => error.code === "APPROVAL_INPUT_INVALID"
+  );
+  assert.equal(getterCalls, 0);
+  assert.equal(policyCalls, 0);
+  assert.equal(handlerCalls, 0);
+});
+
+test("approved empty input cannot gain authority through later prototype pollution", async () => {
+  const approvalQueue = new ApprovalQueue();
+  const policyEngine = new PolicyEngine({
+    allowedTools: ["writer"],
+    approvalRequiredTools: ["writer"]
+  });
+  const gateway = new ToolGateway({ policyEngine, approvalQueue });
+  gateway.registerTool("writer", async (input) => ({
+    admin: input.admin,
+    prototype: Object.getPrototypeOf(input)
+  }));
+
+  let request;
+  await assert.rejects(
+    () => gateway.call("writer", {}, { runId: "prototype_hash" }),
+    (error) => {
+      request = error.details.approvalRequests[0];
+      return error.code === "APPROVAL_REQUIRED";
+    }
+  );
+  approvalQueue.approve(request.approvalId, { decidedBy: "owner" });
+
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, "admin");
+  try {
+    Object.defineProperty(Object.prototype, "admin", {
+      value: true,
+      configurable: true
+    });
+    const result = await gateway.call("writer", {}, {
+      runId: "prototype_hash",
+      approvalId: request.approvalId
+    });
+    assert.equal(result.admin, undefined);
+    assert.equal(result.prototype, null);
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, "admin", previous);
+    else delete Object.prototype.admin;
+  }
+});
+
 test("ToolGateway and PolicyEngine deny by default unless ungoverned use is explicit", async () => {
   assert.throws(() => new ToolGateway(), /requires a policyEngine/);
 
@@ -460,7 +664,7 @@ test("multi-approval tool calls consume approvals atomically", async () => {
     }),
     (error) => error.code === "APPROVAL_INVALID"
   );
-  assert.deepEqual(approvalQueue.get(requests[0].approvalId).consumptions, []);
+  assert.deepEqual([...approvalQueue.get(requests[0].approvalId).consumptions], []);
 });
 
 test("gateway-level goals remain effective inside crawler tools", async () => {
@@ -534,5 +738,32 @@ test("caller context goals can narrow but cannot replace a gateway-level goal", 
       { goal: { allowedTools: ["reader"], allowedOrigins: ["https://two.example"] } }
     ),
     (error) => error instanceof PolicyDeniedError && /goal|origin/i.test(error.message)
+  );
+});
+
+test("ToolGateway rejects malformed goal scopes and detaches configured scopes", async () => {
+  const policyEngine = new PolicyEngine({
+    allowedTools: ["reader", "writer"],
+    allowAllOrigins: true
+  });
+  assert.throws(
+    () => new ToolGateway({ policyEngine, goal: { allowedTools: "reader" } }),
+    /array of non-empty strings/
+  );
+
+  const allowedTools = ["reader"];
+  const gateway = new ToolGateway({ policyEngine, goal: { allowedTools } });
+  gateway.registerTool("reader", async () => ({ ok: true }));
+  gateway.registerTool("writer", async () => ({ wrote: true }));
+  allowedTools[0] = "writer";
+
+  assert.deepEqual(await gateway.call("reader"), { ok: true });
+  await assert.rejects(
+    () => gateway.call("writer"),
+    (error) => error.code === "GOAL_SCOPE_CONFLICT" || error.code === "POLICY_DENIED"
+  );
+  await assert.rejects(
+    () => gateway.call("reader", {}, { goal: { allowedOrigins: "https://example.com" } }),
+    /array of non-empty strings/
   );
 });

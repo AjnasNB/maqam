@@ -15,7 +15,7 @@ const artifact = {
 };
 const release = {
   packageName: "maqam",
-  version: "0.2.1",
+  version: "0.2.2",
   registry: "https://registry.npmjs.org/",
   publishCommand: "npm publish --access public"
 };

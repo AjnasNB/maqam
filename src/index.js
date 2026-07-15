@@ -3,10 +3,97 @@ import * as cheerio from "cheerio";
 import robotsParser from "robots-parser";
 import TurndownService from "turndown";
 import { createCrawlerSecurityError, withPinnedFetch } from "./crawler/security.js";
+import {
+  snapshotJsonValue,
+  snapshotOwnDataArray,
+  snapshotOwnDataRecord
+} from "./framework/boundary.js";
 
 const DEFAULT_USER_AGENT = "Maqam/0.2 (+https://github.com/AjnasNB/maqam)";
 const DEFAULT_MAX_BYTES = 3 * 1024 * 1024;
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+const CRAWL_OPTION_KEYS = [
+  "seeds", "urls", "maxPages", "maxSeeds", "maxRequests", "maxQueue",
+  "maxLinksPerPage", "maxDepth", "concurrency", "sameOrigin", "allowedOrigins",
+  "includeSitemaps", "maxSitemaps", "maxUrlsPerSitemap", "obeyRobots",
+  "allowPrivateNetworks", "userAgent", "delayMs", "timeoutMs", "maxDurationMs",
+  "maxBytes", "maxRedirects", "maxRetries", "retryDelayMs", "signal", "dnsLookup",
+  "onPage", "onError"
+];
+const CRAWLER_CONTEXT_KEYS = [
+  "runId", "taskId", "goal", "limits", "signal", "authorizedOrigins",
+  "authorizationScope", "approvalId", "approvalIds", "requestedBy",
+  "approvalEvidence", "evidence", "evidenceLedger", "approvals", "tools",
+  "outputs", "trace"
+];
+const CRAWL_BOOLEAN_KEYS = [
+  "sameOrigin", "includeSitemaps", "obeyRobots", "allowPrivateNetworks"
+];
+
+function snapshotStringArray(value, label) {
+  const result = snapshotOwnDataArray(value, { label });
+  for (let index = 0; index < result.length; index += 1) {
+    if (typeof result[index] !== "string") {
+      throw new TypeError(`${label}[${index}] must be a string.`);
+    }
+  }
+  return Object.freeze(result);
+}
+
+function snapshotCrawlerOptions(value = {}, label = "Crawler options") {
+  const snapshot = snapshotOwnDataRecord(value, {
+    label,
+    recognizedKeys: CRAWL_OPTION_KEYS
+  });
+  for (const key of ["seeds", "urls", "allowedOrigins"]) {
+    if (snapshot[key] !== undefined) snapshot[key] = snapshotStringArray(snapshot[key], `${label}.${key}`);
+  }
+  for (const key of CRAWL_BOOLEAN_KEYS) {
+    if (snapshot[key] !== undefined && typeof snapshot[key] !== "boolean") {
+      throw new TypeError(`${label}.${key} must be a boolean.`);
+    }
+  }
+  if (snapshot.userAgent !== undefined && typeof snapshot.userAgent !== "string") {
+    throw new TypeError(`${label}.userAgent must be a string.`);
+  }
+  for (const key of ["dnsLookup", "onPage", "onError"]) {
+    if (snapshot[key] !== undefined && snapshot[key] !== null && typeof snapshot[key] !== "function") {
+      throw new TypeError(`${label}.${key} must be a function or null.`);
+    }
+  }
+  if (snapshot.signal !== undefined && snapshot.signal !== null
+    && !(snapshot.signal instanceof AbortSignal)) {
+    throw new TypeError(`${label}.signal must be an AbortSignal or null.`);
+  }
+  return Object.freeze(snapshot);
+}
+
+function snapshotCrawlerContext(value = {}) {
+  const snapshot = snapshotOwnDataRecord(value, {
+    label: "Crawler tool context",
+    recognizedKeys: CRAWLER_CONTEXT_KEYS,
+    rejectUnknown: false
+  });
+  if (snapshot.authorizedOrigins !== undefined) {
+    snapshot.authorizedOrigins = snapshotStringArray(
+      snapshot.authorizedOrigins,
+      "Crawler tool context.authorizedOrigins"
+    );
+  }
+  if (snapshot.goal !== undefined && snapshot.goal !== null) {
+    snapshot.goal = snapshotJsonValue(snapshot.goal, {
+      label: "Crawler tool context.goal",
+      freeze: true
+    });
+  }
+  if (snapshot.limits !== undefined && snapshot.limits !== null) {
+    snapshot.limits = snapshotJsonValue(snapshot.limits, {
+      label: "Crawler tool context.limits",
+      freeze: true
+    });
+  }
+  return Object.freeze(snapshot);
+}
 
 function abortError(signal) {
   if (signal?.reason instanceof Error) return signal.reason;
@@ -14,6 +101,51 @@ function abortError(signal) {
   error.name = "AbortError";
   error.code = "CRAWL_ABORTED";
   return error;
+}
+
+function crawlDurationError(maxDurationMs) {
+  const error = new Error(`Crawl exceeded maxDurationMs (${maxDurationMs}).`);
+  error.code = "CRAWL_DURATION_LIMIT";
+  return error;
+}
+
+async function runCallbackWithinDeadline(callback, payload, {
+  deadlineAt,
+  maxDurationMs,
+  signal,
+  label
+}) {
+  if (signal?.aborted) throw abortError(signal);
+  const remainingMs = deadlineAt - Date.now();
+  if (remainingMs <= 0) throw crawlDurationError(maxDurationMs);
+  const safePayload = snapshotJsonValue(payload, {
+    label: `${label} payload`,
+    maximumStringLength: 50 * 1024 * 1024,
+    allowNullPrototype: true,
+    freeze: true
+  });
+
+  let timer;
+  let onAbort;
+  const boundary = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(crawlDurationError(maxDurationMs)), Math.max(1, remainingMs));
+    if (signal) {
+      onAbort = () => reject(abortError(signal));
+      signal.addEventListener("abort", onAbort, { once: true });
+      if (signal.aborted) onAbort();
+    }
+  });
+  try {
+    await Promise.race([
+      Promise.resolve().then(() => callback(safePayload)),
+      boundary
+    ]);
+  } finally {
+    clearTimeout(timer);
+    if (onAbort) signal.removeEventListener("abort", onAbort);
+  }
+  if (signal?.aborted) throw abortError(signal);
+  if (Date.now() >= deadlineAt) throw crawlDurationError(maxDurationMs);
 }
 
 function sleep(ms, signal) {
@@ -66,7 +198,7 @@ function sameOrigin(a, b) {
 }
 
 function integerOption(value, name, fallback, minimum, maximum) {
-  const candidate = value === undefined ? fallback : Number(value);
+  const candidate = value === undefined ? fallback : value;
   if (!Number.isInteger(candidate) || candidate < minimum || candidate > maximum) {
     throw new TypeError(`${name} must be an integer from ${minimum} to ${maximum}.`);
   }
@@ -74,18 +206,19 @@ function integerOption(value, name, fallback, minimum, maximum) {
 }
 
 function normalizeAllowedOrigins(values = []) {
-  if (!Array.isArray(values)) throw new TypeError("allowedOrigins must be an array of HTTP(S) origins.");
-  return [...new Set(values.map((value) => {
+  const snapshot = snapshotStringArray(values, "allowedOrigins");
+  return [...new Set(snapshot.map((value) => {
     if (!isHttpUrl(value)) throw new TypeError(`Invalid allowed origin '${value}'.`);
     return new URL(value).origin;
   }))];
 }
 
 function normalizeOptions(input, seedCount) {
+  input = snapshotCrawlerOptions(input);
   const maxPages = integerOption(input.maxPages, "maxPages", 50, 1, 10_000);
   const maxSeeds = integerOption(input.maxSeeds, "maxSeeds", 100, 1, 1_000);
   if (seedCount > maxSeeds) throw new TypeError(`seeds exceeds maxSeeds (${seedCount} > ${maxSeeds}).`);
-  const userAgent = String(input.userAgent || DEFAULT_USER_AGENT);
+  const userAgent = input.userAgent ?? DEFAULT_USER_AGENT;
   if (!userAgent || userAgent.length > 256 || /[\r\n]/.test(userAgent)) {
     throw new TypeError("userAgent must be 1-256 characters without line breaks.");
   }
@@ -307,7 +440,8 @@ async function discoverSitemapDocument(sitemapUrl, options) {
 }
 
 async function discoverSitemapUrls(sitemapUrl, options = {}) {
-  const normalized = normalizeOptions({ ...options, maxPages: options.maxPages || 50 }, 1);
+  const input = snapshotCrawlerOptions(options, "discoverSitemapUrls options");
+  const normalized = normalizeOptions({ ...input, maxPages: input.maxPages ?? 50 }, 1);
   const seedOrigin = new URL(sitemapUrl).origin;
   const isUrlAllowed = (url) => (
     (!normalized.allowedOrigins.length || normalized.allowedOrigins.includes(new URL(url).origin))
@@ -341,6 +475,10 @@ function cleanForExtraction($) {
 }
 
 export function extractPage(html, url, options = {}) {
+  options = snapshotOwnDataRecord(options, {
+    label: "extractPage options",
+    recognizedKeys: ["maxLinksPerPage"]
+  });
   const $ = cheerio.load(html);
   cleanForExtraction($);
 
@@ -431,7 +569,8 @@ function isFatalCrawlError(error) {
 }
 
 export async function crawlDetailed(input = {}) {
-  const rawSeeds = input.seeds || input.urls || [];
+  input = snapshotCrawlerOptions(input, "crawlDetailed input");
+  const rawSeeds = input.seeds ?? input.urls ?? [];
   if (!Array.isArray(rawSeeds) || rawSeeds.length === 0) {
     throw new TypeError("At least one http(s) seed URL is required.");
   }
@@ -504,9 +643,7 @@ export async function crawlDetailed(input = {}) {
   async function beforeNetworkRequest(url) {
     if (options.signal?.aborted) throw abortError(options.signal);
     if (Date.now() >= deadlineAt) {
-      const error = new Error(`Crawl exceeded maxDurationMs (${options.maxDurationMs}).`);
-      error.code = "CRAWL_DURATION_LIMIT";
-      throw error;
+      throw crawlDurationError(options.maxDurationMs);
     }
     if (stats.requests >= options.maxRequests) {
       const error = new Error(`Crawl exceeded maxRequests (${options.maxRequests}).`);
@@ -538,7 +675,14 @@ export async function crawlDetailed(input = {}) {
       error: error?.message || String(error)
     };
     failures.push(failure);
-    if (options.onError) await options.onError({ ...failure });
+    if (options.onError) {
+      await runCallbackWithinDeadline(options.onError, failure, {
+        deadlineAt,
+        maxDurationMs: options.maxDurationMs,
+        signal: options.signal,
+        label: "Crawler onError"
+      });
+    }
   }
 
   if (options.includeSitemaps && options.maxSitemaps > 0) {
@@ -649,7 +793,14 @@ export async function crawlDetailed(input = {}) {
     for (const page of batchPages) {
       if (!page || pages.length >= options.maxPages) continue;
       pages.push(page);
-      if (options.onPage) await options.onPage({ ...page, links: [...page.links] });
+      if (options.onPage) {
+        await runCallbackWithinDeadline(options.onPage, page, {
+          deadlineAt,
+          maxDurationMs: options.maxDurationMs,
+          signal: options.signal,
+          label: "Crawler onPage"
+        });
+      }
       if (page.depth < options.maxDepth) {
         for (const link of page.links) enqueue(link, page.depth + 1, page.url);
       }
@@ -699,16 +850,22 @@ export { classifyIpAddress, isPublicIpAddress, resolveUrlTarget } from "./crawle
 
 function boundedNumber(requested, configured, fallback, mode = "max") {
   const boundary = configured ?? fallback;
-  if (!Number.isFinite(Number(requested))) return boundary;
+  if (requested === undefined) return boundary;
+  if (typeof requested !== "number" || !Number.isFinite(requested)) {
+    throw new TypeError("Crawler numeric limits must be finite numbers.");
+  }
   return mode === "min"
-    ? Math.max(boundary, Number(requested))
-    : Math.min(boundary, Number(requested));
+    ? Math.max(boundary, requested)
+    : Math.min(boundary, requested);
 }
 
 export function createCrawlerTool(defaultOptions = {}) {
+  const configured = snapshotCrawlerOptions(defaultOptions, "createCrawlerTool options");
   const tool = async function crawlerTool(input = {}, context = {}) {
-    const signals = [context.signal, defaultOptions.signal].filter(Boolean);
-    const configuredOrigins = normalizeAllowedOrigins(defaultOptions.allowedOrigins || []);
+    input = snapshotCrawlerOptions(input, "Crawler tool input");
+    context = snapshotCrawlerContext(context);
+    const signals = [context.signal, configured.signal].filter(Boolean);
+    const configuredOrigins = normalizeAllowedOrigins(configured.allowedOrigins || []);
     const authorizedOrigins = normalizeAllowedOrigins(context.authorizedOrigins || []);
     const goalOrigins = normalizeAllowedOrigins(context.goal?.allowedOrigins || []);
     const explicitScopes = [configuredOrigins, authorizedOrigins, goalOrigins]
@@ -726,62 +883,62 @@ export function createCrawlerTool(defaultOptions = {}) {
         goalOrigins
       });
     }
-    const sameOrigin = defaultOptions.sameOrigin === false ? input.sameOrigin === true : true;
+    const sameOrigin = configured.sameOrigin === false ? input.sameOrigin === true : true;
     if (!sameOrigin && allowedOrigins.length === 0) {
       throw createCrawlerSecurityError("Cross-origin crawling requires an explicit trusted origin allowlist.");
     }
     const maxPages = boundedNumber(
-      boundedNumber(input.maxPages, context.limits?.maxPages, defaultOptions.maxPages ?? 50),
-      defaultOptions.maxPages,
+      boundedNumber(input.maxPages, context.limits?.maxPages, configured.maxPages ?? 50),
+      configured.maxPages,
       50
     );
     const maxRequests = boundedNumber(
-      boundedNumber(input.maxRequests, context.limits?.maxNetworkRequests, defaultOptions.maxRequests ?? 400),
-      defaultOptions.maxRequests,
+      boundedNumber(input.maxRequests, context.limits?.maxNetworkRequests, configured.maxRequests ?? 400),
+      configured.maxRequests,
       400
     );
     const maxDurationMs = boundedNumber(
-      boundedNumber(input.maxDurationMs, context.limits?.maxRuntimeMs, defaultOptions.maxDurationMs ?? 600_000),
-      defaultOptions.maxDurationMs,
+      boundedNumber(input.maxDurationMs, context.limits?.maxRuntimeMs, configured.maxDurationMs ?? 600_000),
+      configured.maxDurationMs,
       600_000
     );
     return crawl({
       ...input,
       maxPages,
-      maxSeeds: boundedNumber(input.maxSeeds, defaultOptions.maxSeeds, 100),
+      maxSeeds: boundedNumber(input.maxSeeds, configured.maxSeeds, 100),
       maxRequests,
-      maxQueue: boundedNumber(input.maxQueue, defaultOptions.maxQueue, 1_000),
-      maxLinksPerPage: boundedNumber(input.maxLinksPerPage, defaultOptions.maxLinksPerPage, 2_000),
-      maxDepth: boundedNumber(input.maxDepth, defaultOptions.maxDepth, 20),
-      concurrency: boundedNumber(input.concurrency, defaultOptions.concurrency, 4),
-      delayMs: boundedNumber(input.delayMs, defaultOptions.delayMs, 250, "min"),
-      timeoutMs: boundedNumber(input.timeoutMs, defaultOptions.timeoutMs, 15_000),
+      maxQueue: boundedNumber(input.maxQueue, configured.maxQueue, 1_000),
+      maxLinksPerPage: boundedNumber(input.maxLinksPerPage, configured.maxLinksPerPage, 2_000),
+      maxDepth: boundedNumber(input.maxDepth, configured.maxDepth, 20),
+      concurrency: boundedNumber(input.concurrency, configured.concurrency, 4),
+      delayMs: boundedNumber(input.delayMs, configured.delayMs, 250, "min"),
+      timeoutMs: boundedNumber(input.timeoutMs, configured.timeoutMs, 15_000),
       maxDurationMs,
-      maxBytes: boundedNumber(input.maxBytes, defaultOptions.maxBytes, DEFAULT_MAX_BYTES),
-      maxRedirects: boundedNumber(input.maxRedirects, defaultOptions.maxRedirects, 5),
-      maxRetries: boundedNumber(input.maxRetries, defaultOptions.maxRetries, 2),
-      maxSitemaps: boundedNumber(input.maxSitemaps, defaultOptions.maxSitemaps, 20),
-      maxUrlsPerSitemap: boundedNumber(input.maxUrlsPerSitemap, defaultOptions.maxUrlsPerSitemap, 5_000),
-      retryDelayMs: boundedNumber(input.retryDelayMs, defaultOptions.retryDelayMs, 250, "min"),
+      maxBytes: boundedNumber(input.maxBytes, configured.maxBytes, DEFAULT_MAX_BYTES),
+      maxRedirects: boundedNumber(input.maxRedirects, configured.maxRedirects, 5),
+      maxRetries: boundedNumber(input.maxRetries, configured.maxRetries, 2),
+      maxSitemaps: boundedNumber(input.maxSitemaps, configured.maxSitemaps, 20),
+      maxUrlsPerSitemap: boundedNumber(input.maxUrlsPerSitemap, configured.maxUrlsPerSitemap, 5_000),
+      retryDelayMs: boundedNumber(input.retryDelayMs, configured.retryDelayMs, 250, "min"),
       sameOrigin,
-      obeyRobots: defaultOptions.obeyRobots === false ? input.obeyRobots === true : true,
-      allowPrivateNetworks: defaultOptions.allowPrivateNetworks === true,
+      obeyRobots: configured.obeyRobots === false ? input.obeyRobots === true : true,
+      allowPrivateNetworks: configured.allowPrivateNetworks === true,
       allowedOrigins,
-      userAgent: defaultOptions.userAgent || input.userAgent,
-      includeSitemaps: input.includeSitemaps === true && defaultOptions.includeSitemaps !== false,
+      userAgent: configured.userAgent || input.userAgent,
+      includeSitemaps: input.includeSitemaps === true && configured.includeSitemaps !== false,
       signal: signals.length > 1 ? AbortSignal.any(signals) : signals[0] || null,
-      dnsLookup: defaultOptions.dnsLookup || null,
-      onPage: defaultOptions.onPage || null,
-      onError: defaultOptions.onError || null
+      dnsLookup: configured.dnsLookup || null,
+      onPage: configured.onPage || null,
+      onError: configured.onError || null
     });
   };
   tool.governance = Object.freeze({
     name: "crawler",
     effects: ["network:read"],
     safeDefaults: {
-      obeyRobots: defaultOptions.obeyRobots !== false,
-      sameOrigin: defaultOptions.sameOrigin !== false,
-      allowPrivateNetworks: defaultOptions.allowPrivateNetworks === true
+      obeyRobots: configured.obeyRobots !== false,
+      sameOrigin: configured.sameOrigin !== false,
+      allowPrivateNetworks: configured.allowPrivateNetworks === true
     }
   });
   return tool;

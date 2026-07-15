@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { snapshotJsonValue } from "./boundary.js";
 
 const SENSITIVE_KEY = /(?:authorization|cookie|password|passwd|secret|credential|private[_-]?key|api[_-]?key|token|session[_-]?(?:id|key)|client[_-]?secret)/i;
 const SECRET_PATTERNS = [
@@ -49,12 +50,29 @@ export function redactSensitive(value, seen = new WeakSet()) {
   if (value instanceof Date) return value.toISOString();
   if (value instanceof URL) return redactText(sanitizeUrl(value));
   if (Buffer.isBuffer(value)) return `[Binary ${value.byteLength} bytes]`;
-  if (Array.isArray(value)) return value.map((item) => redactSensitive(item, seen));
+  if (Array.isArray(value)) {
+    const redacted = new Array(value.length);
+    for (let index = 0; index < value.length; index += 1) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+      if (!descriptor) continue;
+      if (!descriptor.enumerable || !Object.hasOwn(descriptor, "value")) {
+        throw new TypeError(`Audit data at '$[${index}]' must be an enumerable data property.`);
+      }
+      redacted[index] = redactSensitive(descriptor.value, seen);
+    }
+    return redacted;
+  }
 
   const redacted = {};
-  for (const [key, item] of Object.entries(value)) {
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key !== "string") continue;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor?.enumerable) continue;
+    if (!Object.hasOwn(descriptor, "value")) {
+      throw new TypeError(`Audit data at '$.${key}' must be an enumerable data property.`);
+    }
     Object.defineProperty(redacted, key, {
-      value: SENSITIVE_KEY.test(key) ? "[REDACTED]" : redactSensitive(item, seen),
+      value: SENSITIVE_KEY.test(key) ? "[REDACTED]" : redactSensitive(descriptor.value, seen),
       enumerable: true,
       configurable: true,
       writable: true
@@ -63,86 +81,16 @@ export function redactSensitive(value, seen = new WeakSet()) {
   return redacted;
 }
 
-function canonicalize(value, seen = new WeakSet(), path = "$", state = { nodes: 0 }, depth = 0) {
-  state.nodes += 1;
-  if (state.nodes > MAX_CANONICAL_NODES) {
-    throw new TypeError(`Approval input exceeds ${MAX_CANONICAL_NODES} canonical values.`);
-  }
-  if (depth > MAX_CANONICAL_DEPTH) {
-    throw new TypeError(`Approval input exceeds maximum depth ${MAX_CANONICAL_DEPTH}.`);
-  }
-  if (typeof value === "string" && value.length > MAX_CANONICAL_STRING_LENGTH) {
-    throw new TypeError(`Approval input string at '${path}' is too large.`);
-  }
-  if (value === null || typeof value === "string" || typeof value === "boolean") return value;
-  if (typeof value === "number") {
-    if (!Number.isFinite(value)) throw new TypeError(`Approval input at '${path}' must contain only finite numbers.`);
-    if (Object.is(value, -0)) {
-      throw new TypeError(`Approval input at '${path}' cannot contain -0 because JSON does not preserve it.`);
-    }
-    return value;
-  }
-  if (["undefined", "function", "symbol", "bigint"].includes(typeof value)) {
-    throw new TypeError(`Approval input at '${path}' contains unsupported type '${typeof value}'.`);
-  }
-  if (value instanceof Date || value instanceof URL || Buffer.isBuffer(value)) {
-    throw new TypeError(`Approval input at '${path}' must use JSON-safe values, not '${value.constructor.name}'.`);
-  }
-  if (seen.has(value)) throw new TypeError(`Approval input at '${path}' contains a cycle.`);
-  seen.add(value);
-  if (Array.isArray(value)) {
-    if (value.length > MAX_CANONICAL_COLLECTION_SIZE) {
-      throw new TypeError(`Approval input array at '${path}' exceeds ${MAX_CANONICAL_COLLECTION_SIZE} items.`);
-    }
-    const keys = Reflect.ownKeys(value);
-    if (keys.some((key) => typeof key !== "string")) {
-      throw new TypeError(`Approval input array at '${path}' cannot contain symbol keys.`);
-    }
-    const allowedKeys = new Set(["length", ...Array.from({ length: value.length }, (_, index) => String(index))]);
-    if (keys.some((key) => !allowedKeys.has(key))) {
-      throw new TypeError(`Approval input array at '${path}' cannot contain extra properties.`);
-    }
-    return Array.from({ length: value.length }, (_, index) => {
-      if (!Object.hasOwn(value, index)) {
-        throw new TypeError(`Approval input array at '${path}' must be dense.`);
-      }
-      const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
-      if (!descriptor?.enumerable || !("value" in descriptor)) {
-        throw new TypeError(`Approval input at '${path}[${index}]' must be an enumerable data property.`);
-      }
-      return canonicalize(descriptor.value, seen, `${path}[${index}]`, state, depth + 1);
-    });
-  }
-
-  const prototype = Object.getPrototypeOf(value);
-  if (prototype !== Object.prototype) {
-    throw new TypeError(`Approval input at '${path}' must use plain JSON objects and arrays.`);
-  }
-  const ownKeys = Reflect.ownKeys(value);
-  if (ownKeys.length > MAX_CANONICAL_COLLECTION_SIZE) {
-    throw new TypeError(`Approval input object at '${path}' exceeds ${MAX_CANONICAL_COLLECTION_SIZE} keys.`);
-  }
-  if (ownKeys.some((key) => typeof key !== "string")) {
-    throw new TypeError(`Approval input at '${path}' cannot contain symbol keys.`);
-  }
-  for (const key of ownKeys) {
-    const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (!descriptor?.enumerable || !("value" in descriptor)) {
-      throw new TypeError(`Approval input at '${path}.${key}' must be an enumerable data property.`);
-    }
-  }
-
-  // A null-prototype result prevents keys such as __proto__ from mutating the
-  // canonicalizer itself or disappearing from the serialized representation.
-  const result = Object.create(null);
-  for (const key of Object.keys(value).sort()) {
-    const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (!descriptor?.enumerable || !("value" in descriptor)) {
-      throw new TypeError(`Approval input at '${path}.${key}' must be an enumerable data property.`);
-    }
-    result[key] = canonicalize(descriptor.value, seen, `${path}.${key}`, state, depth + 1);
-  }
-  return result;
+function canonicalize(value) {
+  return snapshotJsonValue(value, {
+    label: "Approval input",
+    maximumDepth: MAX_CANONICAL_DEPTH,
+    maximumNodes: MAX_CANONICAL_NODES,
+    maximumCollectionSize: MAX_CANONICAL_COLLECTION_SIZE,
+    maximumStringLength: MAX_CANONICAL_STRING_LENGTH,
+    allowNullPrototype: false,
+    sortKeys: true
+  });
 }
 
 export function hashValue(value) {
@@ -151,11 +99,13 @@ export function hashValue(value) {
 }
 
 export function snapshotHashedValue(value) {
-  const canonical = JSON.stringify(canonicalize(value));
+  const snapshot = canonicalize(value);
+  const canonical = JSON.stringify(snapshot);
   return {
-    // Parse the exact bytes that are hashed so the value later consumed by an
-    // approval-gated tool cannot diverge from its approval subject.
-    snapshot: JSON.parse(canonical),
+    // The handler receives this exact detached, prototype-isolated structure.
+    // Hashing and execution therefore cannot diverge through later prototype
+    // pollution or caller mutation.
+    snapshot,
     hash: createHash("sha256").update(canonical).digest("hex")
   };
 }

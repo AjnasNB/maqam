@@ -1,8 +1,29 @@
+import {
+  SAFE_ARRAY_PROTOTYPE,
+  snapshotOwnDataArray,
+  snapshotOwnDataRecord
+} from "./boundary.js";
+
 const APPROVAL_STATUSES = new Set(["pending", "approved", "rejected"]);
 const MAX_JSON_DEPTH = 100;
 const MAX_JSON_NODES = 100_000;
 const MAX_COLLECTION_SIZE = 100_000;
 const MAX_STRING_LENGTH = 1_000_000;
+const QUEUE_OPTION_KEYS = new Set(["clock", "approvals", "nextId"]);
+const APPROVAL_RECORD_KEYS = new Set([
+  "approvalId", "status", "action", "requestedBy", "reason", "risk",
+  "subject", "evidence", "reusable", "consumptions", "requestedAt", "decision"
+]);
+const APPROVAL_REQUEST_KEYS = new Set([
+  "action", "requestedBy", "reason", "risk", "subject", "evidence", "reusable"
+]);
+const APPROVAL_QUERY_KEYS = new Set(["action", "status", "subject"]);
+const APPROVAL_DECISION_KEYS = new Set(["decidedBy", "note"]);
+const CONSUMPTION_REQUEST_KEYS = new Set(["approvalId", "usage"]);
+const CONSUMPTION_USAGE_KEYS = new Set(["consumedBy", "runId", "toolName"]);
+const CONSUMPTION_RECORD_KEYS = new Set(["consumedAt", "consumedBy", "runId", "toolName"]);
+const DECISION_RECORD_KEYS = new Set(["decidedBy", "note", "decidedAt"]);
+const SERIALIZED_QUEUE_KEYS = new Set(["approvals", "nextId"]);
 
 function cloneJson(value, path = "$", seen = new WeakSet(), state = { nodes: 0 }, depth = 0) {
   state.nodes += 1;
@@ -34,13 +55,16 @@ function cloneJson(value, path = "$", seen = new WeakSet(), state = { nodes: 0 }
     if (keys.some((key) => typeof key !== "string" || !allowed.has(key))) {
       throw new TypeError(`Approval JSON array at '${path}' contains extra or symbol properties.`);
     }
-    return Array.from({ length: value.length }, (_, index) => {
+    const result = new Array(value.length);
+    Object.setPrototypeOf(result, SAFE_ARRAY_PROTOTYPE);
+    for (let index = 0; index < value.length; index += 1) {
       const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
-      if (!descriptor?.enumerable || !("value" in descriptor)) {
+      if (!descriptor?.enumerable || !Object.hasOwn(descriptor, "value")) {
         throw new TypeError(`Approval JSON at '${path}[${index}]' must be a dense enumerable data property.`);
       }
-      return cloneJson(descriptor.value, `${path}[${index}]`, seen, state, depth + 1);
-    });
+      result[index] = cloneJson(descriptor.value, `${path}[${index}]`, seen, state, depth + 1);
+    }
+    return result;
   }
 
   if (![Object.prototype, null].includes(Object.getPrototypeOf(value))) {
@@ -53,10 +77,10 @@ function cloneJson(value, path = "$", seen = new WeakSet(), state = { nodes: 0 }
   if (keys.some((key) => typeof key !== "string")) {
     throw new TypeError(`Approval JSON object at '${path}' cannot contain symbol keys.`);
   }
-  const result = {};
+  const result = Object.create(null);
   for (const key of keys) {
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (!descriptor?.enumerable || !("value" in descriptor)) {
+    if (!descriptor?.enumerable || !Object.hasOwn(descriptor, "value")) {
       throw new TypeError(`Approval JSON at '${path}.${key}' must be an enumerable data property.`);
     }
     Object.defineProperty(result, key, {
@@ -102,23 +126,32 @@ function requireRisk(value, path) {
 }
 
 function validateConsumption(value, path) {
-  requireRecord(value, path);
-  requireTimestamp(value.consumedAt, `${path}.consumedAt`);
-  requireString(value.consumedBy, `${path}.consumedBy`);
-  requireString(value.runId, `${path}.runId`, { nullable: true });
-  requireString(value.toolName, `${path}.toolName`, { nullable: true });
+  const record = snapshotOwnDataRecord(value, {
+    label: path,
+    recognizedKeys: CONSUMPTION_RECORD_KEYS
+  });
+  requireTimestamp(record.consumedAt, `${path}.consumedAt`);
+  requireString(record.consumedBy, `${path}.consumedBy`);
+  requireString(record.runId, `${path}.runId`, { nullable: true });
+  requireString(record.toolName, `${path}.toolName`, { nullable: true });
 }
 
 function validateDecision(value, path) {
-  requireRecord(value, path);
-  requireString(value.decidedBy, `${path}.decidedBy`);
-  requireString(value.note, `${path}.note`, { empty: true });
-  requireTimestamp(value.decidedAt, `${path}.decidedAt`);
+  const record = snapshotOwnDataRecord(value, {
+    label: path,
+    recognizedKeys: DECISION_RECORD_KEYS
+  });
+  requireString(record.decidedBy, `${path}.decidedBy`);
+  requireString(record.note, `${path}.note`, { empty: true });
+  requireTimestamp(record.decidedAt, `${path}.decidedAt`);
 }
 
 function validateApprovalRecord(value, index) {
-  const record = clone(value);
   const path = `approvals[${index}]`;
+  const record = clone(snapshotOwnDataRecord(value, {
+    label: path,
+    recognizedKeys: APPROVAL_RECORD_KEYS
+  }));
   requireRecord(record, path);
   if (!/^approval_[1-9]\d*$/.test(record.approvalId || "")) {
     throw new TypeError(`${path}.approvalId must match 'approval_<positive integer>'.`);
@@ -159,15 +192,17 @@ function validateApprovalRecord(value, index) {
 }
 
 function validateApprovals(value) {
-  if (!Array.isArray(value)) throw new TypeError("ApprovalQueue approvals must be an array.");
-  if (value.length > MAX_COLLECTION_SIZE) throw new TypeError("ApprovalQueue contains too many approvals.");
-  const approvals = value.map(validateApprovalRecord);
+  const source = snapshotOwnDataArray(value, {
+    label: "ApprovalQueue approvals",
+    maximumLength: MAX_COLLECTION_SIZE
+  });
+  const approvals = source.map(validateApprovalRecord);
   const ids = new Set();
   for (const approval of approvals) {
     if (ids.has(approval.approvalId)) throw new TypeError(`Duplicate approval id '${approval.approvalId}'.`);
     ids.add(approval.approvalId);
   }
-  return approvals;
+  return clone(approvals);
 }
 
 function isoNow(clock) {
@@ -196,11 +231,15 @@ function sameSubject(left = {}, right = {}) {
 
 export class ApprovalQueue {
   constructor(options = {}) {
+    options = snapshotOwnDataRecord(options, {
+      label: "ApprovalQueue options",
+      recognizedKeys: QUEUE_OPTION_KEYS
+    });
     if (typeof options.clock !== "undefined" && typeof options.clock !== "function") {
       throw new TypeError("ApprovalQueue clock must be a function.");
     }
     this.clock = options.clock || (() => new Date());
-    this.approvals = options.approvals === undefined ? [] : validateApprovals(options.approvals);
+    this.approvals = options.approvals === undefined ? clone([]) : validateApprovals(options.approvals);
     const minimumNextId = nextIdFromApprovals(this.approvals);
     if (options.nextId !== undefined
       && (!Number.isSafeInteger(options.nextId)
@@ -212,8 +251,10 @@ export class ApprovalQueue {
   }
 
   requestApproval(input = {}) {
-    const request = clone(input);
-    requireRecord(request, "Approval request");
+    const request = clone(snapshotOwnDataRecord(input, {
+      label: "Approval request",
+      recognizedKeys: APPROVAL_REQUEST_KEYS
+    }));
     const action = request.action ?? "unknown";
     const requestedBy = request.requestedBy ?? "system";
     const reason = request.reason ?? "Approval requested.";
@@ -232,7 +273,7 @@ export class ApprovalQueue {
     evidence.forEach((entry, index) => {
       requireString(entry, `Approval request evidence[${index}]`, { empty: true });
     });
-    const approval = {
+    const approval = clone({
       approvalId: `approval_${this.nextId}`,
       status: "pending",
       action,
@@ -244,7 +285,7 @@ export class ApprovalQueue {
       reusable: request.reusable === true,
       consumptions: [],
       requestedAt: isoNow(this.clock)
-    };
+    });
 
     this.nextId += 1;
     this.approvals.push(approval);
@@ -257,14 +298,16 @@ export class ApprovalQueue {
   }
 
   pending() {
-    return this.approvals
+    return clone(this.approvals
       .filter((approval) => approval.status === "pending")
-      .map((approval) => clone(approval));
+      .map((approval) => clone(approval)));
   }
 
   findMatching(input = {}) {
-    const query = clone(input);
-    requireRecord(query, "Approval query");
+    const query = clone(snapshotOwnDataRecord(input, {
+      label: "Approval query",
+      recognizedKeys: APPROVAL_QUERY_KEYS
+    }));
     const { action, status = "pending", subject = {} } = query;
     if (!APPROVAL_STATUSES.has(status)) throw new TypeError("Approval status is invalid.");
     const expectedSubject = subject;
@@ -290,14 +333,19 @@ export class ApprovalQueue {
   }
 
   consumeMany(requests = []) {
-    if (!Array.isArray(requests) || requests.length === 0) return [];
-
-    const safeRequests = clone(requests);
+    const safeRequests = snapshotOwnDataArray(requests, {
+      label: "Approval consumption requests",
+      maximumLength: MAX_COLLECTION_SIZE
+    });
+    if (safeRequests.length === 0) return clone([]);
 
     const seen = new Set();
     const prepared = safeRequests.map((request) => {
-      requireRecord(request, "Approval consumption request");
-      const approvalId = request?.approvalId;
+      request = snapshotOwnDataRecord(request, {
+        label: "Approval consumption request",
+        recognizedKeys: CONSUMPTION_REQUEST_KEYS
+      });
+      const approvalId = request.approvalId;
       if (!approvalId || seen.has(approvalId)) {
         throw new Error(`Approval consumption requires unique approval ids; received '${approvalId || "unknown"}'.`);
       }
@@ -316,8 +364,10 @@ export class ApprovalQueue {
         throw new Error(`Approval '${approvalId}' has already been consumed.`);
       }
 
-      const usage = request.usage ?? {};
-      requireRecord(usage, "Approval consumption usage");
+      const usage = clone(snapshotOwnDataRecord(request.usage ?? {}, {
+        label: "Approval consumption usage",
+        recognizedKeys: CONSUMPTION_USAGE_KEYS
+      }));
       for (const [key, fallback] of [
         ["consumedBy", "tool-gateway"],
         ["runId", null],
@@ -333,7 +383,7 @@ export class ApprovalQueue {
 
     const consumedAt = isoNow(this.clock);
     const updated = prepared.map(({ index, current, usage }) => {
-      const approval = {
+      const approval = clone({
         ...current,
         consumptions: [
           ...(current.consumptions || []),
@@ -344,12 +394,12 @@ export class ApprovalQueue {
             toolName: usage.toolName || null
           }
         ]
-      };
+      });
       this.approvals[index] = approval;
       return clone(approval);
     });
 
-    return updated;
+    return clone(updated);
   }
 
   #decide(approvalId, status, decision) {
@@ -363,14 +413,16 @@ export class ApprovalQueue {
       throw new Error(`Approval '${approvalId}' is already ${current.status}.`);
     }
 
-    const safeDecision = clone(decision);
-    requireRecord(safeDecision, "Approval decision");
+    const safeDecision = clone(snapshotOwnDataRecord(decision, {
+      label: "Approval decision",
+      recognizedKeys: APPROVAL_DECISION_KEYS
+    }));
     const decidedBy = safeDecision.decidedBy ?? "system";
     const note = safeDecision.note ?? "";
     requireString(decidedBy, "Approval decision decidedBy");
     requireString(note, "Approval decision note", { empty: true });
 
-    const updated = {
+    const updated = clone({
       ...current,
       status,
       decision: {
@@ -378,24 +430,28 @@ export class ApprovalQueue {
         note,
         decidedAt: isoNow(this.clock)
       }
-    };
+    });
 
     this.approvals[index] = updated;
     return clone(updated);
   }
 
   toJSON() {
-    return {
+    return clone({
       approvals: clone(this.approvals),
       nextId: this.nextId
-    };
+    });
   }
 
   static fromJSON(data = {}, options = {}) {
-    const serialized = clone(data);
-    requireRecord(serialized, "ApprovalQueue JSON");
-    const unknownKeys = Reflect.ownKeys(serialized).filter((key) => !["approvals", "nextId"].includes(key));
-    if (unknownKeys.length) throw new TypeError("ApprovalQueue JSON contains unknown fields.");
+    const serialized = clone(snapshotOwnDataRecord(data, {
+      label: "ApprovalQueue JSON",
+      recognizedKeys: SERIALIZED_QUEUE_KEYS
+    }));
+    options = snapshotOwnDataRecord(options, {
+      label: "ApprovalQueue restore options",
+      recognizedKeys: new Set(["clock"])
+    });
     const approvals = validateApprovals(serialized.approvals ?? []);
     const minimumNextId = nextIdFromApprovals(approvals);
     const nextId = serialized.nextId ?? minimumNextId;

@@ -397,6 +397,11 @@ const claim = evidenceLedger.addClaim({
   confidence: 0.8
 });
 
+const committed = evidenceLedger.addBatch({
+  evidence: [{ source: "https://example.com", excerpt: "Source text" }],
+  claims: [{ text: "A checked claim", evidenceIds: [evidence.evidenceId] }]
+});
+
 evidenceLedger.listEvidence();
 evidenceLedger.listClaims();
 evidenceLedger.unsupportedClaims();
@@ -420,7 +425,7 @@ Evidence record shape:
 }
 ```
 
-Evidence ids and claim ids must be unique. Evidence hashes are computed from the normalized source and excerpt; a mismatching caller-supplied hash is rejected. Returned records are defensive copies. Unsupported claims are claims with no evidence IDs, missing evidence, or evidence from a different run.
+Evidence ids and claim ids must be unique. Evidence hashes are computed from the normalized source and excerpt; a mismatching caller-supplied hash is rejected. `addBatch()` validates all evidence and claims before a single commit. Internal collections are private, and returned records are detached prototype-safe copies. Unsupported claims are claims with no evidence IDs, missing evidence, or evidence from a different run.
 
 ### `new ToolGateway(options)`
 
@@ -458,10 +463,12 @@ async function handler(input, context) {
 The handler context includes:
 
 - `toolName`
-- `evidenceLedger`
+- `evidence` and the compatibility alias `evidenceLedger`, both referring to a run/task/tool-scoped facade
 - the exact effective `goal`
 - `authorizedOrigins` and `authorizationScope` from policy
 - safe workflow context passed to `call`
+
+The evidence facade exposes `addEvidence`, `addClaim`, `addBatch`, `listEvidence`, `listClaims`, `unsupportedClaims`, and `toJSON`. Maqam stamps `runId`, `taskId`, and `tool` from the active scope; a handler cannot forge those trusted attribution fields or access the raw ledger.
 
 `ToolGateway` requires a `policyEngine`. For deliberately ungoverned local code only, opt in with `new ToolGateway({ allowUngoverned: true })`.
 
@@ -599,7 +606,7 @@ registry.findByCapability("research");
 registry.select({ trigger: "oss", capabilities: ["research"] });
 ```
 
-`register()` returns a normalized copy of the stored skill. `get()`, `list()`, `find()`, `findByCapability()`, and `select()` also return copies. Selection sorts by `evalScore` descending, then by `id`.
+`register()` returns a normalized copy of the stored skill. `get()`, `list()`, `find()`, `findByCapability()`, and `select()` also return detached copies. Registry storage is private, mutable inputs are snapshotted, unknown/inherited/accessor fields are rejected, and a duplicate id is an error rather than an overwrite. Selection sorts by `evalScore` descending, then by `id`.
 
 ### `createCrawlerTool(defaultOptions)`
 
@@ -674,7 +681,7 @@ const result = await toolGateway.call("summarizer", {
 });
 ```
 
-If the agent output includes `evidence` or `claims` arrays, Maqam records them into the active `EvidenceLedger`.
+If the agent output includes `evidence` or `claims` arrays, Maqam prevalidates and records the entire set as one atomic batch through the active scoped evidence facade. Object runners must be own data functions; bind class prototype methods explicitly before passing them to `createAgentTool()`.
 
 Object-agent example:
 
@@ -705,6 +712,8 @@ const workflow = createResearchWorkflow({
   includeSitemaps: false
 });
 ```
+
+Research options are strict construction-time snapshots. Seeds must be absolute HTTP(S) URLs, numeric bounds are not coerced, and returned crawler pages are schema-checked and capped before any evidence is committed.
 
 ### `createCliAgentTool(options)`
 
@@ -887,8 +896,8 @@ Input fields:
 | `maxRetries` | `number` | Maximum retries for retryable network/HTTP failures. |
 | `retryDelayMs` | `number` | Initial retry delay; backoff is bounded. |
 | `signal` | `AbortSignal` | Cancels DNS resolution, delays, and requests. |
-| `onPage` | `function` | Optional callback for each page. |
-| `onError` | `function` | Optional callback receiving `{ url, phase, code, error }`. |
+| `onPage` | `function` | Optional callback for each page; receives a detached frozen record and remains inside total duration/cancellation limits. |
+| `onError` | `function` | Optional callback receiving a detached frozen `{ url, phase, code, error }` record inside the same limits. |
 
 Security, request-budget, duration, and abort failures reject the crawl. Ordinary page and sitemap failures are reported by `crawlDetailed()` and `onError` while other eligible URLs continue.
 
@@ -1384,7 +1393,7 @@ import { ApprovalQueue, createReleaseGateReport } from "maqam";
 
 const approvals = new ApprovalQueue();
 const artifact = {
-  filename: "maqam-0.2.1.tgz",
+  filename: "maqam-0.2.2.tgz",
   sizeBytes: 123456,
   integrity: `sha256:${"a".repeat(64)}`,
   gitCommit: "0123456789abcdef0123456789abcdef01234567"
@@ -1394,7 +1403,7 @@ const approval = approvals.requestApproval({
   reason: "Release candidate is ready.",
   subject: {
     packageName: "maqam",
-    version: "0.2.1",
+    version: "0.2.2",
     registry: "https://registry.npmjs.org/",
     publishCommand: "npm publish --access public",
     artifactFilename: artifact.filename,
@@ -1406,7 +1415,7 @@ const approval = approvals.requestApproval({
 
 const report = createReleaseGateReport({
   packageName: "maqam",
-  version: "0.2.1",
+  version: "0.2.2",
   license: "MIT",
   publishCommand: "npm publish --access public",
   registry: "https://registry.npmjs.org/",
@@ -1562,8 +1571,11 @@ Rules:
 Trusted startup example:
 
 ```bash
-maqam --allowed-origin https://github.com
+maqam --allowed-origin https://github.com \
+  --allowed-ui-origin https://console.example
 ```
+
+`--allowed-ui-origin` is a repeatable browser API CORS allowlist. Each value must be an exact serialized HTTP(S) origin, such as `https://console.example`: wildcards, `null`, credentials, paths, queries, and fragments are rejected. Allowed cross-origin clients receive that exact origin in `Access-Control-Allow-Origin`; Maqam never emits a wildcard. Preflights on `/api/*` advertise `GET,POST,OPTIONS` and the `Authorization,Content-Type` request headers. Non-preflight requests without an `Origin` remain valid for same-host scripts and command-line clients, except when browser metadata says the request is cross-site.
 
 Non-loopback binding through `startMaqamServer()` requires `MAQAM_API_TOKEN` (or `options.apiToken`) and at least one `--allowed-host`/`options.allowedHosts` value. Direct `listen()` calls on a raw server returned by `createMaqamServer()` require `options.apiToken` plus `options.allowedHosts`; that lower-level factory does not read the environment itself. Omitted hosts, ambiguous transport options, existing handles, and file descriptors are treated as non-loopback. Send the token as `Authorization: Bearer ...`; never put it in a URL or command-line option. The bundled browser page does not store or inject a bearer token, so authenticated remote API deployments should use a controlled client or authentication-aware reverse proxy and deployment egress restrictions.
 

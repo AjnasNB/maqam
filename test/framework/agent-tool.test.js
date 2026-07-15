@@ -45,7 +45,7 @@ test("createAgentTool wraps a function agent for governed execution", async () =
   assert.equal(gateway.trace[0].toolName, "summarizer");
   assert.equal(evidenceLedger.listEvidence()[0].tool, "summarizer");
   assert.equal(evidenceLedger.listClaims()[0].evidenceIds[0], "ev_agent_1");
-  assert.deepEqual(evidenceLedger.unsupportedClaims(), []);
+  assert.deepEqual([...evidenceLedger.unsupportedClaims()], []);
 });
 
 test("createAgentTool wraps object agents with run, invoke, or call methods", async () => {
@@ -120,5 +120,156 @@ test("agent output cannot spoof trusted run, task, or tool evidence fields", asy
   assert.equal(evidence.tool, "reviewer");
   assert.equal(claim.runId, "trusted_run");
   assert.equal(claim.taskId, "trusted_task");
-  assert.deepEqual(evidenceLedger.unsupportedClaims(), []);
+  assert.deepEqual([...evidenceLedger.unsupportedClaims()], []);
+});
+
+test("agent handlers receive only a run-task-tool scoped evidence facade", async () => {
+  const evidenceLedger = new EvidenceLedger();
+  evidenceLedger.addEvidence({
+    evidenceId: "ev_victim",
+    runId: "victim_run",
+    taskId: "victim_task",
+    tool: "victim_tool",
+    source: "private",
+    excerpt: "private"
+  });
+  const policyEngine = new PolicyEngine({ allowedTools: ["reviewer"] });
+  const gateway = new ToolGateway({ policyEngine, evidenceLedger });
+  let visibleBeforeWrite;
+  let exposedInternals;
+  let facadeFrozen;
+  gateway.registerTool("reviewer", createAgentTool(async (_input, context) => {
+    visibleBeforeWrite = context.evidenceLedger.listEvidence();
+    exposedInternals = context.evidenceLedger.evidence;
+    facadeFrozen = Object.isFrozen(context.evidenceLedger)
+      && Object.getPrototypeOf(context.evidenceLedger) === null;
+    context.evidenceLedger.addEvidence({
+      evidenceId: "ev_scoped_direct",
+      runId: "victim_run",
+      taskId: "victim_task",
+      tool: "victim_tool",
+      source: "agent",
+      excerpt: "scoped"
+    });
+    context.evidence.addClaim({
+      claimId: "claim_scoped_direct",
+      runId: "victim_run",
+      taskId: "victim_task",
+      text: "Scoped claim",
+      evidenceIds: ["ev_scoped_direct"]
+    });
+    return { ok: true };
+  }, { name: "reviewer" }));
+
+  await gateway.call("reviewer", {}, { runId: "trusted_run", taskId: "trusted_task" });
+  const evidence = evidenceLedger.listEvidence().find((record) => record.evidenceId === "ev_scoped_direct");
+  const claim = evidenceLedger.listClaims().find((record) => record.claimId === "claim_scoped_direct");
+  assert.deepEqual([...visibleBeforeWrite], []);
+  assert.equal(exposedInternals, undefined);
+  assert.equal(facadeFrozen, true);
+  assert.equal(evidence.runId, "trusted_run");
+  assert.equal(evidence.taskId, "trusted_task");
+  assert.equal(evidence.tool, "reviewer");
+  assert.equal(claim.runId, "trusted_run");
+  assert.equal(claim.taskId, "trusted_task");
+});
+
+test("createAgentTool rejects inherited and accessor runners and accepts explicit binding", async () => {
+  let getterCalls = 0;
+  const accessorAgent = {};
+  Object.defineProperty(accessorAgent, "run", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return async () => ({ unsafe: true });
+    }
+  });
+  assert.throws(() => createAgentTool(accessorAgent), /own enumerable data property/);
+  assert.equal(getterCalls, 0);
+
+  class ClassAgent {
+    constructor(prefix) {
+      this.prefix = prefix;
+    }
+
+    async run(input) {
+      return `${this.prefix}:${input.value}`;
+    }
+  }
+  const instance = new ClassAgent("bound");
+  assert.throws(() => createAgentTool(instance), /bind class methods explicitly/i);
+  const bound = createAgentTool(instance.run.bind(instance), { name: "bound-agent" });
+  assert.equal(await bound({ value: "ok" }), "bound:ok");
+
+  const previousRun = Object.getOwnPropertyDescriptor(Object.prototype, "run");
+  try {
+    Object.defineProperty(Object.prototype, "run", {
+      value: async () => ({ forged: true }),
+      configurable: true
+    });
+    assert.throws(() => createAgentTool({}), /Inherited agent runner 'run'/);
+  } finally {
+    if (previousRun) Object.defineProperty(Object.prototype, "run", previousRun);
+    else delete Object.prototype.run;
+  }
+
+  const options = {};
+  Object.defineProperty(options, "name", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "forged";
+    }
+  });
+  assert.throws(() => createAgentTool(async () => null, options), /data property/);
+  assert.equal(getterCalls, 0);
+});
+
+test("agent evidence and claims commit as one prevalidated batch", async () => {
+  const evidenceLedger = new EvidenceLedger();
+  const gateway = new ToolGateway({
+    policyEngine: new PolicyEngine({ allowedTools: ["researcher"] }),
+    evidenceLedger
+  });
+  const sparseEvidenceIds = [];
+  sparseEvidenceIds.length = 1;
+  gateway.registerTool("researcher", createAgentTool(async () => ({
+    evidence: [{ evidenceId: "ev_atomic", source: "agent", excerpt: "proof" }],
+    claims: [{ claimId: "claim_atomic", text: "claim", evidenceIds: sparseEvidenceIds }]
+  }), { name: "researcher" }));
+
+  await assert.rejects(
+    () => gateway.call("researcher", {}, { runId: "atomic_run", taskId: "atomic_task" }),
+    /dense/i
+  );
+  assert.equal(evidenceLedger.listEvidence().length, 0);
+  assert.equal(evidenceLedger.listClaims().length, 0);
+});
+
+test("agent result evidence accessors are rejected without partial writes or invocation", async () => {
+  const evidenceLedger = new EvidenceLedger();
+  const gateway = new ToolGateway({
+    policyEngine: new PolicyEngine({ allowedTools: ["researcher"] }),
+    evidenceLedger
+  });
+  let getterCalls = 0;
+  gateway.registerTool("researcher", createAgentTool(async () => {
+    const result = { claims: [] };
+    Object.defineProperty(result, "evidence", {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return [{ source: "danger" }];
+      }
+    });
+    return result;
+  }, { name: "researcher" }));
+
+  await assert.rejects(
+    () => gateway.call("researcher", {}, { runId: "accessor_run" }),
+    /data property/
+  );
+  assert.equal(getterCalls, 0);
+  assert.equal(evidenceLedger.listEvidence().length, 0);
+  assert.equal(evidenceLedger.listClaims().length, 0);
 });

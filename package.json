@@ -1,6 +1,6 @@
 {
   "name": "maqam",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Provider-neutral governance for agent workflows, tools, exact approvals, evidence, CLI workers, and secure web research.",
   "license": "MIT",
   "author": "Ajnas NB",

@@ -95,6 +95,6 @@ test("AgentRuntime controls function, object, and CLI workers in one governed wo
   assert.equal(result.status, "completed");
   assert.equal(result.outputs.record.artifact, "agent-workflow.txt");
   assert.match(result.outputs.record.content, /Design agent-workflow/);
-  assert.deepEqual(result.evidence.unsupportedClaims, []);
+  assert.deepEqual([...result.evidence.unsupportedClaims], []);
   assert.deepEqual(toolGateway.trace.map((entry) => entry.toolName), ["planner", "designer", "builder"]);
 });

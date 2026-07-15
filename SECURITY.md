@@ -4,7 +4,7 @@ Maqam is designed for governed local agent workflows. Treat every tool, connecto
 
 ## Supported Version
 
-Security fixes are prepared against `maqam@0.2.1` and later reviewed 0.2.x releases. Version 0.2.1 supersedes 0.2.0 for effect-policy integrity and raw embedded-server binding protection.
+Security fixes are prepared against `maqam@0.2.2` and later reviewed 0.2.x releases. Version 0.2.2 supersedes 0.2.1 for descriptor-validation safety under prototype pollution; 0.2.1 superseded 0.2.0 for effect-policy integrity and raw embedded-server binding protection.
 
 ## Reporting Issues
 
@@ -28,6 +28,10 @@ Report security issues privately to the package owner before public disclosure. 
 - Do not let an HTTP request choose server `allowedOrigins` or private-network authority. Both `startMaqamServer()` and the raw server returned by `createMaqamServer()` reject non-loopback TCP binding unless bearer authentication and an explicit Host allowlist are configured. Omitted hosts, ambiguous transport options, existing handles, and file descriptors are treated as non-loopback unless the protected bind path is configured. Remote deployments also require trusted UI origins and deployment-level egress controls.
 - Use a container, virtual machine, restricted operating-system account, and egress controls when a hard host boundary is required.
 - Treat post-run token or cost violations as potentially side-effecting. Inspect and explicitly roll back the workspace when the error reports observed activity.
+- Treat task and tool evidence capabilities as scoped append/read views. Maqam stamps the active run, task, and tool attribution and never exposes its raw ledger to a handler.
+- Keep Claude tool selectors canonical and separately listed. Composite selector strings are rejected, and unrecognized enabled selectors are classified as write-capable for approval policy.
+- Crawler `onPage` and `onError` callbacks receive detached, frozen payloads and remain inside the total crawl deadline and caller cancellation boundary.
+- Configure cross-origin console access only with exact `allowedUiOrigins` values. Wildcards, `null`, paths, credentials, query strings, and fragments are rejected; origin-less browser cross-site API requests remain denied.
 
 ## External Agent Boundary
 

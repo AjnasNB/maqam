@@ -44,3 +44,119 @@ test("createResearchWorkflow uses gateway results and records evidence", async (
   assert.equal(evidenceLedger.listEvidence().length, 1);
   assert.equal(evidenceLedger.unsupportedClaims().length, 0);
 });
+
+test("createResearchWorkflow snapshots authority-bearing options", async () => {
+  const seeds = ["https://example.com/safe"];
+  const options = {
+    seeds,
+    maxPages: 1,
+    sameOrigin: true,
+    includeSitemaps: false
+  };
+  const workflow = createResearchWorkflow(options);
+  seeds[0] = "http://127.0.0.1/admin";
+  options.maxPages = 999;
+  options.sameOrigin = false;
+  options.includeSitemaps = true;
+
+  let observedInput;
+  const result = await workflow.tasks[0].run({
+    tools: {
+      async call(name, input) {
+        assert.equal(name, "crawler");
+        observedInput = input;
+        return [{
+          url: "https://example.com/safe",
+          title: "Safe",
+          text: "safe result",
+          status: 200
+        }];
+      }
+    },
+    evidence: {
+      addBatch(batch) {
+        return { evidence: batch.evidence.map((_, index) => ({ evidenceId: `ev_${index + 1}` })), claims: [] };
+      }
+    }
+  });
+
+  assert.deepEqual([...observedInput.seeds], ["https://example.com/safe"]);
+  assert.equal(observedInput.maxPages, 1);
+  assert.equal(observedInput.sameOrigin, true);
+  assert.equal(observedInput.includeSitemaps, false);
+  assert.equal(result.pages[0].url, "https://example.com/safe");
+});
+
+test("createResearchWorkflow rejects inherited and accessor options without invoking getters", () => {
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, "sameOrigin");
+  try {
+    Object.defineProperty(Object.prototype, "sameOrigin", { value: false, configurable: true });
+    assert.throws(
+      () => createResearchWorkflow({ seeds: ["https://example.com"] }),
+      /Inherited Research workflow options field 'sameOrigin'/
+    );
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, "sameOrigin", previous);
+    else delete Object.prototype.sameOrigin;
+  }
+
+  let getterCalls = 0;
+  const options = {};
+  Object.defineProperty(options, "includeSitemaps", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return true;
+    }
+  });
+  assert.throws(() => createResearchWorkflow(options), /own enumerable data property/);
+  assert.equal(getterCalls, 0);
+});
+
+test("research collection validates crawler pages before committing evidence", async () => {
+  let evidenceCalls = 0;
+  const contextFor = (pages) => ({
+    tools: { call: async () => pages },
+    evidence: {
+      addBatch() {
+        evidenceCalls += 1;
+        return { evidence: [], claims: [] };
+      }
+    }
+  });
+  const workflow = createResearchWorkflow({
+    seeds: ["https://example.com"],
+    maxPages: 1
+  });
+
+  await assert.rejects(
+    () => workflow.tasks[0].run(contextFor([
+      { url: "https://example.com/1" },
+      { url: "https://example.com/2" }
+    ])),
+    /cannot exceed 1 items/
+  );
+  assert.equal(evidenceCalls, 0);
+
+  let getterCalls = 0;
+  const page = { url: "https://example.com/safe" };
+  Object.defineProperty(page, "text", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "forged";
+    }
+  });
+  await assert.rejects(
+    () => workflow.tasks[0].run(contextFor([page])),
+    /own enumerable data property/
+  );
+  assert.equal(getterCalls, 0);
+  assert.equal(evidenceCalls, 0);
+
+  await assert.rejects(
+    () => workflow.tasks[0].run(contextFor([{ url: "http://user:pass@example.com/private" }])),
+    /without credentials/
+  );
+  assert.equal(evidenceCalls, 0);
+});

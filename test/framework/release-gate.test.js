@@ -96,7 +96,7 @@ test("createReleaseGateReport marks an exact approved complete release publish-r
 test("unrelated actions and mismatched release subjects cannot authorize publishing", () => {
   const cases = [
     { action: "post:announcement" },
-    { subject: { version: "0.2.1" } },
+    { subject: { version: "0.2.2" } },
     { subject: { registry: "https://registry.example/" } },
     { subject: { publishCommand: "npm publish" } },
     { subject: { artifactIntegrity: "sha512-different" } },
@@ -154,4 +154,88 @@ test("createReleaseGateReport explains missing and invalid production evidence",
   assert.ok(report.blockers.some((blocker) => /gitCommit/i.test(blocker)));
   assert.ok(report.blockers.some((blocker) => /filename/i.test(blocker)));
   assert.ok(report.blockers.some((blocker) => /sizeBytes/i.test(blocker)));
+});
+
+test("release gate rejects inherited authority and snapshots release evidence before evaluation", () => {
+  const queue = new ApprovalQueue({ clock: () => new Date("2026-07-05T02:00:00.000Z") });
+  const request = requestReleaseApproval(queue);
+  const approved = queue.approve(request.approvalId, { decidedBy: "owner" });
+
+  const previousApproval = Object.getOwnPropertyDescriptor(Object.prototype, "approval");
+  try {
+    Object.defineProperty(Object.prototype, "approval", {
+      value: approved,
+      configurable: true
+    });
+    assert.throws(
+      () => createReleaseGateReport({ ...completeInput }),
+      /Inherited Release gate input field 'approval'/
+    );
+  } finally {
+    if (previousApproval) Object.defineProperty(Object.prototype, "approval", previousApproval);
+    else delete Object.prototype.approval;
+  }
+
+  const inheritedSubject = { ...approved.subject };
+  delete inheritedSubject.packageName;
+  const previousPackageName = Object.getOwnPropertyDescriptor(Object.prototype, "packageName");
+  try {
+    Object.defineProperty(Object.prototype, "packageName", {
+      value: completeInput.packageName,
+      configurable: true
+    });
+    assert.throws(
+      () => createReleaseGateReport({
+        ...completeInput,
+        approval: { ...approved, subject: inheritedSubject }
+      }),
+      /Inherited Release approval subject field 'packageName'/
+    );
+  } finally {
+    if (previousPackageName) Object.defineProperty(Object.prototype, "packageName", previousPackageName);
+    else delete Object.prototype.packageName;
+  }
+
+  const subjectFields = {
+    packageName: completeInput.packageName,
+    version: completeInput.version,
+    registry: completeInput.registry,
+    publishCommand: completeInput.publishCommand,
+    artifactIntegrity: artifact.integrity,
+    artifactFilename: artifact.filename,
+    artifactSizeBytes: artifact.sizeBytes,
+    gitCommit: artifact.gitCommit
+  };
+  const previousSubjectFields = new Map(
+    Object.keys(subjectFields).map((key) => [key, Object.getOwnPropertyDescriptor(Object.prototype, key)])
+  );
+  try {
+    for (const [key, value] of Object.entries(subjectFields)) {
+      Object.defineProperty(Object.prototype, key, { value, configurable: true });
+    }
+    const subjectlessApproval = { ...approved };
+    delete subjectlessApproval.subject;
+    assert.equal(createReleaseGateReport({
+      ...completeInput,
+      approval: subjectlessApproval
+    }).readyToPublish, false);
+  } finally {
+    for (const [key, descriptor] of previousSubjectFields) {
+      if (descriptor) Object.defineProperty(Object.prototype, key, descriptor);
+      else delete Object.prototype[key];
+    }
+  }
+
+  const mutable = structuredClone(completeInput);
+  const report = createReleaseGateReport({ ...mutable, approval: approved });
+  mutable.artifact.filename = "changed.tgz";
+  mutable.verification[0].status = "fail";
+  mutable.provenance.copiedThirdPartyCode = true;
+
+  assert.equal(report.readyToPublish, true);
+  assert.equal(report.artifact.filename, artifact.filename);
+  assert.equal(report.verification[0].status, "pass");
+  assert.equal(report.provenance.copiedThirdPartyCode, false);
+  assert.equal(Object.getPrototypeOf(report.artifact), null);
+  assert.notEqual(Object.getPrototypeOf(report.verification), Array.prototype);
 });

@@ -36,6 +36,7 @@ function rawRequest(url, options = {}) {
       response.on("data", (chunk) => chunks.push(chunk));
       response.on("end", () => resolve({
         status: response.statusCode,
+        headers: response.headers,
         body: Buffer.concat(chunks).toString("utf8")
       }));
     });
@@ -138,6 +139,138 @@ test("Maqam server rejects hostile Host, Origin, cross-site, and non-JSON reques
   }
 });
 
+test("exact UI origins receive CORS headers and can cross sites, including authenticated preflight", async () => {
+  const allowedOrigin = "https://console.example";
+  const configuredUiOrigins = [allowedOrigin];
+  const server = createMaqamServer({
+    apiToken: "cors-test-token",
+    allowedUiOrigins: configuredUiOrigins,
+    crawlerTool: async () => [{
+      url: "https://example.com/",
+      title: "Example",
+      text: "Example source",
+      status: 200
+    }]
+  });
+  configuredUiOrigins[0] = "https://attacker.example";
+  const baseUrl = await listen(server);
+  try {
+    const preflight = await rawRequest(`${baseUrl}/api/runs/research`, {
+      method: "OPTIONS",
+      headers: {
+        Origin: allowedOrigin,
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "authorization, content-type",
+        "Sec-Fetch-Site": "cross-site"
+      }
+    });
+    assert.equal(preflight.status, 204);
+    assert.equal(preflight.body, "");
+    assert.equal(preflight.headers["access-control-allow-origin"], allowedOrigin);
+    assert.equal(preflight.headers["access-control-allow-methods"], "GET,POST,OPTIONS");
+    assert.equal(preflight.headers["access-control-allow-headers"], "Authorization,Content-Type");
+    assert.match(preflight.headers.vary, /(?:^|,\s*)Origin(?:,|$)/i);
+    assert.notEqual(preflight.headers["access-control-allow-origin"], "*");
+
+    const health = await fetch(`${baseUrl}/api/health`, {
+      headers: {
+        authorization: "Bearer cors-test-token",
+        origin: allowedOrigin,
+        "sec-fetch-site": "cross-site"
+      }
+    });
+    assert.equal(health.status, 200);
+    assert.equal(health.headers.get("access-control-allow-origin"), allowedOrigin);
+    assert.match(health.headers.get("vary"), /(?:^|,\s*)Origin(?:,|$)/i);
+
+    const research = await fetch(`${baseUrl}/api/runs/research`, {
+      method: "POST",
+      headers: {
+        authorization: "Bearer cors-test-token",
+        "content-type": "application/json",
+        origin: allowedOrigin,
+        "sec-fetch-site": "cross-site"
+      },
+      body: JSON.stringify({ seeds: ["https://example.com"], maxPages: 1 })
+    });
+    assert.equal(research.status, 200);
+    assert.equal(research.headers.get("access-control-allow-origin"), allowedOrigin);
+  } finally {
+    await close(server);
+  }
+});
+
+test("CORS rejects unlisted, null, malformed, and origin-less cross-site requests", async () => {
+  const server = createMaqamServer({
+    allowedUiOrigins: ["https://console.example"],
+    crawlerTool: async () => []
+  });
+  const baseUrl = await listen(server);
+  try {
+    for (const origin of [
+      "https://attacker.example",
+      "null",
+      "https://console.example/"
+    ]) {
+      const response = await rawRequest(`${baseUrl}/api/health`, {
+        headers: { Origin: origin, "Sec-Fetch-Site": "cross-site" }
+      });
+      assert.equal(response.status, 403);
+      assert.equal(response.headers["access-control-allow-origin"], undefined);
+      assert.match(response.headers.vary, /(?:^|,\s*)Origin(?:,|$)/i);
+    }
+
+    const missingOriginPreflight = await rawRequest(`${baseUrl}/api/runs/research`, {
+      method: "OPTIONS",
+      headers: { "Access-Control-Request-Method": "POST" }
+    });
+    assert.equal(missingOriginPreflight.status, 403);
+    assert.equal(missingOriginPreflight.headers["access-control-allow-origin"], undefined);
+
+    const originlessCrossSite = await rawRequest(`${baseUrl}/api/health`, {
+      headers: { "Sec-Fetch-Site": "cross-site" }
+    });
+    assert.equal(originlessCrossSite.status, 403);
+  } finally {
+    await close(server);
+  }
+});
+
+test("same-origin and origin-less local API requests retain their behavior", async () => {
+  const server = createMaqamServer({ crawlerTool: async () => [] });
+  const baseUrl = await listen(server);
+  try {
+    const sameOrigin = await fetch(`${baseUrl}/api/health`, {
+      headers: { origin: baseUrl, "sec-fetch-site": "same-origin" }
+    });
+    assert.equal(sameOrigin.status, 200);
+    assert.equal(sameOrigin.headers.get("access-control-allow-origin"), baseUrl);
+    assert.notEqual(sameOrigin.headers.get("access-control-allow-origin"), "*");
+
+    const withoutOrigin = await fetch(`${baseUrl}/api/health`);
+    assert.equal(withoutOrigin.status, 200);
+    assert.equal(withoutOrigin.headers.get("access-control-allow-origin"), null);
+    assert.match(withoutOrigin.headers.get("vary"), /(?:^|,\s*)Origin(?:,|$)/i);
+  } finally {
+    await close(server);
+  }
+});
+
+test("UI origin configuration accepts only exact serialized HTTP(S) origins", () => {
+  for (const value of [
+    "*",
+    "null",
+    "https://console.example/",
+    "https://console.example/path",
+    "https://user@example.com"
+  ]) {
+    assert.throws(
+      () => createMaqamServer({ allowedUiOrigins: [value] }),
+      /exact HTTP\(S\) origins/
+    );
+  }
+});
+
 test("research requests cannot broaden server network policy", async () => {
   let crawlerCalls = 0;
   const server = createMaqamServer({ crawlerTool: async () => { crawlerCalls += 1; return []; } });
@@ -214,6 +347,72 @@ test("non-loopback startup requires both an API token and explicit Host allowlis
     () => startMaqamServer({ host: "0.0.0.0", port: 0, apiToken: "configured" }),
     /requires an explicit allowedHosts list/
   );
+});
+
+test("server authority options must be explicit own data properties", () => {
+  const authorityFields = [
+    ["apiToken", "inherited-token"],
+    ["allowedHosts", ["localhost"]],
+    ["publicDir", process.cwd()],
+    ["crawlerTool", async () => []],
+    ["allowedOrigins", ["https://example.com"]],
+    ["allowedUiOrigins", ["https://example.com"]],
+    ["allowPrivateNetworks", true],
+    ["allowCrossOriginCrawls", true],
+    ["host", "0.0.0.0"]
+  ];
+  for (const [key, value] of authorityFields) {
+    const previous = Object.getOwnPropertyDescriptor(Object.prototype, key);
+    try {
+      Object.defineProperty(Object.prototype, key, { value, configurable: true });
+      assert.throws(
+        () => createMaqamServer(),
+        new RegExp(`Inherited Maqam server options field '${key}'`)
+      );
+    } finally {
+      if (previous) Object.defineProperty(Object.prototype, key, previous);
+      else delete Object.prototype[key];
+    }
+  }
+
+  const previousToken = Object.getOwnPropertyDescriptor(Object.prototype, "apiToken");
+  const previousHosts = Object.getOwnPropertyDescriptor(Object.prototype, "allowedHosts");
+  try {
+    Object.defineProperty(Object.prototype, "apiToken", { value: "forged", configurable: true });
+    Object.defineProperty(Object.prototype, "allowedHosts", { value: ["localhost"], configurable: true });
+    assert.throws(
+      () => startMaqamServer({ host: "0.0.0.0", port: 0 }),
+      /Inherited Maqam server options field/
+    );
+  } finally {
+    if (previousToken) Object.defineProperty(Object.prototype, "apiToken", previousToken);
+    else delete Object.prototype.apiToken;
+    if (previousHosts) Object.defineProperty(Object.prototype, "allowedHosts", previousHosts);
+    else delete Object.prototype.allowedHosts;
+  }
+});
+
+test("server construction snapshots arrays and rejects accessors without invocation", async () => {
+  const options = { apiToken: "configured", allowedHosts: ["localhost"] };
+  const server = createMaqamServer(options);
+  options.allowedHosts.length = 0;
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "0.0.0.0", resolve);
+  });
+  await close(server);
+
+  let getterCalls = 0;
+  const accessorOptions = {};
+  Object.defineProperty(accessorOptions, "apiToken", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "forged";
+    }
+  });
+  assert.throws(() => createMaqamServer(accessorOptions), /own enumerable data property/);
+  assert.equal(getterCalls, 0);
 });
 
 test("raw embedded servers fail closed on non-loopback or implicit TCP binding", async () => {
@@ -320,6 +519,32 @@ test("raw embedded servers snapshot listen options and reject accessor-backed ho
     /requires options.apiToken/
   );
   assert.equal(coercibleHost.listening, false);
+});
+
+test("descriptor prototype pollution cannot forge raw listen options", () => {
+  let getterCalls = 0;
+  const options = { port: 0 };
+  Object.defineProperty(options, "host", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "0.0.0.0";
+    }
+  });
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, "value");
+  const server = createMaqamServer();
+  try {
+    Object.defineProperty(Object.prototype, "value", {
+      value: "127.0.0.1",
+      configurable: true
+    });
+    assert.throws(() => server.listen(options), /own data property/);
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, "value", previous);
+    else delete Object.prototype.value;
+  }
+  assert.equal(getterCalls, 0);
+  assert.equal(server.listening, false);
 });
 
 test("raw embedded servers permit protected non-loopback binding", async () => {

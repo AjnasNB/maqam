@@ -2,10 +2,20 @@ import { lookup as defaultLookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import ipaddr from "ipaddr.js";
 import { Agent, fetch as undiciFetch } from "undici";
+import {
+  snapshotOwnDataArray,
+  snapshotOwnDataRecord
+} from "../framework/boundary.js";
 
 // Link-local space is intentionally never covered by the broad private-network
 // opt-in because it includes cloud metadata endpoints such as 169.254.169.254.
 const EXPLICIT_PRIVATE_RANGES = new Set(["private", "loopback", "uniqueLocal"]);
+const ALWAYS_BLOCKED_ADDRESSES = new Set([
+  "168.63.129.16",
+  "169.254.169.254",
+  "fd00:ec2::254"
+]);
+const RESOLVE_OPTION_KEYS = ["allowPrivateNetworks", "lookup", "signal"];
 
 function stripIpv6Brackets(hostname) {
   return hostname.startsWith("[") && hostname.endsWith("]")
@@ -49,16 +59,24 @@ export function isPublicIpAddress(value) {
 }
 
 function normalizeLookupResults(result) {
-  const values = Array.isArray(result) ? result : [result];
-  return values.map((item) => {
+  const values = Array.isArray(result)
+    ? snapshotOwnDataArray(result, { label: "DNS lookup result" })
+    : [result];
+  return values.map((item, index) => {
     if (typeof item === "string") {
       return { address: item, family: isIP(stripIpv6Brackets(item)) };
     }
+    const record = snapshotOwnDataRecord(item, {
+      label: `DNS lookup result[${index}]`,
+      recognizedKeys: ["address", "family"]
+    });
     return {
-      address: item?.address,
-      family: Number(item?.family) || isIP(stripIpv6Brackets(item?.address || ""))
+      address: record.address,
+      family: record.family === undefined
+        ? isIP(stripIpv6Brackets(record.address || ""))
+        : record.family
     };
-  }).filter((item) => item.address && (item.family === 4 || item.family === 6));
+  }).filter((item) => typeof item.address === "string" && (item.family === 4 || item.family === 6));
 }
 
 function withAbort(promise, signal) {
@@ -81,6 +99,17 @@ function withAbort(promise, signal) {
 }
 
 export async function resolveUrlTarget(value, options = {}) {
+  const resolvedOptions = snapshotOwnDataRecord(options, {
+    label: "resolveUrlTarget options",
+    recognizedKeys: RESOLVE_OPTION_KEYS
+  });
+  if (resolvedOptions.allowPrivateNetworks !== undefined
+    && typeof resolvedOptions.allowPrivateNetworks !== "boolean") {
+    throw new TypeError("resolveUrlTarget options.allowPrivateNetworks must be a boolean.");
+  }
+  if (resolvedOptions.lookup !== undefined && typeof resolvedOptions.lookup !== "function") {
+    throw new TypeError("resolveUrlTarget options.lookup must be a function.");
+  }
   const url = value instanceof URL ? new URL(value) : new URL(value);
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw securityError(`Protocol '${url.protocol}' is not allowed.`, { url: url.toString() });
@@ -93,7 +122,7 @@ export async function resolveUrlTarget(value, options = {}) {
 
   const hostname = normalizeHostname(url.hostname);
   const literalFamily = isIP(hostname);
-  const lookup = options.lookup || defaultLookup;
+  const lookup = resolvedOptions.lookup || defaultLookup;
   let addresses;
   if (literalFamily) {
     addresses = [{ address: hostname, family: literalFamily }];
@@ -102,7 +131,7 @@ export async function resolveUrlTarget(value, options = {}) {
       addresses = normalizeLookupResults(await withAbort(Promise.resolve(lookup(hostname, {
         all: true,
         verbatim: true
-      })), options.signal));
+      })), resolvedOptions.signal));
     } catch (cause) {
       const error = securityError(`DNS resolution failed for '${hostname}'.`, { hostname });
       error.cause = cause;
@@ -120,8 +149,9 @@ export async function resolveUrlTarget(value, options = {}) {
   }));
   {
     const blocked = classified.find((entry) => (
-      !entry.isPublic
-      && !(options.allowPrivateNetworks && EXPLICIT_PRIVATE_RANGES.has(entry.range))
+      ALWAYS_BLOCKED_ADDRESSES.has(entry.address)
+      || (!entry.isPublic
+        && !(resolvedOptions.allowPrivateNetworks === true && EXPLICIT_PRIVATE_RANGES.has(entry.range)))
     ));
     if (blocked) {
       throw securityError(`Address range '${blocked.range}' is not allowed for crawler requests.`, {

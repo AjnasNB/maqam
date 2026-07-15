@@ -1,3 +1,9 @@
+import {
+  snapshotJsonValue,
+  snapshotOwnDataArray,
+  snapshotOwnDataRecord
+} from "./boundary.js";
+
 const REQUIRED_FILE_KEYS = [
   "readme",
   "license",
@@ -15,6 +21,128 @@ const ALLOWED_PUBLISH_COMMANDS = new Set([
   "npm publish --access public",
   "npm publish --access public --provenance"
 ]);
+const RELEASE_INPUT_KEYS = new Set([
+  "packageName", "version", "license", "publishCommand", "registry", "artifact",
+  "requiredFiles", "verification", "provenance", "approval"
+]);
+const ARTIFACT_KEYS = new Set(["integrity", "gitCommit", "filename", "sizeBytes"]);
+const VERIFICATION_KEYS = new Set(["command", "status", "summary"]);
+const APPROVAL_KEYS = new Set([
+  "approvalId", "status", "action", "requestedBy", "reason", "risk", "subject",
+  "evidence", "reusable", "consumptions", "requestedAt", "decision"
+]);
+const RELEASE_SUBJECT_KEYS = new Set([
+  "packageName", "version", "registry", "publishCommand", "artifactIntegrity",
+  "artifactFilename", "artifactSizeBytes", "gitCommit"
+]);
+
+function requireOptionalString(record, key, label) {
+  if (record[key] !== undefined && typeof record[key] !== "string") {
+    throw new TypeError(`${label}.${key} must be a string.`);
+  }
+}
+
+function snapshotReleaseInput(value) {
+  const input = snapshotOwnDataRecord(value, {
+    label: "Release gate input",
+    recognizedKeys: RELEASE_INPUT_KEYS
+  });
+  for (const key of ["packageName", "version", "license", "publishCommand", "registry"]) {
+    requireOptionalString(input, key, "Release gate input");
+  }
+
+  if (input.requiredFiles !== undefined) {
+    input.requiredFiles = snapshotOwnDataRecord(input.requiredFiles, {
+      label: "Release requiredFiles",
+      recognizedKeys: new Set(REQUIRED_FILE_KEYS)
+    });
+    for (const key of Object.keys(input.requiredFiles)) {
+      if (typeof input.requiredFiles[key] !== "boolean") {
+        throw new TypeError(`Release requiredFiles.${key} must be a boolean.`);
+      }
+    }
+  }
+  if (input.artifact !== undefined) {
+    input.artifact = snapshotOwnDataRecord(input.artifact, {
+      label: "Release artifact",
+      recognizedKeys: ARTIFACT_KEYS
+    });
+    for (const key of ["integrity", "gitCommit", "filename"]) {
+      requireOptionalString(input.artifact, key, "Release artifact");
+    }
+    if (input.artifact.sizeBytes !== undefined && typeof input.artifact.sizeBytes !== "number") {
+      throw new TypeError("Release artifact.sizeBytes must be a number.");
+    }
+  }
+  if (input.verification !== undefined) {
+    const verification = snapshotOwnDataArray(input.verification, {
+      label: "Release verification"
+    });
+    const checks = verification.map((check, index) => {
+      const snapshot = snapshotOwnDataRecord(check, {
+        label: `Release verification[${index}]`,
+        recognizedKeys: VERIFICATION_KEYS
+      });
+      for (const key of ["command", "status", "summary"]) {
+        requireOptionalString(snapshot, key, `Release verification[${index}]`);
+      }
+      return snapshot;
+    });
+    input.verification = snapshotJsonValue(checks, {
+      label: "Release verification",
+      allowNullPrototype: true
+    });
+  }
+  if (input.provenance !== undefined) {
+    const provenance = snapshotOwnDataRecord(input.provenance, {
+      label: "Release provenance",
+      recognizedKeys: new Set(["inspectedProjects", "copiedThirdPartyCode"]),
+      rejectUnknown: false
+    });
+    input.provenance = snapshotJsonValue(provenance, {
+      label: "Release provenance",
+      allowNullPrototype: true
+    });
+    if (input.provenance.inspectedProjects !== undefined
+      && !Array.isArray(input.provenance.inspectedProjects)) {
+      throw new TypeError("Release provenance.inspectedProjects must be an array.");
+    }
+    if (input.provenance.copiedThirdPartyCode !== undefined
+      && typeof input.provenance.copiedThirdPartyCode !== "boolean") {
+      throw new TypeError("Release provenance.copiedThirdPartyCode must be a boolean.");
+    }
+  }
+  if (input.approval !== undefined && input.approval !== null) {
+    const approval = snapshotOwnDataRecord(input.approval, {
+      label: "Release approval",
+      recognizedKeys: APPROVAL_KEYS
+    });
+    for (const key of ["approvalId", "status", "action", "requestedBy", "reason", "risk", "requestedAt"]) {
+      requireOptionalString(approval, key, "Release approval");
+    }
+    if (approval.subject !== undefined) {
+      approval.subject = snapshotOwnDataRecord(approval.subject, {
+        label: "Release approval subject",
+        recognizedKeys: RELEASE_SUBJECT_KEYS
+      });
+      for (const key of [
+        "packageName", "version", "registry", "publishCommand", "artifactIntegrity",
+        "artifactFilename", "gitCommit"
+      ]) {
+        requireOptionalString(approval.subject, key, "Release approval subject");
+      }
+      if (approval.subject.artifactSizeBytes !== undefined
+        && typeof approval.subject.artifactSizeBytes !== "number") {
+        throw new TypeError("Release approval subject.artifactSizeBytes must be a number.");
+      }
+    }
+    input.approval = snapshotJsonValue(approval, {
+      label: "Release approval",
+      allowNullPrototype: true
+    });
+  }
+  return input;
+}
 
 function collectMissing(input) {
   const missing = [];
@@ -108,7 +236,7 @@ function collectBlockers(input) {
   if (!input.approval) {
     blockers.push("Explicit release approval is required before publishing.");
   } else {
-    const subject = input.approval.subject || {};
+    const subject = input.approval.subject || Object.create(null);
     if (input.approval.action !== "publish:npm") {
       blockers.push("Release approval action must be 'publish:npm'.");
     }
@@ -136,6 +264,7 @@ function collectBlockers(input) {
 }
 
 export function createReleaseGateReport(input = {}) {
+  input = snapshotReleaseInput(input);
   const missing = collectMissing(input);
   const blockers = collectBlockers(input);
   const approved = input.approval?.status === "approved";

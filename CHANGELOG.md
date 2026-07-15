@@ -2,6 +2,36 @@
 
 All notable Maqam changes are tracked here before release.
 
+## 0.2.2 - 2026-07-15
+
+Security patch for JavaScript authority-boundary integrity under prototype pollution,
+accessor-backed input, and post-validation mutation.
+
+### Security
+
+- Canonical approval inputs, audit redaction, approval queue snapshots, policy/tool metadata, and embedded-server listen options now require `value` to be an own property of each JavaScript property descriptor.
+- A polluted `Object.prototype.value` can no longer make accessor-backed input appear to be an inert data property at governance boundaries.
+- Exported governance constructors and calls reject inherited recognized fields, accessors, symbol keys, and unknown option fields. Authority-bearing arrays and records are detached into prototype-isolated snapshots instead of retaining caller-owned configuration.
+- `ToolGateway` hashes, authorizes, approves, and executes one immutable JSON snapshot. Later caller or prototype mutation cannot add unhashed handler authority, and handlers cannot mutate the frozen policy decision or authorization scope recorded in the trace.
+- Approval queue imports, release approvals, policy allow-all flags, runtime goals/tasks/approval ids, ungoverned gateway opt-ins, CLI shell/environment unlocks, provider permission bypasses, crawler private-network controls, and server bind credentials must all be explicit own data properties.
+- CLI/provider factories snapshot commands, arguments, cwd roots, environment selection, provider tools, permission modes, and limits at construction. The resolved cwd and selected parent environment no longer change between construction and execution.
+- Direct and agent-backed crawler options are strict own-data snapshots; numeric limits are no longer string-coerced, mutable defaults cannot diverge from advertised governance, and known cloud metadata/platform endpoints remain blocked even when trusted private-network crawling is enabled.
+- Workflow tasks can no longer reach `ApprovalQueue` or the raw evidence ledger. Runtime and tool handlers receive call-only tool capabilities and run/task/tool-scoped evidence facades that stamp trusted attribution fields.
+- Evidence storage is private and transactional. Whole agent evidence-and-claim batches validate before one atomic commit, so a failed claim cannot leave partial evidence behind.
+- Agent object runners must be explicit own data functions (class prototype methods can be bound explicitly); inherited or accessor-backed `run`, `invoke`, and `call` capabilities are rejected.
+- CLI calls reject already-aborted signals before spawning, and parsed JSON/JSONL values are bounded prototype-isolated snapshots. JSONL records must be objects.
+- Provider streams ignore inherited completion fields, require terminal success records and complete non-negative safe-integer usage, reject missing observed cost when a spend budget applies, keep normalized IDs/output/failure fields within their declared types, and prevent composite Claude tool selectors from bypassing write approval.
+- The skill registry now uses private storage, strict snapshot validation, and duplicate-id rejection. The bundled research workflow snapshots its configuration and validates/caps every crawler page before recording evidence.
+- Crawler callbacks receive frozen detached records and cannot outlive total duration or cancellation. The local server now supports exact-origin CORS and authenticated API preflights through `allowedUiOrigins` and `--allowed-ui-origin` without wildcard access.
+- Framework errors and runtime error classification ignore inherited/accessor-backed spoofing fields, detach and freeze JSON-safe details, and normalize even self-throwing proxy values without letting error reporting escape the workflow result boundary.
+- Regression tests cover approval, release, policy, gateway, runtime, CLI, provider, crawler, and server boundaries without invoking attacker-controlled getters.
+
+### Compatibility
+
+- Governed tool inputs must be finite, acyclic JSON values with dense arrays and plain objects. Unsupported values, repeated references, accessors, and `-0` fail closed before policy or handler execution.
+- Exported option objects now reject misspelled/unknown keys instead of silently ignoring them.
+- Duplicate skill ids are rejected instead of replacing an existing registration, and object-agent prototype methods must be explicitly bound before registration.
+
 ## 0.2.1 - 2026-07-15
 
 Security and packaging patch for effect-policy integrity, embedded-server binding, and clean TypeScript consumption.

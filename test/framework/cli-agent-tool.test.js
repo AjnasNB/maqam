@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, rmSync, symlinkSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -160,6 +160,74 @@ test("createCliAgentTool does not inherit arbitrary secrets by default or from i
     assert.equal((await explicitlyUnsafe()).json.secret, "must-not-leak");
   } finally {
     delete process.env.MAQAM_TEST_SECRET;
+  }
+});
+
+test("createCliAgentTool rejects inherited safety configuration and snapshots mutable inputs", async () => {
+  for (const [key, value] of [
+    ["command", process.execPath],
+    ["args", ["--version"]],
+    ["shell", true],
+    ["allowUnsafeShell", true],
+    ["inheritEnv", true],
+    ["allowUnsafeEnvInheritance", true]
+  ]) {
+    const previous = Object.getOwnPropertyDescriptor(Object.prototype, key);
+    try {
+      Object.defineProperty(Object.prototype, key, { value, configurable: true });
+      assert.throws(
+        () => createCliAgentTool({}),
+        new RegExp(`Inherited CLI agent options field '${key}'`)
+      );
+    } finally {
+      if (previous) Object.defineProperty(Object.prototype, key, previous);
+      else delete Object.prototype[key];
+    }
+  }
+
+  const options = {
+    ...nodeCli("console.log(process.env.MAQAM_FIXED)"),
+    env: { MAQAM_FIXED: "before" }
+  };
+  const cli = createCliAgentTool(options);
+  options.args[2] = "console.log('mutated command')";
+  options.env.MAQAM_FIXED = "after";
+  const result = await cli();
+  assert.equal(result.stdout.trim(), "before");
+});
+
+test("createCliAgentTool rejects option accessors without invoking them", () => {
+  let getterCalls = 0;
+  const options = { command: process.execPath };
+  Object.defineProperty(options, "shell", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return true;
+    }
+  });
+  assert.throws(() => createCliAgentTool(options), /own enumerable data property/);
+  assert.equal(getterCalls, 0);
+});
+
+test("an already-aborted CLI call never launches the child process", async () => {
+  const fixture = mkdtempSync(join(tmpdir(), "maqam-cli-preabort-"));
+  const marker = join(fixture, "started.txt");
+  const controller = new AbortController();
+  controller.abort(new Error("cancel before launch"));
+  try {
+    const cli = createCliAgentTool({
+      ...nodeCli(`import { writeFileSync } from "node:fs"; writeFileSync(${JSON.stringify(marker)}, "started");`),
+      timeoutMs: 5_000
+    });
+    await assert.rejects(
+      () => cli({}, { signal: controller.signal }),
+      (error) => error.code === "CLI_ABORTED"
+    );
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    assert.equal(existsSync(marker), false);
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
   }
 });
 

@@ -52,16 +52,16 @@ That means Maqam is not limited to crawling. If an agent can be called as a func
 
 - `AgentRuntime`: sequential workflow execution with opt-in retries, cancellation-aware deadlines, trace events, unique run ids, task outputs, and policy preflight.
 - `PolicyEngine`: fail-closed goal and tool-call decisions for allowed tools, origins, effects, clamped tenant limits, and approval gates.
-- `EvidenceLedger`: copied provenance records, computed source hashes, same-run claim links, confidence, and unsupported-claim checks.
+- `EvidenceLedger`: private, transactional provenance records with computed source hashes, same-run claim links, confidence, and unsupported-claim checks.
 - `ToolGateway`: a policy-required path with call ceilings, redacted traces, effective origin scope, non-downgradable handler effects and risk, fail-closed policy-decision validation, and exact one-time approval binding.
-- `createAgentTool`: wraps any function agent or object agent so Maqam can control it through policy, trace, approval, and evidence.
+- `createAgentTool`: wraps any function agent or explicitly bound object agent so Maqam can control it through policy, trace, approval, and atomic evidence/claim capture.
 - `createCliAgentTool`: wraps fixed command-line workers with cwd roots, environment allowlists, cancellation, timeout, approximate token limits, JSONL parsing, and no shell execution by default.
 - `createCodexAgentTool`: runs Codex non-interactively with a read-only default, ephemeral sessions, JSONL activity, and normalized token usage.
 - `createClaudeCodeAgentTool`: runs Claude Code with plan mode by default, no tools by default, max turns, spend limits, stream events, and normalized usage.
 - `ApprovalQueue`: in-memory, serializable human approval records for release gates, external writes, and high-risk actions.
 - `createReleaseGateReport`: release-evidence and exact publish-approval reporting; it reports readiness but does not execute publishing.
-- `SkillRegistry`: lightweight skill metadata registration and selection.
-- `createResearchWorkflow`: crawler-backed source collection, synthesis, and quality checks.
+- `SkillRegistry`: private, snapshot-based skill metadata registration and selection.
+- `createResearchWorkflow`: crawler-backed source collection, bounded result validation, synthesis, and quality checks.
 - `maqam`: local web console for running governed research workflows.
 - `maqam-crawl`: bounded crawler CLI with per-origin delay, robots.txt enforcement, redirect validation, DNS pinning, and public-network-only defaults.
 
@@ -73,6 +73,7 @@ Agent systems fail in production when tools run outside policy, outputs cannot b
 - Tenant budgets and origin scope cannot be raised by a workflow.
 - Every connected tool call goes through `ToolGateway` and is counted per run.
 - Every source-backed claim can be recorded in `EvidenceLedger`.
+- Tasks and tools receive run/task/tool-scoped evidence facades; they cannot choose trusted attribution fields or access the raw ledger.
 - Every run returns trace data for inspection; Maqam does not yet provide durable replay or restart-safe checkpoints.
 - Approval-required actions fail closed with `ApprovalRequiredError`.
 - Approval records are bound to the exact run, tool, and input hash, then consumed once by default.
@@ -270,7 +271,7 @@ startMaqamServer({
 });
 ```
 
-The console accepts crawl authority only from trusted startup options. Request bodies cannot enable private networks or add origins. `startMaqamServer()` accepts `MAQAM_API_TOKEN` or `apiToken`; a raw server returned by `createMaqamServer()` requires `options.apiToken`. Both paths also require an explicit Host allowlist before binding beyond loopback. Calling `listen(port)` without a host, passing ambiguous transport options, or supplying an existing handle/file descriptor is rejected without those protections.
+The console accepts crawl authority only from trusted startup options. Request bodies cannot enable private networks or add origins. `startMaqamServer()` accepts `MAQAM_API_TOKEN` or `apiToken`; a raw server returned by `createMaqamServer()` requires `options.apiToken`. Both paths also require an explicit Host allowlist before binding beyond loopback. Calling `listen(port)` without a host, passing ambiguous transport options, or supplying an existing handle/file descriptor is rejected without those protections. Browser clients on another origin must be explicitly listed with repeatable `--allowed-ui-origin https://console.example` flags or `allowedUiOrigins`; CORS responses echo only the exact allowed origin and never use `*`.
 
 ## Principles
 
