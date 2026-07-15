@@ -1,5 +1,7 @@
 # Maqam Agent Framework Design
 
+> Historical design record (2026-06-28): the package names in this document were proposals, not separate publishable workspaces. The implemented package in this repository is `maqam`; do not create or publish empty packages from this list. Current ProductLoop packages, where applicable, are maintained in their own repository and release process.
+
 ## Summary
 
 Maqam should evolve from a respectful crawler package into an agent framework. The crawler remains useful, but it becomes one tool inside a larger system for running governed, auditable, multi-agent workflows. The core product is the framework: runtime, skills, tool gateway, policy engine, evidence ledger, evaluation harness, human approval, and operational observability.

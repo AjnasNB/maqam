@@ -2,6 +2,28 @@
 
 All notable Maqam changes are tracked here before release.
 
+## 0.2.1 - 2026-07-15
+
+Security and packaging patch for effect-policy integrity, embedded-server binding, and clean TypeScript consumption.
+
+### Security
+
+- Tool registration metadata can add effects or raise recognized risk levels but can no longer erase effects or lower a recognized risk declared by a handler, preventing approval policy and audit metadata from being downgraded during registration while retaining custom risk-label compatibility.
+- Registration metadata is stored as an immutable JSON snapshot and policy/handler calls receive detached copies, so one invocation cannot mutate the authorization metadata used by later calls.
+- Malformed, accessor-backed, inconsistent, or unknown policy decisions now fail closed before a tool handler executes.
+- Caller-provided `maxToolCalls` can lower but cannot raise or disable the policy limit.
+- Restored approval queues now validate JSON structure, ids, status transitions, decisions, consumptions, risk, and sequence state while documenting that serialization does not authenticate a decision.
+- `createMaqamServer()` now guards its raw `listen()` path: TCP binding beyond loopback, including an omitted host, ambiguous port/path options, existing handle/file-descriptor options, or mutable/accessor-backed listen options, requires both bearer authentication and an explicit Host allowlist.
+- Raw embedded-server tests exercise IPv4, IPv6-unspecified, omitted-host, ambiguous transport options, existing TCP handles, accessor/TOCTOU attempts, missing-allowlist, and authenticated non-loopback cases.
+
+### Packaging and release
+
+- The public `maqam/server` declarations now carry `@types/node` as a package dependency, so a clean TypeScript consumer can resolve `node:http` without manually adding Node types.
+- A clean-consumer release check packs Maqam, installs only that artifact into a temporary project, and compiles both root and server imports with strict TypeScript settings.
+- CI uses immutable action revisions and verifies Node.js 20, 22, and 24 across tests, clean-consumer compilation, production audit, and package preview.
+- Release instructions publish from the reviewed repository directory and require post-publish verification of `gitHead` and the absence of local-path `_resolved` or `_from` registry metadata.
+- Corrected the recorded resolved Undici version to 7.28.0.
+
 ## 0.2.0 - 2026-07-15
 
 Fail-closed governance, crawler-network security, typed server exports, and release-evidence hardening.

@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { classifyIpAddress } from "../crawler/security.js";
 import {
   AgentRuntime,
   EvidenceLedger,
@@ -89,6 +90,113 @@ const CONTENT_TYPES = {
   ".png": "image/png",
   ".json": "application/json; charset=utf-8"
 };
+
+function normalizeBindHost(value) {
+  return (typeof value === "string" ? value : "")
+    .trim()
+    .replace(/^\[|\]$/g, "")
+    .replace(/\.$/, "")
+    .toLowerCase();
+}
+
+function isLoopbackBindHost(value) {
+  const host = normalizeBindHost(value);
+  if (host === "localhost") return true;
+  return classifyIpAddress(host).range === "loopback";
+}
+
+function listenTarget(args) {
+  const first = args[0];
+  if (typeof first === "string") return { kind: "ipc", host: null };
+  if (typeof first === "number") {
+    return {
+      kind: "tcp",
+      host: typeof args[1] === "string" ? args[1] : null
+    };
+  }
+  if (first && typeof first === "object") {
+    // Existing handles and file descriptors take precedence over port/path in
+    // Node. Their actual bind address is opaque here, so require the protected
+    // non-loopback path instead of trusting a decoy `path` or loopback `host`.
+    if (["handle", "_handle", "fd"].some((key) => Object.hasOwn(first, key))) {
+      return { kind: "unknown", host: null };
+    }
+    // `port` takes precedence over `path` when both are present.
+    if (Object.hasOwn(first, "port")) {
+      if (first.host !== undefined && typeof first.host !== "string") {
+        return { kind: "unknown", host: null };
+      }
+      return { kind: "tcp", host: first.host || null };
+    }
+    if (Object.hasOwn(first, "path") && typeof first.path === "string") {
+      return { kind: "ipc", host: null };
+    }
+  }
+  return { kind: "unknown", host: null };
+}
+
+function snapshotListenOptions(value) {
+  // A null prototype ensures Node cannot observe polluted transport selectors
+  // (for example Object.prototype.handle) that were not reviewed by the guard.
+  const snapshot = Object.create(null);
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key !== "string") {
+      throw new TypeError("Maqam listen options cannot contain symbol keys.");
+    }
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || !("value" in descriptor)) {
+      throw new TypeError(`Maqam listen option '${key}' must be an own data property.`);
+    }
+    Object.defineProperty(snapshot, key, {
+      value: descriptor.value,
+      enumerable: descriptor.enumerable,
+      configurable: true,
+      writable: true
+    });
+  }
+  return snapshot;
+}
+
+function prepareListenCall(args) {
+  const first = args[0];
+  if (!first || typeof first !== "object") {
+    return { args, target: listenTarget(args) };
+  }
+
+  let prototype;
+  try {
+    prototype = Object.getPrototypeOf(first);
+  } catch {
+    throw new TypeError("Maqam listen options must expose a stable object shape.");
+  }
+  if (prototype !== Object.prototype && prototype !== null) {
+    // Direct native handles and custom option objects have an opaque bind
+    // target. They are permitted only through the protected non-loopback path.
+    return { args, target: { kind: "unknown", host: null } };
+  }
+
+  const snapshot = snapshotListenOptions(first);
+  const preparedArgs = [snapshot, ...args.slice(1)];
+  return { args: preparedArgs, target: listenTarget(preparedArgs) };
+}
+
+function guardServerListen(server, { apiToken, hasExplicitAllowedHosts }) {
+  const originalListen = server.listen;
+  server.listen = function guardedListen(...args) {
+    const prepared = prepareListenCall(args);
+    const target = prepared.target;
+    if (target.kind !== "ipc" && !isLoopbackBindHost(target.host)) {
+      if (!apiToken) {
+        throw new Error("Binding a raw Maqam server beyond loopback requires options.apiToken; startMaqamServer also supports MAQAM_API_TOKEN.");
+      }
+      if (!hasExplicitAllowedHosts) {
+        throw new Error("Binding Maqam beyond loopback requires an explicit allowedHosts list.");
+      }
+    }
+    return originalListen.apply(this, prepared.args);
+  };
+  return server;
+}
 
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
@@ -270,14 +378,15 @@ async function serveStatic(request, response, publicDir) {
 export function createMaqamServer(options = {}) {
   const publicDir = options.publicDir || DEFAULT_PUBLIC_DIR;
   const crawlerTool = options.crawlerTool || null;
-  const allowedHostValues = Array.isArray(options.allowedHosts) && options.allowedHosts.length
+  const hasExplicitAllowedHosts = Array.isArray(options.allowedHosts) && options.allowedHosts.length > 0;
+  const allowedHostValues = hasExplicitAllowedHosts
     ? options.allowedHosts
     : ["127.0.0.1", "localhost", "::1"];
   const allowedHosts = new Set(allowedHostValues
     .map((host) => String(host).replace(/^\[|\]$/g, "").toLowerCase()));
   const apiToken = options.apiToken || null;
 
-  return createServer(async (request, response) => {
+  const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url, "http://localhost");
       const hostHeader = request.headers.host;
@@ -346,17 +455,18 @@ export function createMaqamServer(options = {}) {
       });
     }
   });
+
+  return guardServerListen(server, { apiToken, hasExplicitAllowedHosts });
 }
 
 export function startMaqamServer(options = {}) {
   const port = Number(options.port ?? process.env.PORT ?? 8787);
   const host = options.host || process.env.HOST || "127.0.0.1";
   const apiToken = options.apiToken || process.env.MAQAM_API_TOKEN || null;
-  const loopback = new Set(["127.0.0.1", "localhost", "::1"]);
-  if (!loopback.has(host) && !apiToken) {
+  if (!isLoopbackBindHost(host) && !apiToken) {
     throw new Error("Binding Maqam beyond loopback requires MAQAM_API_TOKEN or options.apiToken.");
   }
-  if (!loopback.has(host) && !(options.allowedHosts || []).length) {
+  if (!isLoopbackBindHost(host) && !(options.allowedHosts || []).length) {
     throw new Error("Binding Maqam beyond loopback requires an explicit allowedHosts list.");
   }
   const server = createMaqamServer({ ...options, apiToken });

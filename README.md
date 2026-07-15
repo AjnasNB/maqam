@@ -53,7 +53,7 @@ That means Maqam is not limited to crawling. If an agent can be called as a func
 - `AgentRuntime`: sequential workflow execution with opt-in retries, cancellation-aware deadlines, trace events, unique run ids, task outputs, and policy preflight.
 - `PolicyEngine`: fail-closed goal and tool-call decisions for allowed tools, origins, effects, clamped tenant limits, and approval gates.
 - `EvidenceLedger`: copied provenance records, computed source hashes, same-run claim links, confidence, and unsupported-claim checks.
-- `ToolGateway`: a policy-required path with call ceilings, redacted traces, effective origin scope, effect policy, and exact one-time approval binding.
+- `ToolGateway`: a policy-required path with call ceilings, redacted traces, effective origin scope, non-downgradable handler effects and risk, fail-closed policy-decision validation, and exact one-time approval binding.
 - `createAgentTool`: wraps any function agent or object agent so Maqam can control it through policy, trace, approval, and evidence.
 - `createCliAgentTool`: wraps fixed command-line workers with cwd roots, environment allowlists, cancellation, timeout, approximate token limits, JSONL parsing, and no shell execution by default.
 - `createCodexAgentTool`: runs Codex non-interactively with a read-only default, ephemeral sessions, JSONL activity, and normalized token usage.
@@ -270,7 +270,7 @@ startMaqamServer({
 });
 ```
 
-The console accepts crawl authority only from trusted startup options. Request bodies cannot enable private networks or add origins. Binding beyond loopback requires `MAQAM_API_TOKEN` (or `apiToken`) plus an explicit Host allowlist.
+The console accepts crawl authority only from trusted startup options. Request bodies cannot enable private networks or add origins. `startMaqamServer()` accepts `MAQAM_API_TOKEN` or `apiToken`; a raw server returned by `createMaqamServer()` requires `options.apiToken`. Both paths also require an explicit Host allowlist before binding beyond loopback. Calling `listen(port)` without a host, passing ambiguous transport options, or supplying an existing handle/file descriptor is rejected without those protections.
 
 ## Principles
 
@@ -293,6 +293,8 @@ Maqam is not a stealth scraper and does not include bypass tooling. It will not 
 ```bash
 npm install
 npm test
+npm run test:consumer-types
+npm audit --omit=dev
 npm pack --dry-run
 ```
 
@@ -306,7 +308,7 @@ Publishing is approval-gated. Do not publish a release until the current release
 npm publish --access public
 ```
 
-Publishing requires an authenticated npm session with permission to publish the `maqam` package.
+Run the publish command from the reviewed repository directory; do not pass a local `.tgz` path to `npm publish`. Publishing requires an authenticated npm session with permission to publish the `maqam` package. After publishing, verify the registry `gitHead` and confirm `_resolved` and `_from` do not expose a local filesystem path.
 
 ## License
 

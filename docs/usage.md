@@ -50,6 +50,7 @@ git clone https://github.com/AjnasNB/maqam.git
 cd maqam
 npm install
 npm test
+npm run test:consumer-types
 npm run maqam
 ```
 
@@ -463,6 +464,8 @@ The handler context includes:
 - safe workflow context passed to `call`
 
 `ToolGateway` requires a `policyEngine`. For deliberately ungoverned local code only, opt in with `new ToolGateway({ allowUngoverned: true })`.
+
+Handler-declared `effects` and standard `risk` levels are minimum governance metadata. Registration metadata may add effects or raise a standard risk, but it cannot erase handler effects or lower a recognized level. Effects must be non-empty strings. The ordered levels are `low`, `medium`, `high`, and `critical`; non-empty domain-specific risk labels remain supported for compatibility but are not ordered against each other. Malformed or unknown policy decisions fail closed without running the handler.
 
 If policy denies the call, `ToolGateway` throws `PolicyDeniedError`.
 
@@ -1372,6 +1375,8 @@ console.log(approval.status); // "pending"
 console.log(approvals.toJSON());
 ```
 
+`ApprovalQueue.fromJSON()` structurally validates restored state, but JSON serialization does not authenticate approvals. Restore approved decisions only from trusted, integrity-protected storage; do not accept queue JSON from a workflow, HTTP request, or other untrusted source.
+
 Create a release gate report:
 
 ```js
@@ -1379,7 +1384,7 @@ import { ApprovalQueue, createReleaseGateReport } from "maqam";
 
 const approvals = new ApprovalQueue();
 const artifact = {
-  filename: "maqam-0.2.0.tgz",
+  filename: "maqam-0.2.1.tgz",
   sizeBytes: 123456,
   integrity: `sha256:${"a".repeat(64)}`,
   gitCommit: "0123456789abcdef0123456789abcdef01234567"
@@ -1389,7 +1394,7 @@ const approval = approvals.requestApproval({
   reason: "Release candidate is ready.",
   subject: {
     packageName: "maqam",
-    version: "0.2.0",
+    version: "0.2.1",
     registry: "https://registry.npmjs.org/",
     publishCommand: "npm publish --access public",
     artifactFilename: artifact.filename,
@@ -1401,7 +1406,7 @@ const approval = approvals.requestApproval({
 
 const report = createReleaseGateReport({
   packageName: "maqam",
-  version: "0.2.0",
+  version: "0.2.1",
   license: "MIT",
   publishCommand: "npm publish --access public",
   registry: "https://registry.npmjs.org/",
@@ -1560,7 +1565,7 @@ Trusted startup example:
 maqam --allowed-origin https://github.com
 ```
 
-Non-loopback binding additionally requires `MAQAM_API_TOKEN` and at least one `--allowed-host`. Send the token as `Authorization: Bearer ...`; never put it in a URL or command-line option. The bundled browser page does not store or inject a bearer token, so authenticated remote API deployments should use a controlled client or authentication-aware reverse proxy and deployment egress restrictions.
+Non-loopback binding through `startMaqamServer()` requires `MAQAM_API_TOKEN` (or `options.apiToken`) and at least one `--allowed-host`/`options.allowedHosts` value. Direct `listen()` calls on a raw server returned by `createMaqamServer()` require `options.apiToken` plus `options.allowedHosts`; that lower-level factory does not read the environment itself. Omitted hosts, ambiguous transport options, existing handles, and file descriptors are treated as non-loopback. Send the token as `Authorization: Bearer ...`; never put it in a URL or command-line option. The bundled browser page does not store or inject a bearer token, so authenticated remote API deployments should use a controlled client or authentication-aware reverse proxy and deployment egress restrictions.
 
 Example:
 
@@ -1624,6 +1629,7 @@ git clone https://github.com/AjnasNB/maqam.git
 cd maqam
 npm install
 npm test
+npm run test:consumer-types
 ```
 
 Run the console from source:
@@ -1663,12 +1669,13 @@ Before publishing:
 ```bash
 npm ci
 npm test
+npm run test:consumer-types
 npm pack --dry-run
 npm audit --omit=dev
 git status --short
 ```
 
-Capture the exact tarball filename, positive byte size, SHA integrity, and full Git commit, then obtain approval for that exact artifact. Use an authenticated npm session or short-lived release token without storing credentials in repository files, package metadata, logs, or release evidence. Follow [the release checklist](release-checklist.md).
+Capture the exact tarball filename, positive byte size, SHA integrity, and full Git commit, then obtain approval for that exact artifact. Publish from the reviewed repository directory, not by passing a local tarball path, so npm records the release commit without leaking a local `_resolved` path. Use an authenticated npm session or short-lived release token without storing credentials in repository files, package metadata, logs, or release evidence. Follow [the release checklist](release-checklist.md).
 
 ## Troubleshooting
 

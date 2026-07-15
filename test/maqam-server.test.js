@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
+import { rm } from "node:fs/promises";
 import { request as httpRequest } from "node:http";
+import { createServer as createNetServer } from "node:net";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 import { createMaqamServer, startMaqamServer } from "../src/maqam/server.js";
 
@@ -210,6 +214,140 @@ test("non-loopback startup requires both an API token and explicit Host allowlis
     () => startMaqamServer({ host: "0.0.0.0", port: 0, apiToken: "configured" }),
     /requires an explicit allowedHosts list/
   );
+});
+
+test("raw embedded servers fail closed on non-loopback or implicit TCP binding", async () => {
+  for (const listenArgs of [
+    [0, "0.0.0.0"],
+    [{ port: 0, host: "::" }],
+    [{ path: "ignored.sock", port: 0, host: "0.0.0.0" }],
+    [0]
+  ]) {
+    const server = createMaqamServer();
+    assert.throws(
+      () => server.listen(...listenArgs),
+      /requires MAQAM_API_TOKEN|apiToken/
+    );
+    assert.equal(server.listening, false);
+  }
+
+  const missingHosts = createMaqamServer({ apiToken: "configured" });
+  assert.throws(
+    () => missingHosts.listen(0, "0.0.0.0"),
+    /requires an explicit allowedHosts list/
+  );
+  assert.equal(missingHosts.listening, false);
+});
+
+test("raw embedded servers reject listen options that disguise existing handles as IPC", async () => {
+  const donor = createNetServer();
+  await new Promise((resolve, reject) => {
+    donor.once("error", reject);
+    donor.listen(0, "0.0.0.0", resolve);
+  });
+  try {
+    const server = createMaqamServer();
+    assert.throws(
+      () => server.listen({ path: "ignored.sock", host: "127.0.0.1", handle: donor._handle }),
+      /requires MAQAM_API_TOKEN|apiToken/
+    );
+    assert.equal(server.listening, false);
+
+    for (const options of [
+      { path: "ignored.sock", _handle: {} },
+      { path: "ignored.sock", fd: 0 }
+    ]) {
+      const guarded = createMaqamServer();
+      assert.throws(() => guarded.listen(options), /requires MAQAM_API_TOKEN|apiToken/);
+      assert.equal(guarded.listening, false);
+    }
+
+    const ipcPath = process.platform === "win32"
+      ? `\\\\.\\pipe\\maqam-prototype-${process.pid}-${Date.now()}`
+      : join(tmpdir(), `maqam-prototype-${process.pid}-${Date.now()}.sock`);
+    const ipcServer = createMaqamServer();
+    let resolveListen;
+    let rejectListen;
+    const listening = new Promise((resolve, reject) => {
+      resolveListen = resolve;
+      rejectListen = reject;
+    });
+    ipcServer.once("error", rejectListen);
+    const previousHandleDescriptor = Object.getOwnPropertyDescriptor(Object.prototype, "handle");
+    try {
+      Object.defineProperty(Object.prototype, "handle", {
+        value: donor._handle,
+        configurable: true
+      });
+      ipcServer.listen({ path: ipcPath }, resolveListen);
+    } finally {
+      if (previousHandleDescriptor) {
+        Object.defineProperty(Object.prototype, "handle", previousHandleDescriptor);
+      } else {
+        delete Object.prototype.handle;
+      }
+    }
+    await listening;
+    try {
+      assert.equal(typeof ipcServer.address(), "string");
+    } finally {
+      await close(ipcServer);
+      if (process.platform !== "win32") await rm(ipcPath, { force: true });
+    }
+  } finally {
+    await close(donor);
+  }
+});
+
+test("raw embedded servers snapshot listen options and reject accessor-backed hosts", () => {
+  let getterCalls = 0;
+  const options = { port: 0 };
+  Object.defineProperty(options, "host", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return getterCalls === 1 ? "127.0.0.1" : "0.0.0.0";
+    }
+  });
+  const server = createMaqamServer();
+  assert.throws(() => server.listen(options), /own data property/);
+  assert.equal(getterCalls, 0);
+  assert.equal(server.listening, false);
+
+  const coercibleHost = createMaqamServer();
+  assert.throws(
+    () => coercibleHost.listen({ port: 0, host: { toString: () => "127.0.0.1" } }),
+    /requires options.apiToken/
+  );
+  assert.equal(coercibleHost.listening, false);
+});
+
+test("raw embedded servers permit protected non-loopback binding", async () => {
+  const server = createMaqamServer({
+    apiToken: "embedded-test-token",
+    allowedHosts: ["localhost"]
+  });
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "0.0.0.0", resolve);
+  });
+  const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const anonymous = await rawRequest(`${baseUrl}/api/health`, {
+      headers: { Host: "localhost" }
+    });
+    assert.equal(anonymous.status, 401);
+
+    const authenticated = await rawRequest(`${baseUrl}/api/health`, {
+      headers: {
+        Host: "localhost",
+        authorization: "Bearer embedded-test-token"
+      }
+    });
+    assert.equal(authenticated.status, 200);
+  } finally {
+    await close(server);
+  }
 });
 
 test("package server subpath exposes server APIs", async () => {

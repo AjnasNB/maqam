@@ -1,6 +1,6 @@
 {
   "name": "maqam",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Provider-neutral governance for agent workflows, tools, exact approvals, evidence, CLI workers, and secure web research.",
   "license": "MIT",
   "author": "Ajnas NB",
@@ -47,7 +47,9 @@
   ],
   "scripts": {
     "test": "node --test",
-    "prepublishOnly": "npm test",
+    "test:consumer-types": "node scripts/clean-consumer-types.mjs",
+    "verify": "npm test && npm run test:consumer-types && npm audit --omit=dev && npm pack --dry-run --ignore-scripts",
+    "prepublishOnly": "npm test && npm run test:consumer-types && npm audit --omit=dev",
     "start": "node bin/maqam.js",
     "crawl": "node bin/ajnas-crawl.js",
     "maqam": "node bin/maqam.js",
@@ -82,11 +84,15 @@
     "research"
   ],
   "dependencies": {
+    "@types/node": "^20.19.43",
     "cheerio": "^1.0.0",
     "ipaddr.js": "^2.4.0",
     "robots-parser": "^3.0.1",
     "turndown": "^7.2.0",
     "undici": "^7.28.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20.18.1"

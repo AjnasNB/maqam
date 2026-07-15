@@ -10,11 +10,12 @@ Maqam is distributed under MIT. Market research and reference inspection do not 
 
 | Package | Version resolved at review | Declared license | Purpose |
 | --- | --- | --- | --- |
+| `@types/node` | 20.19.43 | MIT | Node.js declarations required by the public `maqam/server` TypeScript surface. |
 | `cheerio` | 1.2.0 | MIT | HTML parsing and extraction. |
 | `ipaddr.js` | 2.4.0 | MIT | IP address parsing and special-range classification. |
 | `robots-parser` | 3.0.1 | MIT | robots.txt parsing. |
 | `turndown` | 7.2.4 | MIT | HTML-to-Markdown conversion. |
-| `undici` | 6.27.0 | MIT | HTTP transport with pinned, validated DNS destinations. |
+| `undici` | 7.28.0 | MIT | HTTP transport with pinned, validated DNS destinations. |
 
 Versions are resolved by `package-lock.json`; installed package manifests reported the licenses above. Re-run the dependency and package-content audits whenever the lockfile changes. This table is not a substitute for reviewing transitive packages and included license files.
 

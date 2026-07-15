@@ -1,5 +1,7 @@
 # Maqam Agent Framework Implementation Plan
 
+> Historical implementation record (2026-06-28): commands, imports, package names, and unchecked steps below describe an earlier plan. They are not current release instructions or additional package manifests. The shipped package in this repository is `maqam`; do not publish placeholder packages from this record.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the first local SDK slice of the Maqam agent framework while preserving the existing crawler API and CLI.

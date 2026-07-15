@@ -188,6 +188,8 @@ export interface WorkflowGoal extends JsonObject {
 
 export interface ToolMetadata extends JsonObject {
   effects?: string[];
+  /** Standard ordered levels are monotonic; non-empty domain-specific labels remain supported. */
+  risk?: string;
 }
 
 export interface PolicyEngineConfig {

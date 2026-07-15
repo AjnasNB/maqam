@@ -13,7 +13,7 @@ const security = readFileSync(new URL("../SECURITY.md", import.meta.url), "utf8"
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.2.0");
+  assert.equal(packageJson.version, "0.2.1");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.author, "Ajnas NB");
   assert.equal(packageJson.type, "module");
@@ -46,6 +46,9 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.keywords.includes("governance"));
   assert.ok(packageJson.keywords.includes("release-gate"));
   assert.equal(packageJson.dependencies["ipaddr.js"], "^2.4.0");
+  assert.equal(packageJson.dependencies["@types/node"], "^20.19.43");
+  assert.equal(packageJson.devDependencies.typescript, "^5.9.3");
+  assert.match(packageJson.scripts.prepublishOnly, /test:consumer-types/);
   assert.equal(packageJson.dependencies.undici, "^7.28.0");
   assert.equal(packageJson.engines.node, ">=20.18.1");
 });
@@ -87,7 +90,7 @@ test("public docs and brand assets match Maqam identity", () => {
 
 test("release governance docs require approval before publishing", () => {
   assert.match(changelog, /^# Changelog/m);
-  assert.match(changelog, /## 0\.2\.0 - 2026-07-15/);
+  assert.match(changelog, /## 0\.2\.1 - 2026-07-15/);
   assert.match(changelog, /Fail-closed governance/);
   assert.match(releaseGuide, /^# Maqam Release Checklist/m);
   assert.match(releaseGuide, /npm test/);
@@ -107,4 +110,6 @@ test("release governance docs require approval before publishing", () => {
   assert.match(releaseGuide, /artifactIntegrity/);
   assert.match(security, /^# Security Policy/m);
   assert.match(security, /approval/i);
+  assert.match(security, /integrity-protected trusted state/i);
+  assert.match(security, /does not authenticate approvals/i);
 });

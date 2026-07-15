@@ -149,3 +149,13 @@ export function hashValue(value) {
   const canonical = JSON.stringify(canonicalize(value));
   return createHash("sha256").update(canonical).digest("hex");
 }
+
+export function snapshotHashedValue(value) {
+  const canonical = JSON.stringify(canonicalize(value));
+  return {
+    // Parse the exact bytes that are hashed so the value later consumed by an
+    // approval-gated tool cannot diverge from its approval subject.
+    snapshot: JSON.parse(canonical),
+    hash: createHash("sha256").update(canonical).digest("hex")
+  };
+}
