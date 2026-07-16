@@ -13,7 +13,7 @@ import {
   useVideoConfig,
 } from "remotion";
 
-const PAGE_WINDOW_MS = 2600;
+const PAGE_WINDOW_MS = 1600;
 
 const CaptionPage: React.FC<{ readonly page: TikTokPage }> = ({ page }) => {
   const frame = useCurrentFrame();
@@ -96,7 +96,9 @@ export const CaptionTrack: React.FC<{
         const startFrame = Math.round((page.startMs / 1000) * fps);
         const nextFrame = nextPage
           ? Math.round((nextPage.startMs / 1000) * fps)
-          : Math.round(((page.startMs + PAGE_WINDOW_MS) / 1000) * fps);
+          : Math.round(
+              ((page.startMs + Math.max(PAGE_WINDOW_MS, page.durationMs)) / 1000) * fps,
+            );
         const durationInFrames = Math.max(1, nextFrame - startFrame);
         return (
           <Sequence

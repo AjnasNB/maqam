@@ -711,7 +711,7 @@ const BenchmarkScene: React.FC<{ readonly benchmark: BenchmarkProof }> = ({ benc
               </div>
             )}
             <div style={{ color: palette.paper, fontSize: 29, lineHeight: 1.3 }}>
-              Deterministic, source-fingerprinted safety cases.
+              Deterministic, source-fingerprinted boundary regression cases.
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -766,8 +766,8 @@ const EcosystemScene: React.FC = () => {
     <Card
       tone={tone}
       style={{
-        minHeight: 344,
-        padding: "25px 27px",
+        minHeight: 320,
+        padding: "20px 23px",
         opacity: stageOpacity(index),
         translate: `0 ${interpolate(frame, [18 + index * 22, 42 + index * 22], [18, 0], {
           extrapolateLeft: "clamp",
@@ -776,11 +776,11 @@ const EcosystemScene: React.FC = () => {
         })}px`,
       }}
     >
-      <div style={{ color: tone === "green" ? palette.green : palette.muted, fontSize: 20, fontWeight: 750, letterSpacing: 2.4 }}>
+      <div style={{ color: tone === "green" ? palette.green : palette.muted, fontSize: 19, fontWeight: 750, letterSpacing: 2.4 }}>
         {label}
       </div>
-      <div style={{ marginTop: 10, color: palette.paper, fontSize: 38, fontWeight: 760 }}>{title}</div>
-      <div style={{ display: "grid", gap: 9, marginTop: 18 }}>
+      <div style={{ marginTop: 8, color: palette.paper, fontSize: 35, fontWeight: 760 }}>{title}</div>
+      <div style={{ display: "grid", gap: 7, marginTop: 14 }}>
         {values.map((value) => (
           <div
             key={value}
@@ -788,12 +788,12 @@ const EcosystemScene: React.FC = () => {
               display: "flex",
               alignItems: "center",
               gap: 12,
-              padding: "9px 12px",
+              padding: "7px 10px",
               borderRadius: 10,
               backgroundColor: "rgba(255,255,255,0.035)",
               border: `1px solid ${palette.line}`,
               color: "#d8ddd9",
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: 620,
             }}
           >
@@ -846,7 +846,7 @@ const EcosystemScene: React.FC = () => {
           The host supplies transport clients, discovery, authentication, and protocol validation.
         </div>
       </div>
-      <div style={{ marginTop: 10, color: palette.red, fontFamily: codeFont, fontSize: 20, textAlign: "center" }}>
+      <div style={{ marginTop: 8, color: palette.red, fontFamily: codeFont, fontSize: 19, textAlign: "center" }}>
         Outside this path: provider-internal actions, unregistered calls, and host OS or network isolation.
       </div>
     </SceneShell>

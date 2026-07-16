@@ -34,6 +34,10 @@ Public roadmap: [ROADMAP.md](https://github.com/AjnasNB/maqam/blob/main/ROADMAP.
 
 Technical article: [Your Agent Approval May Not Authorize The Input That Actually Executes](https://github.com/AjnasNB/maqam/blob/main/docs/articles/exact-agent-approvals.md)
 
+Benchmark methodology and raw evidence: [Maqam Benchmarking](https://github.com/AjnasNB/maqam/blob/main/docs/benchmarking.md)
+
+Benchmarking article: [Benchmarking an Agent-Governance Boundary Without Fooling Yourself](https://github.com/AjnasNB/maqam/blob/main/docs/articles/benchmarking-agent-governance.md)
+
 Migration guide for 0.2: [docs/migration-0.2.md](https://github.com/AjnasNB/maqam/blob/main/docs/migration-0.2.md)
 
 ![Maqam system map](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-system-map.svg)
@@ -351,9 +355,9 @@ npm audit --omit=dev
 npm pack --dry-run
 ```
 
-The project-defined [Maqam Governance Evaluation Suite (MGES) v1](benchmarks/README.md) keeps performance and conformance separate. Its provisional 30-observation Windows/Node 24 local-call result is `137.480 microseconds/call` median, with a `132.351-142.697 microseconds/call` 95% bootstrap interval for the sample median and `8.522%` coefficient of variation. The separate governance profile currently passes `12/12` named fixtures.
+The project-defined [Maqam Governance Evaluation Suite (MGES) v1](benchmarks/README.md) keeps performance and conformance separate. Its clean-source 30-observation Windows/Node 24 local-call result is `127.498 microseconds/call` median, with a `126.334-128.942 microseconds/call` 95% bootstrap interval for the sample median and `5.572%` coefficient of variation. The separate governance profile passes `12/12` named fixtures.
 
-Those figures are local regression evidence, not a globally standardized benchmark, cross-product speed comparison, security score, certification, network benchmark, or production SLA. Read the [raw artifacts, complete methodology and publication wording](benchmarks/README.md) or the detailed article, [Benchmarking an agent-governance boundary without fooling yourself](docs/articles/benchmarking-agent-governance.md), before quoting them. A clean tagged-commit rerun is still required before treating the provisional performance artifact as the final release baseline.
+Those figures are local regression evidence, not a globally standardized benchmark, cross-product speed comparison, security score, certification, network benchmark, or production SLA. Read the [raw artifacts, complete methodology and publication wording](benchmarks/README.md) or the detailed article, [Benchmarking an agent-governance boundary without fooling yourself](docs/articles/benchmarking-agent-governance.md), before quoting them. The artifacts record clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d`; the evidence-only release commit must leave the fingerprinted implementation unchanged.
 
 The npm tarball intentionally excludes the large brand-board and presentation PNG files; those remain in the source repository. Only the logo and files required by the local console ship as runtime app assets.
 

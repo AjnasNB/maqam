@@ -27,9 +27,9 @@ Every conformance claim must include:
 
 ## Approved compact performance wording
 
-> MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 137.480 microseconds median per governed call (95% bootstrap interval for the sample median: 132.351-142.697; 30 fresh-process observations; CV 8.522%; project checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. [Raw JSON](results/2026-07-16-mges-performance-windows-node24.json).
+> MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 127.498 microseconds median per governed call (95% bootstrap interval for the sample median: 126.334-128.942; 30 fresh-process observations; CV 5.572%; project checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. [Raw JSON](results/2026-07-16-mges-performance-windows-node24.json).
 
-Until the clean release rerun exists, prefix this with **“Provisional result:”**.
+The current raw artifact records clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d`. Prefix a future result with **“Provisional result:”** whenever its artifact reports `workingTreeDirty: true` or it has not passed the declared project checks.
 
 ## Approved compact conformance wording
 
@@ -40,8 +40,8 @@ Until the clean release rerun exists, prefix this with **“Provisional result:�
 Use no more than these three levels:
 
 ```text
-137.480 microseconds/call median
-132.351-142.697 microseconds · 95% bootstrap interval · 30 observations
+127.498 microseconds/call median
+126.334-128.942 microseconds · 95% bootstrap interval · 30 observations
 Local Node 24/Windows component fixture; no model/network/storage; not a competitor benchmark or SLA
 ```
 
@@ -96,7 +96,7 @@ If those conditions are absent, publish a capability comparison and keep perform
 - “Globally accepted benchmark.”
 - “NIST benchmark,” “SPEC benchmark,” or “OWASP-certified.”
 - “Maqam is 137 microseconds” without the fixture and environment.
-- “7,274 calls/second throughput” without saying sequential rate at the observed median.
+- “7,843 calls/second throughput” without saying sequential rate at the observed median.
 - “12/12 secure.”
 - A ratio to the trivial direct handler.
 - A competitor speed claim from unmatched product defaults.

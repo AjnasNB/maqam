@@ -10,17 +10,17 @@
   },
   "performance": {
     "publicationCandidate": true,
-    "governedMedianMicrosecondsPerCall": 137.48,
-    "interval95LowMicrosecondsPerCall": 132.351,
-    "interval95HighMicrosecondsPerCall": 142.697,
+    "governedMedianMicrosecondsPerCall": 127.498,
+    "interval95LowMicrosecondsPerCall": 126.334,
+    "interval95HighMicrosecondsPerCall": 128.942,
     "samplesPerVariant": 30,
     "qualityChecksPassed": 5,
     "qualityChecksTotal": 5,
     "artifact": "benchmarks/results/2026-07-16-mges-performance-windows-node24.json",
-    "measuredAt": "2026-07-16T13:59:39.163Z",
-    "sourceFingerprint": "5149a7800102a8760c9c774d0e40899762215a47906679da620f2ab3dc509eba",
-    "repositoryCommit": "7a07d944e79283dd8c27131c41896d59fbe31249",
-    "workingTreeDirty": true
+    "measuredAt": "2026-07-16T14:21:20.269Z",
+    "sourceFingerprint": "b6b2f9d87f0d8f87fe933b2bb62cefbd31d78c24ea1ca74f954f4e766d1b85d3",
+    "repositoryCommit": "44c198f9eab1ea3a2dedb1f784413a2733b7745d",
+    "workingTreeDirty": false
   },
   "conformance": {
     "passed": 12,
@@ -28,10 +28,10 @@
     "failed": 0,
     "allPassed": true,
     "artifact": "benchmarks/results/2026-07-16-mges-conformance-windows-node24.json",
-    "measuredAt": "2026-07-16T14:08:33.341Z",
-    "sourceFingerprint": "4d1ea30b67d06e95b6df1347163118b5d1a2a93552e804c8f1cff6132845d30b",
-    "repositoryCommit": null,
-    "workingTreeDirty": null
+    "measuredAt": "2026-07-16T14:21:01.591Z",
+    "sourceFingerprint": "ef4f9571f4a4c33885ea37719467031b157d5dd6567905eb263ec287fbb155cb",
+    "repositoryCommit": "44c198f9eab1ea3a2dedb1f784413a2733b7745d",
+    "workingTreeDirty": false
   },
   "environment": {
     "node": "v24.15.0",

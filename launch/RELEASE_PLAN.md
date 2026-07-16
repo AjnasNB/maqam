@@ -50,7 +50,7 @@ Required launch assets:
 - optimized WebP/PNG poster with descriptive alt text;
 - reproducible Remotion source in a private, separate demo package;
 - TTS voice file and provenance record for voice, fonts, icons, music, and screenshots;
-- five stills: policy path, pending exact approval, changed-input rejection, successful one-use call, and evidence/trace;
+- seven stills: policy path, pending exact approval, changed-input rejection, successful one-use call, evidence/trace, benchmark method, and ecosystem boundary;
 - one architecture diagram that distinguishes Maqam from provider and host boundaries;
 - benchmark methodology, raw result, environment, fixture, warmup, sample count, and non-generalization disclaimer;
 - `Why Maqam`, detailed comparison, public roadmap, technical article, Show HN factual author brief, changelog, and release notes;

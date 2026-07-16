@@ -107,17 +107,17 @@ MGES also pairs the direct and governed estimates from each round and reports th
 
 ## The first passing MGES v1 result
 
-The current provisional artifact is [`2026-07-16-mges-performance-windows-node24.json`](../../benchmarks/results/2026-07-16-mges-performance-windows-node24.json).
+The current clean-source artifact is [`2026-07-16-mges-performance-windows-node24.json`](../../benchmarks/results/2026-07-16-mges-performance-windows-node24.json).
 
 | Field | Result |
 |---|---:|
 | Runtime and host | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
 | Observations | 30 fresh processes per variant |
-| Governed median | **137.480 microseconds/call** |
-| 95% bootstrap interval for the sample median | **132.351-142.697 microseconds/call** |
-| Sequential rate at the median | **7,273.806 calls/second** |
-| Paired added median | **137.410 microseconds/call** |
-| Governed coefficient of variation | **8.522%** |
+| Governed median | **127.498 microseconds/call** |
+| 95% bootstrap interval for the sample median | **126.334-128.942 microseconds/call** |
+| Sequential rate at the median | **7,843.288 calls/second** |
+| Paired added median | **127.422 microseconds/call** |
+| Governed coefficient of variation | **5.572%** |
 | Direct coefficient of variation | **8.890%** |
 | Project publication checks | **PASS (5/5)** |
 
@@ -125,7 +125,7 @@ The suite's project-defined publication checks require 30 observations, coeffici
 
 An earlier calibrated run failed the stability gate because several large outliers drove the governed coefficient of variation to 85.33%. That result was withheld from headline use. The timed batches were lengthened before the passing run so allocation and garbage-collection behavior would be represented more consistently. No observations were deleted and the declared thresholds were not weakened.
 
-The passing artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It also reports that the shared working tree contained uncommitted release documentation and demo work. A final tagged artifact should therefore be rerun from a clean commit. The current number is suitable as a transparent provisional result, not as a claim of commit-identical reproduction.
+The passing artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It records clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d` and `workingTreeDirty: false`. An evidence-only release commit may add the artifact, documentation, and media; any later change to a fingerprinted source requires another run.
 
 ## Conformance is not another latency metric
 
@@ -212,7 +212,7 @@ Artifacts could be signed and indexed by suite version, source fingerprint, clea
 
 A defensible compact statement is:
 
-> **Provisional result:** MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 137.480 microseconds median per governed call (95% bootstrap interval for the sample median: 132.351-142.697; 30 fresh-process observations; CV 8.522%). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
+> MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 127.498 microseconds median per governed call (95% bootstrap interval for the sample median: 126.334-128.942; 30 fresh-process observations; CV 5.572%). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
 
 For conformance:
 

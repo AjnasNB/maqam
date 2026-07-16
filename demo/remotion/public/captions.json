@@ -478,34 +478,13 @@
     {
         "text":  " run",
         "startMs":  25710,
-        "endMs":  26781,
+        "endMs":  26780,
         "timestampMs":  null,
         "confidence":  null
     },
     {
-        "text":  " M",
-        "startMs":  26781,
-        "endMs":  26921,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " G",
-        "startMs":  26921,
-        "endMs":  27113,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " E",
-        "startMs":  27113,
-        "endMs":  27233,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " S",
-        "startMs":  27233,
+        "text":  " MGES",
+        "startMs":  26780,
         "endMs":  27384,
         "timestampMs":  null,
         "confidence":  null
@@ -541,13 +520,13 @@
     {
         "text":  " and",
         "startMs":  28585,
-        "endMs":  28681,
+        "endMs":  28680,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " conformance",
-        "startMs":  28681,
+        "startMs":  28680,
         "endMs":  29817,
         "timestampMs":  null,
         "confidence":  null
@@ -602,527 +581,443 @@
         "confidence":  null
     },
     {
-        "text":  " safety",
+        "text":  " boundary",
         "startMs":  32314,
-        "endMs":  32596,
+        "endMs":  32671,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " fixtures",
-        "startMs":  32596,
-        "endMs":  33702,
+        "startMs":  32671,
+        "endMs":  33777,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " It",
-        "startMs":  33702,
-        "endMs":  33782,
+        "startMs":  33777,
+        "endMs":  33857,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " is",
-        "startMs":  33782,
-        "endMs":  33868,
+        "startMs":  33857,
+        "endMs":  33943,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " project-defined",
-        "startMs":  33868,
-        "endMs":  34903,
+        "startMs":  33943,
+        "endMs":  34978,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " not",
-        "startMs":  34903,
-        "endMs":  35064,
+        "startMs":  34978,
+        "endMs":  35139,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " an",
-        "startMs":  35064,
-        "endMs":  35134,
+        "startMs":  35139,
+        "endMs":  35209,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " industry",
-        "startMs":  35134,
-        "endMs":  35476,
+        "startMs":  35209,
+        "endMs":  35552,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " standard",
-        "startMs":  35476,
-        "endMs":  35813,
+        "startMs":  35552,
+        "endMs":  35888,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " or",
-        "startMs":  35813,
-        "endMs":  35903,
+        "startMs":  35888,
+        "endMs":  35978,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " certification",
-        "startMs":  35903,
-        "endMs":  37341,
+        "startMs":  35978,
+        "endMs":  37417,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " Functions",
-        "startMs":  37341,
-        "endMs":  38070,
+        "startMs":  37417,
+        "endMs":  38145,
         "timestampMs":  null,
         "confidence":  null
     },
     {
-        "text":  " C",
-        "startMs":  38070,
-        "endMs":  38296,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " L",
-        "startMs":  38296,
-        "endMs":  38437,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " I",
-        "startMs":  38437,
-        "endMs":  38517,
+        "text":  " CLI",
+        "startMs":  38145,
+        "endMs":  38593,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " workers",
-        "startMs":  38517,
-        "endMs":  39166,
+        "startMs":  38593,
+        "endMs":  39241,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " and",
-        "startMs":  39166,
-        "endMs":  39236,
+        "startMs":  39241,
+        "endMs":  39312,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " host",
-        "startMs":  39236,
-        "endMs":  39452,
+        "startMs":  39312,
+        "endMs":  39528,
         "timestampMs":  null,
         "confidence":  null
     },
     {
-        "text":  " S",
-        "startMs":  39452,
-        "endMs":  39623,
+        "text":  " SDK",
+        "startMs":  39528,
+        "endMs":  40342,
         "timestampMs":  null,
         "confidence":  null
     },
     {
-        "text":  " D",
-        "startMs":  39623,
-        "endMs":  39764,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " K",
-        "startMs":  39764,
-        "endMs":  40267,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " H",
-        "startMs":  40267,
-        "endMs":  40462,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " T",
-        "startMs":  40462,
-        "endMs":  40629,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " T",
-        "startMs":  40629,
-        "endMs":  40820,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " P",
-        "startMs":  40820,
-        "endMs":  41328,
+        "text":  " HTTP",
+        "startMs":  40342,
+        "endMs":  41403,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " or",
-        "startMs":  41328,
-        "endMs":  41438,
+        "startMs":  41403,
+        "endMs":  41513,
         "timestampMs":  null,
         "confidence":  null
     },
     {
-        "text":  " M",
-        "startMs":  41438,
-        "endMs":  41558,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " C",
-        "startMs":  41558,
-        "endMs":  41739,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " P",
-        "startMs":  41739,
-        "endMs":  41930,
+        "text":  " MCP",
+        "startMs":  41513,
+        "endMs":  42006,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " style",
-        "startMs":  41930,
-        "endMs":  42202,
+        "startMs":  42006,
+        "endMs":  42278,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " adapters",
-        "startMs":  42202,
-        "endMs":  42589,
+        "startMs":  42278,
+        "endMs":  42664,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " enter",
-        "startMs":  42589,
-        "endMs":  42800,
+        "startMs":  42664,
+        "endMs":  42875,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " registered",
-        "startMs":  42800,
-        "endMs":  43162,
+        "startMs":  42875,
+        "endMs":  43237,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " paths.",
-        "startMs":  43162,
-        "endMs":  43408,
+        "startMs":  43237,
+        "endMs":  43484,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " Maqam",
-        "startMs":  43408,
-        "endMs":  43730,
+        "startMs":  43484,
+        "endMs":  43805,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " applies",
-        "startMs":  43730,
-        "endMs":  44022,
+        "startMs":  43805,
+        "endMs":  44097,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " policy",
-        "startMs":  44022,
-        "endMs":  44519,
+        "startMs":  44097,
+        "endMs":  44594,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " approval",
-        "startMs":  44519,
-        "endMs":  44976,
+        "startMs":  44594,
+        "endMs":  45052,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " trace",
-        "startMs":  44976,
-        "endMs":  45388,
+        "startMs":  45052,
+        "endMs":  45464,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " and",
-        "startMs":  45388,
-        "endMs":  45484,
+        "startMs":  45464,
+        "endMs":  45560,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " evidence",
-        "startMs":  45484,
-        "endMs":  46475,
+        "startMs":  45560,
+        "endMs":  46550,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " Hosts",
-        "startMs":  46475,
-        "endMs":  46766,
+        "startMs":  46550,
+        "endMs":  46841,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " own",
-        "startMs":  46766,
-        "endMs":  46891,
+        "startMs":  46841,
+        "endMs":  46966,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " transport",
-        "startMs":  46891,
-        "endMs":  47328,
+        "startMs":  46966,
+        "endMs":  47404,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " and",
-        "startMs":  47328,
-        "endMs":  47429,
+        "startMs":  47404,
+        "endMs":  47504,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " unregistered",
-        "startMs":  47429,
-        "endMs":  47911,
+        "startMs":  47504,
+        "endMs":  47987,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " actions",
-        "startMs":  47911,
-        "endMs":  49113,
+        "startMs":  47987,
+        "endMs":  49188,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " Maqam",
-        "startMs":  49113,
-        "endMs":  49460,
+        "startMs":  49188,
+        "endMs":  49535,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " complements",
-        "startMs":  49460,
-        "endMs":  49917,
+        "startMs":  49535,
+        "endMs":  49992,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " agent",
-        "startMs":  49917,
-        "endMs":  50173,
+        "startMs":  49992,
+        "endMs":  50248,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " runtimes",
-        "startMs":  50173,
-        "endMs":  50761,
+        "startMs":  50248,
+        "endMs":  50836,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " durable",
-        "startMs":  50761,
-        "endMs":  51013,
+        "startMs":  50836,
+        "endMs":  51088,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " workflows",
-        "startMs":  51013,
-        "endMs":  51601,
+        "startMs":  51088,
+        "endMs":  51676,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " provider",
-        "startMs":  51601,
-        "endMs":  51917,
+        "startMs":  51676,
+        "endMs":  51993,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " permissions",
-        "startMs":  51917,
-        "endMs":  52486,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " and",
-        "startMs":  52486,
+        "startMs":  51993,
         "endMs":  52561,
         "timestampMs":  null,
         "confidence":  null
     },
     {
-        "text":  " operating",
+        "text":  " and",
         "startMs":  52561,
-        "endMs":  52933,
+        "endMs":  52636,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " operating",
+        "startMs":  52636,
+        "endMs":  53008,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " system",
-        "startMs":  52933,
-        "endMs":  53229,
+        "startMs":  53008,
+        "endMs":  53305,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " isolation",
-        "startMs":  53229,
-        "endMs":  54360,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " It",
-        "startMs":  54360,
+        "startMs":  53305,
         "endMs":  54436,
         "timestampMs":  null,
         "confidence":  null
     },
     {
-        "text":  " does",
+        "text":  " It",
         "startMs":  54436,
-        "endMs":  54607,
+        "endMs":  54511,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " does",
+        "startMs":  54511,
+        "endMs":  54682,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " not",
-        "startMs":  54607,
-        "endMs":  54783,
+        "startMs":  54682,
+        "endMs":  54858,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " replace",
-        "startMs":  54783,
-        "endMs":  55119,
+        "startMs":  54858,
+        "endMs":  55195,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " them",
-        "startMs":  55119,
-        "endMs":  56180,
+        "startMs":  55195,
+        "endMs":  56255,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " Run",
-        "startMs":  56180,
-        "endMs":  56331,
+        "startMs":  56255,
+        "endMs":  56406,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " the",
-        "startMs":  56331,
-        "endMs":  56391,
+        "startMs":  56406,
+        "endMs":  56466,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " proof",
-        "startMs":  56386,
-        "endMs":  56627,
+        "startMs":  56461,
+        "endMs":  56703,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " and",
-        "startMs":  56627,
-        "endMs":  56712,
+        "startMs":  56703,
+        "endMs":  56788,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " inspect",
-        "startMs":  56712,
-        "endMs":  57019,
+        "startMs":  56788,
+        "endMs":  57095,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " raw",
-        "startMs":  57019,
-        "endMs":  57170,
+        "startMs":  57095,
+        "endMs":  57245,
         "timestampMs":  null,
         "confidence":  null
     },
     {
         "text":  " benchmark",
-        "startMs":  57170,
-        "endMs":  57592,
+        "startMs":  57245,
+        "endMs":  57667,
         "timestampMs":  null,
         "confidence":  null
     },
     {
-        "text":  " J",
-        "startMs":  57592,
-        "endMs":  57768,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " S",
-        "startMs":  57768,
-        "endMs":  57964,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " O",
-        "startMs":  57964,
-        "endMs":  58040,
-        "timestampMs":  null,
-        "confidence":  null
-    },
-    {
-        "text":  " N",
-        "startMs":  58040,
-        "endMs":  58514,
+        "text":  " JSON",
+        "startMs":  57667,
+        "endMs":  58589,
         "timestampMs":  null,
         "confidence":  null
     }

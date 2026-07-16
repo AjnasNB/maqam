@@ -31,7 +31,7 @@
   },
   {
     "scene": "benchmark",
-    "text": "M G E S version one separates performance and conformance. Performance tracks local gateway regression; conformance checks safety fixtures. It is project-defined, not an industry standard or certification.",
+    "text": "M G E S version one separates performance and conformance. Performance tracks local gateway regression; conformance checks boundary fixtures. It is project-defined, not an industry standard or certification.",
     "pauseAfterMs": 260
   },
   {

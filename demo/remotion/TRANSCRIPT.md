@@ -12,7 +12,7 @@ Replay it. Rejected; execution stays at one, file unchanged.
 
 The handler records evidence and links the supported claim in the same run.
 
-MGES version one separates performance and conformance. Performance tracks local gateway regression; conformance checks safety fixtures. It is project-defined, not an industry standard or certification.
+MGES version one separates performance and conformance. Performance tracks local gateway regression; conformance checks boundary fixtures. It is project-defined, not an industry standard or certification.
 
 Functions, CLI workers, and host SDK, HTTP, or MCP-style adapters enter registered paths. Maqam applies policy, approval, trace, and evidence. Hosts own transport and unregistered actions.
 

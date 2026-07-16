@@ -17,7 +17,7 @@ npm run check
 
 `npm run proof` executes the repository CLI command `maqam demo approval --json` and validates the result before writing `public/demo-proof.json`.
 
-`npm run benchmark-proof` validates and summarizes the reviewed MGES v1 performance and conformance artifacts into `public/benchmark-proof.json`. A performance value is shown only when the report passes Maqam's project stability checks; otherwise the video displays `RESULT WITHHELD / REVIEW`. MGES is project-defined and is not an industry standard, external certification, security score, competitor benchmark, or SLA. See the [benchmarking methodology](../../docs/benchmarking.md).
+`npm run benchmark-proof` validates and summarizes the reviewed MGES v1 performance and conformance artifacts into `public/benchmark-proof.json`. A release-baseline result is shown only when the report passes Maqam's project checks and records a clean source tree; otherwise the video displays `RESULT WITHHELD / REVIEW`. MGES is project-defined and is not an industry standard, external certification, security score, competitor benchmark, or SLA. See the [benchmarking methodology](../../docs/benchmarking.md).
 
 `npm run voiceover` uses the local Windows `System.Speech` engine. It writes `public/voiceover.wav`, word-timed `public/captions.json`, and `public/voiceover-metadata.json`. No cloud TTS call is made.
 

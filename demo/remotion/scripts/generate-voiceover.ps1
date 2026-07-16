@@ -116,6 +116,43 @@ $captions = for ($index = 0; $index -lt $wordEvents.Count; $index += 1) {
   }
 }
 
+# Keep letter-by-letter pronunciation in the audio while presenting common
+# acronyms as normal words in captions. Each merged caption spans the complete
+# spoken acronym so no pronounced letter is left without visible text.
+$normalizedCaptions = [System.Collections.Generic.List[object]]::new()
+for ($captionIndex = 0; $captionIndex -lt $captions.Count;) {
+  $letters = [System.Collections.Generic.List[string]]::new()
+  $sequenceEnd = $captionIndex
+  while ($sequenceEnd -lt $captions.Count) {
+    $letter = ([string]$captions[$sequenceEnd].text).Trim()
+    if ($letter -cnotmatch "^[A-Z]$") {
+      break
+    }
+    $letters.Add($letter)
+    $sequenceEnd += 1
+    # A long SAPI token duration at a punctuation boundary belongs to the
+    # preceding acronym (for example the comma between SDK and HTTP).
+    if (([int]$captions[$sequenceEnd - 1].endMs - [int]$captions[$sequenceEnd - 1].startMs) -gt 350) {
+      break
+    }
+  }
+  if ($letters.Count -ge 2) {
+    $prefix = if ($captionIndex -eq 0) { "" } else { " " }
+    $normalizedCaptions.Add([pscustomobject][ordered]@{
+      text = "$prefix$($letters -join '')"
+      startMs = [int]$captions[$captionIndex].startMs
+      endMs = [int]$captions[$sequenceEnd - 1].endMs
+      timestampMs = $null
+      confidence = $null
+    })
+    $captionIndex = $sequenceEnd
+  } else {
+    $normalizedCaptions.Add($captions[$captionIndex])
+    $captionIndex += 1
+  }
+}
+$captions = @($normalizedCaptions)
+
 $utf8WithoutBom = [System.Text.UTF8Encoding]::new($false)
 $captionsJson = $captions | ConvertTo-Json -Depth 5
 [System.IO.File]::WriteAllText($CaptionsTempPath, $captionsJson, $utf8WithoutBom)
@@ -128,7 +165,7 @@ $metadata = [ordered]@{
   volume = 96
   durationMs = $durationMs
   captionTimeScale = $captionTimeScale
-  captionTiming = "SAPI SpeakProgress positions rescaled to rendered WAVE duration"
+  captionTiming = "SAPI SpeakProgress positions rescaled to rendered WAVE duration; spelled acronyms normalized for display"
   generatedAt = [DateTime]::UtcNow.ToString("o")
   cloudServiceUsed = $false
   sourceScript = "scripts/voiceover-script.json"

@@ -100,21 +100,21 @@ The runner marks an artifact `publicationCandidate: true` only when all of these
 
 These thresholds are MGES stability rules. They are not universal acceptance criteria. A pass does not control CPU affinity, CPU frequency, virtualization, thermal state, or background load; each artifact discloses those uncontrolled conditions. Do not remove outliers or silently change thresholds to obtain a pass.
 
-### Current provisional baseline
+### Current clean-source baseline
 
 [`2026-07-16-mges-performance-windows-node24.json`](results/2026-07-16-mges-performance-windows-node24.json) records a full passing run:
 
 | Field | Observed value |
 |---|---:|
 | Environment | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
-| Governed median | **137.480 microseconds/call** |
-| 95% bootstrap interval for the sample median | **132.351-142.697 microseconds/call** |
-| Sequential rate at the median | **7,273.806 calls/second** |
-| Paired added median | **137.410 microseconds/call** |
-| Governed coefficient of variation | **8.522%** |
+| Governed median | **127.498 microseconds/call** |
+| 95% bootstrap interval for the sample median | **126.334-128.942 microseconds/call** |
+| Sequential rate at the median | **7,843.288 calls/second** |
+| Paired added median | **127.422 microseconds/call** |
+| Governed coefficient of variation | **5.572%** |
 | MGES project publication checks | **PASS (5/5)** |
 
-The artifact was captured while the shared release working tree contained uncommitted documentation and demo work. It includes SHA-256 fingerprints for every benchmark and implementation source file, but the final tagged-release artifact should be rerun from a clean commit. Until that clean rerun, call this result provisional and cite its source fingerprint rather than claiming commit-identical reproduction.
+The artifact records clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d` with `workingTreeDirty: false`. It includes SHA-256 fingerprints for every benchmark and implementation file in the measured path. The follow-up release commit may add results, documentation, and media, but any change to a fingerprinted source requires another run.
 
 The earlier [`2026-07-16-windows-node24.json`](results/2026-07-16-windows-node24.json) is retained as a legacy seven-sample result. It is superseded for public presentation because it did not include the v1 isolation, raw observations, uncertainty interval, or publication checks.
 
@@ -167,7 +167,7 @@ This is a relevance crosswalk only. It does not establish OWASP compliance or en
 
 ### Compact, acceptable form
 
-> **Provisional result:** MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 137.480 microseconds median per governed call (95% bootstrap interval for the sample median: 132.351-142.697; 30 fresh-process observations; CV 8.522%). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. Raw JSON: [artifact](results/2026-07-16-mges-performance-windows-node24.json).
+> MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 127.498 microseconds median per governed call (95% bootstrap interval for the sample median: 126.334-128.942; 30 fresh-process observations; CV 5.572%). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. Raw JSON: [artifact](results/2026-07-16-mges-performance-windows-node24.json).
 
 For conformance:
 
@@ -176,7 +176,7 @@ For conformance:
 ### Do not publish
 
 - “Maqam is 137 microseconds globally.”
-- “Maqam is 7,274 times faster” or any comparison that did not run the same representative workload.
+- “Maqam is 7,843 times faster” or any comparison that did not run the same representative workload.
 - “12/12 means Maqam is secure.”
 - “NIST-, SPEC- or OWASP-certified.”
 - A point estimate without environment, interval, sample count, scope and raw artifact.

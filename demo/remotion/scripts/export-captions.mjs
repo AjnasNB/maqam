@@ -14,8 +14,12 @@ if (!Array.isArray(captions) || captions.length === 0 || !Array.isArray(script))
 }
 
 let captionIndex = 0;
+const presentationText = (value) =>
+  String(value)
+    .trim()
+    .replace(/\b(?:[A-Z]\s+){1,}[A-Z]\b/g, (match) => match.replace(/\s+/g, ""));
 const cues = script.map((segment, segmentIndex) => {
-  const wordCount = String(segment.text).trim().split(/\s+/).length;
+  const wordCount = presentationText(segment.text).split(/\s+/).length;
   const first = captions[captionIndex];
   const last = captions[captionIndex + wordCount - 1];
   if (!first || !last) {
@@ -25,7 +29,7 @@ const cues = script.map((segment, segmentIndex) => {
   return {
     startMs: first.startMs,
     endMs: last.endMs,
-    text: String(segment.text).trim(),
+    text: presentationText(segment.text),
   };
 });
 

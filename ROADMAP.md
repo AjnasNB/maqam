@@ -33,7 +33,7 @@ Maqam will integrate with orchestration, model, browser, crawl, and observabilit
 - Publish a five-minute quickstart and a reproducible 60-second demonstration of policy, approval mismatch, one-use consumption, trace, and evidence.
 - Extend adapter conformance beyond the shipped single-invocation fixture to cover cancellation, retry/idempotency, protocol errors, durable correlation, and bypass audits.
 - Add focused examples for an MCP tool, OpenAI Agents SDK, LangGraph, and a generic HTTP service without making those systems runtime dependencies.
-- Rerun the provisional MGES performance baseline from the final clean tagged commit and solicit independent reruns on Linux, macOS, Windows, multiple Node releases, and multiple processor families.
+- Solicit independent MGES reruns on Linux, macOS, Windows, multiple Node releases, and multiple processor families; publish compatible artifacts without treating one machine as a universal baseline.
 - Version MGES schemas and workloads without silently changing the v1 measurement construct; publish unstable and failed publication checks instead of discarding them.
 - Improve issue templates, security-reporting guidance, contribution boundaries, and good-first integration tasks.
 

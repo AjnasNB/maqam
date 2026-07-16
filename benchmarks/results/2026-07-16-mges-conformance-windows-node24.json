@@ -9,7 +9,12 @@
     "externallyStandardized": false,
     "externallyCertified": false
   },
-  "measuredAt": "2026-07-16T14:08:33.341Z",
+  "measuredAt": "2026-07-16T14:21:01.591Z",
+  "repository": {
+    "available": true,
+    "commit": "44c198f9eab1ea3a2dedb1f784413a2733b7745d",
+    "workingTreeDirty": false
+  },
   "environment": {
     "node": "v24.15.0",
     "v8": "13.6.233.17-node.48",
@@ -19,11 +24,11 @@
   },
   "sourceFingerprint": {
     "algorithm": "sha256",
-    "combined": "4d1ea30b67d06e95b6df1347163118b5d1a2a93552e804c8f1cff6132845d30b",
+    "combined": "ef4f9571f4a4c33885ea37719467031b157d5dd6567905eb263ec287fbb155cb",
     "files": [
       {
         "path": "benchmarks/governance-conformance.mjs",
-        "sha256": "0d640d0833d552596054921b883947532f22c5a1d1ed0cfd4e306306239f1d5f"
+        "sha256": "33c585568dbe8be21f77e9cbf8692d448f5f43fe5f37b6e4282181507dc91cfa"
       },
       {
         "path": "src/index.js",
@@ -75,7 +80,7 @@
       "property": "deny-by-default-construction",
       "threat": "An execution gateway is created without an explicit policy boundary.",
       "status": "pass",
-      "durationMs": 0.419,
+      "durationMs": 0.521,
       "evidence": {
         "constructorRejected": true,
         "errorType": "TypeError"
@@ -86,7 +91,7 @@
       "property": "policy-denial-blocks-dispatch",
       "threat": "A registered tool is invoked even though policy denies it.",
       "status": "pass",
-      "durationMs": 5.145,
+      "durationMs": 4.228,
       "evidence": {
         "rejectionCode": "POLICY_DENIED",
         "handlerExecutions": 0
@@ -97,7 +102,7 @@
       "property": "policy-evaluation-fails-closed",
       "threat": "A policy backend exception falls through to tool execution.",
       "status": "pass",
-      "durationMs": 0.624,
+      "durationMs": 0.459,
       "evidence": {
         "rejectionCode": "POLICY_EVALUATION_FAILED",
         "handlerExecutions": 0
@@ -108,7 +113,7 @@
       "property": "accessor-input-rejected-without-execution",
       "threat": "Input accessors execute while authorization data is being canonicalized.",
       "status": "pass",
-      "durationMs": 0.437,
+      "durationMs": 0.319,
       "evidence": {
         "rejectionCode": "APPROVAL_INPUT_INVALID",
         "getterExecutions": 0,
@@ -121,7 +126,7 @@
       "property": "approval-bound-to-run-tool-and-canonical-input",
       "threat": "An approval for one exact call authorizes a changed run, tool, or payload.",
       "status": "pass",
-      "durationMs": 6.786,
+      "durationMs": 5.935,
       "evidence": {
         "changedRunCode": "APPROVAL_SCOPE_MISMATCH",
         "changedInputCode": "APPROVAL_SCOPE_MISMATCH",
@@ -136,7 +141,7 @@
       "property": "approval-single-use-by-default",
       "threat": "A consumed approval can be replayed for a second execution.",
       "status": "pass",
-      "durationMs": 3.162,
+      "durationMs": 2.994,
       "evidence": {
         "replayCode": "APPROVAL_INVALID",
         "handlerExecutions": 1,
@@ -148,7 +153,7 @@
       "property": "per-run-call-limit-enforced",
       "threat": "A caller raises a policy-owned call limit and executes again.",
       "status": "pass",
-      "durationMs": 1.011,
+      "durationMs": 1.204,
       "evidence": {
         "rejectionCode": "TOOL_CALL_LIMIT_EXCEEDED",
         "handlerExecutions": 1,
@@ -160,7 +165,7 @@
       "property": "handler-input-is-detached-and-immutable",
       "threat": "The handler receives a mutable caller-owned object that can change after authorization.",
       "status": "pass",
-      "durationMs": 0.815,
+      "durationMs": 0.714,
       "evidence": {
         "detached": true,
         "rootFrozen": true,
@@ -175,7 +180,7 @@
       "property": "cross-run-evidence-does-not-support-a-claim",
       "threat": "Evidence from another run is treated as support for a claim.",
       "status": "pass",
-      "durationMs": 1.457,
+      "durationMs": 1.303,
       "evidence": {
         "evidenceId": "ev_1",
         "mismatchedClaimId": "claim_1",
@@ -190,7 +195,7 @@
       "property": "multi-approval-consumption-is-atomic",
       "threat": "A failed multi-approval call partially consumes the still-valid approval.",
       "status": "pass",
-      "durationMs": 4.956,
+      "durationMs": 5.008,
       "evidence": {
         "rejectionCode": "APPROVAL_INVALID",
         "firstApprovalConsumptions": 0,
@@ -203,7 +208,7 @@
       "property": "gateway-evidence-attribution-is-run-task-and-tool-scoped",
       "threat": "A handler forges the run, task, or tool attribution on evidence it records.",
       "status": "pass",
-      "durationMs": 1.214,
+      "durationMs": 1.138,
       "evidence": {
         "attemptedAttribution": {
           "runId": "forged_run",
@@ -222,7 +227,7 @@
       "property": "denial-trace-is-redacted-and-coded",
       "threat": "A denied call omits an audit trace or writes caller secrets into it.",
       "status": "pass",
-      "durationMs": 0.639,
+      "durationMs": 0.605,
       "evidence": {
         "rejectionCode": "POLICY_DENIED",
         "traceStatus": "denied",

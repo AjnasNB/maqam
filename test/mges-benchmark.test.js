@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -7,6 +8,21 @@ import { test } from "node:test";
 const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
 const performanceSuite = fileURLToPath(new URL("../benchmarks/governance-suite.mjs", import.meta.url));
 const conformanceSuite = fileURLToPath(new URL("../benchmarks/governance-conformance.mjs", import.meta.url));
+
+function checkedResult(path) {
+  return JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
+}
+
+function verifySourceFingerprint(result) {
+  const combined = createHash("sha256");
+  for (const file of result.sourceFingerprint.files) {
+    const bytes = readFileSync(new URL(`../${file.path}`, import.meta.url));
+    const digest = createHash("sha256").update(bytes).digest("hex");
+    assert.equal(digest, file.sha256, `${file.path} changed after the recorded MGES run`);
+    combined.update(`${file.path}\0${file.sha256}\n`);
+  }
+  assert.equal(combined.digest("hex"), result.sourceFingerprint.combined);
+}
 
 function run(script, ...args) {
   return spawnSync(process.execPath, [script, ...args], {
@@ -103,4 +119,22 @@ test("MGES result schemas are versioned machine-readable JSON Schema documents",
   assert.equal(performanceSchema.properties.schema.const, "maqam.benchmark.performance/v1");
   assert.equal(conformanceSchema.$schema, "https://json-schema.org/draft/2020-12/schema");
   assert.equal(conformanceSchema.properties.schema.const, "maqam.benchmark.conformance/v1");
+});
+
+test("checked-in MGES release artifacts identify a clean source commit and unchanged measured files", () => {
+  const performance = checkedResult(
+    "../benchmarks/results/2026-07-16-mges-performance-windows-node24.json"
+  );
+  const conformance = checkedResult(
+    "../benchmarks/results/2026-07-16-mges-conformance-windows-node24.json"
+  );
+
+  assert.equal(performance.repository.workingTreeDirty, false);
+  assert.equal(conformance.repository.workingTreeDirty, false);
+  assert.match(performance.repository.commit, /^[a-f0-9]{40}$/);
+  assert.equal(conformance.repository.commit, performance.repository.commit);
+  assert.equal(performance.quality.publicationCandidate, true);
+  assert.equal(conformance.summary.allPassed, true);
+  verifySourceFingerprint(performance);
+  verifySourceFingerprint(conformance);
 });
