@@ -4,7 +4,7 @@ Maqam is designed for governed local agent workflows. Treat every tool, connecto
 
 ## Supported Version
 
-Security fixes are prepared against `maqam@0.2.3` and later reviewed 0.2.x releases. Version 0.2.3 adds a reproducible exact-approval demo without weakening the descriptor-validation protections introduced in 0.2.2; 0.2.2 superseded 0.2.1 for authority-boundary integrity under prototype pollution.
+Security fixes are prepared against `maqam@0.2.4` and later reviewed 0.2.x releases. Version 0.2.4 adds a fail-closed host-adapter descriptor/conformance boundary and project-defined governance evaluation fixtures without weakening the descriptor-validation protections introduced in 0.2.2. Version 0.2.3 added the reproducible exact-approval demo; 0.2.2 superseded 0.2.1 for authority-boundary integrity under prototype pollution.
 
 ## Reporting Issues
 

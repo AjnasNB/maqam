@@ -5,7 +5,7 @@ Use this checklist before publishing any Maqam release.
 ## Release Candidate
 
 - Package: `maqam`
-- Version: `0.2.3`
+- Version: `0.2.4`
 - License: MIT
 - Registry target: npm public registry
 - Publish command: `npm publish --access public`
@@ -48,17 +48,17 @@ Confirm before release:
 
 ## Approval Gate
 
-Publishing requires explicit user approval for the exact package, version, registry, command, artifact identity, and Git commit in the current run. Approval must name `maqam@0.2.3` or a later reviewed version and use the `publish:npm` action.
+Publishing requires explicit user approval for the exact package, version, registry, command, artifact identity, and Git commit in the current run. Approval must name `maqam@0.2.4` or a later reviewed version and use the `publish:npm` action.
 
 When represented as an `ApprovalQueue` record, the subject must exactly match:
 
 ```js
 {
   packageName: "maqam",
-  version: "0.2.3",
+  version: "0.2.4",
   registry: "https://registry.npmjs.org/",
   publishCommand: "npm publish --access public",
-  artifactFilename: "maqam-0.2.3.tgz",
+  artifactFilename: "maqam-0.2.4.tgz",
   artifactSizeBytes: 123456,
   artifactIntegrity: "sha512-...",
   gitCommit: "0123456789abcdef0123456789abcdef01234567"
@@ -73,7 +73,7 @@ Do not publish automatically from an automation, background run, scheduled job, 
 
 ```bash
 npm publish --access public
-npm view maqam@0.2.3 version dist.integrity gitHead _resolved _from
+npm view maqam@0.2.4 version dist.integrity gitHead _resolved _from
 ```
 
-Run the publish command from the reviewed, clean, committed repository directory and do not publish by passing a local `.tgz` path. Use an authenticated npm session or short-lived release token without storing credentials in repository files, shell history, logs, package metadata, or evidence. After publishing, require registry `gitHead` to match the approved commit, verify version and integrity, and confirm `_resolved` and `_from` expose no local filesystem path. Only then create the `0.2.3` GitHub release with the npm package URL.
+Run the publish command from the reviewed, clean, committed repository directory and do not publish by passing a local `.tgz` path. Use an authenticated npm session or short-lived release token without storing credentials in repository files, shell history, logs, package metadata, or evidence. After publishing, require registry `gitHead` to match the approved commit, verify version and integrity, and confirm `_resolved` and `_from` expose no local filesystem path. Only then create the `0.2.4` GitHub release with the npm package URL.

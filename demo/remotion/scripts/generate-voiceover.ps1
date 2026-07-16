@@ -11,6 +11,9 @@ $ScriptPath = Join-Path $PSScriptRoot "voiceover-script.json"
 $AudioPath = Join-Path $PublicDirectory "voiceover.wav"
 $CaptionsPath = Join-Path $PublicDirectory "captions.json"
 $MetadataPath = Join-Path $PublicDirectory "voiceover-metadata.json"
+$AudioTempPath = Join-Path $PublicDirectory "voiceover.rendering.wav"
+$CaptionsTempPath = Join-Path $PublicDirectory "captions.rendering.json"
+$MetadataTempPath = Join-Path $PublicDirectory "voiceover-metadata.rendering.json"
 
 $segments = Get-Content -Raw -LiteralPath $ScriptPath | ConvertFrom-Json
 if (-not $segments -or $segments.Count -eq 0) {
@@ -18,8 +21,10 @@ if (-not $segments -or $segments.Count -eq 0) {
 }
 
 New-Item -ItemType Directory -Force -Path $PublicDirectory | Out-Null
-if (Test-Path -LiteralPath $AudioPath) {
-  Remove-Item -LiteralPath $AudioPath -Force
+foreach ($temporaryPath in @($AudioTempPath, $CaptionsTempPath, $MetadataTempPath)) {
+  if (Test-Path -LiteralPath $temporaryPath) {
+    Remove-Item -LiteralPath $temporaryPath -Force
+  }
 }
 
 $synthesizer = [System.Speech.Synthesis.SpeechSynthesizer]::new()
@@ -65,7 +70,7 @@ foreach ($segment in $segments) {
 }
 
 try {
-  $synthesizer.SetOutputToWaveFile($AudioPath)
+  $synthesizer.SetOutputToWaveFile($AudioTempPath)
   $synthesizer.Speak($prompt)
   $synthesizer.SetOutputToNull()
 } finally {
@@ -79,13 +84,14 @@ if ($wordEvents.Count -eq 0) {
 
 $ffprobeCommand = Get-Command ffprobe -ErrorAction SilentlyContinue
 if ($null -ne $ffprobeCommand) {
-  $durationText = & $ffprobeCommand.Source -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -- $AudioPath
+  $durationText = & $ffprobeCommand.Source -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -- $AudioTempPath
   $durationMs = [int][math]::Round(([double]::Parse($durationText.Trim(), [System.Globalization.CultureInfo]::InvariantCulture)) * 1000)
 } else {
   $durationMs = [int]$wordEvents[$wordEvents.Count - 1].startMs + 900
 }
 
 if ($durationMs -gt 59800) {
+  Remove-Item -LiteralPath $AudioTempPath -Force -ErrorAction SilentlyContinue
   throw "Voiceover is $durationMs ms and exceeds the 60-second composition safe limit."
 }
 
@@ -112,7 +118,7 @@ $captions = for ($index = 0; $index -lt $wordEvents.Count; $index += 1) {
 
 $utf8WithoutBom = [System.Text.UTF8Encoding]::new($false)
 $captionsJson = $captions | ConvertTo-Json -Depth 5
-[System.IO.File]::WriteAllText($CaptionsPath, $captionsJson, $utf8WithoutBom)
+[System.IO.File]::WriteAllText($CaptionsTempPath, $captionsJson, $utf8WithoutBom)
 
 $metadata = [ordered]@{
   provider = "Microsoft System.Speech (local Windows SAPI)"
@@ -128,7 +134,11 @@ $metadata = [ordered]@{
   sourceScript = "scripts/voiceover-script.json"
 }
 $metadataJson = $metadata | ConvertTo-Json
-[System.IO.File]::WriteAllText($MetadataPath, $metadataJson, $utf8WithoutBom)
+[System.IO.File]::WriteAllText($MetadataTempPath, $metadataJson, $utf8WithoutBom)
+
+Move-Item -LiteralPath $AudioTempPath -Destination $AudioPath -Force
+Move-Item -LiteralPath $CaptionsTempPath -Destination $CaptionsPath -Force
+Move-Item -LiteralPath $MetadataTempPath -Destination $MetadataPath -Force
 
 Write-Output "Generated $AudioPath with $($voice.Name) ($durationMs ms)."
 Write-Output "Generated $($captions.Count) word-timed captions."

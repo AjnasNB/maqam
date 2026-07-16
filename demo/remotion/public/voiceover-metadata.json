@@ -4,10 +4,10 @@
     "culture":  "en-US",
     "rate":  3,
     "volume":  96,
-    "durationMs":  51271,
-    "captionTimeScale":  0.7339001732010707,
+    "durationMs":  58514,
+    "captionTimeScale":  0.7296555852058757,
     "captionTiming":  "SAPI SpeakProgress positions rescaled to rendered WAVE duration",
-    "generatedAt":  "2026-07-16T12:42:39.7822398Z",
+    "generatedAt":  "2026-07-16T14:06:41.3620810Z",
     "cloudServiceUsed":  false,
     "sourceScript":  "scripts/voiceover-script.json"
 }

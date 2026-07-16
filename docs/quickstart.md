@@ -7,7 +7,7 @@ This quickstart proves the exact-approval path locally. It needs Node.js 20.18.1
 From any directory:
 
 ```bash
-npx -y maqam@0.2.3 demo approval
+npx -y maqam@0.2.4 demo approval
 ```
 
 Expected checkpoints:
@@ -27,7 +27,7 @@ PASS
 The command creates a temporary isolated workspace, performs one exact approved file write, verifies it, and removes the workspace. Add `--json` for the deterministic machine-readable report used by the launch video:
 
 ```bash
-npx -y maqam@0.2.3 demo approval --json
+npx -y maqam@0.2.4 demo approval --json
 ```
 
 ## 2. Install In A Project
@@ -36,7 +36,7 @@ npx -y maqam@0.2.3 demo approval --json
 mkdir maqam-quickstart
 cd maqam-quickstart
 npm init -y
-npm install maqam@0.2.3
+npm install maqam@0.2.4
 ```
 
 Create `approval.mjs` with this local, side-effect-free example:

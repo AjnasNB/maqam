@@ -1,50 +1,52 @@
 [
   {
-    "text": "An agent asks to write release notes. In most systems, approval is just a yes.",
-    "pauseAfterMs": 360
+    "scene": "hook",
+    "text": "An agent requests a write. Approval should mean one exact action.",
+    "pauseAfterMs": 260
   },
   {
-    "text": "Maqam pauses before execution and creates an approval for this exact run, tool, and input fingerprint.",
-    "pauseAfterMs": 420
+    "scene": "approval",
+    "text": "Maqam pauses first, binding approval to the run, registered tool, and input hash.",
+    "pauseAfterMs": 300
   },
   {
-    "text": "Change even one field after approval, and the call fails closed with approval scope mismatch.",
-    "pauseAfterMs": 330
-  },
-  {
-    "text": "Nothing executes. No file exists.",
-    "pauseAfterMs": 500
-  },
-  {
-    "text": "Restore the exact approved input, and the write runs once.",
-    "pauseAfterMs": 330
-  },
-  {
-    "text": "The saved file is verified, and the approval is consumed.",
-    "pauseAfterMs": 500
-  },
-  {
-    "text": "Try to replay that same approval, and Maqam rejects it.",
+    "scene": "mismatch",
+    "text": "Change one field. The call fails closed. Nothing executes; no file exists.",
     "pauseAfterMs": 320
   },
   {
-    "text": "Execution count stays at one. The file stays unchanged.",
-    "pauseAfterMs": 520
+    "scene": "exact",
+    "text": "Restore the exact input. One verified write runs, consuming the approval.",
+    "pauseAfterMs": 300
   },
   {
-    "text": "The successful call records source evidence, hashes the content, and links a claim to that evidence in the same run.",
-    "pauseAfterMs": 520
+    "scene": "replay",
+    "text": "Replay it. Rejected; execution stays at one, file unchanged.",
+    "pauseAfterMs": 300
   },
   {
-    "text": "The final report shows one execution, one approval consumption, one evidence record, one supported claim, and zero unsupported claims.",
-    "pauseAfterMs": 520
+    "scene": "evidence",
+    "text": "The handler records evidence and links the supported claim in the same run.",
+    "pauseAfterMs": 300
   },
   {
-    "text": "Policy before execution. Exact approval for the call. Evidence behind the claim.",
-    "pauseAfterMs": 380
+    "scene": "benchmark",
+    "text": "M G E S version one separates performance and conformance. Performance tracks local gateway regression; conformance checks safety fixtures. It is project-defined, not an industry standard or certification.",
+    "pauseAfterMs": 260
   },
   {
-    "text": "Install Maqam from npm.",
+    "scene": "ecosystem",
+    "text": "Functions, C L I workers, and host S D K, H T T P, or M C P style adapters enter registered paths. Maqam applies policy, approval, trace, and evidence. Hosts own transport and unregistered actions.",
+    "pauseAfterMs": 260
+  },
+  {
+    "scene": "summary",
+    "text": "Maqam complements agent runtimes, durable workflows, provider permissions, and operating system isolation. It does not replace them.",
+    "pauseAfterMs": 320
+  },
+  {
+    "scene": "final",
+    "text": "Run the proof and inspect raw benchmark J S O N.",
     "pauseAfterMs": 100
   }
 ]

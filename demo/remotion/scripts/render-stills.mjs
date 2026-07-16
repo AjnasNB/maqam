@@ -7,11 +7,13 @@ const outputDirectory = resolve(projectDirectory, "out", "screenshots");
 await mkdir(outputDirectory, { recursive: true });
 
 const stills = [
-  { frame: 90, file: "policy-path.png" },
-  { frame: 240, file: "pending-exact-approval.png" },
-  { frame: 450, file: "01-scope-mismatch.png" },
-  { frame: 660, file: "02-exact-execution.png" },
-  { frame: 1090, file: "03-evidence-linked.png" },
+  { frame: 75, file: "policy-path.png" },
+  { frame: 195, file: "pending-exact-approval.png" },
+  { frame: 345, file: "01-scope-mismatch.png" },
+  { frame: 480, file: "02-exact-execution.png" },
+  { frame: 780, file: "03-evidence-linked.png" },
+  { frame: 975, file: "04-benchmark-method.png" },
+  { frame: 1320, file: "05-ecosystem-boundary.png" },
 ];
 
 const cliPath = resolve(projectDirectory, "node_modules", "@remotion", "cli", "remotion-cli.js");

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AjnasNB/maqam/blob/main/benchmarks/schemas/performance-v1.schema.json",
+  "title": "MGES v1 local-call performance result",
+  "type": "object",
+  "required": [
+    "schema",
+    "suite",
+    "measuredAt",
+    "repository",
+    "sourceFingerprint",
+    "environment",
+    "methodology",
+    "fixture",
+    "results",
+    "raw",
+    "quality",
+    "interpretation"
+  ],
+  "properties": {
+    "schema": { "const": "maqam.benchmark.performance/v1" },
+    "suite": {
+      "type": "object",
+      "required": ["shortName", "profile", "version", "externallyStandardized"],
+      "properties": {
+        "shortName": { "const": "MGES" },
+        "profile": { "const": "local-call-performance" },
+        "version": { "const": "1.0.0" },
+        "externallyStandardized": { "const": false }
+      }
+    },
+    "measuredAt": { "type": "string", "format": "date-time" },
+    "executionDurationMs": { "type": "number", "exclusiveMinimum": 0 },
+    "repository": { "type": "object" },
+    "sourceFingerprint": {
+      "type": "object",
+      "required": ["algorithm", "combined", "files"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "combined": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "files": { "type": "array", "minItems": 1 }
+      }
+    },
+    "environment": { "type": "object" },
+    "methodology": { "type": "object" },
+    "fixture": { "type": "object" },
+    "results": {
+      "type": "object",
+      "required": ["direct", "governed", "pairedAdded"],
+      "properties": {
+        "direct": { "$ref": "#/$defs/summary" },
+        "governed": { "$ref": "#/$defs/summary" },
+        "pairedAdded": { "$ref": "#/$defs/summary" }
+      }
+    },
+    "raw": {
+      "type": "object",
+      "required": ["rounds"],
+      "properties": {
+        "rounds": { "type": "array", "minItems": 2 }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": ["publicationCandidate", "checks"],
+      "properties": {
+        "publicationCandidate": { "type": "boolean" },
+        "checks": { "type": "array", "minItems": 1 }
+      }
+    },
+    "interpretation": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "summary": {
+      "type": "object",
+      "required": [
+        "sampleCount",
+        "medianNsPerOperation",
+        "medianMicrosecondsPerOperation",
+        "coefficientOfVariation",
+        "bootstrapMedian95Interval"
+      ],
+      "properties": {
+        "sampleCount": { "type": "integer", "minimum": 2 },
+        "medianNsPerOperation": { "type": "number" },
+        "medianMicrosecondsPerOperation": { "type": "number" },
+        "coefficientOfVariation": { "type": ["number", "null"] },
+        "bootstrapMedian95Interval": { "type": "object" }
+      }
+    }
+  }
+}

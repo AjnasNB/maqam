@@ -4,6 +4,8 @@ Last reviewed: 2026-07-16.
 
 This document compares product scope using official repositories and official documentation available on the review date. Most entries are open source; deprecated or source-available exceptions are identified explicitly. It is not a performance benchmark, security certification, endorsement, or legal opinion. Projects evolve; follow the links before making an adoption or license decision.
 
+Maqam does not publish a speed ranking for these products. Its [MGES v1 benchmark](../benchmarks/README.md) measures only Maqam's own local component path and project-defined conformance fixtures. A fair cross-product benchmark would require the same representative workload, policy and approval obligations, trace/evidence outputs, persistence model, configuration disclosure, repeated environments, predeclared analysis and public adapters for every participant. Those matched conditions do not exist in MGES v1.
+
 ## Short Answer
 
 Maqam is not the only open-source project concerned with agent safety, human approval, policy, provenance, orchestration, or crawling. Its current center is narrower: a local TypeScript path from declared policy, through a registered tool boundary, to exact run/tool/input-bound one-use approval and same-run claim-to-evidence records.

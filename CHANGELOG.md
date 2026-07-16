@@ -2,6 +2,28 @@
 
 All notable Maqam changes are tracked here before release.
 
+## 0.2.4 - 2026-07-16
+
+Evaluation, ecosystem-adapter, and proof-video patch.
+
+### Added
+
+- Maqam Governance Evaluation Suite (MGES) v1 with a 30-observation fresh-process local-call profile, raw observations, source fingerprints, coefficient-of-variation gates, a deterministic 95% bootstrap interval, versioned JSON Schemas, and copy-safe claim templates.
+- A separate 12-case governance-boundary conformance profile covering default denial, fail-closed policy, accessor input rejection, exact run/tool/input approval scope, replay rejection, call ceilings, immutable input, atomic multi-approval consumption, evidence attribution, and redacted denial traces without collapsing them into a security score.
+- `defineToolAdapter`, `registerToolAdapter`, and `runToolAdapterConformance` for explicit host-supplied function, SDK, HTTP, MCP-style, and custom adapters.
+- A deterministic adapter ecosystem example and documented explicit composition with ProductLoop OS through its existing `maqamGateway`.
+- A revised 60-second Remotion proof with real benchmark artifacts, PASS/REVIEW withholding, an honest ecosystem boundary, local TTS, portable captions, and release stills.
+
+### Security and boundaries
+
+- Adapter effects, risk, identity, and transport metadata are explicit and cannot be downgraded through extra metadata. Registration preserves stricter governance declared on the underlying handler, and ambiguous leading/trailing whitespace is rejected. Governed adapters receive the same detached frozen input and exact approval semantics as other registered tools.
+- Adapter conformance errors expose only bounded error identity. SDK/MCP clients, authentication, discovery, HTTP transport security, secrets, persistence, retries, provider-internal actions, and direct bypass paths remain host responsibilities.
+- MGES is project-defined regression evidence, not a globally standardized benchmark, penetration test, compliance result, competitor ranking, SLA, security score, or certification.
+
+### Documentation
+
+- Added canonical benchmark documentation, raw artifacts, methodology, presentation rules, a detailed benchmarking article, an OWASP relevance crosswalk with explicit gaps, and a host-adapter integration guide.
+
 ## 0.2.3 - 2026-07-16
 
 Launch, documentation, and reproducible-proof patch for exact approvals.

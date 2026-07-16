@@ -9,6 +9,7 @@ import {
   useCurrentFrame,
 } from "remotion";
 import { CaptionTrack } from "./CaptionTrack";
+import type { BenchmarkProof } from "./benchmark";
 import type { DemoProof } from "./proof";
 import { useDemoAssets } from "./useDemoAssets";
 
@@ -31,14 +32,16 @@ const uiFont = "'Segoe UI', Arial, sans-serif";
 const codeFont = "'Cascadia Code', Consolas, monospace";
 
 const sceneTiming = {
-  hook: { from: 0, duration: 150 },
-  approval: { from: 150, duration: 156 },
-  mismatch: { from: 306, duration: 234 },
-  exact: { from: 540, duration: 199 },
-  replay: { from: 739, duration: 214 },
-  evidence: { from: 953, duration: 168 },
-  summary: { from: 1121, duration: 378 },
-  final: { from: 1499, duration: 301 },
+  hook: { from: 0, duration: 120 },
+  approval: { from: 120, duration: 150 },
+  mismatch: { from: 270, duration: 150 },
+  exact: { from: 420, duration: 135 },
+  replay: { from: 555, duration: 135 },
+  evidence: { from: 690, duration: 135 },
+  benchmark: { from: 804, duration: 316 },
+  ecosystem: { from: 1120, duration: 353 },
+  summary: { from: 1473, duration: 212 },
+  final: { from: 1685, duration: 115 },
 } as const;
 
 const shortHash = (value: string, length = 12) => {
@@ -120,7 +123,7 @@ const FrameHeader: React.FC = () => {
           <div style={{ color: palette.paper, fontSize: 28, fontWeight: 750, letterSpacing: 5 }}>MAQAM</div>
           <div style={{ width: 1, height: 27, backgroundColor: palette.line }} />
           <div style={{ color: palette.muted, fontSize: 22, fontWeight: 600, letterSpacing: 2.2 }}>
-            EXACT APPROVAL · REAL CLI PROOF
+            REAL CLI PROOF / REPRODUCIBLE BENCHMARK
           </div>
         </div>
         <div
@@ -606,28 +609,286 @@ const EvidenceScene: React.FC<{ readonly proof: DemoProof }> = ({ proof }) => {
   );
 };
 
-const SummaryScene: React.FC<{ readonly proof: DemoProof }> = ({ proof }) => {
+const BenchmarkScene: React.FC<{ readonly benchmark: BenchmarkProof }> = ({ benchmark }) => {
   const frame = useCurrentFrame();
-  const metrics = [
-    { label: "ALTERED INPUT", value: "BLOCKED", tone: palette.red },
-    { label: "EXECUTIONS", value: proof.summary.executions, tone: palette.green },
-    { label: "CONSUMPTIONS", value: proof.summary.approvalConsumptions, tone: palette.green },
-    { label: "UNSUPPORTED", value: proof.summary.unsupportedClaims, tone: palette.green },
-  ];
+  const { performance, conformance, environment } = benchmark;
+  const performanceIsReleaseBaseline =
+    performance.publicationCandidate && performance.workingTreeDirty === false;
+  const conformanceIsReleaseBaseline =
+    conformance.allPassed && conformance.workingTreeDirty === false;
+  const cardOpacity = (index: number) =>
+    interpolate(frame, [20 + index * 20, 48 + index * 20], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.bezier(0.16, 1, 0.3, 1),
+    });
+
+  return (
+    <SceneShell durationInFrames={sceneTiming.benchmark.duration}>
+      <Eyebrow>MGES v1 / project-defined / not an industry standard</Eyebrow>
+      <Title>Two signals. Different questions.</Title>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginTop: 34 }}>
+        <Card
+          style={{
+            minHeight: 332,
+            padding: "28px 32px",
+            opacity: cardOpacity(0),
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div style={{ color: palette.blue, fontSize: 21, fontWeight: 760, letterSpacing: 2.4 }}>
+              PERFORMANCE / LOCAL SEQUENTIAL TOOLGATEWAY REGRESSION
+            </div>
+            {performanceIsReleaseBaseline ? (
+              <>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginTop: 18 }}>
+                  <span style={{ color: palette.paper, fontFamily: codeFont, fontSize: 92, fontWeight: 790, letterSpacing: -4 }}>
+                    {performance.governedMedianMicrosecondsPerCall.toFixed(3)}
+                  </span>
+                  <span style={{ color: palette.blue, fontFamily: codeFont, fontSize: 34, fontWeight: 740 }}>
+                    {"\u00b5s/call"}
+                  </span>
+                </div>
+                <div style={{ color: palette.muted, fontFamily: codeFont, fontSize: 24 }}>
+                  95% bootstrap interval {performance.interval95LowMicrosecondsPerCall.toFixed(3)}-
+                  {performance.interval95HighMicrosecondsPerCall.toFixed(3)} {"\u00b5s"}
+                </div>
+              </>
+            ) : (
+              <div style={{ marginTop: 30 }}>
+                <div style={{ color: palette.amber, fontSize: 54, fontWeight: 780 }}>RESULT WITHHELD</div>
+                <div style={{ marginTop: 12, color: palette.paper, fontSize: 30 }}>
+                  {performance.workingTreeDirty === true
+                    ? "Clean-source check: REVIEW"
+                    : "Stability checks: REVIEW"}
+                </div>
+              </div>
+            )}
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ color: palette.muted, fontSize: 22 }}>
+              {performance.samplesPerVariant} fresh-process observations / variant
+            </span>
+            <Status tone={performanceIsReleaseBaseline ? "green" : "amber"}>
+              {performanceIsReleaseBaseline
+                ? `PROJECT CHECKS ${performance.qualityChecksPassed}/${performance.qualityChecksTotal}`
+                : "RELEASE BASELINE REVIEW"}
+            </Status>
+          </div>
+        </Card>
+
+        <Card
+          tone={conformanceIsReleaseBaseline ? "green" : "red"}
+          style={{
+            minHeight: 332,
+            padding: "28px 32px",
+            opacity: cardOpacity(1),
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div style={{ color: conformanceIsReleaseBaseline ? palette.green : palette.red, fontSize: 21, fontWeight: 760, letterSpacing: 2.4 }}>
+              CONFORMANCE / GOVERNANCE BOUNDARY
+            </div>
+            {conformanceIsReleaseBaseline ? (
+              <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginTop: 18 }}>
+                <span style={{ color: palette.green, fontFamily: codeFont, fontSize: 92, fontWeight: 790, letterSpacing: -4 }}>
+                  {conformance.passed}/{conformance.total}
+                </span>
+                <span style={{ color: palette.paper, fontSize: 31, fontWeight: 720 }}>MGES fixtures passed</span>
+              </div>
+            ) : (
+              <div style={{ marginTop: 30 }}>
+                <div style={{ color: palette.red, fontSize: 54, fontWeight: 780 }}>RESULT WITHHELD</div>
+                <div style={{ marginTop: 12, color: palette.paper, fontSize: 28 }}>
+                  {conformance.workingTreeDirty === true ? "Clean-source check: REVIEW" : "Conformance cases: REVIEW"}
+                </div>
+              </div>
+            )}
+            <div style={{ color: palette.paper, fontSize: 29, lineHeight: 1.3 }}>
+              Deterministic, source-fingerprinted safety cases.
+            </div>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ color: palette.muted, fontSize: 22 }}>Not a security score or certification.</span>
+            <Status tone={conformanceIsReleaseBaseline ? "green" : "red"}>
+              {conformanceIsReleaseBaseline ? "MGES PASS" : "MGES REVIEW"}
+            </Status>
+          </div>
+        </Card>
+      </div>
+      <div style={{ marginTop: 20, display: "flex", justifyContent: "space-between", color: palette.muted, fontFamily: codeFont, fontSize: 20 }}>
+        <span>isolated processes / raw JSON / uncertainty / environment disclosed</span>
+        <span>{environment.node} / {environment.platform}-{environment.architecture}</span>
+      </div>
+      <div style={{ marginTop: 11, color: palette.amber, fontSize: 20, lineHeight: 1.25, textAlign: "center" }}>
+        Local in-process component microbenchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
+      </div>
+      <div style={{ marginTop: 5, color: palette.muted, fontSize: 18, textAlign: "center" }}>
+        Method and raw artifacts: docs/benchmarking.md
+      </div>
+    </SceneShell>
+  );
+};
+
+const EcosystemScene: React.FC = () => {
+  const frame = useCurrentFrame();
+  const stageOpacity = (index: number) =>
+    interpolate(frame, [18 + index * 22, 42 + index * 22], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.bezier(0.16, 1, 0.3, 1),
+    });
+  const items = {
+    sources: [
+      "Function or object worker",
+      "Codex CLI",
+      "Claude Code",
+      "Generic CLI worker",
+      "Host SDK / HTTP / MCP-style adapter",
+    ],
+    gateway: ["Policy decision", "Exact call approval", "Ceilings and trace", "Evidence and claims"],
+    effects: ["HTTP crawler", "Function handler", "File or API wrapper", "Internal service"],
+  } as const;
+
+  const Column: React.FC<{
+    readonly label: string;
+    readonly title: string;
+    readonly values: readonly string[];
+    readonly tone?: "neutral" | "green";
+    readonly index: number;
+  }> = ({ label, title, values, tone = "neutral", index }) => (
+    <Card
+      tone={tone}
+      style={{
+        minHeight: 344,
+        padding: "25px 27px",
+        opacity: stageOpacity(index),
+        translate: `0 ${interpolate(frame, [18 + index * 22, 42 + index * 22], [18, 0], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+          easing: Easing.bezier(0.16, 1, 0.3, 1),
+        })}px`,
+      }}
+    >
+      <div style={{ color: tone === "green" ? palette.green : palette.muted, fontSize: 20, fontWeight: 750, letterSpacing: 2.4 }}>
+        {label}
+      </div>
+      <div style={{ marginTop: 10, color: palette.paper, fontSize: 38, fontWeight: 760 }}>{title}</div>
+      <div style={{ display: "grid", gap: 9, marginTop: 18 }}>
+        {values.map((value) => (
+          <div
+            key={value}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "9px 12px",
+              borderRadius: 10,
+              backgroundColor: "rgba(255,255,255,0.035)",
+              border: `1px solid ${palette.line}`,
+              color: "#d8ddd9",
+              fontSize: 24,
+              fontWeight: 620,
+            }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: tone === "green" ? palette.green : palette.blue }} />
+            {value}
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+
+  const Arrow: React.FC<{ readonly index: number }> = ({ index }) => (
+    <div
+      style={{
+        color: palette.green,
+        fontSize: 58,
+        fontWeight: 500,
+        textAlign: "center",
+        opacity: stageOpacity(index),
+      }}
+    >
+      &rarr;
+    </div>
+  );
+
+  return (
+    <SceneShell durationInFrames={sceneTiming.ecosystem.duration}>
+      <Eyebrow>Connection model</Eyebrow>
+      <Title>One boundary. Your existing stack.</Title>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "0.95fr 62px 1.05fr 62px 0.95fr",
+          gap: 14,
+          alignItems: "center",
+          marginTop: 32,
+        }}
+      >
+        <Column label="SUPPORTED PATHS" title="Agents and hosts" values={items.sources} index={0} />
+        <Arrow index={1} />
+        <Column label="REGISTERED PATH" title="Maqam ToolGateway" values={items.gateway} tone="green" index={2} />
+        <Arrow index={3} />
+        <Column label="YOUR HANDLERS" title="Allowed effects" values={items.effects} index={4} />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 18, marginTop: 18 }}>
+        <div style={{ color: palette.blue, fontSize: 22, fontWeight: 650 }}>
+          ProductLoop OS accepts explicit Maqam adapters; no automatic cross-package transaction is implied.
+        </div>
+        <div style={{ color: palette.muted, fontSize: 21, textAlign: "right" }}>
+          The host supplies transport clients, discovery, authentication, and protocol validation.
+        </div>
+      </div>
+      <div style={{ marginTop: 10, color: palette.red, fontFamily: codeFont, fontSize: 20, textAlign: "center" }}>
+        Outside this path: provider-internal actions, unregistered calls, and host OS or network isolation.
+      </div>
+    </SceneShell>
+  );
+};
+
+const SummaryScene: React.FC = () => {
+  const frame = useCurrentFrame();
+  const columns = [
+    {
+      label: "USE BESIDE",
+      title: "Your runtime",
+      tone: palette.blue,
+      values: ["Agent SDK or LangGraph", "ProductLoop OS", "Crawler or MCP client"],
+    },
+    {
+      label: "MAQAM ADDS",
+      title: "Governed boundary",
+      tone: palette.green,
+      values: ["Policy before dispatch", "Exact approval receipts", "Scoped evidence links"],
+    },
+    {
+      label: "HOST STILL OWNS",
+      title: "Hard boundaries",
+      tone: palette.amber,
+      values: ["Identity and reviewer auth", "Durable trusted storage", "OS and network isolation"],
+    },
+  ] as const;
   return (
     <SceneShell durationInFrames={sceneTiming.summary.duration}>
-      <Eyebrow>Deterministic report</Eyebrow>
-      <Title>The proof, in one frame.</Title>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 22, flex: 1, alignItems: "center", marginTop: 36 }}>
-        {metrics.map((metric, index) => (
+      <Eyebrow>Product position</Eyebrow>
+      <Title>The boundary, not the whole stack.</Title>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, flex: 1, alignItems: "center", marginTop: 34 }}>
+        {columns.map((column, index) => (
           <Card
-            key={metric.label}
+            key={column.label}
             style={{
-              minHeight: 250,
-              padding: 28,
+              minHeight: 300,
+              padding: "27px 29px",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "space-between",
+              gap: 20,
               opacity: interpolate(frame, [18 + index * 10, 40 + index * 10], [0, 1], {
                 extrapolateLeft: "clamp",
                 extrapolateRight: "clamp",
@@ -640,16 +901,23 @@ const SummaryScene: React.FC<{ readonly proof: DemoProof }> = ({ proof }) => {
               })}px`,
             }}
           >
-            <div style={{ color: palette.muted, fontSize: 22, fontWeight: 700, letterSpacing: 2 }}>{metric.label}</div>
-            <div style={{ color: metric.tone, fontFamily: codeFont, fontSize: typeof metric.value === "number" ? 98 : 46, fontWeight: 780, lineHeight: 1 }}>
-              {metric.value}
+            <div>
+              <div style={{ color: column.tone, fontSize: 20, fontWeight: 760, letterSpacing: 2.2 }}>{column.label}</div>
+              <div style={{ marginTop: 10, color: palette.paper, fontSize: 39, fontWeight: 760 }}>{column.title}</div>
+            </div>
+            <div style={{ display: "grid", gap: 10 }}>
+              {column.values.map((value) => (
+                <div key={value} style={{ display: "flex", alignItems: "center", gap: 12, color: "#d8ddd9", fontSize: 25 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: column.tone }} />
+                  {value}
+                </div>
+              ))}
             </div>
           </Card>
         ))}
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", color: palette.muted, fontFamily: codeFont, fontSize: 22 }}>
-        <span>evidence {proof.summary.evidenceRecords} · claims {proof.summary.claims}</span>
-        <span style={{ color: palette.green }}>temporary workspace removed {String(proof.cleanup.temporaryWorkspaceRemoved)}</span>
+      <div style={{ color: palette.red, fontFamily: codeFont, fontSize: 21, textAlign: "center" }}>
+        Only registered paths are governed. Evidence provenance does not prove semantic truth.
       </div>
     </SceneShell>
   );
@@ -662,19 +930,13 @@ const FinalScene: React.FC = () => {
       <div style={{ display: "flex", flexDirection: "column", flex: 1, alignItems: "center", justifyContent: "center", textAlign: "center" }}>
         <Eyebrow>Maqam · TypeScript governance</Eyebrow>
         <div style={{ maxWidth: 1480, fontSize: 104, lineHeight: 0.98, letterSpacing: -5, fontWeight: 740 }}>
-          The agent can act. <span style={{ color: palette.green }}>Maqam makes it prove why.</span>
-        </div>
-        <div style={{ display: "flex", gap: 32, marginTop: 34, color: palette.muted, fontSize: 30 }}>
-          <span>Policy before execution</span><span style={{ color: palette.line }}>•</span>
-          <span>Exact approval for the call</span><span style={{ color: palette.line }}>•</span>
-          <span>Evidence behind the claim</span>
+          The agent can act. <span style={{ color: palette.green }}>Maqam binds it to what was approved.</span>
         </div>
         <div
           style={{
-            marginTop: 42,
+            marginTop: 30,
             display: "flex",
             alignItems: "center",
-            gap: 30,
             opacity: interpolate(frame, [24, 50], [0, 1], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
@@ -683,9 +945,8 @@ const FinalScene: React.FC = () => {
           }}
         >
           <div style={{ padding: "17px 26px", borderRadius: 12, border: `1px solid ${palette.green}66`, backgroundColor: palette.greenDim, color: palette.paper, fontFamily: codeFont, fontSize: 31 }}>
-            npm install maqam
+            npx -y maqam demo approval
           </div>
-          <div style={{ color: palette.muted, fontFamily: codeFont, fontSize: 26 }}>github.com/AjnasNB/maqam</div>
         </div>
       </div>
     </SceneShell>
@@ -704,7 +965,7 @@ export const MaqamDemo: React.FC = () => {
         <Audio
           src={staticFile("voiceover.wav")}
           volume={(frame) =>
-            interpolate(frame, [0, 15, 1740, 1785], [0, 1, 1, 0], {
+            interpolate(frame, [0, 15, 1780, 1798], [0, 1, 1, 0], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             })
@@ -717,7 +978,9 @@ export const MaqamDemo: React.FC = () => {
       <Sequence name="Exact execution" from={sceneTiming.exact.from} durationInFrames={sceneTiming.exact.duration}><ExactScene proof={assets.proof} /></Sequence>
       <Sequence name="Replay rejected" from={sceneTiming.replay.from} durationInFrames={sceneTiming.replay.duration}><ReplayScene proof={assets.proof} /></Sequence>
       <Sequence name="Evidence linked" from={sceneTiming.evidence.from} durationInFrames={sceneTiming.evidence.duration}><EvidenceScene proof={assets.proof} /></Sequence>
-      <Sequence name="Proof summary" from={sceneTiming.summary.from} durationInFrames={sceneTiming.summary.duration}><SummaryScene proof={assets.proof} /></Sequence>
+      <Sequence name="MGES benchmark" from={sceneTiming.benchmark.from} durationInFrames={sceneTiming.benchmark.duration}><BenchmarkScene benchmark={assets.benchmark} /></Sequence>
+      <Sequence name="Ecosystem map" from={sceneTiming.ecosystem.from} durationInFrames={sceneTiming.ecosystem.duration}><EcosystemScene /></Sequence>
+      <Sequence name="Product position" from={sceneTiming.summary.from} durationInFrames={sceneTiming.summary.duration}><SummaryScene /></Sequence>
       <Sequence name="Call to action" from={sceneTiming.final.from} durationInFrames={sceneTiming.final.duration}><FinalScene /></Sequence>
       <CaptionTrack captions={assets.captions} />
     </AbsoluteFill>

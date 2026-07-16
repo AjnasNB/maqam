@@ -13,6 +13,9 @@ import {
   createCliAgentTool,
   createCodexAgentTool,
   createCrawlerTool,
+  defineToolAdapter,
+  registerToolAdapter,
+  runToolAdapterConformance,
   createReleaseGateReport,
   createResearchWorkflow,
   crawl
@@ -31,6 +34,9 @@ test("framework primitives are exported without removing crawler exports", () =>
   assert.equal(typeof createCodexAgentTool, "function");
   assert.equal(typeof createClaudeCodeAgentTool, "function");
   assert.equal(typeof createCliAgentTool, "function");
+  assert.equal(typeof defineToolAdapter, "function");
+  assert.equal(typeof registerToolAdapter, "function");
+  assert.equal(typeof runToolAdapterConformance, "function");
   assert.equal(typeof createResearchWorkflow, "function");
   assert.equal(typeof createCrawlerTool, "function");
   assert.equal(typeof createReleaseGateReport, "function");

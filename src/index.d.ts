@@ -423,6 +423,88 @@ export type AgentHandler<TInput = unknown, TOutput = unknown> = ((
   governance?: Readonly<JsonObject>;
 };
 
+/** A descriptive transport label. Maqam does not bundle clients for these transports. */
+export type ToolAdapterTransport = "function" | "sdk" | "http" | "mcp" | "custom";
+
+export interface ToolAdapterSpec<TInput = unknown, TOutput = unknown> {
+  schemaVersion?: "maqam.tool-adapter.v1";
+  name: string;
+  transport: ToolAdapterTransport;
+  description: string;
+  /** Required and explicit. Use an empty array only for a pure adapter. */
+  effects: readonly string[];
+  risk: string;
+  metadata?: JsonObject;
+  /** Bind class prototype methods before supplying them here. */
+  invoke: AgentHandler<TInput, TOutput>;
+}
+
+export interface ToolAdapter<TInput = unknown, TOutput = unknown> {
+  readonly schemaVersion: "maqam.tool-adapter.v1";
+  readonly name: string;
+  readonly transport: ToolAdapterTransport;
+  readonly description: string;
+  readonly effects: readonly string[];
+  readonly risk: string;
+  readonly metadata: Readonly<JsonObject>;
+  readonly invoke: AgentHandler<TInput, TOutput>;
+}
+
+export interface ToolAdapterGateway {
+  registerTool<TInput = unknown, TOutput = unknown>(
+    name: string,
+    handler: AgentHandler<TInput, TOutput>,
+    metadata?: ToolMetadata
+  ): unknown;
+}
+
+export interface ToolAdapterConformanceCheck {
+  readonly id: string;
+  readonly status: "passed" | "failed" | "skipped";
+}
+
+export interface ToolAdapterConformanceReport {
+  readonly schemaVersion: "maqam.tool-adapter-conformance.v1";
+  readonly adapter: {
+    readonly schemaVersion: "maqam.tool-adapter.v1";
+    readonly name: string;
+    readonly transport: ToolAdapterTransport;
+    readonly description: string;
+    readonly effects: readonly string[];
+    readonly risk: string;
+  };
+  readonly passed: boolean;
+  readonly checks: readonly ToolAdapterConformanceCheck[];
+  readonly traceStatus: string | null;
+  readonly error: Readonly<{ name: string; code: string | null }> | null;
+  readonly limitations: readonly string[];
+}
+
+export interface ToolAdapterConformanceOptions<TInput = unknown, TOutput = unknown> {
+  input?: TInput;
+  context?: ToolCallContext;
+  verifyOutput?: (output: TOutput) => boolean | Promise<boolean>;
+}
+
+export const TOOL_ADAPTER_SCHEMA_VERSION: "maqam.tool-adapter.v1";
+export const TOOL_ADAPTER_CONFORMANCE_SCHEMA_VERSION: "maqam.tool-adapter-conformance.v1";
+export function defineToolAdapter<TInput = unknown, TOutput = unknown>(
+  spec: ToolAdapterSpec<TInput, TOutput>
+): ToolAdapter<TInput, TOutput>;
+export function registerToolAdapter<
+  TGateway extends ToolAdapterGateway,
+  TInput = unknown,
+  TOutput = unknown
+>(
+  gateway: TGateway,
+  adapter: ToolAdapterSpec<TInput, TOutput> | ToolAdapter<TInput, TOutput>
+): TGateway;
+/** Invokes the adapter once. Run only against a fixture or sandbox. */
+export function runToolAdapterConformance<TInput = unknown, TOutput = unknown>(
+  adapter: ToolAdapterSpec<TInput, TOutput> | ToolAdapter<TInput, TOutput>,
+  options?: ToolAdapterConformanceOptions<TInput, TOutput>
+): Promise<ToolAdapterConformanceReport>;
+
 export interface ToolGatewayCommonOptions {
   evidenceLedger?: EvidenceLedger;
   approvalQueue?: ApprovalQueue;

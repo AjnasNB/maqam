@@ -50,6 +50,7 @@ Choose only the facts that matter to your own story:
 - Handlers and workflows can explicitly record source evidence and link same-run claims to it.
 - The deterministic demo uses a real temporary-file write and cleans up afterward.
 - The core policy, approval, gateway, evidence, demo, and benchmark require no model key or hosted account.
+- MGES v1 publishes separate local-call performance and deterministic governance-boundary profiles, including raw observations, source fingerprints, uncertainty, and project stability checks.
 - Optional Codex CLI and Claude Code adapters require those tools to be installed and authenticated separately.
 
 ## Facts About The Problem
@@ -73,6 +74,7 @@ At least the most relevant limits should appear in the author's own submission o
 - only calls routed through registered adapters are governed;
 - Maqam does not replace provider permissions, an operating-system sandbox, durable workflow execution, or a full browser/crawl platform; and
 - passing tests is evidence for covered behavior, not proof of defect-free software.
+- MGES is a Maqam project benchmark, not a globally standardized benchmark, competitor ranking, security score, penetration test, SLA, compliance assessment, or certification.
 
 ## Comparison Facts
 
@@ -101,6 +103,8 @@ npm test
 npm run test:consumer-types
 npm audit --omit=dev
 npm pack --dry-run
+npm run benchmark:mges:conformance
+npm run benchmark:mges:performance
 ```
 
 Public install check:
@@ -118,6 +122,8 @@ npx -y maqam demo approval
 - Detailed comparison: <https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md>
 - Public roadmap: <https://github.com/AjnasNB/maqam/blob/main/ROADMAP.md>
 - Technical article: <https://github.com/AjnasNB/maqam/blob/main/docs/articles/exact-agent-approvals.md>
+- Benchmark methodology and raw artifacts: <https://github.com/AjnasNB/maqam/blob/main/benchmarks/README.md>
+- Benchmarking article: <https://github.com/AjnasNB/maqam/blob/main/docs/articles/benchmarking-agent-governance.md>
 - Security policy: <https://github.com/AjnasNB/maqam/blob/main/SECURITY.md>
 
 ## Questions Worth Answering Personally

@@ -123,6 +123,16 @@ Use a durable workflow engine such as LangGraph or Microsoft Agent Framework whe
 
 See the [dated open-source comparison](comparison.md) for sources, stronger alternatives, and current limitations.
 
+## What The Current Evaluation Establishes
+
+The project-defined [Maqam Governance Evaluation Suite (MGES) v1](../benchmarks/README.md) evaluates two different things without combining them into a marketing score.
+
+The local-call performance profile currently reports a provisional `137.480 microseconds/call` median on Node 24.15.0, Windows x64, and an AMD Ryzen 7 4800H. Its 95% bootstrap interval for the sample median is `132.351-142.697 microseconds/call`; 30 fresh-process observations produced an `8.522%` governed coefficient of variation and passed all five project stability checks. The timed path excludes model, network, storage, human review and concurrency.
+
+The governance-boundary profile passes `12/12` project-defined fixtures covering default denial, fail-closed policy, exact run/tool/input approval binding, changed-input and replay rejection, immutable detached input, atomic multi-approval consumption, evidence attribution, and redacted denial traces.
+
+Neither result is a globally accepted benchmark, security certification, penetration test, OWASP compliance statement, competitor ranking, or proof that unregistered code cannot bypass Maqam. The [raw results and claim templates](../benchmarks/README.md) publish the exact scope and limitations; the [technical article](articles/benchmarking-agent-governance.md) explains the design.
+
 ## Maqam And ProductLoop OS
 
 Maqam is the focused product and install for teams that want the governance boundary described above:
@@ -142,5 +152,6 @@ npm install maqam
 - Provider-reported usage and activity can be observed after execution; not every provider exposes a preventive hard limit for every measure.
 - Calls that bypass registered adapters are outside Maqam's control.
 - Passing tests is evidence for covered cases, not proof that the software has no defects.
+- The current MGES performance artifact fingerprints the tested source files but was recorded from a working tree with other uncommitted release work; rerun it from the final clean commit before treating it as the tagged-release baseline.
 
 Those limits are part of the product boundary, not footnotes to hide. The [public roadmap](../ROADMAP.md) identifies which ones Maqam intends to address next.

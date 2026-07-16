@@ -25,13 +25,16 @@ Maqam will integrate with orchestration, model, browser, crawl, and observabilit
 - Bounded HTTP crawler with robots handling, redirect authorization, DNS validation, DNS pinning, and private-network denial by default.
 - Local research console, typed `maqam/server` export, JSON/JSONL crawler output, examples, migration guidance, and security documentation.
 - Node.js 20, 22, and 24 continuous integration, clean external TypeScript consumption, production dependency audit, and package-content checks.
+- MGES v1 project-defined performance and governance-boundary profiles with raw observations, source fingerprints, uncertainty reporting, stability gates, and named conformance evidence.
+- A typed host-supplied adapter descriptor, explicit `ToolGateway` registration, and fixture conformance probe for function, SDK, HTTP, MCP-style, and custom transports.
 
 ## Now: Make Adoption Verifiable
 
 - Publish a five-minute quickstart and a reproducible 60-second demonstration of policy, approval mismatch, one-use consumption, trace, and evidence.
-- Define an adapter conformance suite so third-party connectors can demonstrate the input, effect, cancellation, error, and evidence semantics they implement.
+- Extend adapter conformance beyond the shipped single-invocation fixture to cover cancellation, retry/idempotency, protocol errors, durable correlation, and bypass audits.
 - Add focused examples for an MCP tool, OpenAI Agents SDK, LangGraph, and a generic HTTP service without making those systems runtime dependencies.
-- Publish benchmark fixtures with hardware, Node version, fixture shape, warmup, sample count, raw output, and explicit limits on what each result means.
+- Rerun the provisional MGES performance baseline from the final clean tagged commit and solicit independent reruns on Linux, macOS, Windows, multiple Node releases, and multiple processor families.
+- Version MGES schemas and workloads without silently changing the v1 measurement construct; publish unstable and failed publication checks instead of discarding them.
 - Improve issue templates, security-reporting guidance, contribution boundaries, and good-first integration tasks.
 
 Exit criteria:

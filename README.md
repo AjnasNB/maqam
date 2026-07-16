@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/maqam.svg)](https://www.npmjs.com/package/maqam)
 [![CI](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml/badge.svg)](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](https://github.com/AjnasNB/maqam/blob/v0.2.3/LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](https://github.com/AjnasNB/maqam/blob/v0.2.4/LICENSE)
 
 **Policy before execution. Exact approval for the call. Evidence behind the claim.**
 
@@ -12,7 +12,7 @@ Maqam is an MIT-licensed agent framework for governed workflows. It combines a l
 
 The crawler is not the product center; it is only one built-in connector. Maqam governs workers that enter through `ToolGateway`, including function agents, object agents with `run`/`invoke`/`call`, Codex CLI, Claude Code, generic command-line workers, browser agents, research agents, internal services, and write actions that need human approval.
 
-[![Watch the 60-second Maqam exact-approval demo](https://raw.githubusercontent.com/AjnasNB/maqam/v0.2.3/docs/assets/maqam-demo-poster.png)](https://github.com/AjnasNB/maqam/releases/download/v0.2.3/maqam-exact-approval-demo.mp4)
+[![Watch the 60-second Maqam governance proof](https://raw.githubusercontent.com/AjnasNB/maqam/v0.2.4/docs/assets/maqam-demo-poster.png)](https://github.com/AjnasNB/maqam/releases/download/v0.2.4/maqam-exact-approval-demo.mp4)
 
 The video is rendered from the JSON emitted by the real `maqam demo approval --json` command. The displayed approval id, hashes, execution counts, evidence ids, and rejection codes come from the executed package rather than a staged interface.
 
@@ -86,7 +86,7 @@ Use Maqam when that enforcement path matters more than adopting a larger platfor
 | Mature general policy-as-code | [Open Policy Agent](https://github.com/open-policy-agent/opa) | Use OPA as a decision engine while Maqam supplies the agent-specific enforcement and approval lifecycle. |
 | Browser automation or crawler operations | [Crawl4AI](https://github.com/unclecode/crawl4ai), [Firecrawl](https://github.com/firecrawl/firecrawl), or [Crawlee](https://github.com/apify/crawlee) | Put a separately installed connector behind Maqam; its built-in crawler remains deliberately smaller and HTTP-only. |
 
-See the [detailed, dated comparison](https://github.com/AjnasNB/maqam/blob/v0.2.3/docs/comparison.md), including limitations and source/license notes, before choosing a stack.
+See the [detailed, dated comparison](https://github.com/AjnasNB/maqam/blob/v0.2.4/docs/comparison.md), including limitations and source/license notes, before choosing a stack.
 
 ## What Ships
 
@@ -345,12 +345,15 @@ npm install
 npm test
 npm run test:consumer-types
 npm run demo:approval
-npm run benchmark:governance
+npm run benchmark:mges:conformance
+npm run benchmark:mges:performance
 npm audit --omit=dev
 npm pack --dry-run
 ```
 
-The [benchmark methodology and raw baseline](https://github.com/AjnasNB/maqam/blob/v0.2.3/benchmarks/README.md) measure only Maqam's local governed-call overhead. They are not a cross-product speed comparison, security score, network benchmark, or production SLA.
+The project-defined [Maqam Governance Evaluation Suite (MGES) v1](benchmarks/README.md) keeps performance and conformance separate. Its provisional 30-observation Windows/Node 24 local-call result is `137.480 microseconds/call` median, with a `132.351-142.697 microseconds/call` 95% bootstrap interval for the sample median and `8.522%` coefficient of variation. The separate governance profile currently passes `12/12` named fixtures.
+
+Those figures are local regression evidence, not a globally standardized benchmark, cross-product speed comparison, security score, certification, network benchmark, or production SLA. Read the [raw artifacts, complete methodology and publication wording](benchmarks/README.md) or the detailed article, [Benchmarking an agent-governance boundary without fooling yourself](docs/articles/benchmarking-agent-governance.md), before quoting them. A clean tagged-commit rerun is still required before treating the provisional performance artifact as the final release baseline.
 
 The npm tarball intentionally excludes the large brand-board and presentation PNG files; those remain in the source repository. Only the logo and files required by the local console ship as runtime app assets.
 

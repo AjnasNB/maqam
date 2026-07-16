@@ -92,6 +92,7 @@ GitHub release notes should contain:
 - security/enforcement boundary summary;
 - migration information;
 - tests and platforms executed;
+- MGES version/profile, environment, uncertainty, project-check status, raw artifacts, and the explicit statement that it is not an external standard or certification;
 - artifact integrity and commit identity;
 - known limitations; and
 - links to Why Maqam, comparison, roadmap, article, npm, and security policy.
@@ -134,6 +135,8 @@ Within 24 hours:
 ## Stage 3: Technical Article
 
 Primary article: [exact-agent-approvals.md](../docs/articles/exact-agent-approvals.md).
+
+Benchmark article: [benchmarking-agent-governance.md](../docs/articles/benchmarking-agent-governance.md). Publish it as an engineering-methodology article, not as a speed-ranking announcement. Keep the raw JSON, fixture exclusions, environment, uncertainty interval, and non-standard/non-certification statement adjacent to every compact result.
 
 Publication sequence:
 

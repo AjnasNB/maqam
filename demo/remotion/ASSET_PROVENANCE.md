@@ -8,6 +8,15 @@ This project contains no copied third-party footage, screenshots, logos, music, 
 - The generator executes `node ../../bin/maqam.js demo approval --json` from this project and validates the exact approval, scope-mismatch, single execution, replay rejection, evidence link, and cleanup invariants before writing the file.
 - The proof describes a deterministic temporary-workspace run of the MIT-licensed Maqam source in this repository.
 
+## Benchmark and conformance data
+
+- `public/benchmark-proof.json` is generated locally by `scripts/generate-benchmark-proof.mjs` from the reviewed MGES v1 JSON artifacts under `benchmarks/results/`.
+- The generator validates suite identity, version, standardization and certification flags, performance statistics, project stability checks, source fingerprints, environment metadata, and the conformance summary before writing the video asset.
+- `scripts/validate-assets.mjs` compares the summarized asset back to both raw reports. A stale summary or changed source fingerprint fails the release render.
+- The performance result is a local, sequential, in-process `ToolGateway` component measurement. It excludes model inference, network I/O, storage, review time, and concurrency. The value is hidden whenever the project publication checks do not pass or the artifact reports a dirty source tree.
+- The conformance total describes only the named deterministic MGES fixtures. Success treatment is withheld when any fixture fails or the artifact reports a dirty source tree. It is not a penetration test, formal proof, compliance assessment, security score, external certification, or industry benchmark.
+- Methodology, schemas, claim rules, and raw artifacts are documented in [`docs/benchmarking.md`](../../docs/benchmarking.md).
+
 ## Voiceover and captions
 
 - `public/voiceover.wav` is synthesized locally with Microsoft Windows `System.Speech` / SAPI from the original narration in `scripts/voiceover-script.json`.

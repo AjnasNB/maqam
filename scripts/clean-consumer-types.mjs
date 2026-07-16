@@ -52,10 +52,14 @@ try {
     type: "module"
   }, null, 2));
   await writeFile(join(consumerDirectory, "consumer.ts"), [
-    "import { AgentRuntime, crawl } from \"maqam\";",
+    "import { AgentRuntime, PolicyEngine, ToolGateway, crawl, defineToolAdapter, registerToolAdapter, runToolAdapterConformance } from \"maqam\";",
     "import { createMaqamServer } from \"maqam/server\";",
     "void AgentRuntime;",
     "void crawl;",
+    "const gateway = new ToolGateway({ policyEngine: new PolicyEngine({ allowedTools: [\"fixture.echo\"] }) });",
+    "const adapter = defineToolAdapter({ name: \"fixture.echo\", transport: \"function\", description: \"Echo a typed fixture.\", effects: [], risk: \"low\", invoke: async (input: { value: string }) => ({ value: input.value }) });",
+    "registerToolAdapter(gateway, adapter);",
+    "void runToolAdapterConformance(adapter, { input: { value: \"ok\" }, verifyOutput: (output) => output.value === \"ok\" });",
     "const server = createMaqamServer();",
     "server.close();",
     ""
@@ -80,7 +84,7 @@ try {
     join(consumerDirectory, "node_modules", "maqam", "package.json"),
     "utf8"
   ));
-  if (installed.version !== "0.2.3" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
+  if (installed.version !== "0.2.4" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
     throw new Error("The packed Maqam manifest does not expose the reviewed Node type dependency.");
   }
   run(process.execPath, [tscPath, "-p", join(consumerDirectory, "tsconfig.json")], {

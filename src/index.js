@@ -837,6 +837,13 @@ export { SkillRegistry } from "./framework/skill-registry.js";
 export { AgentRuntime } from "./framework/runtime.js";
 export { ApprovalQueue } from "./framework/approval-queue.js";
 export { createAgentTool } from "./framework/agent-tool.js";
+export {
+  TOOL_ADAPTER_SCHEMA_VERSION,
+  TOOL_ADAPTER_CONFORMANCE_SCHEMA_VERSION,
+  defineToolAdapter,
+  registerToolAdapter,
+  runToolAdapterConformance
+} from "./framework/tool-adapter.js";
 export { createCliAgentTool, estimateCliInputTokens, parseCliJsonLines } from "./framework/cli-agent-tool.js";
 export {
   createCodexAgentTool,

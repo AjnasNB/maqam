@@ -1,29 +1,29 @@
-# Maqam exact-approval demo transcript
+# Maqam proof, benchmark, and ecosystem demo transcript
 
-An agent asks to write release notes. In most systems, approval is just a yes.
+An agent requests a write. Approval should mean one exact action.
 
-Maqam pauses before execution and creates an approval for this exact run, tool, and input fingerprint.
+Maqam pauses first, binding approval to the run, registered tool, and input hash.
 
-Change even one field after approval, and the call fails closed with approval scope mismatch.
+Change one field. The call fails closed. Nothing executes; no file exists.
 
-Nothing executes. No file exists.
+Restore the exact input. One verified write runs, consuming the approval.
 
-Restore the exact approved input, and the write runs once.
+Replay it. Rejected; execution stays at one, file unchanged.
 
-The saved file is verified, and the approval is consumed.
+The handler records evidence and links the supported claim in the same run.
 
-Try to replay that same approval, and Maqam rejects it.
+MGES version one separates performance and conformance. Performance tracks local gateway regression; conformance checks safety fixtures. It is project-defined, not an industry standard or certification.
 
-Execution count stays at one. The file stays unchanged.
+Functions, CLI workers, and host SDK, HTTP, or MCP-style adapters enter registered paths. Maqam applies policy, approval, trace, and evidence. Hosts own transport and unregistered actions.
 
-The successful call records source evidence, hashes the content, and links a claim to that evidence in the same run.
+Maqam complements agent runtimes, durable workflows, provider permissions, and operating-system isolation. It does not replace them.
 
-The final report shows one execution, one approval consumption, one evidence record, one supported claim, and zero unsupported claims.
+Run the proof and inspect raw benchmark JSON.
 
-Policy before execution. Exact approval for the call. Evidence behind the claim.
+## Benchmark disclosure
 
-Install Maqam from npm.
+The performance number shown in the video is a local component-regression measurement from a disclosed machine and runtime. The conformance result is a separate pass/fail report over Maqam-defined safety invariants. Neither is a globally accepted benchmark, external certification, security score, competitor ranking, production SLA, or proof of end-to-end agent performance. Methodology and raw artifacts are documented in [`docs/benchmarking.md`](../../docs/benchmarking.md).
 
 ## Accessibility and provenance
 
-This transcript matches `scripts/voiceover-script.json`. Word-level caption timing is generated locally into `public/captions.json` by `scripts/generate-voiceover.ps1`. The rendered video displays those captions, and the narration is synthesized locally with the Windows SAPI voice recorded in `public/voiceover-metadata.json`.
+This transcript matches `scripts/voiceover-script.json`; letter-spaced acronyms in the synthesis source are normalized here for readability. Word-level caption timing is generated locally into `public/captions.json` by `scripts/generate-voiceover.ps1`. The rendered video displays those captions, and narration is synthesized locally with the Windows SAPI voice recorded in `public/voiceover-metadata.json`.

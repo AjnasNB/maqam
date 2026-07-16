@@ -31,6 +31,7 @@
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "proof": "node scripts/generate-proof.mjs",
+    "benchmark-proof": "node scripts/generate-benchmark-proof.mjs",
     "voiceover": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-voiceover.ps1",
     "captions:portable": "node scripts/export-captions.mjs",
     "validate:assets": "node scripts/validate-assets.mjs",

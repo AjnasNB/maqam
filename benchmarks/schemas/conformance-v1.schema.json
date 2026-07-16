@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AjnasNB/maqam/blob/main/benchmarks/schemas/conformance-v1.schema.json",
+  "title": "MGES v1 governance-boundary conformance result",
+  "type": "object",
+  "required": [
+    "schema",
+    "suite",
+    "measuredAt",
+    "repository",
+    "environment",
+    "sourceFingerprint",
+    "summary",
+    "cases",
+    "interpretation"
+  ],
+  "properties": {
+    "schema": { "const": "maqam.benchmark.conformance/v1" },
+    "suite": {
+      "type": "object",
+      "required": [
+        "shortName",
+        "profile",
+        "version",
+        "externallyStandardized",
+        "externallyCertified"
+      ],
+      "properties": {
+        "shortName": { "const": "MGES" },
+        "profile": { "const": "governance-boundary-conformance" },
+        "version": { "const": "1.0.0" },
+        "externallyStandardized": { "const": false },
+        "externallyCertified": { "const": false }
+      }
+    },
+    "measuredAt": { "type": "string", "format": "date-time" },
+    "repository": { "type": "object" },
+    "environment": { "type": "object" },
+    "sourceFingerprint": { "type": "object" },
+    "summary": {
+      "type": "object",
+      "required": ["total", "passed", "failed", "allPassed"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 1 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "allPassed": { "type": "boolean" }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "property", "threat", "status", "durationMs"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^MGES-C[0-9]{2}$" },
+          "property": { "type": "string", "minLength": 1 },
+          "threat": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["pass", "fail"] },
+          "durationMs": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "interpretation": { "type": "string", "minLength": 1 }
+  }
+}
