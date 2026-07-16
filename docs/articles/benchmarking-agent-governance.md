@@ -125,7 +125,7 @@ The suite's project-defined publication checks require 30 observations, coeffici
 
 An earlier calibrated run failed the stability gate because several large outliers drove the governed coefficient of variation to 85.33%. That result was withheld from headline use. The timed batches were lengthened before the passing run so allocation and garbage-collection behavior would be represented more consistently. No observations were deleted and the declared thresholds were not weakened.
 
-The passing artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It records clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d` and `workingTreeDirty: false`. An evidence-only release commit may add the artifact, documentation, and media; any later change to a fingerprinted source requires another run.
+The passing artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It records clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d` and `workingTreeDirty: false`. Later release commits may change files outside the measured path; any change to a fingerprinted source requires another run.
 
 ## Conformance is not another latency metric
 

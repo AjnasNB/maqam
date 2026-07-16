@@ -22,7 +22,7 @@ On Node 24.15.0, Windows x64 and an AMD Ryzen 7 4800H, the MGES local-call profi
 
 The timed fixture excludes model inference, network and filesystem I/O, durable storage, human review, process startup and concurrent load. The rate is a derived sequential rate, not a concurrent capacity claim.
 
-The artifact records source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d` with `workingTreeDirty: false` and fingerprints every benchmark and implementation file in the measured path. A later evidence-only release commit may add this JSON, documentation, and rendered media, but must not change those fingerprinted sources without another rerun.
+The artifact records source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d` with `workingTreeDirty: false` and fingerprints every benchmark and implementation file in the measured path. Later release commits may change files outside the measured path, but any change to a fingerprinted source requires another run.
 
 The separate governance-boundary profile currently records **12/12 project-defined fixtures passed**, including denial before dispatch, fail-closed policy, exact run/tool/input approval scope, changed-input and replay rejection, immutable detached input, atomic multi-approval consumption, evidence scoping, and redacted denial traces. This is regression evidence only—not proof that Maqam or a deployment is secure.
 

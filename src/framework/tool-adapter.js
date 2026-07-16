@@ -62,6 +62,46 @@ function normalizeMetadata(value = {}) {
   return metadata;
 }
 
+function validateInvokeGovernance(invoke) {
+  const governanceDescriptor = Object.getOwnPropertyDescriptor(invoke, "governance");
+  if (!governanceDescriptor && "governance" in invoke) {
+    throw new TypeError("Tool adapter invoke governance must be an own data property.");
+  }
+  if (!governanceDescriptor) return null;
+  if (!Object.hasOwn(governanceDescriptor, "value")) {
+    throw new TypeError("Tool adapter invoke governance must be a data property.");
+  }
+
+  const governance = governanceDescriptor.value;
+  if (!governance || typeof governance !== "object" || Array.isArray(governance)
+    || ![Object.prototype, null].includes(Object.getPrototypeOf(governance))) {
+    throw new TypeError("Tool adapter invoke governance must be a plain object.");
+  }
+  for (const key of ["effects", "risk"]) {
+    if (!Object.hasOwn(governance, key) && key in governance) {
+      throw new TypeError(`Inherited tool adapter invoke governance field '${key}' is not allowed.`);
+    }
+  }
+
+  const effectsDescriptor = Object.getOwnPropertyDescriptor(governance, "effects");
+  if (effectsDescriptor) {
+    if (!effectsDescriptor.enumerable || !Object.hasOwn(effectsDescriptor, "value")) {
+      throw new TypeError("Tool adapter invoke governance.effects must be an enumerable data property.");
+    }
+    normalizeEffects(effectsDescriptor.value);
+  }
+  const riskDescriptor = Object.getOwnPropertyDescriptor(governance, "risk");
+  if (riskDescriptor) {
+    if (!riskDescriptor.enumerable || !Object.hasOwn(riskDescriptor, "value")) {
+      throw new TypeError("Tool adapter invoke governance.risk must be an enumerable data property.");
+    }
+    if (riskDescriptor.value !== undefined) {
+      requiredString(riskDescriptor.value, "Tool adapter invoke governance.risk");
+    }
+  }
+  return governanceDescriptor;
+}
+
 function dataFunction(value, key, label) {
   let current = value;
   while (current
@@ -157,6 +197,7 @@ export function defineToolAdapter(spec) {
   if (typeof spec.invoke !== "function") {
     throw new TypeError("Tool adapter invoke must be an own function; bind class methods explicitly.");
   }
+  validateInvokeGovernance(spec.invoke);
   const suppliedMetadata = normalizeMetadata(spec.metadata);
   for (const key of RESERVED_METADATA_KEYS) {
     if (Object.hasOwn(suppliedMetadata, key)) {
@@ -250,14 +291,8 @@ export async function runToolAdapterConformance(adapter, options = {}) {
       && sameStrings(context.toolMetadata.effects, normalized.effects);
     return normalized.invoke(input, context);
   };
-  const governanceDescriptor = Object.getOwnPropertyDescriptor(normalized.invoke, "governance");
-  if (!governanceDescriptor && "governance" in normalized.invoke) {
-    throw new TypeError("Tool adapter invoke governance must be an own data property.");
-  }
+  const governanceDescriptor = validateInvokeGovernance(normalized.invoke);
   if (governanceDescriptor) {
-    if (!Object.hasOwn(governanceDescriptor, "value")) {
-      throw new TypeError("Tool adapter invoke governance must be a data property.");
-    }
     Object.defineProperty(observedInvoke, "governance", governanceDescriptor);
   }
   const observed = defineToolAdapter({

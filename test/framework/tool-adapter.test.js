@@ -129,6 +129,59 @@ test("adapter registration preserves stricter governance declared by the invoke 
   assert.equal(gateway.tools.get(adapter.name).metadata.risk, "critical");
 });
 
+test("adapter registration rejects whitespace-bearing handler governance before dispatch", () => {
+  let invocations = 0;
+  const invoke = async () => {
+    invocations += 1;
+    return { published: true };
+  };
+  const definition = {
+    name: "sdk.ambiguous-governance",
+    transport: "sdk",
+    description: "Reject ambiguous handler governance labels.",
+    effects: [],
+    risk: "low",
+    invoke
+  };
+
+  Object.defineProperty(invoke, "governance", {
+    value: { effects: ["publish "], risk: "critical" },
+    configurable: true
+  });
+  assert.throws(
+    () => defineToolAdapter(definition),
+    /must not contain leading or trailing whitespace/
+  );
+
+  Object.defineProperty(invoke, "governance", {
+    value: { effects: ["publish"], risk: "critical " },
+    configurable: true
+  });
+  assert.throws(
+    () => defineToolAdapter(definition),
+    /must not contain leading or trailing whitespace/
+  );
+
+  delete invoke.governance;
+  const adapter = defineToolAdapter(definition);
+  Object.defineProperty(invoke, "governance", {
+    value: { effects: ["publish "], risk: "critical" },
+    configurable: true
+  });
+  const gateway = new ToolGateway({
+    policyEngine: new PolicyEngine({
+      allowedTools: [adapter.name],
+      approvalRequiredEffects: ["publish"]
+    })
+  });
+  assert.throws(
+    () => registerToolAdapter(gateway, adapter),
+    /must not contain leading or trailing whitespace/
+  );
+  assert.equal(invocations, 0);
+  assert.equal(gateway.tools.has(adapter.name), false);
+});
+
 test("an MCP-style adapter keeps discovery and client behavior host supplied", async () => {
   const calls = [];
   const mcpClient = {
