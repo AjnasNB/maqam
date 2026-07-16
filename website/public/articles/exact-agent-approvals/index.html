@@ -88,6 +88,7 @@ import {
 const approvals = new ApprovalQueue();
 const policy = new PolicyEngine({
   allowedTools: ["publisher"],
+  allowedOrigins: ["https://registry.npmjs.org"],
   approvalRequiredEffects: ["publish"]
 });
 const gateway = new ToolGateway({

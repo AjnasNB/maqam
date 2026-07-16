@@ -58,6 +58,13 @@ for (const file of htmlFiles) {
   requireMatch(/<a\s+class="skip-link"\s+href="#main">/i, "missing skip link");
   requireMatch(/<main\b[^>]*\bid="main"/i, "missing main landmark id");
 
+  if (label === path.join("articles", "exact-agent-approvals", "index.html")) {
+    requireMatch(
+      /allowedOrigins:\s*\["https:\/\/registry\.npmjs\.org"\]/,
+      "runnable approval example must allow its declared registry origin"
+    );
+  }
+
   const h1Count = (source.match(/<h1\b/gi) || []).length;
   if (h1Count !== 1) failures.push(`${label}: expected one h1, found ${h1Count}`);
 
