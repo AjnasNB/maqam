@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Host: maqamagent.com
+Sitemap: https://maqamagent.com/sitemap.xml

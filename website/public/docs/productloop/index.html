@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ProductLoop OS packages | Maqam documentation</title>
+  <meta name="description" content="A package-by-package guide to ProductLoop OS, Maqam, runtime, policy, approvals, provenance, skills, connectors, evaluations, and browser research.">
+  <meta name="theme-color" content="#0b0e0d">
+  <link rel="canonical" href="https://maqamagent.com/docs/productloop/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
+  </header>
+
+  <main id="main" class="shell docs-layout">
+    <aside class="docs-sidebar" aria-label="ProductLoop package navigation">
+      <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Package menu <span aria-hidden="true">+</span></button>
+      <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
+        <nav aria-label="Packages">
+          <h2>Package atlas</h2>
+          <a href="#overview-video">Video overview</a><a href="#umbrella">productloop-os</a><a href="#maqam">maqam</a><a href="#runtime">ajnas-runtime</a><a href="#policy">ajnas-policy</a><a href="#approvals">ajnas-approvals</a><a href="#provenance">ajnas-provenance</a><a href="#skills">ajnas-skills-registry</a><a href="#connectors">ajnas-connectors</a><a href="#evals">ajnas-evals</a><a href="#browser">ajnas-browser-research</a>
+        </nav>
+        <nav aria-label="Related documentation"><h2>Related</h2><a href="/docs/">Maqam quickstart</a><a href="/docs/integrations/">Adapter patterns</a><a href="/docs/security/">Security model</a></nav>
+      </div>
+    </aside>
+
+    <article class="docs-content">
+      <h1>ProductLoop OS package atlas</h1>
+      <p class="lede">ProductLoop OS presents Maqam and eight modular governance packages through one named-namespace dependency.</p>
+      <div class="callout">
+        <strong>The product model</strong>
+        Start with Maqam for the focused execution boundary. Start with <code>productloop-os</code> when one application needs the broader package family and tested composition helpers.
+      </div>
+
+      <section id="overview-video" class="docs-media" data-video-block>
+        <h2>Watch the package map</h2>
+        <p>The 55-second overview follows ProductLoop OS from the umbrella package into runtime, policy, approvals, provenance, skills, connectors, evaluation, browser research, and Maqam.</p>
+        <p id="productloop-doc-video-status" data-video-status>Loading video metadata.</p>
+        <figure class="media-frame">
+          <video data-proof-video controls preload="metadata" aria-describedby="productloop-doc-video-status" poster="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-poster.png">
+            <source src="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4" type="video/mp4">
+            <track src="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.vtt" kind="captions" srclang="en" label="English" default>
+            Your browser cannot play this video. <a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4">Open the MP4 file</a>.
+          </video>
+          <figcaption>ProductLoop OS as one package family with explicit responsibility boundaries.</figcaption>
+        </figure>
+        <p><a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4">Open MP4</a> · <a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.vtt">Download VTT captions</a> · <a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.srt">Download SRT captions</a></p>
+      </section>
+
+      <h2 id="install">Install the umbrella</h2>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#productloop-install">Copy</button><pre><code id="productloop-install">npm install productloop-os@0.2.0
+npx productloop-os@0.2.0 doctor
+npx productloop-os@0.2.0 demo</code></pre></div>
+      <p><code>doctor</code> checks Node.js and packaged imports. It does not probe credentials, live browsers, model providers, networks, or external connector services.</p>
+
+      <div class="callout">
+        <strong>Public registry status</strong>
+        All nine ProductLoop packages below are public on npm at the exact versions shown. Maqam is listed separately at public 0.2.3; its 0.2.4 candidate is pending exact release approval.
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Package / namespace</th><th>Public version</th><th>npm</th><th>Primary job</th><th>Important boundary</th></tr></thead>
+          <tbody>
+            <tr><td><code>productloop-os</code></td><td>0.2.0</td><td><a href="https://www.npmjs.com/package/productloop-os">npm</a></td><td>Umbrella composition and named namespaces</td><td>Not a hosted control plane</td></tr>
+            <tr><td><code>maqam</code></td><td>0.2.3</td><td><a href="https://www.npmjs.com/package/maqam">npm</a></td><td>Exact gateway approvals, workflows, evidence, worker adapters, HTTP crawling</td><td>Only registered gateway calls are governed</td></tr>
+            <tr><td><code>ajnas-runtime</code> / <code>runtime</code></td><td>0.2.0</td><td><a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></td><td>Ordered policy-gated tool execution</td><td>Fail-closed without an explicit policy</td></tr>
+            <tr><td><code>ajnas-policy</code> / <code>policy</code></td><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-policy">npm</a></td><td>Declarative decisions and audit receipts</td><td>Does not execute tools</td></tr>
+            <tr><td><code>ajnas-approvals</code> / <code>approvals</code></td><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></td><td>Human review state machine</td><td>Transport and identity remain host concerns</td></tr>
+            <tr><td><code>ajnas-provenance</code> / <code>provenance</code></td><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-provenance">npm</a></td><td>Hash-linked traces and signed bundles</td><td>Tamper evidence is not tamper prevention</td></tr>
+            <tr><td><code>ajnas-skills-registry</code> / <code>skills</code></td><td>0.2.0</td><td><a href="https://www.npmjs.com/package/ajnas-skills-registry">npm</a></td><td>Signed skill manifests and install policy</td><td>Does not sandbox skill code</td></tr>
+            <tr><td><code>ajnas-connectors</code> / <code>connectors</code></td><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-connectors">npm</a></td><td>Connector manifests and trust evaluation</td><td>Does not call external services</td></tr>
+            <tr><td><code>ajnas-evals</code> / <code>evals</code></td><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-evals">npm</a></td><td>Deterministic assertions over artifacts</td><td>Adapters supply the real executions</td></tr>
+            <tr><td><code>ajnas-browser-research</code> / <code>browserResearch</code></td><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-browser-research">npm</a></td><td>Governed plans, replay, citations, evidence</td><td>Not a browser engine</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="package-atlas">
+        <section class="package-entry" id="umbrella">
+          <header><h2>productloop-os</h2><span class="package-version">public 0.2.0 · <a href="https://www.npmjs.com/package/productloop-os">npm</a></span></header>
+          <div class="package-body">
+            <p>Creates a deny-by-default composition with named namespaces, separate ledgers and registries, tested schema adapters, and a dependency doctor.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#umbrella-code">Copy</button><pre><code id="umbrella-code">import { createProductLoopOS } from "productloop-os";
+
+const os = createProductLoopOS({
+  policyBundle: {
+    schemaVersion: "ajnas.policy.bundle.v1",
+    id: "local-policy",
+    version: "1.0.0",
+    defaultEffect: "deny",
+    rules: [{
+      id: "allow-echo",
+      effect: "allow",
+      reason: "Reviewed local tool",
+      match: { toolNames: ["local.echo"], risks: ["low"] }
+    }]
+  }
+});
+
+os.tools.register({
+  name: "local.echo",
+  description: "Return local structured input",
+  risk: "low",
+  execute: ({ input }) => input
+});
+
+const result = await os.runtime.run({
+  name: "hello",
+  input: { message: "hello" },
+  steps: [{
+    id: "echo",
+    run: (context) => context.callTool("local.echo", context.input)
+  }]
+});
+
+os.importRuntimeEvents();
+console.log(result.status, os.trace.events.length);</code></pre></div>
+            <p class="package-boundary">Not a model, hosted control plane, identity system, database, distributed scheduler, secret manager, sandbox, browser engine, or crawler fleet.</p>
+          </div>
+        </section>
+
+        <section class="package-entry" id="maqam">
+          <header><h2>maqam</h2><span class="package-version">public 0.2.3 · 0.2.4 candidate pending approval · <a href="https://www.npmjs.com/package/maqam">npm</a></span></header>
+          <div class="package-body">
+            <p>Provides the higher-level exact approval gateway, workflow runtime, evidence ledger, worker adapters, local console, and bounded HTTP crawler.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#maqam-code">Copy</button><pre><code id="maqam-code">import { PolicyEngine, ToolGateway } from "maqam";
+
+const gateway = new ToolGateway({
+  policyEngine: new PolicyEngine({ allowedTools: ["local.echo"] })
+});
+
+gateway.registerTool("local.echo", async (input) => input, {
+  effects: []
+});
+
+console.log(await gateway.call(
+  "local.echo",
+  { message: "hello" },
+  { runId: "local_1" }
+));</code></pre></div>
+            <p class="package-boundary">Current approval, trace, runtime, and evidence state is in-process unless the host exports, authenticates, and protects it.</p>
+          </div>
+        </section>
+
+        <section class="package-entry" id="runtime">
+          <header><h2>ajnas-runtime</h2><span class="package-version">public 0.2.0 · <a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></span></header>
+          <div class="package-body">
+            <p>Runs ordered workflow steps, evaluates every registered tool call, emits hash-linked provenance receipts, and optionally writes file-backed snapshots.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#runtime-code">Copy</button><pre><code id="runtime-code">import {
+  AgentRuntime,
+  InMemoryProvenanceSink,
+  ToolRegistry
+} from "ajnas-runtime";
+
+const tools = new ToolRegistry().register({
+  name: "local.echo",
+  description: "Return local input",
+  risk: "low",
+  execute: async ({ input }) => input
+});
+
+const runtime = new AgentRuntime({
+  tools,
+  provenance: new InMemoryProvenanceSink(),
+  policy: {
+    evaluate: async () => ({ decision: "allow", reason: "local fixture" })
+  }
+});
+
+console.log(await runtime.run({
+  name: "echo",
+  input: { message: "hello" },
+  steps: [{
+    id: "echo",
+    run: (context) => context.callTool("local.echo", context.input)
+  }]
+}));</code></pre></div>
+            <p class="package-boundary">It is an execution kernel, not a provider, model loop, remote queue, or trusted reviewer identity service.</p>
+          </div>
+        </section>
+
+        <section class="package-entry" id="policy">
+          <header><h2>ajnas-policy</h2><span class="package-version">public 0.1.1 · <a href="https://www.npmjs.com/package/ajnas-policy">npm</a></span></header>
+          <div class="package-body">
+            <p>Evaluates versioned bundles into <code>allow</code>, <code>deny</code>, or <code>require_approval</code> decisions and records replayable audit receipts.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#policy-code">Copy</button><pre><code id="policy-code">import {
+  PolicyDecisionLedger,
+  createDeclarativePolicyEngine
+} from "ajnas-policy";
+
+const bundle = {
+  schemaVersion: "ajnas.policy.bundle.v1",
+  id: "release-policy",
+  version: "1.0.0",
+  defaultEffect: "deny",
+  rules: [{
+    id: "review-publish",
+    effect: "require_approval",
+    reason: "Owner review required",
+    match: { toolNames: ["packages.publish"] }
+  }]
+};
+
+const audit = new PolicyDecisionLedger();
+const policy = createDeclarativePolicyEngine({ bundle, audit });
+const decision = await policy.evaluate({
+  runId: "run_1",
+  stepId: "publish",
+  tool: { name: "packages.publish", risk: "critical" },
+  input: { destination: "npm" },
+  metadata: { purpose: "release" }
+});
+
+console.log(decision, audit.verify());</code></pre></div>
+            <p class="package-boundary">Policy code receives metadata, not the execution callback. A policy decision has value only when the real execution path enforces it.</p>
+          </div>
+        </section>
+
+        <section class="package-entry" id="approvals">
+          <header><h2>ajnas-approvals</h2><span class="package-version">public 0.1.1 · <a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></span></header>
+          <div class="package-body">
+            <p>Models staged review, quorum, delegation, expiry, escalation, decisions, and hash-linked audit history without choosing a notification transport.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#approvals-code">Copy</button><pre><code id="approvals-code">import {
+  ApprovalQueue,
+  createReleaseApprovalSubject
+} from "ajnas-approvals";
+
+const workflow = {
+  schemaVersion: "ajnas.approval.workflow.v1",
+  id: "release-approval",
+  version: "1.0.0",
+  name: "Release approval",
+  owner: "release-governance",
+  stages: [{
+    id: "owner-review",
+    name: "Owner review",
+    reviewers: [{ id: "release-owner", kind: "role" }],
+    quorum: { strategy: "any" }
+  }],
+  policy: { preventRequesterSelfApproval: true, defaultTtlHours: 48 }
+};
+
+const queue = new ApprovalQueue();
+const ticket = queue.request({
+  workflow,
+  subject: createReleaseApprovalSubject({
+    packageName: "example-package",
+    version: "1.0.0",
+    changeSummary: "Reviewed release"
+  }),
+  requestedBy: "release-bot",
+  reason: "External publish requires approval"
+});
+
+console.log(ticket.status);</code></pre></div>
+            <p class="package-boundary">The host must authenticate reviewers, persist tickets, send notifications, and protect restored approval state from tampering.</p>
+          </div>
+        </section>
+
+        <section class="package-entry" id="provenance">
+          <header><h2>ajnas-provenance</h2><span class="package-version">public 0.1.2 · <a href="https://www.npmjs.com/package/ajnas-provenance">npm</a></span></header>
+          <div class="package-body">
+            <p>Records append-only events with SHA-256 receipt chains, redacts common secret fields, and creates verifiable or signed trace bundles.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#provenance-code">Copy</button><pre><code id="provenance-code">import {
+  TraceLedger,
+  createTraceBundle,
+  verifyTraceBundle
+} from "ajnas-provenance";
+
+const ledger = new TraceLedger({ traceId: "trace_release_1" });
+ledger.record({
+  actor: "release-bot",
+  action: "approval.requested",
+  subject: { type: "package", id: "demo@1.0.0" },
+  source: { system: "release", id: "gate" },
+  data: { destination: "npm" }
+});
+
+const bundle = createTraceBundle(ledger.events, {
+  generatedBy: "release-bot",
+  purpose: "release-gate"
+});
+
+console.log(verifyTraceBundle(bundle));</code></pre></div>
+            <p class="package-boundary">Receipts make later alteration detectable. They do not make storage immutable or establish that a recorded claim is true.</p>
+          </div>
+        </section>
+
+        <section class="package-entry" id="skills">
+          <header><h2>ajnas-skills-registry</h2><span class="package-version">public 0.2.0 · <a href="https://www.npmjs.com/package/ajnas-skills-registry">npm</a></span></header>
+          <div class="package-body">
+            <p>Validates and registers signed skill manifests with capability, permission, publisher, compatibility, and license metadata.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#skills-code">Copy</button><pre><code id="skills-code">import { generateKeyPairSync } from "node:crypto";
+import {
+  SkillRegistry,
+  signSkillManifest
+} from "ajnas-skills-registry";
+
+const manifest = {
+  schemaVersion: "ajnas.skill.v1",
+  id: "com.example.local-summary",
+  name: "Local Summary",
+  version: "1.0.0",
+  description: "Summarize reviewed local notes.",
+  license: "MIT",
+  entrypoint: { type: "module", value: "./dist/index.js" },
+  compatibility: { ajnasRuntime: "^0.2.0" },
+  capabilities: [{
+    name: "notes.summarize",
+    description: "Summarize reviewed notes.",
+    risk: "medium"
+  }],
+  permissions: {
+    network: "none",
+    filesystem: "read",
+    externalPublish: false,
+    humanApproval: "on_high_risk"
+  },
+  trust: {
+    source: "first-party",
+    publisher: "example",
+    repository: "https://example.com/repository",
+    licenseEvidence: {
+      kind: "repository",
+      checkedAt: "2026-07-16T00:00:00.000Z"
+    }
+  }
+};
+
+const { privateKey, publicKey } = generateKeyPairSync("ed25519");
+const signed = signSkillManifest(manifest, {
+  algorithm: "ed25519",
+  keyId: "local-key",
+  privateKey
+});
+
+const registry = new SkillRegistry({
+  keyResolver: (keyId) => keyId === "local-key" ? publicKey : null
+});
+registry.register(signed, { actor: "owner", source: "local-review" });</code></pre></div>
+            <p class="package-boundary">A valid signature proves key possession for the signed digest. It does not audit, sandbox, install, or make executable skill code safe.</p>
+          </div>
+        </section>
+
+        <section class="package-entry" id="connectors">
+          <header><h2>ajnas-connectors</h2><span class="package-version">public 0.1.1 · <a href="https://www.npmjs.com/package/ajnas-connectors">npm</a></span></header>
+          <div class="package-body">
+            <p>Validates connector manifests and turns declared permissions, operations, data classes, publisher metadata, and review state into trust decisions.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#connectors-code">Copy</button><pre><code id="connectors-code">import {
+  ConnectorAuditLedger,
+  ConnectorRegistry,
+  evaluateConnectorTrust,
+  validateConnectorManifest
+} from "ajnas-connectors";
+
+const validation = validateConnectorManifest(manifest);
+if (!validation.valid) {
+  throw new Error(JSON.stringify(validation.issues));
+}
+
+const audit = new ConnectorAuditLedger();
+const registry = new ConnectorRegistry({ audit });
+registry.register(manifest, { actorId: "platform-engineer" });
+
+const trust = evaluateConnectorTrust(manifest, { request: invocation });
+console.log(trust.decision, audit.verify());</code></pre></div>
+            <p class="package-boundary">This snippet expects your reviewed <code>manifest</code> and <code>invocation</code> objects. The package does not create clients or call external services.</p>
+          </div>
+        </section>
+
+        <section class="package-entry" id="evals">
+          <header><h2>ajnas-evals</h2><span class="package-version">public 0.1.1 · <a href="https://www.npmjs.com/package/ajnas-evals">npm</a></span></header>
+          <div class="package-body">
+            <p>Evaluates normalized run artifacts against explicit status, JSON, event, policy, approval, provenance, connector, and browser-step assertions.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#evals-code">Copy</button><pre><code id="evals-code">import {
+  runEvalSuite,
+  validateEvalSuite,
+  verifyEvalReport
+} from "ajnas-evals";
+
+const validation = validateEvalSuite(suite);
+if (!validation.valid) {
+  throw new Error(JSON.stringify(validation.issues));
+}
+
+const report = await runEvalSuite(
+  suite,
+  async (testCase) => runArtifacts[testCase.id],
+  { generatedBy: "release-gate" }
+);
+
+console.log(report.summary);
+console.log(verifyEvalReport(report));</code></pre></div>
+            <p class="package-boundary">This snippet expects a reviewed <code>suite</code> and normalized <code>runArtifacts</code>. The package does not run a provider or external service by itself.</p>
+          </div>
+        </section>
+
+        <section class="package-entry" id="browser">
+          <header><h2>ajnas-browser-research</h2><span class="package-version">public 0.1.2 · <a href="https://www.npmjs.com/package/ajnas-browser-research">npm</a></span></header>
+          <div class="package-body">
+            <p>Runs declarative research plans around replaceable browser, search, crawl, and note adapters with policy decisions, citations, replay, and provenance.</p>
+            <div class="code-shell"><button class="copy-button" type="button" data-copy="#browser-code">Copy</button><pre><code id="browser-code">import {
+  ReplayBrowserAdapter,
+  runBrowserResearchPlan,
+  verifyBrowserResearchReport
+} from "ajnas-browser-research";
+
+const report = await runBrowserResearchPlan(plan, {
+  adapter: new ReplayBrowserAdapter(replayRecords),
+  runId: "run_release_fixture"
+});
+
+console.log(report.status);
+console.log(verifyBrowserResearchReport(report).valid);</code></pre></div>
+            <p class="package-boundary">This snippet expects a plan and replay records. Production browser engines, credentials, sandboxes, network policy, tenant isolation, and access-control compliance remain deployment responsibilities.</p>
+          </div>
+        </section>
+      </div>
+
+      <h2 id="composition">Composition rules</h2>
+      <ol>
+        <li>Keep package stores, registries, ledgers, and transactions distinct unless the host defines a real synchronization contract.</li>
+        <li>Use correlation IDs, idempotency keys, an outbox or retry policy, and reconciliation for cross-package workflows.</li>
+        <li>Do not treat a manifest, policy decision, approval ticket, or trace receipt as an operating-system sandbox.</li>
+        <li>Route the real side effect through Maqam when exact run, tool, and input binding is required.</li>
+      </ol>
+      <div class="button-row"><a class="button button-primary" href="/docs/integrations/">Build an adapter</a><a class="button" href="https://github.com/AjnasNB/productloop-os">View source</a></div>
+    </article>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-grid"><div><h2>ProductLoop OS</h2><p>One package family, explicit boundaries.</p></div><div><h3>Start</h3><a href="/docs/">Maqam</a><a href="/docs/productloop/">Package atlas</a></div><div><h3>Review</h3><a href="/docs/security/">Security</a><a href="/docs/benchmark/">Benchmark</a></div><div><h3>Source</h3><a href="https://github.com/AjnasNB/productloop-os">ProductLoop GitHub</a><a href="https://github.com/AjnasNB/maqam">Maqam GitHub</a></div></div></footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

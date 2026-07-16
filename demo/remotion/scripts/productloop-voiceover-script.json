@@ -1,0 +1,42 @@
+[
+  {
+    "scene": "hook",
+    "text": "ProductLoop O S is a TypeScript composition layer for policy-gated agent workflows.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "modules",
+    "text": "One install exposes Maqam and eight Ajnas modules: runtime, policy, approvals, provenance, evaluations, connectors, skills, and browser research.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "default",
+    "text": "The default composition denies by default. Tools are registered explicitly, and policy decisions enter their own audit ledger.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "approval",
+    "text": "When policy requires review, the runtime binds approval to the run, step, tool, risk, canonical input, metadata, reason, and prompt.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "bridges",
+    "text": "Bridges are narrow and tested. Runtime and skill events enter provenance; run snapshots and browser reports become evaluation artifacts.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "maqam",
+    "text": "Maqam remains a separate subsystem. Its crawler can become an explicit high-risk runtime tool, but nothing is registered automatically.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "boundaries",
+    "text": "Stores stay separate. ProductLoop does not supply distributed transactions, models, live browsers, credentials, identity, sandboxes, databases, or schedulers.",
+    "pauseAfterMs": 240
+  },
+  {
+    "scene": "final",
+    "text": "Use it for inspectable governance primitives without choosing one model provider. Run the dependency doctor, then expose only reviewed tools.",
+    "pauseAfterMs": 100
+  }
+]

@@ -35,6 +35,9 @@ jobs:
       - name: Clean consumer TypeScript compile
         run: npm run test:consumer-types
 
+      - name: Website contract check
+        run: npm run test:website
+
       - name: Audit production dependencies
         run: npm audit --omit=dev
 

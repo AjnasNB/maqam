@@ -1,0 +1,1003 @@
+[
+    {
+        "text":  "ProductLoop",
+        "startMs":  60,
+        "endMs":  448,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " OS",
+        "startMs":  448,
+        "endMs":  670,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " is",
+        "startMs":  670,
+        "endMs":  750,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " a",
+        "startMs":  750,
+        "endMs":  810,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " TypeScript",
+        "startMs":  786,
+        "endMs":  1199,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " composition",
+        "startMs":  1199,
+        "endMs":  1643,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " layer",
+        "startMs":  1643,
+        "endMs":  1824,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " for",
+        "startMs":  1824,
+        "endMs":  1924,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " policy-gated",
+        "startMs":  1924,
+        "endMs":  2429,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " agent",
+        "startMs":  2429,
+        "endMs":  2655,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " workflows",
+        "startMs":  2655,
+        "endMs":  3810,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " One",
+        "startMs":  3810,
+        "endMs":  3946,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " install",
+        "startMs":  3946,
+        "endMs":  4228,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " exposes",
+        "startMs":  4228,
+        "endMs":  4587,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Maqam",
+        "startMs":  4587,
+        "endMs":  4889,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  4889,
+        "endMs":  4979,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " eight",
+        "startMs":  4979,
+        "endMs":  5110,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Ajnas",
+        "startMs":  5110,
+        "endMs":  5393,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " modules",
+        "startMs":  5393,
+        "endMs":  6008,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " runtime",
+        "startMs":  6008,
+        "endMs":  6461,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " policy",
+        "startMs":  6461,
+        "endMs":  6894,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approvals",
+        "startMs":  6894,
+        "endMs":  7369,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " provenance",
+        "startMs":  7369,
+        "endMs":  7833,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " evaluations",
+        "startMs":  7833,
+        "endMs":  8523,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " connectors",
+        "startMs":  8523,
+        "endMs":  8976,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " skills",
+        "startMs":  8976,
+        "endMs":  9395,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  9395,
+        "endMs":  9480,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " browser",
+        "startMs":  9480,
+        "endMs":  9783,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " research",
+        "startMs":  9783,
+        "endMs":  10801,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " The",
+        "startMs":  10801,
+        "endMs":  10862,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " default",
+        "startMs":  10862,
+        "endMs":  11129,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " composition",
+        "startMs":  11129,
+        "endMs":  11557,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " denies",
+        "startMs":  11557,
+        "endMs":  11779,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " by",
+        "startMs":  11779,
+        "endMs":  11900,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " default",
+        "startMs":  11900,
+        "endMs":  12772,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Tools",
+        "startMs":  12772,
+        "endMs":  12974,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " are",
+        "startMs":  12974,
+        "endMs":  13049,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " registered",
+        "startMs":  13049,
+        "endMs":  13377,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " explicitly",
+        "startMs":  13377,
+        "endMs":  14082,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  14082,
+        "endMs":  14163,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " policy",
+        "startMs":  14163,
+        "endMs":  14475,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " decisions",
+        "startMs":  14475,
+        "endMs":  14829,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " enter",
+        "startMs":  14829,
+        "endMs":  15005,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " their",
+        "startMs":  15005,
+        "endMs":  15121,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " own",
+        "startMs":  15121,
+        "endMs":  15247,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " audit",
+        "startMs":  15247,
+        "endMs":  15433,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " ledger",
+        "startMs":  15433,
+        "endMs":  16366,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " When",
+        "startMs":  16366,
+        "endMs":  16477,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " policy",
+        "startMs":  16477,
+        "endMs":  16799,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " requires",
+        "startMs":  16799,
+        "endMs":  17178,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " review",
+        "startMs":  17178,
+        "endMs":  17722,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  17722,
+        "endMs":  17797,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " runtime",
+        "startMs":  17797,
+        "endMs":  18120,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " binds",
+        "startMs":  18120,
+        "endMs":  18332,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approval",
+        "startMs":  18332,
+        "endMs":  18619,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " to",
+        "startMs":  18619,
+        "endMs":  18710,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  18710,
+        "endMs":  18785,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " run",
+        "startMs":  18785,
+        "endMs":  19068,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " step",
+        "startMs":  19068,
+        "endMs":  19425,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " tool",
+        "startMs":  19425,
+        "endMs":  19758,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " risk",
+        "startMs":  19758,
+        "endMs":  20115,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " canonical",
+        "startMs":  20115,
+        "endMs":  20443,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " input",
+        "startMs":  20443,
+        "endMs":  20801,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " metadata",
+        "startMs":  20801,
+        "endMs":  21265,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " reason",
+        "startMs":  21265,
+        "endMs":  21608,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  21608,
+        "endMs":  21689,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " prompt",
+        "startMs":  21689,
+        "endMs":  22712,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Bridges",
+        "startMs":  22712,
+        "endMs":  22949,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " are",
+        "startMs":  22949,
+        "endMs":  23009,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " narrow",
+        "startMs":  23009,
+        "endMs":  23216,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  23216,
+        "endMs":  23307,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " tested",
+        "startMs":  23307,
+        "endMs":  24139,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Runtime",
+        "startMs":  24139,
+        "endMs":  24451,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  24451,
+        "endMs":  24542,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " skill",
+        "startMs":  24542,
+        "endMs":  24728,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " events",
+        "startMs":  24728,
+        "endMs":  24945,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " enter",
+        "startMs":  24945,
+        "endMs":  25106,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " provenance",
+        "startMs":  25106,
+        "endMs":  25786,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " run",
+        "startMs":  25786,
+        "endMs":  25928,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " snapshots",
+        "startMs":  25928,
+        "endMs":  26397,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  26397,
+        "endMs":  26492,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " browser",
+        "startMs":  26492,
+        "endMs":  26790,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " reports",
+        "startMs":  26790,
+        "endMs":  27087,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " become",
+        "startMs":  27087,
+        "endMs":  27314,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " evaluation",
+        "startMs":  27314,
+        "endMs":  27783,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " artifacts",
+        "startMs":  27783,
+        "endMs":  28977,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Maqam",
+        "startMs":  28977,
+        "endMs":  29280,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " remains",
+        "startMs":  29280,
+        "endMs":  29531,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " a",
+        "startMs":  29531,
+        "endMs":  29591,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " separate",
+        "startMs":  29561,
+        "endMs":  29829,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " subsystem",
+        "startMs":  29829,
+        "endMs":  30842,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Its",
+        "startMs":  30842,
+        "endMs":  30953,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " crawler",
+        "startMs":  30953,
+        "endMs":  31205,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " can",
+        "startMs":  31205,
+        "endMs":  31346,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " become",
+        "startMs":  31346,
+        "endMs":  31547,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " an",
+        "startMs":  31547,
+        "endMs":  31608,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " explicit",
+        "startMs":  31608,
+        "endMs":  31931,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " high-risk",
+        "startMs":  31931,
+        "endMs":  32258,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " runtime",
+        "startMs":  32258,
+        "endMs":  32576,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " tool",
+        "startMs":  32576,
+        "endMs":  33095,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " but",
+        "startMs":  33095,
+        "endMs":  33196,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " nothing",
+        "startMs":  33196,
+        "endMs":  33408,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " is",
+        "startMs":  33408,
+        "endMs":  33503,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " registered",
+        "startMs":  33503,
+        "endMs":  33836,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " automatically",
+        "startMs":  33836,
+        "endMs":  35025,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Stores",
+        "startMs":  35025,
+        "endMs":  35308,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " stay",
+        "startMs":  35308,
+        "endMs":  35449,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " separate",
+        "startMs":  35449,
+        "endMs":  36326,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " ProductLoop",
+        "startMs":  36326,
+        "endMs":  36714,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " does",
+        "startMs":  36714,
+        "endMs":  36861,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " not",
+        "startMs":  36861,
+        "endMs":  37016,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " supply",
+        "startMs":  37016,
+        "endMs":  37274,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " distributed",
+        "startMs":  37274,
+        "endMs":  37667,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " transactions",
+        "startMs":  37667,
+        "endMs":  38271,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " models",
+        "startMs":  38271,
+        "endMs":  38680,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " live",
+        "startMs":  38680,
+        "endMs":  38836,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " browsers",
+        "startMs":  38836,
+        "endMs":  39325,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " credentials",
+        "startMs":  39325,
+        "endMs":  39875,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " identity",
+        "startMs":  39875,
+        "endMs":  40344,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " sandboxes",
+        "startMs":  40344,
+        "endMs":  40974,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " databases",
+        "startMs":  40974,
+        "endMs":  41538,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " or",
+        "startMs":  41538,
+        "endMs":  41618,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " schedulers",
+        "startMs":  41618,
+        "endMs":  42829,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Use",
+        "startMs":  42829,
+        "endMs":  42970,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " it",
+        "startMs":  42970,
+        "endMs":  43040,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " for",
+        "startMs":  43040,
+        "endMs":  43156,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " inspectable",
+        "startMs":  43156,
+        "endMs":  43544,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " governance",
+        "startMs":  43544,
+        "endMs":  43846,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " primitives",
+        "startMs":  43846,
+        "endMs":  44179,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " without",
+        "startMs":  44179,
+        "endMs":  44376,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " choosing",
+        "startMs":  44376,
+        "endMs":  44613,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " one",
+        "startMs":  44613,
+        "endMs":  44749,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " model",
+        "startMs":  44749,
+        "endMs":  44955,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " provider",
+        "startMs":  44955,
+        "endMs":  45868,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Run",
+        "startMs":  45868,
+        "endMs":  45999,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  45999,
+        "endMs":  46059,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " dependency",
+        "startMs":  46059,
+        "endMs":  46452,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " doctor",
+        "startMs":  46452,
+        "endMs":  47007,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " then",
+        "startMs":  47007,
+        "endMs":  47118,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " expose",
+        "startMs":  47118,
+        "endMs":  47410,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " only",
+        "startMs":  47410,
+        "endMs":  47592,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " reviewed",
+        "startMs":  47592,
+        "endMs":  47848,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " tools",
+        "startMs":  47848,
+        "endMs":  48324,
+        "timestampMs":  null,
+        "confidence":  null
+    }
+]

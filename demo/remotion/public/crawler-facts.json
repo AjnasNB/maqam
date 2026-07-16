@@ -1,0 +1,21 @@
+{
+  "schema": "maqam.crawler.video.facts/v1",
+  "source": {
+    "repository": "https://github.com/AjnasNB/maqam",
+    "commit": "eeb0de484b6f49cfd8989fad5da61a3722e91d6d",
+    "workingTreeDirty": true,
+    "fingerprint": "10014b0af74b21e22bfb782531c2a1fe8d716bcd9ebbe463fa41776a16038014"
+  },
+  "packageVersion": "0.2.4",
+  "claims": {
+    "transport": "http-html",
+    "browserJavaScriptExecution": false,
+    "robotsDefault": true,
+    "sameOriginDefault": true,
+    "publicNetworkDefault": true,
+    "redirectValidation": true,
+    "dnsPinning": true,
+    "contentHash": "sha256",
+    "governedEffect": "network:read"
+  }
+}

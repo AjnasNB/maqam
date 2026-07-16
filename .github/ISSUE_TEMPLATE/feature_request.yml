@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose a scoped capability or public contract.
+title: "feature: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Explain the user or operator problem without prescribing a solution first.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed contract
+      description: Describe the API, CLI, behavior, and failure mode.
+    validations:
+      required: true
+  - type: textarea
+    id: authority
+    attributes:
+      label: Authority and security impact
+      description: Identify effects on policy, approvals, credentials, network, filesystem, processes, persistence, and evidence.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification plan
+      description: List deterministic tests, provider mocks, compatibility checks, or benchmark evidence.
+    validations:
+      required: true

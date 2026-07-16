@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maqam | Exact approval and evidence for agent actions</title>
+  <meta name="description" content="Maqam is an open-source TypeScript boundary for policy-gated agent actions, exact approvals, one-use execution, and source-linked evidence.">
+  <meta name="theme-color" content="#0b0e0d">
+  <meta property="og:title" content="Maqam | Approve the exact call">
+  <meta property="og:description" content="A focused governance boundary for TypeScript agents, composed with the ProductLoop OS package family.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://maqamagent.com/">
+  <meta property="og:image" content="https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-demo-poster.png">
+  <link rel="canonical" href="https://maqamagent.com/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="preload" href="/media/releases/maqam/v0.2.4/maqam-demo-poster.png" as="image" fetchpriority="high">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home">
+        <img src="/assets/maqam-logo.svg" width="30" height="30" alt="">
+        <span>MAQAM</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <a href="/docs/">Docs</a>
+        <a href="/docs/productloop/">ProductLoop</a>
+        <a href="/why/">Why</a>
+        <a href="/docs/integrations/">Integrations</a>
+        <a href="/docs/benchmark/">Benchmark</a>
+        <a href="/roadmap/">Roadmap</a>
+        <a href="/releases/v0.2.4/">Release</a>
+        <a href="/community/">Community</a>
+        <a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a>
+      </nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden>
+      <a href="/docs/">Docs</a>
+      <a href="/docs/productloop/">ProductLoop</a>
+      <a href="/why/">Why Maqam</a>
+      <a href="/docs/integrations/">Integrations</a>
+      <a href="/docs/benchmark/">Benchmark</a>
+      <a href="/roadmap/">Roadmap</a>
+      <a href="/releases/v0.2.4/">Release</a>
+      <a href="/community/">Community</a>
+      <a href="https://github.com/AjnasNB/maqam">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="shell hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title">Approve the exact call. Run it once.</h1>
+        <p>Policy-gated TypeScript actions with input-bound approval, replay prevention, traces, and source-linked evidence.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="/docs/">Start locally</a>
+          <a class="button" href="#proof-video">Watch the proof</a>
+        </div>
+      </div>
+      <figure class="hero-media">
+        <img src="/media/releases/maqam/v0.2.4/maqam-demo-poster.png" width="1920" height="1080" alt="Maqam proof showing an altered call blocked, one exact approved call passed, and approval replay blocked" fetchpriority="high">
+        <figcaption>Real output from the deterministic <code>maqam demo approval --json</code> flow.</figcaption>
+      </figure>
+    </section>
+
+    <div class="shell release-state" role="status">
+      <strong>Package state</strong>
+      <span>Latest public npm: 0.2.3 · 0.2.4 candidate pending exact release approval</span>
+    </div>
+
+    <section class="proof-strip" aria-label="Release evidence">
+      <div class="shell proof-grid">
+        <div>
+          <span class="proof-label">Install</span>
+          <span class="proof-value">npm install maqam@0.2.3</span>
+        </div>
+        <div>
+          <span class="proof-label">License</span>
+          <span class="proof-value">MIT</span>
+        </div>
+        <div>
+          <span class="proof-label">Runtime</span>
+          <span class="proof-value">Node &gt;=20.18.1</span>
+        </div>
+        <div>
+          <span class="proof-label">MGES fixtures</span>
+          <span class="proof-value">12 / 12</span>
+        </div>
+        <div>
+          <span class="proof-label">Model key</span>
+          <span class="proof-value">Not required</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <header class="section-head">
+          <p class="eyebrow">The enforcement path</p>
+          <h2>Review and execution stay bound.</h2>
+          <p>Maqam canonicalizes the proposed input, binds approval to that scope, and consumes the approval before the registered handler runs.</p>
+        </header>
+        <div class="flow-list">
+          <ol class="flow-steps">
+            <li>
+              <code>01</code>
+              <div><h3>Policy decides first</h3><p>Tool, origin, effect, risk, and tenant ceilings are evaluated before execution.</p></div>
+            </li>
+            <li>
+              <code>02</code>
+              <div><h3>Approval binds the input</h3><p>The record covers the run, tool, and canonical input hash, not a loose description.</p></div>
+            </li>
+            <li>
+              <code>03</code>
+              <div><h3>The gateway consumes once</h3><p>Changed input fails scope validation. Reusing a consumed approval fails closed.</p></div>
+            </li>
+            <li>
+              <code>04</code>
+              <div><h3>Evidence remains explicit</h3><p>Handlers and workflows link claims to source records through scoped capabilities.</p></div>
+            </li>
+          </ol>
+          <figure class="media-frame">
+            <img src="/media/01-scope-mismatch.png" width="1920" height="1080" loading="lazy" alt="Maqam demo frame showing changed input rejected before tool execution">
+            <figcaption>Altered input is rejected before the write handler executes.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <header class="section-head">
+          <h2>One boundary. A modular operating layer.</h2>
+          <p>Maqam is the focused enforcement product. ProductLoop OS composes it with smaller packages for runtime, policy, review, evidence, skills, connectors, evaluation, and research.</p>
+        </header>
+        <div class="ecosystem-grid">
+          <article class="ecosystem-item">
+            <h3>maqam</h3>
+            <p>Exact gateway approvals, governed worker adapters, workflow traces, evidence links, and a bounded HTTP crawler.</p>
+            <p><a href="/docs/">Read the Maqam quickstart</a></p>
+          </article>
+          <article class="ecosystem-item">
+            <h3>productloop-os</h3>
+            <p>One dependency with named namespaces and tested composition helpers across the package family.</p>
+          </article>
+          <article class="ecosystem-item">
+            <h3>runtime + policy</h3>
+            <p>Ordered tool execution and declarative allow, deny, or approval decisions.</p>
+          </article>
+          <article class="ecosystem-item">
+            <h3>approvals + provenance</h3>
+            <p>Review state machines and hash-linked trace bundles. Durable storage remains a host concern.</p>
+          </article>
+          <article class="ecosystem-item">
+            <h3>skills + connectors</h3>
+            <p>Signed manifests and connector trust metadata. These packages do not install or call services by themselves.</p>
+          </article>
+          <article class="ecosystem-item">
+            <h3>evals</h3>
+            <p>Deterministic assertions over normalized run artifacts and evidence.</p>
+          </article>
+          <article class="ecosystem-item">
+            <h3>browser research</h3>
+            <p>Governed plans, deterministic replay, citations, and provenance. It is not a browser engine.</p>
+            <p><a href="/docs/productloop/">Inspect every package</a></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="proof-video">
+      <div class="shell video-layout" data-video-block>
+        <div class="video-notes">
+          <strong>60 seconds</strong>
+          <p>1920 by 1080, captioned, locally narrated, and rendered from real command output.</p>
+          <p id="exact-video-status" data-video-status>Loading video metadata.</p>
+          <p><a href="/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.vtt">Download VTT captions</a><br><a href="/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.srt">Download SRT captions</a></p>
+        </div>
+        <figure class="media-frame">
+          <video data-proof-video controls preload="metadata" aria-describedby="exact-video-status" poster="/media/releases/maqam/v0.2.4/maqam-demo-poster.png">
+            <source src="/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4" type="video/mp4">
+            <track src="/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.vtt" kind="captions" srclang="en" label="English" default>
+            Your browser cannot play this video. <a href="/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4">Open the MP4 file</a>.
+          </video>
+          <figcaption>The proof requests approval, blocks changed input, runs the exact call once, blocks replay, and links evidence to a claim.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="release-video-heading">
+      <div class="shell">
+        <header class="section-head">
+          <p class="eyebrow">Candidate video library</p>
+          <h2 id="release-video-heading">See the boundary, then see the ecosystem.</h2>
+          <p>Three captioned candidate-release demos separate Maqam's exact-call proof from the ProductLoop package map and the crawler's network limits.</p>
+        </header>
+        <div class="video-library">
+          <article class="video-entry" data-video-block>
+            <div class="video-entry-copy">
+              <p class="eyebrow">ProductLoop OS</p>
+              <h3>One operating layer, named package boundaries.</h3>
+              <p>The ecosystem overview shows what each module contributes, where Maqam sits, and which host responsibilities remain outside the package family.</p>
+              <p id="productloop-video-status" data-video-status>Loading video metadata.</p>
+              <p><a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4">Open MP4</a><br><a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.vtt">Download VTT captions</a><br><a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.srt">Download SRT captions</a></p>
+            </div>
+            <figure class="media-frame">
+              <video data-proof-video controls preload="metadata" aria-describedby="productloop-video-status" poster="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-poster.png">
+                <source src="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4" type="video/mp4">
+                <track src="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.vtt" kind="captions" srclang="en" label="English" default>
+                Your browser cannot play this video. <a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4">Open the MP4 file</a>.
+              </video>
+              <figcaption>A 55-second package and responsibility map for ProductLoop OS.</figcaption>
+            </figure>
+          </article>
+          <article class="video-entry" data-video-block>
+            <div class="video-entry-copy">
+              <p class="eyebrow">Maqam crawler</p>
+              <h3>Governed research with explicit network limits.</h3>
+              <p>The crawler demo follows policy, bounded fetching, source records, and citations while naming the browser rendering and distributed crawling features it does not provide.</p>
+              <p id="crawler-video-status" data-video-status>Loading video metadata.</p>
+              <p><a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4">Open MP4</a><br><a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt">Download VTT captions</a><br><a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.srt">Download SRT captions</a></p>
+            </div>
+            <figure class="media-frame">
+              <video data-proof-video controls preload="metadata" aria-describedby="crawler-video-status" poster="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research-poster.png">
+                <source src="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4" type="video/mp4">
+                <track src="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt" kind="captions" srclang="en" label="English" default>
+                Your browser cannot play this video. <a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4">Open the MP4 file</a>.
+              </video>
+              <figcaption>A 55-second walkthrough of governed crawling, citations, and boundaries.</figcaption>
+            </figure>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell benchmark-layout">
+        <div class="benchmark-copy">
+          <blockquote>127.498 microseconds per governed local call, measured as a clean-source regression profile.</blockquote>
+          <p>The separate conformance profile passed 12 of 12 named governance-boundary fixtures.</p>
+          <p>MGES v1 is project-defined. It is not a standard, certification, competitor ranking, security score, production capacity result, or SLA.</p>
+          <div class="button-row">
+            <a class="button" href="/docs/benchmark/">Read the methodology</a>
+          </div>
+        </div>
+        <figure class="media-frame">
+          <img src="/media/04-benchmark-method.png" width="1920" height="1080" loading="lazy" alt="Maqam benchmark frame showing local method, median call overhead, interval, and conformance fixtures">
+          <figcaption>Raw JSON, source fingerprints, environment data, and publication checks are kept in the repository.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell community-grid">
+        <div>
+          <header class="section-head">
+            <h2>Open source means review before trust.</h2>
+            <p>Fork it, inspect the boundary, run the proof, propose focused changes, and attach evidence to claims.</p>
+          </header>
+          <div class="button-row">
+            <a class="button button-primary" href="/community/">Contribute</a>
+            <a class="button" href="https://github.com/AjnasNB/maqam/issues">Browse issues</a>
+          </div>
+        </div>
+        <div class="code-shell">
+          <button class="copy-button" type="button" data-copy="#install-snippet">Copy</button>
+          <pre><code id="install-snippet">npx -y maqam@0.2.3 demo approval
+npm install maqam@0.2.3
+npm test</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div>
+        <h2>Maqam</h2>
+        <p>Focused governance for agent side effects.</p>
+        <p>MIT licensed.</p>
+      </div>
+      <div>
+        <h3>Learn</h3>
+        <a href="/docs/">Quickstart</a>
+        <a href="/docs/productloop/">ProductLoop OS</a>
+        <a href="/why/">Why Maqam</a>
+      </div>
+      <div>
+        <h3>Project</h3>
+        <a href="/docs/benchmark/">MGES methodology</a>
+        <a href="/roadmap/">Public roadmap</a>
+        <a href="/releases/v0.2.4/">0.2.4 candidate notes</a>
+      </div>
+      <div>
+        <h3>Source</h3>
+        <a href="https://github.com/AjnasNB/maqam">Maqam on GitHub</a>
+        <a href="https://github.com/AjnasNB/maqam/blob/main/CONTRIBUTING.md">Contributing</a>
+        <a href="https://github.com/AjnasNB/maqam/blob/main/GOVERNANCE.md">Governance</a>
+      </div>
+    </div>
+  </footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

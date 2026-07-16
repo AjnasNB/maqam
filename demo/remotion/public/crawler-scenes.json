@@ -1,0 +1,58 @@
+[
+  {
+    "scene": "hook",
+    "startMs": 0,
+    "endMs": 5093,
+    "narrationStartMs": 60,
+    "narrationEndMs": 5093
+  },
+  {
+    "scene": "limits",
+    "startMs": 5093,
+    "endMs": 10741,
+    "narrationStartMs": 5093,
+    "narrationEndMs": 10741
+  },
+  {
+    "scene": "network",
+    "startMs": 10741,
+    "endMs": 16833,
+    "narrationStartMs": 10741,
+    "narrationEndMs": 16833
+  },
+  {
+    "scene": "scope",
+    "startMs": 16833,
+    "endMs": 24826,
+    "narrationStartMs": 16833,
+    "narrationEndMs": 24826
+  },
+  {
+    "scene": "output",
+    "startMs": 24826,
+    "endMs": 32541,
+    "narrationStartMs": 24826,
+    "narrationEndMs": 32541
+  },
+  {
+    "scene": "detail",
+    "startMs": 32541,
+    "endMs": 37902,
+    "narrationStartMs": 32541,
+    "narrationEndMs": 37902
+  },
+  {
+    "scene": "gateway",
+    "startMs": 37902,
+    "endMs": 44392,
+    "narrationStartMs": 37902,
+    "narrationEndMs": 44392
+  },
+  {
+    "scene": "final",
+    "startMs": 44392,
+    "endMs": 55000,
+    "narrationStartMs": 44392,
+    "narrationEndMs": 50460
+  }
+]

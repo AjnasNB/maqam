@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benchmarking an agent governance boundary without fooling yourself</title>
+  <meta name="description" content="How MGES separates local-call performance from deterministic governance conformance, reports uncertainty, and avoids turning a project benchmark into a security score.">
+  <meta name="theme-color" content="#0b0e0d">
+  <meta property="og:title" content="Benchmarking an agent governance boundary without fooling yourself">
+  <meta property="og:description" content="A transparent measurement method for Maqam, with raw artifacts, limitations, and a path toward ecosystem evaluation.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://maqamagent.com/articles/benchmarking-governance/">
+  <meta property="og:image" content="https://maqamagent.com/assets/approval-gate-art.png">
+  <link rel="canonical" href="https://maqamagent.com/articles/benchmarking-governance/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+  </header>
+
+  <main id="main" class="shell article-shell">
+    <article class="article">
+      <h1>Benchmarking an agent governance boundary without fooling yourself</h1>
+      <p class="lede">One number cannot answer latency, policy enforcement, security, and task quality at the same time.</p>
+      <figure class="media-frame">
+        <img src="/assets/approval-gate-art.png" width="1680" height="945" alt="Mechanical approval gate with a measured path for agent tool calls" fetchpriority="high">
+        <figcaption>MGES measures a named boundary under recorded conditions. It is not a universal agent leaderboard.</figcaption>
+      </figure>
+
+      <p>Agent products often compress unrelated questions into one score. How fast is the runtime? Does policy stop a denied call? Is the whole system secure? Does the agent complete useful work? Each question needs a different fixture and a different claim.</p>
+      <p>The Maqam Governance Evaluation Suite, or MGES v1, keeps two profiles separate: a local-call performance microbenchmark and a deterministic governance-boundary conformance suite. The first detects regressions in one in-process path. The second exercises named invariants. Neither ranks models or competing products.</p>
+
+      <h2>Start with the measurement claim</h2>
+      <p>The performance objective is deliberately narrow: measure the sequential cost of Maqam's current local governed-call path under matched conditions. It excludes model inference, networks, storage, concurrency, human review, durable workflows, prompt-injection resistance, and task success.</p>
+      <p>The conformance objective is different: execute declared boundary cases and publish pass or fail evidence for the exact tested source fingerprint. A passing result is regression evidence, not a security score, certification, penetration test, or guarantee that every application path is governed.</p>
+      <div class="callout"><strong>Measurement rule</strong>Define the question and intended use before choosing a metric. Report the fixture, environment, uncertainty, artifacts, and limitations with the result.</div>
+
+      <h2>What one governed call includes</h2>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#fixture-code">Copy</button><pre><code id="fixture-code">const input = { value: 41, nested: { release: "0.2.x" } };
+const handler = async (value) => value.value + 1;</code></pre></div>
+      <p>The direct variant invokes the handler. The governed variant invokes it through <code>ToolGateway</code> with an allowlist <code>PolicyEngine</code> and tracing enabled.</p>
+      <ul>
+        <li>Snapshot and validate caller context.</li>
+        <li>Canonicalize, detach, deep-freeze, and hash input.</li>
+        <li>Resolve the registered tool and effective goal.</li>
+        <li>Evaluate and normalize policy.</li>
+        <li>Enforce per-run limits.</li>
+        <li>Construct a scoped evidence facade.</li>
+        <li>Dispatch the exact detached input.</li>
+        <li>Append a redacted completion trace.</li>
+      </ul>
+      <p>After each timed batch, the fixture verifies the result checksum, completed call count, and one trace record per governed operation. It cannot report an attractive number after silently skipping normal trace work.</p>
+
+      <h2>Why batch sizes differ</h2>
+      <p>The direct handler only performs an asynchronous addition, so a short direct batch would be dominated by scheduling noise. The governed path allocates snapshots and trace records, so it reaches a stable timing window with fewer operations.</p>
+      <div class="table-wrap"><table><thead><tr><th>Variant</th><th>Warmup operations</th><th>Timed operations per observation</th></tr></thead><tbody><tr><td>Direct</td><td>250,000</td><td>5,000,000</td></tr><tr><td>Governed</td><td>500</td><td>5,000</td></tr></tbody></table></div>
+      <p>Each observation divides its own elapsed time by its own operation count. Both median timed batches exceeded the project's 100 ms minimum in the recorded run.</p>
+
+      <h2>Fresh processes and alternating order</h2>
+      <p>JavaScript timings respond to runtime optimization, allocation, garbage collection, CPU scheduling, and execution order. MGES starts every observation in a fresh Node child process. Startup and module loading finish before the timed interval.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#order-code">Copy</button><pre><code id="order-code">round 1: direct   -> governed
+round 2: governed -> direct
+round 3: direct   -> governed
+...</code></pre></div>
+      <p>Thirty paired rounds alternate order to reduce a simple temporal bias. Timing uses Node's monotonic <code>process.hrtime.bigint()</code>.</p>
+
+      <h2>The statistics and their limits</h2>
+      <p>The headline is the median of 30 governed observation means. MGES also records the mean, sample standard deviation, coefficient of variation, median absolute deviation, minimum, maximum, 5th and 95th percentiles, and every raw observation.</p>
+      <p>The reported 95% interval is a deterministic percentile-bootstrap interval for the sample median using 10,000 resamples. It estimates sampling uncertainty across runs on the recorded machine. It does not describe uncertainty across processors, operating systems, Node versions, thermal states, or production workloads.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#rate-code">Copy</button><pre><code id="rate-code">nanoseconds per operation = elapsed nanoseconds / completed operations
+operations per second at median = 1,000,000,000 / median nanoseconds</code></pre></div>
+      <p>The derived rate is a sequential local rate, not a concurrency or capacity measurement. MGES reports paired absolute added time and avoids promoting a governed/direct ratio because the direct baseline intentionally does almost no work.</p>
+
+      <h2>The clean MGES v1 result</h2>
+      <div class="table-wrap"><table><thead><tr><th>Field</th><th>Recorded result</th></tr></thead><tbody>
+        <tr><td>Runtime and host</td><td>Node 24.15.0, Windows x64, AMD Ryzen 7 4800H</td></tr>
+        <tr><td>Observations</td><td>30 fresh processes per variant</td></tr>
+        <tr><td>Governed median</td><td>127.498 microseconds per call</td></tr>
+        <tr><td>95% bootstrap interval</td><td>126.334 to 128.942 microseconds per call</td></tr>
+        <tr><td>Sequential rate at median</td><td>7,843.288 calls per second</td></tr>
+        <tr><td>Paired added median</td><td>127.422 microseconds per call</td></tr>
+        <tr><td>Governed coefficient of variation</td><td>5.572%</td></tr>
+        <tr><td>Project publication checks</td><td>PASS, 5 of 5</td></tr>
+      </tbody></table></div>
+      <p>The publication checks require 30 observations, coefficient of variation no greater than 10% for both variants, and median timed batches of at least 100 ms. These are suite stability gates, not an industry acceptance rule.</p>
+      <p>An earlier calibrated run failed because outliers pushed governed variation to 85.33%. The headline result was withheld. Timed batches were lengthened, no observations were deleted, and the declared threshold was not weakened.</p>
+      <p>The clean artifact records commit <code>44c198f9eab1ea3a2dedb1f784413a2733b7745d</code>, <code>workingTreeDirty: false</code>, and SHA-256 fingerprints for benchmark and implementation files. A changed fingerprint requires another run.</p>
+      <div class="button-row"><a class="button button-primary" href="/media/mges-performance.json">Download performance JSON</a><a class="button" href="/media/mges-conformance.json">Download conformance JSON</a></div>
+
+      <h2>Conformance is not latency</h2>
+      <p>The governance-boundary profile executes 12 deterministic fixtures covering deny-by-default construction, denial before dispatch, fail-closed policy evaluation, safe input handling, exact approval scope, replay rejection, call limits, detached handler input, evidence isolation, atomic multi-approval consumption, attribution, and redacted denial traces.</p>
+      <p>The recorded artifact reports 12 of 12 fixtures passing. MGES does not turn that into a percentage security score because equal weighting would imply equal risk and coverage. That has not been established.</p>
+
+      <h2>Relationship to OWASP agentic risks</h2>
+      <p>The OWASP Top 10 for Agentic Applications 2026 is a peer-reviewed risk framework. MGES is neither a substitute nor an OWASP certification.</p>
+      <p>Several cases provide narrow evidence relevant to tool misuse: deny unknown calls, scope approval to an exact action, enforce a call limit, and consume approvals atomically. They do not test prompt injection, poisoned tool descriptions, provider-internal execution, operating-system containment, or network isolation.</p>
+      <p>Exact scope and one-use consumption are relevant to accidental authority reuse. Maqam v0.2.x still accepts reviewer identity as host-supplied data. Authentication, IAM, delegation, credentials, and non-repudiation remain host responsibilities.</p>
+      <p>An approval gate creates a review point, but MGES does not evaluate reviewer fatigue, interface quality, social engineering, or whether the host authenticated the reviewer.</p>
+
+      <h2>Why this cannot rank Maqam against other tools</h2>
+      <p>Maqam, a crawler, an orchestration framework, and a policy engine do not perform the same work. Comparing their default tool-call timing would reward whichever system does less.</p>
+      <p>A credible cross-product comparison needs the same payload and effect, the same policy and approval obligations, equivalent input scope and trace output, an agreed process model, public adapters, predeclared statistics, independent machines, disclosure of unstable runs, and review by maintainers of every system. MGES v1 does not provide those competitor adapters and makes no speed ranking.</p>
+
+      <h2>A path to ecosystem evaluation</h2>
+      <h3>Adapter conformance</h3>
+      <p>A shared protocol could verify that effectful calls enter the gateway, identifiers survive transport, exact approval scope is preserved, cancellation fails closed, and evidence identifiers propagate. Every result should name the adapter, provider, version, and unsupported properties. Not tested must remain different from pass.</p>
+      <h3>End-to-end profiles</h3>
+      <p>Local CLI, MCP transport, HTTP services, durable queues, crawler research, and multi-agent handoffs each need distinct fixtures and schemas because latency and failure models differ.</p>
+      <h3>Adversarial evaluation</h3>
+      <p>Security work should test malicious tool descriptions, prompt-injected content, forged reviewer identity, replay across restarts, poisoned evidence, bypass attempts, origin violations, persistence failure, and concurrent races. These are attack experiments, not extensions of a latency loop.</p>
+      <h3>Public result registry</h3>
+      <p>Signed artifacts indexed by suite version, source fingerprint, environment, and profile could separate one machine's observation from independently reproduced results.</p>
+
+      <h2>How to quote the result responsibly</h2>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-performance">Copy</button><pre><code id="quote-performance">MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H:
+127.498 microseconds median per governed call (95% bootstrap interval for the
+sample median: 126.334 to 128.942; 30 fresh-process observations; CV 5.572%).
+Local in-process component benchmark; excludes model, network, storage, and
+concurrency; not a competitor benchmark or SLA.</code></pre></div>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-conformance">Copy</button><pre><code id="quote-conformance">MGES v1 governance-boundary profile: 12 of 12 project-defined fixtures passed
+on the recorded source fingerprint. This is regression evidence, not a
+security score, penetration test, or certification.</code></pre></div>
+      <p>A result without its objective, fixture, environment, uncertainty, limitations, and raw artifact is not a benchmark report. It is an anecdote.</p>
+      <div class="button-row"><a class="button button-primary" href="/docs/benchmark/">Inspect the benchmark</a><a class="button" href="https://github.com/AjnasNB/maqam/blob/main/docs/articles/benchmarking-agent-governance.md">Read the source article</a></div>
+    </article>
+
+    <aside class="article-meta" aria-label="Article information">
+      <strong>Technical article</strong>
+      <p>Approximate reading time: 14 minutes</p>
+      <p>Topics: benchmarks, TypeScript, governance, security</p>
+      <a href="/docs/benchmark/">MGES method</a>
+      <a href="/docs/security/">Security boundary</a>
+      <a href="/articles/exact-agent-approvals/">Approval article</a>
+      <a href="https://doi.org/10.6028/NIST.AI.800-2.ipd">NIST benchmark draft</a>
+      <a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/">OWASP agentic risks</a>
+    </aside>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-grid"><div><h2>Maqam writing</h2><p>Technical claims tied to runnable evidence.</p></div><div><h3>Start</h3><a href="/docs/">Quickstart</a><a href="/docs/productloop/">ProductLoop</a></div><div><h3>Review</h3><a href="/docs/security/">Security</a><a href="/docs/benchmark/">Benchmark</a></div><div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam">GitHub</a><a href="https://www.npmjs.com/package/maqam">npm</a></div></div></footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

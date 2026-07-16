@@ -1,0 +1,16 @@
+{
+  "name": "maqamagent-site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static landing and documentation site for Maqam and ProductLoop OS.",
+  "scripts": {
+    "check": "node scripts/check-site.mjs",
+    "dev": "wrangler dev --local --port 8791",
+    "preview": "wrangler dev --local --port 8791",
+    "deploy:dry": "wrangler deploy --dry-run --outdir .wrangler-dry-run"
+  },
+  "engines": {
+    "node": ">=20.18.1"
+  }
+}

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and integration design
+    url: https://github.com/AjnasNB/maqam/discussions
+    about: Ask usage questions or discuss a design before filing an implementation issue.
+  - name: Security report
+    url: https://github.com/AjnasNB/maqam/security/policy
+    about: Report vulnerabilities privately. Do not disclose credentials or exploit details in an issue.

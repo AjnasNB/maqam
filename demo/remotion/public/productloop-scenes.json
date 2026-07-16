@@ -1,0 +1,58 @@
+[
+  {
+    "scene": "hook",
+    "startMs": 0,
+    "endMs": 3810,
+    "narrationStartMs": 60,
+    "narrationEndMs": 3810
+  },
+  {
+    "scene": "modules",
+    "startMs": 3810,
+    "endMs": 10801,
+    "narrationStartMs": 3810,
+    "narrationEndMs": 10801
+  },
+  {
+    "scene": "default",
+    "startMs": 10801,
+    "endMs": 16366,
+    "narrationStartMs": 10801,
+    "narrationEndMs": 16366
+  },
+  {
+    "scene": "approval",
+    "startMs": 16366,
+    "endMs": 22712,
+    "narrationStartMs": 16366,
+    "narrationEndMs": 22712
+  },
+  {
+    "scene": "bridges",
+    "startMs": 22712,
+    "endMs": 28977,
+    "narrationStartMs": 22712,
+    "narrationEndMs": 28977
+  },
+  {
+    "scene": "maqam",
+    "startMs": 28977,
+    "endMs": 35025,
+    "narrationStartMs": 28977,
+    "narrationEndMs": 35025
+  },
+  {
+    "scene": "boundaries",
+    "startMs": 35025,
+    "endMs": 42829,
+    "narrationStartMs": 35025,
+    "narrationEndMs": 42829
+  },
+  {
+    "scene": "final",
+    "startMs": 42829,
+    "endMs": 55000,
+    "narrationStartMs": 42829,
+    "narrationEndMs": 48324
+  }
+]

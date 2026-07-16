@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your agent approval may not authorize the input that actually executes</title>
+  <meta name="description" content="A technical guide to exact, one-use approval receipts for agent tools, including input snapshots, effect policy, replay prevention, evidence, limits, and adoption steps.">
+  <meta name="theme-color" content="#0b0e0d">
+  <meta property="og:title" content="Your agent approval may not authorize the input that actually executes">
+  <meta property="og:description" content="How exact, one-use receipts close the gap between a review screen and an agent tool call.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://maqamagent.com/articles/exact-agent-approvals/">
+  <meta property="og:image" content="https://maqamagent.com/assets/evidence-article.png">
+  <link rel="canonical" href="https://maqamagent.com/articles/exact-agent-approvals/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+  </header>
+
+  <main id="main" class="shell article-shell">
+    <article class="article">
+      <h1>Your agent approval may not authorize the input that actually executes</h1>
+      <p class="lede">How exact, one-use receipts close the gap between a review screen and an agent tool call.</p>
+      <figure class="media-frame">
+        <img src="/assets/evidence-article.png" width="1680" height="945" alt="Locked evidence envelopes measured on an inspection table" fetchpriority="high">
+        <figcaption>Review is useful only when the inspected scope and execution scope remain connected.</figcaption>
+      </figure>
+
+      <p>Agent products increasingly add confirmation before an email is sent, a repository is modified, or a deployment starts. The screen looks reassuring: it names an action, a person approves it, and the agent continues.</p>
+      <p>But what did that decision authorize?</p>
+      <p>If approval is only a boolean or reusable id, the target can change after review. A later run can reuse the decision. The tool can receive a different object from the one policy inspected. The application can display a friendly summary while executing fields that were never reviewed.</p>
+      <p>Maqam implements a narrower property at <code>ToolGateway</code>: bind one human decision to one run, one registered tool, and one canonical input, then consume the decision when that handler executes.</p>
+      <p>This does not make the action correct, prove reviewer identity, or make a malicious tool safe. It closes one specific class of authority gaps at the application boundary.</p>
+
+      <h2>The common boolean model</h2>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#boolean-code">Copy</button><pre><code id="boolean-code">if (approval.status === "approved") {
+  await tool.call(currentInput);
+}</code></pre></div>
+      <p>This answers one question: is the record marked approved? It does not necessarily answer whether the record belongs to this run and tool, whether the input still matches, whether the decision already authorized another call, or whether stored state came from an authenticated source.</p>
+
+      <h2>The ordinary failure modes</h2>
+      <h3>Input mutation</h3>
+      <p>Policy authorizes a caller-owned object. Before the handler reads it, another callback changes <code>environment: "staging"</code> to <code>environment: "production"</code>.</p>
+      <h3>Approval replay</h3>
+      <p>A valid approval id is presented for a second execution, another run, or another payload.</p>
+      <h3>Confused tool authority</h3>
+      <p>A decision requested for a preview tool is accepted by a publish tool because approval is not scoped to the registered name.</p>
+      <h3>Display and execution drift</h3>
+      <p>The review screen summarizes a subset of fields while hidden or newly added input fields affect execution.</p>
+      <h3>Partial multi-approval consumption</h3>
+      <p>A call needs tool and effect approval. One is consumed before the other is found invalid, leaving state that is difficult to retry safely.</p>
+
+      <h2>The Maqam call boundary</h2>
+      <p>Maqam accepts finite, acyclic JSON values built from supported primitives, dense arrays, and plain objects. Accessors, symbol keys, sparse arrays, repeated object references, non-finite numbers, negative zero, and unsupported object types fail closed.</p>
+      <ol>
+        <li>Validate and detach the input.</li>
+        <li>Ask policy whether the tool and declared effects are allowed.</li>
+        <li>Create pending approval requests when policy requires them.</li>
+        <li>Bind requests to run id, registered tool, and input hash.</li>
+        <li>Return without invoking the handler.</li>
+        <li>Let a trusted application reviewer decide.</li>
+        <li>Retry the same call with the approval id.</li>
+        <li>Validate every required approval and consume them atomically.</li>
+        <li>Invoke the handler with the detached authorized input.</li>
+      </ol>
+      <p>If the run, tool, or input changes, the approval does not match. If the approval was consumed, it cannot authorize another execution.</p>
+
+      <h2>A runnable local proof</h2>
+      <p>The handler below is a fake publisher, so it has no external effect.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#article-example">Copy</button><pre><code id="article-example">import assert from "node:assert/strict";
+import {
+  ApprovalQueue,
+  ApprovalRequiredError,
+  PolicyEngine,
+  ToolGateway
+} from "maqam";
+
+const approvals = new ApprovalQueue();
+const policy = new PolicyEngine({
+  allowedTools: ["publisher"],
+  approvalRequiredEffects: ["publish"]
+});
+const gateway = new ToolGateway({
+  policyEngine: policy,
+  approvalQueue: approvals
+});
+
+const executions = [];
+gateway.registerTool("publisher", async (input) => {
+  executions.push(input);
+  return { published: input.version };
+}, { effects: ["publish"] });
+
+const input = {
+  packageName: "example-package",
+  version: "1.2.3",
+  artifactIntegrity: "sha512:reviewed-example"
+};
+const context = { runId: "release_42" };
+
+let request;
+try {
+  await gateway.call("publisher", input, context);
+  assert.fail("The handler must wait for approval.");
+} catch (error) {
+  assert.ok(error instanceof ApprovalRequiredError);
+  request = error.details.approvalRequests[0];
+}
+
+assert.equal(executions.length, 0);
+approvals.approve(request.approvalId, {
+  decidedBy: "authenticated-release-owner"
+});
+
+await assert.rejects(
+  gateway.call("publisher", { ...input, version: "1.2.4" }, {
+    ...context,
+    approvalId: request.approvalId
+  }),
+  (error) => error.code === "APPROVAL_SCOPE_MISMATCH"
+);
+
+const result = await gateway.call("publisher", input, {
+  ...context,
+  approvalId: request.approvalId
+});
+assert.deepEqual(result, { published: "1.2.3" });
+assert.equal(executions.length, 1);
+
+await assert.rejects(
+  gateway.call("publisher", input, {
+    ...context,
+    approvalId: request.approvalId
+  }),
+  (error) => error.code === "APPROVAL_INVALID"
+);</code></pre></div>
+      <p>In production, <code>decidedBy</code> must come from authenticated reviewer context, never from agent input, a query string, or an unsigned client payload.</p>
+
+      <h2>Why the execution snapshot matters</h2>
+      <p>Hash comparison is insufficient if the handler later receives the original mutable object.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#mutation-code">Copy</button><pre><code id="mutation-code">const input = { environment: "staging" };
+const call = governedCall(input);
+input.environment = "production";
+await call;</code></pre></div>
+      <p>If policy hashed staging but the handler reads production, audit and execution disagree. Maqam validates and detaches the value, then uses that snapshot for policy, approval, and execution. It cannot guarantee that a remote service honors the fields correctly.</p>
+
+      <h2>Effects belong in policy</h2>
+      <p>A tool name can be too coarse. The same connector may read, write, and publish. Maqam handlers declare effects, and policy can require approval for selected effects. Registration may add effects or raise risk, but it cannot remove a handler's minimum effect set.</p>
+      <p>Effects remain application vocabulary. Maqam cannot inspect arbitrary code and discover its real side effects. Adapter authors must declare them accurately, and credentials must remain least privileged.</p>
+
+      <h2>Approval and evidence answer different questions</h2>
+      <p>Approval asks whether a configured action may execute. Evidence asks which recorded sources support a later claim.</p>
+      <p>The evidence ledger can record source metadata, excerpts, hashes, run and tool attribution, confidence, and same-run claim links. Scoped capabilities keep handlers from choosing trusted attribution fields or accessing the raw ledger.</p>
+      <div class="callout callout-warning"><strong>Provenance is not truth verification</strong>A hash shows that recorded content has a digest. A claim link shows that a workflow cites a record. Neither proves that the source is reliable or that the claim follows from it.</div>
+
+      <h2>Bypass is still bypass</h2>
+      <p>No application library can govern a path that does not call it. Direct access to a cloud SDK, deployment credential, general shell, or network endpoint remains outside Maqam.</p>
+      <ul>
+        <li>Remove direct credentials from agent environments.</li>
+        <li>Expose narrow registered tools instead of general shells.</li>
+        <li>Use provider read-only or plan defaults.</li>
+        <li>Isolate high-risk workers in containers or virtual machines.</li>
+        <li>Enforce egress and service-side authorization separately.</li>
+        <li>Verify the external outcome after execution.</li>
+      </ul>
+
+      <h2>In-process state is not durable governance</h2>
+      <p>Current Maqam approvals, traces, runtime state, and evidence live in process. Export and restore APIs let a host persist state, but serialization does not authenticate a decision or make consumption safe across processes.</p>
+      <p>A production persistence layer needs authenticated reviewer identity, integrity protection, compare-and-swap or transaction semantics, schema migration, crash recovery, retention, redaction, deletion, and audit access control.</p>
+
+      <h2>A practical adoption sequence</h2>
+      <ol>
+        <li>Identify one high-risk action with stable structured input.</li>
+        <li>Remove direct access to that action from the agent.</li>
+        <li>Register a narrow adapter with accurate effects.</li>
+        <li>Configure deny-by-default tool and origin policy.</li>
+        <li>Display every authority-bearing field to the reviewer.</li>
+        <li>Supply reviewer identity from authenticated context.</li>
+        <li>Retry only the exact gateway-generated request.</li>
+        <li>Verify the outcome and record relevant evidence.</li>
+        <li>Add mismatch, replay, mutation, bypass, and failure tests.</li>
+        <li>Add durable storage only with explicit integrity and concurrency semantics.</li>
+      </ol>
+
+      <h2>Conclusion</h2>
+      <p>"A human approved it" is incomplete unless the system can say what it was.</p>
+      <p>An exact receipt should identify execution context, bind the reviewed payload, reject drift, and resist replay. It should also be honest about what remains outside: reviewer authentication, handler behavior, provider-internal actions, host isolation, durable state, and semantic correctness.</p>
+      <p>Maqam is a focused TypeScript control boundary for applications that need a stronger connection between policy, approval, execution, and evidence.</p>
+      <div class="button-row"><a class="button button-primary" href="/docs/">Run the proof</a><a class="button" href="https://github.com/AjnasNB/maqam/blob/main/docs/articles/exact-agent-approvals.md">Read the source article</a></div>
+    </article>
+
+    <aside class="article-meta" aria-label="Article information">
+      <strong>Technical article</strong>
+      <p>Approximate reading time: 12 minutes</p>
+      <p>Topics: TypeScript, security, agents, open source</p>
+      <a href="/docs/security/">Security model</a>
+      <a href="/docs/integrations/">Adapter guide</a>
+      <a href="/articles/benchmarking-governance/">Benchmark article</a>
+    </aside>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-grid"><div><h2>Maqam writing</h2><p>Technical claims tied to runnable evidence.</p></div><div><h3>Start</h3><a href="/docs/">Quickstart</a><a href="/docs/productloop/">ProductLoop</a></div><div><h3>Review</h3><a href="/docs/security/">Security</a><a href="/docs/benchmark/">Benchmark</a></div><div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam">GitHub</a><a href="https://www.npmjs.com/package/maqam">npm</a></div></div></footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

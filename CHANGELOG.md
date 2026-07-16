@@ -2,9 +2,11 @@
 
 All notable Maqam changes are tracked here before release.
 
-## 0.2.4 - 2026-07-16
+## 0.2.4 (candidate) - 2026-07-16
 
-Evaluation, ecosystem-adapter, and proof-video patch.
+Evaluation, ecosystem-adapter, documentation-site, and proof-video candidate.
+
+**Release status:** `maqam@0.2.3` remains the latest public npm and GitHub release. `0.2.4` has not been published or tagged and remains blocked on final clean-commit checks, a newly packed and inspected npm artifact, clean-consumer installation, and explicit owner approval of that exact artifact identity. Versioned website media paths identify the candidate media set; they do not establish npm publication. See the [unified 0.2.4 candidate release note](docs/release-0.2.4-candidate.md).
 
 ### Added
 
@@ -13,6 +15,8 @@ Evaluation, ecosystem-adapter, and proof-video patch.
 - `defineToolAdapter`, `registerToolAdapter`, and `runToolAdapterConformance` for explicit host-supplied function, SDK, HTTP, MCP-style, and custom adapters.
 - A deterministic adapter ecosystem example and documented explicit composition with ProductLoop OS through its existing `maqamGateway`.
 - A revised 60-second Remotion proof with real benchmark artifacts, PASS/REVIEW withholding, an honest ecosystem boundary, local TTS, portable captions, and release stills.
+- Narrated ProductLoop OS and governed-crawler overview videos with posters, VTT/SRT captions, reproducible Remotion source, and immutable candidate-media URLs.
+- A responsive terminal/editorial documentation site at [maqamagent.com](https://maqamagent.com/) with quickstart, ProductLoop package atlas, integration, benchmark, security, articles, community, and all three videos.
 
 ### Security and boundaries
 
@@ -23,6 +27,17 @@ Evaluation, ecosystem-adapter, and proof-video patch.
 ### Documentation
 
 - Added canonical benchmark documentation, raw artifacts, methodology, presentation rules, a detailed benchmarking article, an OWASP relevance crosswalk with explicit gaps, and a host-adapter integration guide.
+- Added provider-specific Google ADK and Microsoft Agent 365 templates that distinguish repository-tested Maqam behavior from illustrative provider wiring and document direct-tool bypass paths.
+- Documented Maqam as the governed execution kernel and ProductLoop OS as its explicit companion package ecosystem, with an exact public package-version map and no claim that their runtimes or ledgers are silently merged.
+- Added open-source contribution, governance, support, code-of-conduct, issue/PR template, and community entry points.
+- Replaced future `v0.2.4` GitHub tag/release links with live website media or `main` documentation links while retaining the candidate-versus-public-package distinction.
+
+### Candidate verification
+
+- Local Maqam test suite: 202/202 passed.
+- Clean-consumer TypeScript compilation and production dependency audit passed; the audit reported zero known production vulnerabilities.
+- The previous source CI run passed on Node.js 20, 22, and 24 at `eeb0de484b6f49cfd8989fad5da61a3722e91d6d`. Final documentation/source commit CI and final packed-artifact verification remain required before release.
+- ProductLoop OS `0.2.0` remains a separately published companion release. Its nine-package workspace verification covered 124 tests, builds, typechecks, integration, dependency doctor, clean-consumer declarations, and package previews.
 
 ## 0.2.3 - 2026-07-16
 

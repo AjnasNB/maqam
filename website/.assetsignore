@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+.wrangler-dry-run/
+scripts/
+src/
+*.md
+package.json
+wrangler.jsonc

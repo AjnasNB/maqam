@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a reproducible Maqam defect.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Do not use this form for security vulnerabilities. Follow the repository security policy instead.
+  - type: input
+    id: version
+    attributes:
+      label: Maqam version
+      placeholder: 0.2.4
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Node.js version, operating system, architecture, and package manager.
+      placeholder: Node 24.15.0, Windows 11 x64, npm 11
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide complete code or a public repository and exact commands.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include redacted errors or traces. Never include credentials.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I removed credentials, tokens, private URLs, and personal data.
+          required: true
+        - label: I searched existing issues and discussions.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

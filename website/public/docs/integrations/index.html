@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0.2.4 candidate integration preview | Maqam documentation</title>
+  <meta name="description" content="Source-preview documentation for the Maqam 0.2.4 candidate adapter API. These APIs are not exports of public npm 0.2.3.">
+  <meta name="theme-color" content="#0b0e0d">
+  <link rel="canonical" href="https://maqamagent.com/docs/integrations/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/" aria-current="page">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/" aria-current="page">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+  </header>
+
+  <main id="main" class="shell docs-layout">
+    <aside class="docs-sidebar" aria-label="Integration documentation">
+      <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Integration menu <span aria-hidden="true">+</span></button>
+      <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
+        <nav aria-label="Integration types"><h2>0.2.4 source preview</h2><a href="#source-preview">Candidate status</a><a href="#contract">Contract</a><a href="#sdk">SDK</a><a href="#http">HTTP</a><a href="#mcp">MCP-shaped</a><a href="#productloop">ProductLoop OS</a><a href="#conformance">Conformance</a></nav>
+        <nav aria-label="External runtimes"><h2>External runtimes</h2><a href="#google-adk">Google ADK</a><a href="#agent-365">Microsoft Agent 365</a><a href="#checklist">Deployment checklist</a></nav>
+      </div>
+    </aside>
+
+    <article class="docs-content">
+      <h1>0.2.4 candidate integration preview</h1>
+      <p class="lede">This page documents source-only candidate APIs. Public npm 0.2.3 does not export them.</p>
+      <div class="callout callout-danger" id="source-preview">
+        <strong>Candidate source only, pending exact release approval</strong>
+        <code>defineToolAdapter()</code>, <code>registerToolAdapter()</code>, and <code>runToolAdapterConformance()</code> are present in the reviewed 0.2.4 candidate source and candidate tarball. They are not available from public <code>maqam@0.2.3</code>. Do not run an unpinned <code>npm install maqam</code> and expect these examples to compile.
+      </div>
+      <p>The final candidate source commit is not recorded yet. For a non-release source review, inspect the current repository and run its verification. Do not treat this checkout as the exact publication artifact:</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#candidate-source-code">Copy</button><pre><code id="candidate-source-code">git clone https://github.com/AjnasNB/maqam.git
+cd maqam
+npm ci
+npm test
+npm run test:consumer-types
+npm pack --dry-run</code></pre></div>
+      <p>The final public install command remains <code>npm install maqam@0.2.3</code> until 0.2.4 is approved and the npm registry reports it as latest.</p>
+      <div class="callout callout-warning">
+        <strong>Boundary statement</strong>
+        Maqam does not bundle provider SDKs, a native MCP client or server, provider discovery, protocol authentication, an HTTP service client, a connector marketplace, or secret storage.
+      </div>
+
+      <h2 id="contract">Define a static adapter (0.2.4 candidate)</h2>
+      <p>The adapter name is the policy identity. Declare transport, effects, risk, description, and invocation explicitly.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#adapter-code">Copy</button><pre><code id="adapter-code">import {
+  PolicyEngine,
+  ToolGateway,
+  defineToolAdapter,
+  registerToolAdapter
+} from "maqam";
+
+const adapter = defineToolAdapter({
+  name: "function.slug",
+  transport: "function",
+  description: "Create a URL slug without external I/O.",
+  effects: [],
+  risk: "low",
+  invoke: async ({ value }) => ({
+    slug: value.toLowerCase().replaceAll(" ", "-")
+  })
+});
+
+const gateway = new ToolGateway({
+  policyEngine: new PolicyEngine({
+    allowedTools: [adapter.name]
+  })
+});
+
+registerToolAdapter(gateway, adapter);
+console.log(await gateway.call(
+  adapter.name,
+  { value: "Maqam Release" },
+  { runId: "release_1" }
+));</code></pre></div>
+      <p>The invoked adapter receives the detached, deeply frozen input that policy evaluated. Adapter output remains trusted input from the host integration. Defining an adapter does not validate or record that output as evidence.</p>
+
+      <h2 id="sdk">SDK operation</h2>
+      <p>Construct and authenticate the client in trusted host configuration. Do not place API tokens in canonical adapter input or evidence.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#sdk-code">Copy</button><pre><code id="sdk-code">const issueAdapter = defineToolAdapter({
+  name: "sdk.issue.create",
+  transport: "sdk",
+  description: "Create an issue through the configured SDK client.",
+  effects: ["network:write"],
+  risk: "high",
+  invoke: (input) => issueSdk.issues.create(input)
+});
+
+registerToolAdapter(gateway, issueAdapter);</code></pre></div>
+      <p>Configure <code>approvalRequiredEffects: ["network:write"]</code> when this operation must pause for exact human approval.</p>
+
+      <h2 id="http">HTTP operation</h2>
+      <p>Keep the destination in canonical input so policy can inspect it, then compare the effective origin against the gateway-authorized origin scope.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#http-code">Copy</button><pre><code id="http-code">const httpAdapter = defineToolAdapter({
+  name: "http.release.enqueue",
+  transport: "http",
+  description: "Queue a release through a configured HTTP client.",
+  effects: ["network:write", "release:queue"],
+  risk: "high",
+  async invoke(input, context) {
+    const origin = new URL(input.endpoint).origin;
+    if (!context.authorizedOrigins.includes(origin)) {
+      throw new Error(`Origin '${origin}' was not authorized.`);
+    }
+
+    return httpClient.request({
+      method: "POST",
+      url: input.endpoint,
+      json: { release: input.release }
+    });
+  }
+});</code></pre></div>
+      <div class="callout callout-danger">
+        <strong>HTTP is not made safe by a label</strong>
+        The host must constrain redirects, DNS resolution, proxies, private networks, response bytes, retries, authentication, rate limits, and deadlines.
+      </div>
+
+      <h2 id="mcp">MCP-shaped operation</h2>
+      <p>Register one static local adapter for one intended remote tool. Do not let untrusted input choose an arbitrary remote tool name behind one policy identity.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#mcp-code">Copy</button><pre><code id="mcp-code">const mcpAdapter = defineToolAdapter({
+  name: "mcp.github.create_issue",
+  transport: "mcp",
+  description: "Call one configured remote tool through the host client.",
+  effects: ["network:write"],
+  risk: "high",
+  invoke: (input) => mcpClient.callTool({
+    name: "create_issue",
+    arguments: input
+  })
+});
+
+registerToolAdapter(gateway, mcpAdapter);</code></pre></div>
+      <div class="callout callout-warning">
+        <strong>Not native MCP support</strong>
+        This is an MCP-shaped host wrapper. The host owns connection lifecycle, discovery, schema validation, authentication, cancellation, protocol errors, and remote permissions.
+      </div>
+
+      <h2 id="productloop">ProductLoop OS composition</h2>
+      <p>Public <code>productloop-os@0.2.0</code> exposes a Maqam gateway. The adapter helpers shown here still come from the local Maqam 0.2.4 candidate, not from public npm 0.2.3. Registration remains explicit.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#productloop-adapter">Copy</button><pre><code id="productloop-adapter">import { createProductLoopOS } from "productloop-os";
+import {
+  defineToolAdapter,
+  registerToolAdapter
+} from "maqam";
+
+const adapter = defineToolAdapter({
+  name: "sdk.issue.create",
+  transport: "sdk",
+  description: "Create an issue through the host SDK.",
+  effects: ["network:write"],
+  risk: "high",
+  invoke: (input) => issueSdk.issues.create(input)
+});
+
+const productLoop = createProductLoopOS({
+  maqamPolicy: { allowedTools: [adapter.name] }
+});
+registerToolAdapter(productLoop.maqamGateway, adapter);
+
+const result = await productLoop.maqamGateway.call(
+  adapter.name,
+  { title: "Review release" },
+  { runId: "productloop_release_1" }
+);
+
+console.log(result);</code></pre></div>
+      <p>ProductLoop connector manifests, approvals, provenance, runtime events, and Maqam state remain distinct. Define correlation, mapping, idempotency, persistence, retry, and reconciliation explicitly.</p>
+
+      <h2 id="google-adk">Google ADK</h2>
+      <div class="callout callout-warning">
+        <strong>Illustrative and not tested in this repository</strong>
+        Maqam does not ship a native Google ADK integration. The current ADK TypeScript API can expose a host-defined function tool whose execute handler calls a Maqam gateway.
+      </div>
+      <p>The official ADK TypeScript quickstart uses <code>FunctionTool</code> with Zod parameters. The following sketch shows the integration seam for a pure local operation. Pin and verify your ADK version before production use.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#adk-code">Copy</button><pre><code id="adk-code">import { FunctionTool } from "@google/adk";
+import { z } from "zod";
+import {
+  PolicyEngine,
+  ToolGateway,
+  defineToolAdapter,
+  registerToolAdapter
+} from "maqam";
+
+const adapter = defineToolAdapter({
+  name: "function.slug",
+  transport: "function",
+  description: "Create a local slug.",
+  effects: [],
+  risk: "low",
+  invoke: ({ value }) => ({
+    slug: value.toLowerCase().replaceAll(" ", "-")
+  })
+});
+
+const gateway = new ToolGateway({
+  policyEngine: new PolicyEngine({ allowedTools: [adapter.name] })
+});
+registerToolAdapter(gateway, adapter);
+
+export const governedSlug = new FunctionTool({
+  name: "governed_slug",
+  description: "Create a URL slug through the Maqam gateway.",
+  parameters: z.object({ value: z.string() }),
+  execute: ({ value }) => gateway.call(
+    adapter.name,
+    { value },
+    { runId: crypto.randomUUID() }
+  )
+});</code></pre></div>
+      <p>For a high-risk operation, the host must keep a stable run id, authenticate the reviewer, store the approval safely, and retry the exact same input with the approval id. ADK also has its own action-confirmation feature. Compare its semantics with your requirements instead of layering approvals automatically.</p>
+      <p>Direct use of ADK <code>MCPToolset</code> bypasses Maqam unless each intended operation is routed through a Maqam adapter and direct paths are removed.</p>
+      <ul>
+        <li><a href="https://adk.dev/get-started/typescript/">Official ADK TypeScript quickstart</a></li>
+        <li><a href="https://adk.dev/tools-custom/function-tools/">Official ADK function tools</a></li>
+        <li><a href="https://adk.dev/tools-custom/confirmation/">Official ADK action confirmations</a></li>
+        <li><a href="https://adk.dev/tools-custom/mcp-tools/">Official ADK MCP tools</a></li>
+      </ul>
+
+      <h2 id="agent-365">Microsoft Agent 365</h2>
+      <div class="callout callout-warning">
+        <strong>Architecture guidance, not a shipped integration</strong>
+        Maqam does not ship or test a native Microsoft Agent 365 SDK adapter. Agent 365 supplies enterprise identity, observability, notifications, governance, and Microsoft 365 tool access around agents built with other runtimes.
+      </div>
+      <p>Wrap individual Agent 365 SDK operations behind static Maqam adapter names when exact local gateway approval is required. Keep Entra identity, blueprint policy, Work IQ permissions, and Microsoft-side governance enabled.</p>
+      <p>Do not assume that calling <code>addToolServersToAgent</code> governs later tool calls through Maqam. Automatic server registration is outside the Maqam gateway unless each later operation is routed back through an explicit adapter. Work IQ MCP documentation currently describes a preview surface, so verify current tenant availability and contract details.</p>
+      <ul>
+        <li><a href="https://learn.microsoft.com/en-us/microsoft-agent-365/developer/">Official Agent 365 SDK and CLI overview</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/microsoft-agent-365/developer/tooling">Official Agent 365 tooling guide</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/microsoft-agent-365/tooling-servers-overview">Official Work IQ tooling server overview</a></li>
+      </ul>
+
+      <h2 id="conformance">Run the candidate conformance probe</h2>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#conformance-code">Copy</button><pre><code id="conformance-code">import { runToolAdapterConformance } from "maqam";
+
+const report = await runToolAdapterConformance(adapter, {
+  input: { value: "Fixture Value" },
+  verifyOutput: (output) => output.slug === "fixture-value"
+});
+
+if (!report.passed) process.exitCode = 1;
+console.log(JSON.stringify(report, null, 2));</code></pre></div>
+      <p>Run this only against a fixture, emulator, or sandbox. It invokes the adapter once. A pass is not protocol certification, a security score, a distributed-systems test, a production SLA, or proof that bypass paths are closed.</p>
+
+      <h2 id="checklist">Deployment checklist</h2>
+      <ol>
+        <li>Give each operation one static adapter name and declare every meaningful effect.</li>
+        <li>Configure allowlists and exact approval rules before registration.</li>
+        <li>Keep credentials in trusted host configuration, outside canonical input and evidence.</li>
+        <li>Enforce transport timeouts, size limits, rate limits, network controls, retries, and response validation.</li>
+        <li>Run local conformance against a fixture, then provider-specific integration tests in a restricted environment.</li>
+        <li>Remove or independently block every direct client path that could bypass the adapter.</li>
+        <li>Persist and reconcile state when in-process storage is insufficient.</li>
+      </ol>
+    </article>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-grid"><div><h2>Integration principle</h2><p>One static identity per real operation.</p></div><div><h3>Core</h3><a href="/docs/">Maqam</a><a href="/docs/productloop/">ProductLoop OS</a></div><div><h3>Review</h3><a href="/docs/security/">Security</a><a href="/docs/benchmark/">Benchmark</a></div><div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam/blob/main/docs/integrations.md">Repository guide</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></div></div></footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

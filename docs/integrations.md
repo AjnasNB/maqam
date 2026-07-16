@@ -4,6 +4,8 @@ Maqam can place a policy and approval boundary around a function, SDK call, HTTP
 
 That sentence defines the boundary. Maqam does not bundle provider SDKs, an MCP client or server, MCP discovery, protocol authentication, an HTTP service client, a connector marketplace, secret storage, or an automatic ProductLoop transaction bridge. Calls that use those clients directly bypass Maqam.
 
+For provider-specific prerequisites, runnable templates and explicit bypass warnings, see [Google ADK and Microsoft Agent 365](integrations-google-adk-agent365.md).
+
 ## What is implemented
 
 | Surface | Maqam supplies | Host application supplies |

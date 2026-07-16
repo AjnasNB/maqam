@@ -24,6 +24,16 @@ This project contains no copied third-party footage, screenshots, logos, music, 
 - No text, prompt, recording, or metadata is sent to a cloud TTS service.
 - `public/captions.json` is generated from SAPI `SpeakProgress` timings and follows the Remotion `Caption` JSON shape.
 - The narration and caption text are original to this project.
+- `public/productloop-voiceover.wav` and `public/crawler-voiceover.wav` are synthesized by the same local SAPI pipeline from the original scripts in `scripts/productloop-voiceover-script.json` and `scripts/crawler-voiceover-script.json`.
+- Their selected voice, speech rate, volume, WAV duration, and caption count are recorded in the corresponding `*-voiceover-metadata.json` files.
+- `public/productloop-captions.json` and `public/crawler-captions.json` contain SAPI word timings. `scripts/export-additional-captions.mjs` exports matching portable SRT and WebVTT sidecars under `out/`.
+
+## ProductLoop and crawler implementation facts
+
+- `public/productloop-facts.json` is generated from the sibling ProductLoop OS source by `scripts/generate-additional-facts.mjs`. The generator checks the exported module names, Maqam gateway wiring, exact-approval binding fields, and the deliberately separate registry/store boundaries before fingerprinting every inspected file.
+- `public/crawler-facts.json` is generated from this repository. The generator checks crawler limits, URL/origin and DNS controls, redirect validation, robots behavior, structured page output, tool effect declarations, and the Maqam gateway path before fingerprinting every inspected file.
+- `scripts/validate-additional-assets.mjs` rejects missing, malformed, or timeline-inconsistent facts, narration, captions, or scene timing. `npm run render:additional` refreshes source facts first, and the render hooks repeat asset-shape checks so a bad asset fails the composition rather than silently appearing in a release video.
+- These implementation facts describe the inspected local source revisions. They are not an industry benchmark, independent audit, penetration test, browser-automation claim, or guarantee about a downstream deployment.
 
 ## Visuals and fonts
 

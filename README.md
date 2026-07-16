@@ -2,43 +2,54 @@
 
 [![npm version](https://img.shields.io/npm/v/maqam.svg)](https://www.npmjs.com/package/maqam)
 [![CI](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml/badge.svg)](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](https://github.com/AjnasNB/maqam/blob/v0.2.4/LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](https://github.com/AjnasNB/maqam/blob/main/LICENSE)
 
 **Policy before execution. Exact approval for the call. Evidence behind the claim.**
 
 ![Maqam governed agent framework hero](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-readme-hero.png)
 
-Maqam is an MIT-licensed agent framework for governed workflows. It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, and a crawler-backed research workflow.
+Maqam is an MIT-licensed TypeScript framework for governed workflows. It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, and a crawler-backed research workflow.
 
-The crawler is not the product center; it is only one built-in connector. Maqam governs workers that enter through `ToolGateway`, including function agents, object agents with `run`/`invoke`/`call`, Codex CLI, Claude Code, generic command-line workers, browser agents, research agents, internal services, and write actions that need human approval.
+The crawler is not the product center; it is one built-in connector. Maqam governs workers that enter through `ToolGateway`, including function agents, explicitly bound object agents, Codex CLI, Claude Code, generic command-line workers, browser and research adapters, internal services, and write actions that need human approval. Calls that bypass a registered adapter are outside Maqam's control.
 
-[![Watch the 60-second Maqam governance proof](https://raw.githubusercontent.com/AjnasNB/maqam/v0.2.4/docs/assets/maqam-demo-poster.png)](https://github.com/AjnasNB/maqam/releases/download/v0.2.4/maqam-exact-approval-demo.mp4)
+> **Release status — 2026-07-16:** [`maqam@0.2.3`](https://www.npmjs.com/package/maqam) is the latest public npm package. `0.2.4` is a candidate pending final clean-commit verification, a newly packed artifact, and explicit approval of that exact artifact identity. It has not been published or tagged. The live `/v0.2.4/` media paths identify the candidate media set, not an npm release. See the [unified candidate release note](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md).
 
-The video is rendered from the JSON emitted by the real `maqam demo approval --json` command. The displayed approval id, hashes, execution counts, evidence ids, and rejection codes come from the executed package rather than a staged interface.
+[Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
 
-Full documentation: [docs/usage.md](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md)
+## Maqam and ProductLoop OS
 
-Five-minute quickstart and cleanup: [docs/quickstart.md](https://github.com/AjnasNB/maqam/blob/main/docs/quickstart.md)
+Maqam is the governed execution kernel: policy before a registered operation, approval bound to the exact run/tool/input, one-use consumption by default, and reviewable trace and evidence records. [ProductLoop OS](https://github.com/AjnasNB/productloop-os) is the companion ecosystem: its public umbrella and eight small packages add workflow runtime, policy decisions, approval operations, provenance, evaluations, connector trust, skill manifests, and replayable browser-research records.
 
-Coding-agent guide: [docs/external-agents.md](https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md)
+They are one ecosystem with explicit boundaries, not one silently merged runtime. `productloop-os@0.2.0` exposes Maqam and the Ajnas packages as named namespaces and tested adapters, while their contracts and ledgers remain distinct. Install Maqam for the compact governed boundary, crawler, console, or CLI adapters; install ProductLoop when the application also needs the wider composable package set. See the [package atlas and copy-paste examples](https://maqamagent.com/docs/productloop/).
 
-Release checklist: [docs/release-checklist.md](https://github.com/AjnasNB/maqam/blob/main/docs/release-checklist.md)
+## Watch the Proofs
 
-Provenance and license notes: [docs/provenance-and-licenses.md](https://github.com/AjnasNB/maqam/blob/main/docs/provenance-and-licenses.md)
+[![Watch the 60-second Maqam governance proof](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-demo-poster.png)](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4)
 
-Comparison with related open-source and source-available tools: [docs/comparison.md](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md)
+The exact-approval video is rendered from JSON emitted by the real `maqam demo approval --json` command. Its approval id, hashes, execution counts, evidence ids, and rejection codes come from the executed candidate rather than a staged interface.
 
-Why Maqam: [docs/why-maqam.md](https://github.com/AjnasNB/maqam/blob/main/docs/why-maqam.md)
+| Demonstration | Video | Captions |
+|---|---|---|
+| Exact approval: altered input blocked, exact input executed once, replay blocked | [MP4](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4) | [VTT](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.vtt) · [SRT](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.srt) |
+| ProductLoop OS: Maqam plus eight explicit package namespaces | [MP4](https://maqamagent.com/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4) | [VTT](https://maqamagent.com/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.vtt) · [SRT](https://maqamagent.com/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.srt) |
+| Governed crawler research: bounded collection, citations, and evidence | [MP4](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4) | [VTT](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt) · [SRT](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.srt) |
 
-Public roadmap: [ROADMAP.md](https://github.com/AjnasNB/maqam/blob/main/ROADMAP.md)
+## Documentation Map
 
-Technical article: [Your Agent Approval May Not Authorize The Input That Actually Executes](https://github.com/AjnasNB/maqam/blob/main/docs/articles/exact-agent-approvals.md)
+| Start with | Use it for |
+|---|---|
+| [Five-minute quickstart](https://github.com/AjnasNB/maqam/blob/main/docs/quickstart.md) and [full usage guide](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md) | Local proof, installation, APIs, cleanup, and deployment boundaries |
+| [Why Maqam](https://maqamagent.com/why/) and [detailed comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md) | Product fit, alternatives, differences, limitations, sources, and licenses |
+| [ProductLoop package atlas](https://maqamagent.com/docs/productloop/) | Package-by-package roles, versions, examples, and Maqam relationship |
+| [Integration guide](https://maqamagent.com/docs/integrations/) and [Google ADK / Microsoft Agent 365 boundary](https://github.com/AjnasNB/maqam/blob/main/docs/integrations-google-adk-agent365.md) | Host adapters, prerequisites, copy-paste templates, and bypass warnings |
+| [MGES benchmark guide](https://maqamagent.com/docs/benchmark/) and [raw methodology](https://github.com/AjnasNB/maqam/blob/main/benchmarks/README.md) | Reproducible local-call and conformance evidence with claim limits |
+| [Security guide](https://maqamagent.com/docs/security/) and [security policy](https://github.com/AjnasNB/maqam/blob/main/SECURITY.md) | Threat boundaries, reporting, crawler safety, and required host controls |
+| [Coding-agent guide](https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md) | Codex, Claude Code, generic CLI workers, approvals, and outcome checks |
+| [Public roadmap](https://maqamagent.com/roadmap/) and [source roadmap](https://github.com/AjnasNB/maqam/blob/main/ROADMAP.md) | Shipped baseline, next work, exit criteria, and explicit non-goals |
+| [Community hub](https://maqamagent.com/community/), [contributing](https://github.com/AjnasNB/maqam/blob/main/CONTRIBUTING.md), and [governance](https://github.com/AjnasNB/maqam/blob/main/GOVERNANCE.md) | Questions, examples, issues, forks, reviewed pull requests, and maintenance policy |
+| [Candidate release note](https://maqamagent.com/releases/v0.2.4/), [source note](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md), [release checklist](https://github.com/AjnasNB/maqam/blob/main/docs/release-checklist.md), and [provenance and license notes](https://github.com/AjnasNB/maqam/blob/main/docs/provenance-and-licenses.md) | Exact package map, verification evidence, MGES caveats, provenance, licenses, and approval gate |
 
-Benchmark methodology and raw evidence: [Maqam Benchmarking](https://github.com/AjnasNB/maqam/blob/main/docs/benchmarking.md)
-
-Benchmarking article: [Benchmarking an Agent-Governance Boundary Without Fooling Yourself](https://github.com/AjnasNB/maqam/blob/main/docs/articles/benchmarking-agent-governance.md)
-
-Migration guide for 0.2: [docs/migration-0.2.md](https://github.com/AjnasNB/maqam/blob/main/docs/migration-0.2.md)
+Articles: [Your Agent Approval May Not Authorize the Input That Actually Executes](https://maqamagent.com/articles/exact-agent-approvals/) · [Benchmarking an Agent-Governance Boundary Without Fooling Yourself](https://maqamagent.com/articles/benchmarking-governance/)
 
 ![Maqam system map](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-system-map.svg)
 
@@ -90,7 +101,7 @@ Use Maqam when that enforcement path matters more than adopting a larger platfor
 | Mature general policy-as-code | [Open Policy Agent](https://github.com/open-policy-agent/opa) | Use OPA as a decision engine while Maqam supplies the agent-specific enforcement and approval lifecycle. |
 | Browser automation or crawler operations | [Crawl4AI](https://github.com/unclecode/crawl4ai), [Firecrawl](https://github.com/firecrawl/firecrawl), or [Crawlee](https://github.com/apify/crawlee) | Put a separately installed connector behind Maqam; its built-in crawler remains deliberately smaller and HTTP-only. |
 
-See the [detailed, dated comparison](https://github.com/AjnasNB/maqam/blob/v0.2.4/docs/comparison.md), including limitations and source/license notes, before choosing a stack.
+See the [detailed, dated comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md), including limitations and source/license notes, before choosing a stack.
 
 ## What Ships
 
@@ -363,7 +374,7 @@ The npm tarball intentionally excludes the large brand-board and presentation PN
 
 ## Publish
 
-Publishing is approval-gated. Do not publish a release until the current release checklist is complete and the package owner has explicitly approved that exact version.
+The latest public npm package is `maqam@0.2.3`. The `0.2.4` candidate is not published or tagged. Publishing is approval-gated: do not publish until the final clean commit has passed the complete release checklist, a fresh tarball has been inspected and installed in a clean consumer, and the package owner has explicitly approved that exact artifact filename, byte size, integrity, SHA-256, version, registry, command, and Git commit.
 
 ```bash
 npm publish --access public
@@ -371,10 +382,14 @@ npm publish --access public
 
 Run the publish command from the reviewed repository directory; do not pass a local `.tgz` path to `npm publish`. Publishing requires an authenticated npm session with permission to publish the `maqam` package. After publishing, verify the registry `gitHead` and confirm `_resolved` and `_from` do not expose a local filesystem path.
 
+See the [0.2.4 candidate release note](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md) for the current package map and evidence without a stale tarball identity.
+
 ## License
 
 MIT
 
 ## Open Development
 
-Maqam is open source under MIT and open for development, issues, ideas, and contributions.
+Maqam is open source under MIT. Start with the [community hub](https://maqamagent.com/community/) or [GitHub Discussions](https://github.com/AjnasNB/maqam/discussions) for questions, examples, and integration proposals. Changes should arrive through a fork or branch and a reviewed pull request; external contributors cannot merge directly to `main`.
+
+Read [CONTRIBUTING.md](https://github.com/AjnasNB/maqam/blob/main/CONTRIBUTING.md), [GOVERNANCE.md](https://github.com/AjnasNB/maqam/blob/main/GOVERNANCE.md), [SUPPORT.md](https://github.com/AjnasNB/maqam/blob/main/SUPPORT.md), the [code of conduct](https://github.com/AjnasNB/maqam/blob/main/CODE_OF_CONDUCT.md), [security policy](https://github.com/AjnasNB/maqam/blob/main/SECURITY.md), and [public roadmap](https://github.com/AjnasNB/maqam/blob/main/ROADMAP.md) before opening a change.

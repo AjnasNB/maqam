@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maqam documentation | Quickstart and core boundary</title>
+  <meta name="description" content="Install Maqam, run the exact-approval proof, register governed tools, connect coding agents, and understand the execution boundary.">
+  <meta name="theme-color" content="#0b0e0d">
+  <link rel="canonical" href="https://maqamagent.com/docs/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <a href="/docs/" aria-current="page">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a>
+      </nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden>
+      <a href="/docs/" aria-current="page">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main" class="shell docs-layout">
+    <aside class="docs-sidebar" aria-label="Documentation sections">
+      <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Documentation menu <span aria-hidden="true">+</span></button>
+      <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
+        <nav aria-label="Maqam guide">
+          <h2>Maqam</h2>
+          <a href="#install">Public 0.2.3 install</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#candidate-preview">0.2.4 source preview</a><a href="#boundary">Boundary</a>
+        </nav>
+        <nav aria-label="Other documentation">
+          <h2>More</h2>
+          <a href="/docs/productloop/">ProductLoop packages</a><a href="/docs/integrations/">Integration patterns</a><a href="/docs/benchmark/">MGES benchmark</a><a href="/docs/security/">Security model</a>
+        </nav>
+      </div>
+    </aside>
+
+    <article class="docs-content">
+      <h1>Maqam 0.2.3 public quickstart</h1>
+      <p class="lede">Run the public npm surface here. Candidate-only 0.2.4 APIs are separated below.</p>
+      <div class="callout">
+        <strong>Requirements</strong>
+        Node.js 20.18.1 or newer. The built-in proof needs no model key, hosted account, browser, database, or external side effect.
+      </div>
+      <div class="callout callout-warning">
+        <strong>Current package state</strong>
+        Latest public npm: 0.2.3 · 0.2.4 candidate pending exact release approval. Every install command in this quickstart pins 0.2.3. Versioned R2 media is candidate evidence, not proof of npm publication.
+      </div>
+
+      <h2 id="install">Install public npm 0.2.3</h2>
+      <p>Use the pinned command-line proof without modifying a project, or pin the public package in your dependency manifest.</p>
+      <div class="code-shell">
+        <button class="copy-button" type="button" data-copy="#install-code">Copy</button>
+        <pre><code id="install-code"># One-off proof from the public release
+npx -y maqam@0.2.3 demo approval
+
+# Pinned project dependency
+npm install maqam@0.2.3</code></pre>
+      </div>
+
+      <h2 id="proof">Run the exact-approval proof</h2>
+      <p>The demo creates an isolated temporary workspace, performs one exact approved write, verifies the file, and removes the workspace.</p>
+      <div class="code-shell">
+        <button class="copy-button" type="button" data-copy="#proof-code">Copy</button>
+        <pre><code id="proof-code">npx -y maqam@0.2.3 demo approval
+npx -y maqam@0.2.3 demo approval --json</code></pre>
+      </div>
+      <p>Expected checkpoints:</p>
+      <div class="code-shell">
+        <button class="copy-button" type="button" data-copy="#proof-output">Copy</button>
+        <pre><code id="proof-output">APPROVAL_REQUIRED
+APPROVAL_SCOPE_MISMATCH
+executions 0
+COMPLETED
+executions 1 | approval consumptions 1
+APPROVAL_INVALID
+ev_1 -> claim_1
+unsupported claims 0
+PASS</code></pre>
+      </div>
+
+      <h2 id="first-tool">Register a governed tool</h2>
+      <p>This local fixture has no real publish side effect. It shows the contract you should preserve when replacing the handler.</p>
+      <div class="code-shell">
+        <button class="copy-button" type="button" data-copy="#approval-example">Copy</button>
+        <pre><code id="approval-example">import assert from "node:assert/strict";
+import {
+  ApprovalQueue,
+  ApprovalRequiredError,
+  PolicyEngine,
+  ToolGateway
+} from "maqam";
+
+const approvals = new ApprovalQueue();
+const policy = new PolicyEngine({
+  allowedTools: ["publisher"],
+  approvalRequiredEffects: ["publish"]
+});
+const gateway = new ToolGateway({
+  policyEngine: policy,
+  approvalQueue: approvals
+});
+
+let executions = 0;
+gateway.registerTool("publisher", async (input) => {
+  executions += 1;
+  return { published: input.version };
+}, { effects: ["publish"] });
+
+const input = { packageName: "demo", version: "1.0.0" };
+const context = { runId: "release_1" };
+let request;
+
+try {
+  await gateway.call("publisher", input, context);
+  assert.fail("The handler must wait for approval.");
+} catch (error) {
+  assert.ok(error instanceof ApprovalRequiredError);
+  request = error.details.approvalRequests[0];
+}
+
+assert.equal(executions, 0);
+approvals.approve(request.approvalId, {
+  decidedBy: "authenticated-owner"
+});
+
+await assert.rejects(
+  gateway.call("publisher", { ...input, version: "2.0.0" }, {
+    ...context,
+    approvalId: request.approvalId
+  }),
+  (error) => error.code === "APPROVAL_SCOPE_MISMATCH"
+);
+
+const result = await gateway.call("publisher", input, {
+  ...context,
+  approvalId: request.approvalId
+});
+
+assert.deepEqual(result, { published: "1.0.0" });
+assert.equal(executions, 1);
+console.log("PASS");</code></pre>
+      </div>
+      <div class="callout callout-warning">
+        <strong>Reviewer identity is a host responsibility</strong>
+        The <code>decidedBy</code> field is an audit field. Authenticate and authorize the reviewer outside agent-controlled input.
+      </div>
+
+      <h2 id="worker-adapters">Connect workers</h2>
+      <p>Maqam can wrap a function, an explicitly bound object method, a fixed command-line worker, Codex CLI, Claude Code, or a host-supplied SDK, HTTP, or MCP-shaped client call.</p>
+      <h3>Codex read-only review</h3>
+      <div class="code-shell">
+        <button class="copy-button" type="button" data-copy="#codex-example">Copy</button>
+        <pre><code id="codex-example">import {
+  PolicyEngine,
+  ToolGateway,
+  createCodexAgentTool
+} from "maqam";
+
+const policy = new PolicyEngine({
+  allowedTools: ["codeReview"],
+  maxToolCalls: 1
+});
+const gateway = new ToolGateway({ policyEngine: policy });
+
+gateway.registerTool("codeReview", createCodexAgentTool({
+  cwd: process.cwd(),
+  sandbox: "read-only",
+  timeoutMs: 90_000,
+  maxInputTokens: 1_000,
+  maxOutputTokens: 16_000,
+  maxTotalTokens: 50_000
+}));
+
+const result = await gateway.call("codeReview", {
+  prompt: "Review the current diff. Do not modify files."
+}, {
+  runId: "review_1",
+  limits: { maxToolCalls: 1 }
+});
+
+console.log(result.output);</code></pre>
+      </div>
+      <p>The provider CLI must already be installed and authenticated. Keep provider permissions narrower than Maqam policy. Use a container, virtual machine, or restricted operating-system account when you need a hard host boundary.</p>
+      <p><a href="https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md">Read the complete coding-agent guide on GitHub</a>.</p>
+
+      <h2 id="crawler">Use the bounded crawler</h2>
+      <p>The built-in crawler is HTTP-only. It blocks special-purpose destinations by default, checks robots.txt, validates each redirect, pins connections to validated DNS results, and enforces response limits.</p>
+      <div class="code-shell">
+        <button class="copy-button" type="button" data-copy="#crawler-code">Copy</button>
+        <pre><code id="crawler-code">import { crawlDetailed } from "maqam";
+
+const result = await crawlDetailed({
+  seeds: ["https://example.com"],
+  allowedOrigins: ["https://example.com"],
+  maxPages: 10,
+  maxRequests: 80,
+  maxDepth: 5
+});
+
+console.log(result.pages);
+console.log(result.failures);
+console.log(result.stats);</code></pre>
+      </div>
+      <div class="code-shell">
+        <button class="copy-button" type="button" data-copy="#crawler-cli">Copy</button>
+        <pre><code id="crawler-cli">npx --yes --package=maqam@0.2.3 maqam-crawl https://example.com \
+  --max-pages 25 \
+  --delay 250 \
+  --jsonl \
+  --output crawl.jsonl</code></pre>
+      </div>
+      <div class="callout callout-warning">
+        <strong>Crawler limit</strong>
+        The built-in crawler does not render JavaScript, drive a browser, rotate proxies, bypass access controls, or operate a distributed queue.
+      </div>
+      <section class="docs-media" data-video-block>
+        <h3>Watch the governed research flow</h3>
+        <p>The 55-second demo shows the bounded HTTP path, network limits, recorded source material, citations, and the handoff back through the governed application boundary.</p>
+        <p id="crawler-doc-video-status" data-video-status>Loading video metadata.</p>
+        <figure class="media-frame">
+          <video data-proof-video controls preload="metadata" aria-describedby="crawler-doc-video-status" poster="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research-poster.png">
+            <source src="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4" type="video/mp4">
+            <track src="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt" kind="captions" srclang="en" label="English" default>
+            Your browser cannot play this video. <a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4">Open the MP4 file</a>.
+          </video>
+          <figcaption>Governed crawling means bounded network work and explicit evidence, not browser automation or unrestricted fetching.</figcaption>
+        </figure>
+        <p><a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4">Open MP4</a> · <a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt">Download VTT captions</a> · <a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.srt">Download SRT captions</a></p>
+      </section>
+
+      <h2 id="console">Run the local console</h2>
+      <div class="code-shell">
+        <button class="copy-button" type="button" data-copy="#console-code">Copy</button>
+        <pre><code id="console-code">npx -y maqam@0.2.3
+# Open http://127.0.0.1:8787</code></pre>
+      </div>
+      <p>The console binds to loopback by default. Remote binding requires authentication, an explicit Host allowlist, trusted UI origins, and deployment-level egress controls.</p>
+
+      <h2 id="candidate-preview">0.2.4 candidate source preview</h2>
+      <div class="callout callout-warning">
+        <strong>Not available from public npm yet</strong>
+        <code>defineToolAdapter()</code>, <code>registerToolAdapter()</code>, and <code>runToolAdapterConformance()</code> are 0.2.4 candidate APIs in the reviewed source and candidate tarball. They are not exports of public npm 0.2.3. Do not use an unpinned <code>npm install maqam</code> command expecting these APIs until 0.2.4 is published after exact approval.
+      </div>
+      <p>Use the <a href="/docs/integrations/">candidate integration guide</a> only when intentionally evaluating the exact source candidate. Keep production projects on <code>maqam@0.2.3</code> until the npm package state changes.</p>
+
+      <h2 id="boundary">Know the boundary</h2>
+      <dl class="definition-grid">
+        <dt>Governed</dt><dd>Calls routed through a registered <code>ToolGateway</code> path with explicit policy and configured approval rules.</dd>
+        <dt>Not governed</dt><dd>Direct provider, SDK, HTTP, MCP, browser, or process calls that bypass the registered adapter.</dd>
+        <dt>Recorded</dt><dd>Workflow traces, gateway decisions, approval scope and consumption, plus evidence and claims that code explicitly adds.</dd>
+        <dt>Not guaranteed</dt><dd>Reviewer identity, source truth, durable state, provider-internal behavior, operating-system isolation, secret storage, or safe rollback.</dd>
+      </dl>
+      <p>Before connecting a real side effect, define its minimum effects, exact review payload, idempotency, recovery behavior, trusted persistence, credentials, network controls, and independent authorization.</p>
+      <div class="button-row">
+        <a class="button button-primary" href="/docs/security/">Review security</a>
+        <a class="button" href="/docs/integrations/">Connect an adapter</a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div><h2>Maqam docs</h2><p>Runnable examples with explicit boundaries.</p></div>
+      <div><h3>Packages</h3><a href="/docs/productloop/">ProductLoop OS</a><a href="https://www.npmjs.com/package/maqam">npm</a></div>
+      <div><h3>Evidence</h3><a href="/docs/benchmark/">MGES</a><a href="/articles/exact-agent-approvals/">Approval article</a></div>
+      <div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam">GitHub</a><a href="/community/">Contribute</a></div>
+    </div>
+  </footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

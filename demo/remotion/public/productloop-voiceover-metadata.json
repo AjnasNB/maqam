@@ -1,0 +1,14 @@
+{
+    "provider":  "Microsoft System.Speech (local Windows SAPI)",
+    "voice":  "Microsoft Zira Desktop",
+    "culture":  "en-US",
+    "rate":  4,
+    "volume":  96,
+    "durationMs":  48324,
+    "captionTimeScale":  0.73173834039975771,
+    "captionTiming":  "SAPI SpeakProgress positions rescaled to rendered WAVE duration; spelled acronyms normalized for display",
+    "generatedAt":  "2026-07-16T15:42:05.2607112Z",
+    "cloudServiceUsed":  false,
+    "sourceScript":  "scripts/productloop-voiceover-script.json",
+    "assetId":  "productloop"
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "productloop.video.facts/v1",
+  "source": {
+    "repository": "https://github.com/AjnasNB/productloop-os",
+    "commit": "21e35e9c1461be547f9cf5ac5dc68312b99841fc",
+    "workingTreeDirty": false,
+    "fingerprint": "ff4ed560f8b9ef5b5db3ce2bfc35965806013060537500f0c0d487650b2e8606"
+  },
+  "umbrellaVersion": "0.2.0",
+  "modules": [
+    "maqam",
+    "ajnas-runtime",
+    "ajnas-policy",
+    "ajnas-approvals",
+    "ajnas-provenance",
+    "ajnas-evals",
+    "ajnas-connectors",
+    "ajnas-skills-registry",
+    "ajnas-browser-research"
+  ],
+  "claims": {
+    "defaultDenyComposition": true,
+    "explicitMaqamCrawlerAdapter": true,
+    "maqamCrawlerRisk": "high",
+    "automaticToolRegistration": false,
+    "sharedDistributedTransaction": false,
+    "bundledModelOrLiveBrowser": false
+  }
+}

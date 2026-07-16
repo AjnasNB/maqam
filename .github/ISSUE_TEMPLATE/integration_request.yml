@@ -1,0 +1,41 @@
+name: Integration request
+description: Propose a tested adapter or framework bridge.
+title: "integration: "
+labels:
+  - integration
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Framework or provider
+      placeholder: Google ADK, Microsoft Agent 365, LangGraph, or a host SDK
+    validations:
+      required: true
+  - type: input
+    id: official_docs
+    attributes:
+      label: Primary documentation
+      description: Link the current official API or protocol documentation.
+    validations:
+      required: true
+  - type: textarea
+    id: callable_boundary
+    attributes:
+      label: Callable boundary
+      description: Identify the exact host operation that can be routed through ToolGateway.
+    validations:
+      required: true
+  - type: textarea
+    id: bypasses
+    attributes:
+      label: Known bypass paths
+      description: Explain what calls, discovery, provider-internal actions, or authentication would remain outside Maqam.
+    validations:
+      required: true
+  - type: textarea
+    id: test_plan
+    attributes:
+      label: Test plan
+      description: Name the official mock, local fixture, sandbox, or test tenant that will be used.
+    validations:
+      required: true

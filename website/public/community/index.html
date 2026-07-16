@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contribute to Maqam and ProductLoop OS</title>
+  <meta name="description" content="Fork, test, document, and propose focused changes to the open-source Maqam and ProductLoop OS repositories.">
+  <meta name="theme-color" content="#0b0e0d">
+  <link rel="canonical" href="https://maqamagent.com/community/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/" aria-current="page">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/" aria-current="page">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+  </header>
+
+  <main id="main">
+    <header class="page-hero">
+      <div class="shell">
+        <h1>Inspect it. Break it. Propose the fix.</h1>
+        <p>Maqam and ProductLoop OS are MIT licensed. Contributions arrive through reviewed pull requests, not direct writes to protected branches.</p>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="shell community-grid">
+        <div>
+          <header class="section-head"><h2>The contribution path</h2><p>Keep each change narrow enough to review and strong enough to verify.</p></header>
+          <ol class="flow-steps">
+            <li><code>01</code><div><h3>Open or choose an issue</h3><p>Describe the behavior, boundary, and evidence needed before writing a large change.</p></div></li>
+            <li><code>02</code><div><h3>Fork and branch</h3><p>Create a topic branch in your fork. Contributors do not need direct write access to the upstream repository.</p></div></li>
+            <li><code>03</code><div><h3>Test the boundary</h3><p>Add a focused regression test, run the complete suite, and update security or migration notes when behavior changes.</p></div></li>
+            <li><code>04</code><div><h3>Open a pull request</h3><p>Maintainers review code, provenance, license impact, compatibility, and release claims before merge.</p></div></li>
+          </ol>
+        </div>
+        <div>
+          <div class="code-shell"><button class="copy-button" type="button" data-copy="#contribute-code">Copy</button><pre><code id="contribute-code">git clone https://github.com/YOUR_NAME/maqam.git
+cd maqam
+git switch -c fix/focused-boundary-test
+npm ci
+npm test
+npm run test:consumer-types
+npm audit --omit=dev</code></pre></div>
+          <div class="callout callout-warning"><strong>Do not include secrets</strong>Remove API keys, npm credentials, private URLs, customer data, and provider transcripts before attaching logs or fixtures.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <header class="section-head"><h2>Good first contribution shapes</h2><p>Start with a bounded change that has a clear pass condition.</p></header>
+        <ul class="issue-list">
+          <li><a href="https://github.com/AjnasNB/maqam/issues">Documentation fixture</a><p>Add a complete example for one existing API and verify every command in a clean project.</p></li>
+          <li><a href="https://github.com/AjnasNB/maqam/issues">Adapter conformance case</a><p>Model one failure mode in a local fixture without contacting a real provider.</p></li>
+          <li><a href="https://github.com/AjnasNB/maqam/issues">Type declaration edge case</a><p>Reproduce a strict TypeScript consumer problem and add it to the clean-consumer test.</p></li>
+          <li><a href="https://github.com/AjnasNB/maqam/issues">Crawler parser case</a><p>Add a bounded public-format fixture without bypass, login, paywall, CAPTCHA, or private-network behavior.</p></li>
+          <li><a href="https://github.com/AjnasNB/productloop-os/issues">ProductLoop package example</a><p>Improve one package example while preserving its explicit host and security boundaries.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell benchmark-layout">
+        <div>
+          <header class="section-head"><h2>Review standards</h2></header>
+          <ul>
+            <li>Tests cover the changed behavior and important failure paths.</li>
+            <li>Security-sensitive code fails closed and cannot downgrade handler effects or risk.</li>
+            <li>Public examples run from a clean consumer project.</li>
+            <li>Third-party source, licenses, notices, and modifications are recorded before incorporation.</li>
+            <li>Benchmarks are rerun when fingerprinted sources change.</li>
+            <li>Marketing claims remain narrower than the attached evidence.</li>
+          </ul>
+        </div>
+        <figure class="media-frame">
+          <img src="/assets/productloop-ecosystem.png" width="1536" height="1536" alt="Physical hub connecting separate dark modules through explicit cables" loading="lazy">
+          <figcaption>Composition stays explicit. Each package and adapter keeps its own boundary.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell community-grid">
+        <div><header class="section-head"><h2>Choose the right repository</h2><p>Use Maqam for the enforcement boundary and ProductLoop OS for the modular package family.</p></header></div>
+        <div><div class="button-row"><a class="button button-primary" href="https://github.com/AjnasNB/maqam/issues">Maqam issues</a><a class="button" href="https://github.com/AjnasNB/productloop-os/issues">ProductLoop issues</a></div><div class="button-row"><a class="button" href="https://github.com/AjnasNB/maqam/blob/main/CONTRIBUTING.md">Contributing guide</a><a class="button" href="https://github.com/AjnasNB/maqam/blob/main/GOVERNANCE.md">Governance</a><a class="button" href="https://github.com/AjnasNB/maqam/discussions">Discussions</a></div><div class="callout callout-warning"><strong>Discussions status</strong>GitHub Discussions is not enabled yet. Use issues until maintainers enable that repository surface.</div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-grid"><div><h2>Open development</h2><p>Fork, branch, test, review.</p></div><div><h3>Learn</h3><a href="/why/">Why Maqam</a><a href="/roadmap/">Roadmap</a></div><div><h3>Governance</h3><a href="https://github.com/AjnasNB/maqam/blob/main/CONTRIBUTING.md">Contributing</a><a href="https://github.com/AjnasNB/maqam/blob/main/GOVERNANCE.md">Governance</a></div><div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam">Maqam</a><a href="https://github.com/AjnasNB/productloop-os">ProductLoop OS</a></div></div></footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

@@ -1,0 +1,42 @@
+[
+  {
+    "scene": "hook",
+    "text": "Maqam's crawler is a bounded H T T P and H T M L research connector, not a browser automation fleet.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "limits",
+    "text": "A run starts with seeds and ceilings for pages, requests, queue size, depth, bytes, retries, concurrency, and duration.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "network",
+    "text": "Maqam validates origins, resolves and pins public addresses, checks each redirect, and respects robots dot text by default.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "scope",
+    "text": "Same-origin discovery is the default. Cross-origin work needs trusted scope. Private networks require host opt-in, while link-local and other unsafe ranges stay blocked.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "output",
+    "text": "Each page returns normalized U R L, title, heading, text, markdown, links, response metadata, redirect history, and a content hash.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "detail",
+    "text": "Detailed mode adds failures and statistics. The governed wrapper declares a network-read effect and enforces deployment limits.",
+    "pauseAfterMs": 220
+  },
+  {
+    "scene": "gateway",
+    "text": "Through ToolGateway, calls receive policy, call ceilings, exact approvals when configured, redacted trace, and scoped evidence.",
+    "pauseAfterMs": 240
+  },
+  {
+    "scene": "final",
+    "text": "It does not execute page JavaScript, defeat anti-bot systems, or prove a source is true. Use a browser provider when rendering is required.",
+    "pauseAfterMs": 100
+  }
+]
