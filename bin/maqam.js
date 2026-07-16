@@ -1,5 +1,21 @@
 #!/usr/bin/env node
+import { formatApprovalDemo, runApprovalDemo } from "../src/maqam/approval-demo.js";
 import { startMaqamServer } from "../src/maqam/server.js";
+
+function readDemoArgs(argv) {
+  if (argv[0] !== "demo") return null;
+  if (argv[1] === "--help" || argv[1] === "-h") return { help: true };
+  if (argv[1] !== "approval") {
+    throw new TypeError("Usage: maqam demo approval [--json]");
+  }
+  const options = { json: false, help: false };
+  for (const argument of argv.slice(2)) {
+    if (argument === "--json") options.json = true;
+    else if (argument === "--help" || argument === "-h") options.help = true;
+    else throw new TypeError(`Unknown demo option: ${argument}`);
+  }
+  return options;
+}
 
 function readArgs(argv) {
   const options = { allowedOrigins: [], allowedHosts: [], allowedUiOrigins: [] };
@@ -30,6 +46,7 @@ Maqam
 
 Usage:
   maqam [options]
+  maqam demo approval [--json]
 
 Options:
   --port <number>                 Listen port. Default: 8787
@@ -41,19 +58,30 @@ Options:
   --allow-cross-origin-crawls     Permit cross-origin links within --allowed-origin entries
   --help                          Show this help
 
+Demo options:
+  --json                          Emit deterministic machine-readable output
+
 Non-loopback binding also requires MAQAM_API_TOKEN. The token is never accepted as a command-line argument.
 `);
 }
 
 try {
-  const options = readArgs(process.argv.slice(2));
-  if (options.help) usage();
-  else {
-    const server = startMaqamServer(options);
-    server.once("error", (error) => {
-      process.stderr.write(`${error.message || String(error)}\n`);
-      process.exitCode = 1;
-    });
+  const argv = process.argv.slice(2);
+  const demo = readDemoArgs(argv);
+  if (demo?.help) usage();
+  else if (demo) {
+    const report = await runApprovalDemo();
+    process.stdout.write(`${demo.json ? JSON.stringify(report, null, 2) : formatApprovalDemo(report)}\n`);
+  } else {
+    const options = readArgs(argv);
+    if (options.help) usage();
+    else {
+      const server = startMaqamServer(options);
+      server.once("error", (error) => {
+        process.stderr.write(`${error.message || String(error)}\n`);
+        process.exitCode = 1;
+      });
+    }
   }
 } catch (error) {
   process.stderr.write(`${error.message || String(error)}\n`);

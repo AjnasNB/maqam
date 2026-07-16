@@ -1,0 +1,42 @@
+{
+  "benchmark": "maqam-governed-local-call-overhead",
+  "measuredAt": "2026-07-16T12:35:10.775Z",
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32",
+    "architecture": "x64",
+    "cpu": "AMD64 Family 23 Model 96 Stepping 1, AuthenticAMD"
+  },
+  "fixture": {
+    "tool": "echo",
+    "input": {
+      "value": 41,
+      "nested": {
+        "release": "0.2.x"
+      }
+    },
+    "policy": "allowedTools: [echo]",
+    "handler": "async in-process return",
+    "iterationsPerSample": 5000,
+    "samples": 7,
+    "warmupIterations": 500
+  },
+  "results": {
+    "direct": {
+      "medianNsPerCall": 87,
+      "p95SampleNsPerCall": 257,
+      "minNsPerCall": 58,
+      "maxNsPerCall": 257
+    },
+    "governed": {
+      "medianNsPerCall": 143912,
+      "p95SampleNsPerCall": 172141,
+      "minNsPerCall": 126224,
+      "maxNsPerCall": 172141
+    },
+    "medianAddedNsPerCall": 143825,
+    "medianAddedMicrosecondsPerCall": 143.825,
+    "medianRatio": 1654.16
+  },
+  "interpretation": "Measures one local allowed ToolGateway call against the same direct async handler. It is not a competitor benchmark, network benchmark, security score, or production SLA."
+}

@@ -1,0 +1,46 @@
+{
+  "name": "@maqam/demo-video",
+  "version": "0.0.0-private",
+  "description": "Private Remotion source for the Maqam exact-approval demonstration.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AjnasNB/maqam.git",
+    "directory": "demo/remotion"
+  },
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@remotion/cli": "4.0.490",
+    "@remotion/captions": "4.0.490",
+    "@remotion/media": "4.0.490",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.490"
+  },
+  "devDependencies": {
+    "@remotion/eslint-config-flat": "4.0.490",
+    "@types/react": "19.2.7",
+    "@types/web": "0.0.166",
+    "eslint": "9.39.5",
+    "prettier": "3.8.1",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "dev": "remotion studio --no-open",
+    "build": "remotion bundle",
+    "upgrade": "remotion upgrade",
+    "lint": "eslint src && tsc",
+    "proof": "node scripts/generate-proof.mjs",
+    "voiceover": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-voiceover.ps1",
+    "captions:portable": "node scripts/export-captions.mjs",
+    "validate:assets": "node scripts/validate-assets.mjs",
+    "check": "npm run lint && npm run validate:assets",
+    "render:video": "remotion render src/index.ts MaqamProof60 out/maqam-exact-approval-demo.mp4 --codec=h264 --crf=16",
+    "render:poster": "remotion still src/index.ts MaqamProofPoster out/maqam-proof-poster.png",
+    "render:frames": "node scripts/render-stills.mjs",
+    "render:all": "npm run check && npm run captions:portable && npm run render:poster && npm run render:frames && npm run render:video"
+  },
+  "sideEffects": [
+    "*.css"
+  ]
+}

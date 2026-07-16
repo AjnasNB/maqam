@@ -1,0 +1,13 @@
+{
+    "provider":  "Microsoft System.Speech (local Windows SAPI)",
+    "voice":  "Microsoft Zira Desktop",
+    "culture":  "en-US",
+    "rate":  3,
+    "volume":  96,
+    "durationMs":  51271,
+    "captionTimeScale":  0.7339001732010707,
+    "captionTiming":  "SAPI SpeakProgress positions rescaled to rendered WAVE duration",
+    "generatedAt":  "2026-07-16T12:42:39.7822398Z",
+    "cloudServiceUsed":  false,
+    "sourceScript":  "scripts/voiceover-script.json"
+}

@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "demo": "exact-approval",
+  "status": "passed",
+  "description": "A changed input is blocked, the exact approved write runs once, and replay is rejected.",
+  "approvedInput": {
+    "path": "release/notes.json",
+    "content": "Maqam exact approval verified."
+  },
+  "alteredInput": {
+    "path": "release/notes.json",
+    "content": "ALTERED after approval"
+  },
+  "steps": [
+    {
+      "id": "request",
+      "status": "needs_approval",
+      "code": "APPROVAL_REQUIRED",
+      "approvalId": "approval_1",
+      "action": "effect:write",
+      "approvalStatus": "pending",
+      "scope": {
+        "runId": "demo_release_1",
+        "toolName": "writer",
+        "inputHash": "495c908d2223178a336fe0a91434df93fafa05d72d077878543eaf3a6a0d291a"
+      },
+      "executions": 0,
+      "fileExists": false
+    },
+    {
+      "id": "altered_input",
+      "status": "blocked",
+      "code": "APPROVAL_SCOPE_MISMATCH",
+      "message": "Approval 'approval_1' does not match this exact tool call.",
+      "executions": 0,
+      "fileExists": false
+    },
+    {
+      "id": "exact_input",
+      "status": "completed",
+      "code": null,
+      "executions": 1,
+      "approvalConsumptions": 1,
+      "result": {
+        "path": "release/notes.json",
+        "bytes": 30,
+        "contentHash": "sha256:aeb981e669beb745001e7ecffe5291d36cce4add894a120c9089133ee197815b",
+        "verified": true,
+        "evidenceId": "ev_1",
+        "claimId": "claim_1"
+      },
+      "file": {
+        "path": "release/notes.json",
+        "content": "Maqam exact approval verified.",
+        "verified": true
+      }
+    },
+    {
+      "id": "replay",
+      "status": "blocked",
+      "code": "APPROVAL_INVALID",
+      "message": "Approval 'approval_1' has already been consumed.",
+      "executions": 1,
+      "fileUnchanged": true
+    }
+  ],
+  "approval": {
+    "approvalId": "approval_1",
+    "status": "approved",
+    "action": "effect:write",
+    "reusable": false,
+    "scope": {
+      "runId": "demo_release_1",
+      "toolName": "writer",
+      "inputHash": "495c908d2223178a336fe0a91434df93fafa05d72d077878543eaf3a6a0d291a"
+    },
+    "decision": {
+      "decidedBy": "demo-owner",
+      "note": "Approve only this exact run, tool, and input.",
+      "decidedAt": "2026-07-16T12:00:00.000Z"
+    },
+    "consumptions": [
+      {
+        "consumedAt": "2026-07-16T12:00:00.000Z",
+        "consumedBy": "demo-operator",
+        "runId": "demo_release_1",
+        "toolName": "writer"
+      }
+    ]
+  },
+  "evidence": {
+    "evidence": [
+      {
+        "evidenceId": "ev_1",
+        "runId": "demo_release_1",
+        "taskId": "write_release_note",
+        "sourceType": "tool_output",
+        "source": "demo://release/notes.json",
+        "retrievedAt": "2026-07-16T12:00:00.000Z",
+        "excerpt": "Maqam exact approval verified.",
+        "hash": "sha256:2c4d8758516bba3a5564a983e512dc111703011e3aeee67584a4f0ee2d1f6cab",
+        "tool": "writer",
+        "confidence": 1
+      }
+    ],
+    "claims": [
+      {
+        "claimId": "claim_1",
+        "runId": "demo_release_1",
+        "taskId": "write_release_note",
+        "text": "release/notes.json contains the exact approved content.",
+        "evidenceIds": [
+          "ev_1"
+        ],
+        "confidence": 1
+      }
+    ],
+    "unsupportedClaims": []
+  },
+  "trace": [
+    {
+      "status": "needs_approval",
+      "code": "APPROVAL_REQUIRED",
+      "approvalIds": []
+    },
+    {
+      "status": "needs_approval",
+      "code": "APPROVAL_SCOPE_MISMATCH",
+      "approvalIds": []
+    },
+    {
+      "status": "completed",
+      "code": null,
+      "approvalIds": [
+        "approval_1"
+      ]
+    },
+    {
+      "status": "needs_approval",
+      "code": "APPROVAL_INVALID",
+      "approvalIds": []
+    }
+  ],
+  "summary": {
+    "executions": 1,
+    "approvalConsumptions": 1,
+    "evidenceRecords": 1,
+    "claims": 1,
+    "unsupportedClaims": 0
+  },
+  "cleanup": {
+    "temporaryWorkspaceRemoved": true
+  }
+}

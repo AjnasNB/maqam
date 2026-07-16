@@ -1,12 +1,24 @@
 # Maqam
 
+[![npm version](https://img.shields.io/npm/v/maqam.svg)](https://www.npmjs.com/package/maqam)
+[![CI](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml/badge.svg)](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](https://github.com/AjnasNB/maqam/blob/v0.2.3/LICENSE)
+
+**Policy before execution. Exact approval for the call. Evidence behind the claim.**
+
 ![Maqam governed agent framework hero](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-readme-hero.png)
 
 Maqam is an MIT-licensed agent framework for governed workflows. It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, and a crawler-backed research workflow.
 
 The crawler is not the product center; it is only one built-in connector. Maqam governs workers that enter through `ToolGateway`, including function agents, object agents with `run`/`invoke`/`call`, Codex CLI, Claude Code, generic command-line workers, browser agents, research agents, internal services, and write actions that need human approval.
 
+[![Watch the 60-second Maqam exact-approval demo](https://raw.githubusercontent.com/AjnasNB/maqam/v0.2.3/docs/assets/maqam-demo-poster.png)](https://github.com/AjnasNB/maqam/releases/download/v0.2.3/maqam-exact-approval-demo.mp4)
+
+The video is rendered from the JSON emitted by the real `maqam demo approval --json` command. The displayed approval id, hashes, execution counts, evidence ids, and rejection codes come from the executed package rather than a staged interface.
+
 Full documentation: [docs/usage.md](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md)
+
+Five-minute quickstart and cleanup: [docs/quickstart.md](https://github.com/AjnasNB/maqam/blob/main/docs/quickstart.md)
 
 Coding-agent guide: [docs/external-agents.md](https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md)
 
@@ -14,7 +26,13 @@ Release checklist: [docs/release-checklist.md](https://github.com/AjnasNB/maqam/
 
 Provenance and license notes: [docs/provenance-and-licenses.md](https://github.com/AjnasNB/maqam/blob/main/docs/provenance-and-licenses.md)
 
-Comparison with related open-source tools: [docs/comparison.md](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md)
+Comparison with related open-source and source-available tools: [docs/comparison.md](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md)
+
+Why Maqam: [docs/why-maqam.md](https://github.com/AjnasNB/maqam/blob/main/docs/why-maqam.md)
+
+Public roadmap: [ROADMAP.md](https://github.com/AjnasNB/maqam/blob/main/ROADMAP.md)
+
+Technical article: [Your Agent Approval May Not Authorize The Input That Actually Executes](https://github.com/AjnasNB/maqam/blob/main/docs/articles/exact-agent-approvals.md)
 
 Migration guide for 0.2: [docs/migration-0.2.md](https://github.com/AjnasNB/maqam/blob/main/docs/migration-0.2.md)
 
@@ -47,6 +65,28 @@ flowchart LR
 ```
 
 That means Maqam is not limited to crawling. If an agent can be called as a function, object method, HTTP/SDK connector, or fixed command-line worker, Maqam can route it through policy, runtime and call ceilings, trace capture, evidence, and configured human approval gates. Only registered adapters are governed; provider-reported token ceilings may be post-run, and a container or virtual machine is still needed for a hard operating-system boundary.
+
+## Why Maqam
+
+Maqam does not try to own the entire agent stack. Its focused job is to connect four controls in one small TypeScript package:
+
+1. decide whether a registered tool call is allowed;
+2. bind required approval to the exact run, tool, and canonical input hash;
+3. consume that approval once by default and pass the same detached input to the governed handler; and
+4. provide scoped APIs for handlers and workflows to explicitly connect claims to source evidence from the same run.
+
+Use Maqam when that enforcement path matters more than adopting a larger platform. It can wrap an existing function, CLI worker, coding agent, crawler, browser connector, or internal service. Calls that bypass the registered adapter are outside Maqam's control, and evidence links show provenance rather than proving that a claim is true.
+
+| If your primary need is | Stronger starting point | Where Maqam fits |
+|---|---|---|
+| Broad identity, trust, compliance, fleet, and multi-language governance | [Microsoft Agent Governance Toolkit](https://github.com/microsoft/agent-governance-toolkit) | A smaller local TypeScript boundary with explicit exact-call approval and claim/evidence semantics. |
+| A full TypeScript agent loop, handoffs, sessions, models, and tracing | [OpenAI Agents SDK](https://github.com/openai/openai-agents-js) | Govern selected external actions; do not replace the SDK's agent loop or first-class human approval flow. |
+| Durable, branching, restart-safe orchestration | [LangGraph](https://github.com/langchain-ai/langgraph) | Call Maqam-governed tools from graph nodes; Maqam's current state is in-process. |
+| Contextual traffic, model-facing, or prompt-injection guardrails | [Invariant](https://github.com/invariantlabs-ai/invariant) or [NeMo Guardrails](https://github.com/NVIDIA-NeMo/Guardrails) | Add action policy, exact gateway approvals, and source-linked evidence. |
+| Mature general policy-as-code | [Open Policy Agent](https://github.com/open-policy-agent/opa) | Use OPA as a decision engine while Maqam supplies the agent-specific enforcement and approval lifecycle. |
+| Browser automation or crawler operations | [Crawl4AI](https://github.com/unclecode/crawl4ai), [Firecrawl](https://github.com/firecrawl/firecrawl), or [Crawlee](https://github.com/apify/crawlee) | Put a separately installed connector behind Maqam; its built-in crawler remains deliberately smaller and HTTP-only. |
+
+See the [detailed, dated comparison](https://github.com/AjnasNB/maqam/blob/v0.2.3/docs/comparison.md), including limitations and source/license notes, before choosing a stack.
 
 ## What Ships
 
@@ -86,6 +126,15 @@ Maqam requires Node.js 20.18.1 or later.
 ```bash
 npm install -g maqam
 ```
+
+Run the exact-approval proof without a model key or hosted account:
+
+```bash
+maqam demo approval
+maqam demo approval --json
+```
+
+The flow requests approval, rejects altered input with `APPROVAL_SCOPE_MISMATCH` while executions remain zero, executes the exact input once, rejects replay with `APPROVAL_INVALID`, and links `ev_1` to `claim_1`.
 
 Run the local console:
 
@@ -295,9 +344,13 @@ Maqam is not a stealth scraper and does not include bypass tooling. It will not 
 npm install
 npm test
 npm run test:consumer-types
+npm run demo:approval
+npm run benchmark:governance
 npm audit --omit=dev
 npm pack --dry-run
 ```
+
+The [benchmark methodology and raw baseline](https://github.com/AjnasNB/maqam/blob/v0.2.3/benchmarks/README.md) measure only Maqam's local governed-call overhead. They are not a cross-product speed comparison, security score, network benchmark, or production SLA.
 
 The npm tarball intentionally excludes the large brand-board and presentation PNG files; those remain in the source repository. Only the logo and files required by the local console ship as runtime app assets.
 

@@ -1393,7 +1393,7 @@ import { ApprovalQueue, createReleaseGateReport } from "maqam";
 
 const approvals = new ApprovalQueue();
 const artifact = {
-  filename: "maqam-0.2.2.tgz",
+  filename: "maqam-0.2.3.tgz",
   sizeBytes: 123456,
   integrity: `sha256:${"a".repeat(64)}`,
   gitCommit: "0123456789abcdef0123456789abcdef01234567"
@@ -1403,7 +1403,7 @@ const approval = approvals.requestApproval({
   reason: "Release candidate is ready.",
   subject: {
     packageName: "maqam",
-    version: "0.2.2",
+    version: "0.2.3",
     registry: "https://registry.npmjs.org/",
     publishCommand: "npm publish --access public",
     artifactFilename: artifact.filename,
@@ -1415,7 +1415,7 @@ const approval = approvals.requestApproval({
 
 const report = createReleaseGateReport({
   packageName: "maqam",
-  version: "0.2.2",
+  version: "0.2.3",
   license: "MIT",
   publishCommand: "npm publish --access public",
   registry: "https://registry.npmjs.org/",

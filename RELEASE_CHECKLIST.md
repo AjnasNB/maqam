@@ -1,11 +1,11 @@
 # Maqam Release Checklist
 
-Use this root checklist as the release gate for `maqam@0.2.2`.
+Use this root checklist as the release gate for `maqam@0.2.3`.
 
 ## Package
 
 - Name: `maqam`
-- Version: `0.2.2`
+- Version: `0.2.3`
 - License: MIT
 - Registry: npm public registry
 - Publish command after approval: `npm publish --access public`
@@ -35,12 +35,12 @@ Required result:
 
 ## Approval Gate
 
-Do not publish from automation. Stop after preparing evidence and request explicit user approval for `maqam@0.2.2`.
+Do not publish from automation. Stop after preparing evidence and request explicit user approval for `maqam@0.2.3`.
 
 Approval must name:
 
 - Package: `maqam`
-- Version: `0.2.2`
+- Version: `0.2.3`
 - Target: npm public registry
 - Command: `npm publish --access public`
 - Artifact: filename, byte size, integrity digest, and Git commit
@@ -51,7 +51,7 @@ For `createReleaseGateReport`, the approval action must be `publish:npm`. Its su
 
 ```bash
 npm publish --access public
-npm view maqam@0.2.2 version dist.integrity gitHead _resolved _from
+npm view maqam@0.2.3 version dist.integrity gitHead _resolved _from
 ```
 
 Run `npm publish --access public` from the reviewed, clean, committed repository directory; do not pass a local `.tgz` path. Use an authenticated npm session or a short-lived release token without writing credentials into the repository, shell history, package metadata, logs, or approval evidence. Require registry `gitHead` to equal the approved commit and confirm `_resolved` and `_from` are absent or contain no local filesystem path. Record the published version and integrity, then create a matching GitHub release only after npm verification succeeds.

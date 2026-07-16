@@ -8,12 +8,17 @@ const usageGuide = readFileSync(new URL("../docs/usage.md", import.meta.url), "u
 const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
 const provenanceGuide = readFileSync(new URL("../docs/provenance-and-licenses.md", import.meta.url), "utf8");
 const releaseGuide = readFileSync(new URL("../docs/release-checklist.md", import.meta.url), "utf8");
+const whyMaqam = readFileSync(new URL("../docs/why-maqam.md", import.meta.url), "utf8");
+const comparison = readFileSync(new URL("../docs/comparison.md", import.meta.url), "utf8");
+const quickstart = readFileSync(new URL("../docs/quickstart.md", import.meta.url), "utf8");
+const roadmap = readFileSync(new URL("../ROADMAP.md", import.meta.url), "utf8");
+const technicalArticle = readFileSync(new URL("../docs/articles/exact-agent-approvals.md", import.meta.url), "utf8");
 const maqamBin = readFileSync(new URL("../bin/maqam.js", import.meta.url), "utf8");
 const security = readFileSync(new URL("../SECURITY.md", import.meta.url), "utf8");
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.2.2");
+  assert.equal(packageJson.version, "0.2.3");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.author, "Ajnas NB");
   assert.equal(packageJson.type, "module");
@@ -36,8 +41,13 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.files.includes("docs/release-checklist.md"));
   assert.ok(packageJson.files.includes("docs/provenance-and-licenses.md"));
   assert.ok(packageJson.files.includes("docs/comparison.md"));
+  assert.ok(packageJson.files.includes("docs/quickstart.md"));
+  assert.ok(packageJson.files.includes("docs/why-maqam.md"));
+  assert.ok(packageJson.files.includes("docs/articles/exact-agent-approvals.md"));
   assert.ok(packageJson.files.includes("docs/migration-0.2.md"));
   assert.ok(packageJson.files.includes("examples/"));
+  assert.ok(packageJson.files.includes("benchmarks/"));
+  assert.ok(packageJson.files.includes("ROADMAP.md"));
   assert.ok(packageJson.files.includes("CHANGELOG.md"));
   assert.ok(packageJson.files.includes("SECURITY.md"));
   assert.ok(packageJson.files.includes("RELEASE_CHECKLIST.md"));
@@ -49,6 +59,8 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.dependencies["@types/node"], "^20.19.43");
   assert.equal(packageJson.devDependencies.typescript, "^5.9.3");
   assert.match(packageJson.scripts.prepublishOnly, /test:consumer-types/);
+  assert.equal(packageJson.scripts["demo:approval"], "node bin/maqam.js demo approval");
+  assert.equal(packageJson.scripts["benchmark:governance"], "node benchmarks/governance-overhead.mjs");
   assert.equal(packageJson.dependencies.undici, "^7.28.0");
   assert.equal(packageJson.engines.node, ">=20.18.1");
 });
@@ -73,10 +85,21 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(usageGuide, /createCliAgentTool/);
   assert.match(usageGuide, /ApprovalQueue/);
   assert.match(usageGuide, /createReleaseGateReport/);
+  assert.match(whyMaqam, /^# Why Maqam/m);
+  assert.match(whyMaqam, /canonical/i);
+  assert.match(comparison, /Microsoft Agent Governance Toolkit/);
+  assert.match(quickstart, /^# Maqam Five-Minute Quickstart/m);
+  assert.match(quickstart, /npm uninstall -g maqam/);
+  assert.match(comparison, /OpenAI Agents SDK/);
+  assert.match(comparison, /LangGraph/);
+  assert.match(roadmap, /^# Maqam Public Roadmap/m);
+  assert.match(technicalArticle, /approval may not authorize the input/i);
   assert.match(maqamBin, /startMaqamServer/);
   assert.match(maqamBin, /--allow-private-networks/);
   assert.match(maqamBin, /--allowed-ui-origin/);
   assert.match(maqamBin, /MAQAM_API_TOKEN/);
+  assert.match(maqamBin, /demo approval/);
+  assert.ok(existsSync(new URL("../benchmarks/governance-overhead.mjs", import.meta.url)));
   assert.ok(existsSync(new URL("../src/index.d.ts", import.meta.url)));
   assert.ok(existsSync(new URL("../examples/governed-release.mjs", import.meta.url)));
   assert.ok(existsSync(new URL("../examples/govern-coding-agent.mjs", import.meta.url)));

@@ -2,6 +2,22 @@
 
 All notable Maqam changes are tracked here before release.
 
+## 0.2.3 - 2026-07-16
+
+Launch, documentation, and reproducible-proof patch for exact approvals.
+
+### Added
+
+- `maqam demo approval` and `npm run demo:approval` now run a deterministic temporary-file flow that proves altered input is rejected before execution, the exact approved input runs once, replay is rejected, evidence links to the resulting claim, and cleanup succeeds. `--json` emits stable machine-readable render input.
+- A permanent CLI regression suite covers the approval request, canonical input scope mismatch, one-use consumption, replay rejection, evidence linkage, and deterministic output.
+- A reproducible local governed-call overhead microbenchmark with machine-readable output and explicit interpretation limits.
+- Public “Why Maqam,” five-minute quickstart and cleanup, current open-source/source-available comparison, enforcement-boundary diagram, roadmap, technical article, HN-compliant author fact brief, release plan, and Remotion launch-video source.
+
+### Documentation
+
+- Positions Maqam as a compact TypeScript enforcement boundary rather than claiming to replace broader agent runtimes, durable orchestrators, enterprise governance platforms, model guardrails, or general policy engines.
+- Documents the current in-process persistence model, registered-adapter enforcement boundary, and the difference between evidence-link integrity checks and semantic proof that a claim is true.
+
 ## 0.2.2 - 2026-07-15
 
 Security patch for JavaScript authority-boundary integrity under prototype pollution,

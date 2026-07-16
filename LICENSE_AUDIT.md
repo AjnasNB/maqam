@@ -1,6 +1,6 @@
 # License Audit
 
-Audit date: 2026-07-15.
+Audit date: 2026-07-16.
 
 ## Package License
 
@@ -19,6 +19,21 @@ Maqam is distributed under MIT. Market research and reference inspection do not 
 
 Versions are resolved by `package-lock.json`; installed package manifests reported the licenses above. Re-run the dependency and package-content audits whenever the lockfile changes. This table is not a substitute for reviewing transitive packages and included license files.
 
+## Repository-Only Video Toolchain
+
+`demo/remotion/` is a separate private npm workspace used to render launch media. It is excluded from the public `maqam` npm tarball and adds no Maqam runtime dependency.
+
+| Package | Version | License observed | Purpose |
+| --- | --- | --- | --- |
+| `remotion`, `@remotion/cli` | 4.0.490 | Remotion License | Composition and local rendering. The official pricing page describes free use for individuals and companies up to three people; larger collaborations/companies require a company license. |
+| `@remotion/captions` | 4.0.490 | MIT | Caption grouping and display. |
+| `@remotion/media` | 4.0.490 | Package manifest omits a license field; it depends on `remotion`, so the upstream Remotion terms must be reviewed as a unit. | Audio playback during render. |
+| `react`, `react-dom` | 19.2.3 | MIT | Video composition UI. |
+| `typescript` | 5.9.3 | Apache-2.0 | Repository-only type checking. |
+| `eslint`, `prettier` | 9.39.5, 3.8.1 | MIT | Repository-only linting and formatting. |
+
+The original Maqam video composition, narration, captions, and generated proof assets are covered by the root MIT project license. Third-party rendering software retains its own terms. See [`demo/remotion/ASSET_PROVENANCE.md`](demo/remotion/ASSET_PROVENANCE.md) and the [official Remotion license page](https://www.remotion.dev/docs/license/pricing). This project records Ajnas NB as an individual publisher; any larger organization must confirm its own eligibility before re-rendering or operationalizing the toolchain.
+
 ## Inspected References, Not Dependencies
 
 No source code, documentation text, examples, tests, prompts, assets, logos, or branding from these projects was copied into Maqam.
@@ -30,6 +45,14 @@ No source code, documentation text, examples, tests, prompts, assets, logos, or 
 | [Crawlee](https://github.com/apify/crawlee) | [Apache-2.0](https://github.com/apify/crawlee/blob/master/LICENSE.md). | Reference inspection only; no code incorporated. |
 | [Browser Use](https://github.com/browser-use/browser-use) | [MIT](https://github.com/browser-use/browser-use/blob/main/LICENSE). | Reference inspection only; no code incorporated. |
 | [LangGraph](https://github.com/langchain-ai/langgraph) | [MIT](https://github.com/langchain-ai/langgraph/blob/main/LICENSE). | Reference inspection only; no code incorporated. |
+| [Microsoft Agent Governance Toolkit](https://github.com/microsoft/agent-governance-toolkit) | MIT. | Reference inspection only; no code incorporated. |
+| [Microsoft Agent Framework](https://github.com/microsoft/agent-framework) | MIT. | Reference inspection only; no code incorporated. |
+| [OpenAI Agents SDK for JavaScript](https://github.com/openai/openai-agents-js) | MIT. | Reference inspection only; no code incorporated. |
+| [Invariant Guardrails](https://github.com/invariantlabs-ai/invariant) | Apache-2.0. | Reference inspection only; no code incorporated. |
+| [NVIDIA NeMo Guardrails](https://github.com/NVIDIA-NeMo/Guardrails) | Apache-2.0. | Reference inspection only; no code incorporated. |
+| [Open Policy Agent](https://github.com/open-policy-agent/opa) | Apache-2.0. | Reference inspection only; no code incorporated. |
+| [HumanLayer legacy repository](https://github.com/humanlayer/humanlayer) | Apache-2.0 for the deprecated public repository; do not infer that license for the current rebuild. | Reference inspection only; no code incorporated. |
+| [Arize Phoenix](https://github.com/Arize-ai/phoenix) | Elastic License 2.0 at the reviewed root license. | Source-available reference inspection only; no code incorporated. |
 | [Qwen-Agent](https://github.com/QwenLM/Qwen-Agent) | Apache-2.0. | Reference inspection only; no code incorporated. |
 | [PageAgent](https://github.com/alibaba/page-agent) | MIT. | Reference inspection only; no code incorporated. This corrects an earlier audit entry that incorrectly listed Apache-2.0. |
 | [Qwen Code](https://github.com/QwenLM/qwen-code) | Apache-2.0. | Reference inspection only; no code incorporated. |

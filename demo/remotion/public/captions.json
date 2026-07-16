@@ -1,0 +1,1017 @@
+[
+    {
+        "text":  "An",
+        "startMs":  70,
+        "endMs":  167,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " agent",
+        "startMs":  167,
+        "endMs":  434,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " asks",
+        "startMs":  434,
+        "endMs":  692,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " to",
+        "startMs":  692,
+        "endMs":  788,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " write",
+        "startMs":  788,
+        "endMs":  940,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " release",
+        "startMs":  940,
+        "endMs":  1233,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " notes",
+        "startMs":  1233,
+        "endMs":  2174,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " In",
+        "startMs":  2174,
+        "endMs":  2265,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " most",
+        "startMs":  2265,
+        "endMs":  2472,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " systems",
+        "startMs":  2472,
+        "endMs":  3184,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approval",
+        "startMs":  3184,
+        "endMs":  3513,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " is",
+        "startMs":  3513,
+        "endMs":  3625,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " just",
+        "startMs":  3625,
+        "endMs":  3827,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " a",
+        "startMs":  3827,
+        "endMs":  3887,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " yes",
+        "startMs":  3872,
+        "endMs":  5076,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Maqam",
+        "startMs":  5076,
+        "endMs":  5419,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " pauses",
+        "startMs":  5419,
+        "endMs":  5728,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " before",
+        "startMs":  5728,
+        "endMs":  5986,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " execution",
+        "startMs":  5986,
+        "endMs":  6466,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  6466,
+        "endMs":  6562,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " creates",
+        "startMs":  6562,
+        "endMs":  6860,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " an",
+        "startMs":  6860,
+        "endMs":  6921,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approval",
+        "startMs":  6921,
+        "endMs":  7214,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " for",
+        "startMs":  7214,
+        "endMs":  7325,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " this",
+        "startMs":  7325,
+        "endMs":  7456,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " exact",
+        "startMs":  7456,
+        "endMs":  7750,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " run",
+        "startMs":  7750,
+        "endMs":  8058,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " tool",
+        "startMs":  8058,
+        "endMs":  8447,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  8447,
+        "endMs":  8524,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " input",
+        "startMs":  8524,
+        "endMs":  8801,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " fingerprint",
+        "startMs":  8801,
+        "endMs":  10212,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Change",
+        "startMs":  10212,
+        "endMs":  10480,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " even",
+        "startMs":  10480,
+        "endMs":  10672,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " one",
+        "startMs":  10672,
+        "endMs":  10834,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " field",
+        "startMs":  10834,
+        "endMs":  11061,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " after",
+        "startMs":  11061,
+        "endMs":  11294,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approval",
+        "startMs":  11294,
+        "endMs":  11931,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  11931,
+        "endMs":  12001,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  12001,
+        "endMs":  12062,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " call",
+        "startMs":  12062,
+        "endMs":  12274,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " fails",
+        "startMs":  12274,
+        "endMs":  12537,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " closed",
+        "startMs":  12537,
+        "endMs":  12815,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " with",
+        "startMs":  12815,
+        "endMs":  12906,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approval",
+        "startMs":  12906,
+        "endMs":  13200,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " scope",
+        "startMs":  13200,
+        "endMs":  13463,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " mismatch",
+        "startMs":  13463,
+        "endMs":  14757,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Nothing",
+        "startMs":  14757,
+        "endMs":  15020,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " executes",
+        "startMs":  15020,
+        "endMs":  16193,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " No",
+        "startMs":  16193,
+        "endMs":  16345,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " file",
+        "startMs":  16345,
+        "endMs":  16602,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " exists",
+        "startMs":  16602,
+        "endMs":  18003,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Restore",
+        "startMs":  18003,
+        "endMs":  18276,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  18276,
+        "endMs":  18362,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " exact",
+        "startMs":  18362,
+        "endMs":  18640,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approved",
+        "startMs":  18640,
+        "endMs":  18913,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " input",
+        "startMs":  18913,
+        "endMs":  19520,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  19520,
+        "endMs":  19595,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  19595,
+        "endMs":  19681,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " write",
+        "startMs":  19681,
+        "endMs":  19853,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " runs",
+        "startMs":  19853,
+        "endMs":  20060,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " once",
+        "startMs":  20060,
+        "endMs":  21228,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " The",
+        "startMs":  21228,
+        "endMs":  21288,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " saved",
+        "startMs":  21279,
+        "endMs":  21552,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " file",
+        "startMs":  21552,
+        "endMs":  21815,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " is",
+        "startMs":  21815,
+        "endMs":  21916,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " verified",
+        "startMs":  21916,
+        "endMs":  22664,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  22664,
+        "endMs":  22735,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  22735,
+        "endMs":  22816,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approval",
+        "startMs":  22816,
+        "endMs":  23134,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " is",
+        "startMs":  23134,
+        "endMs":  23240,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " consumed",
+        "startMs":  23240,
+        "endMs":  24626,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Try",
+        "startMs":  24626,
+        "endMs":  24787,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " to",
+        "startMs":  24787,
+        "endMs":  24878,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " replay",
+        "startMs":  24878,
+        "endMs":  25177,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " that",
+        "startMs":  25177,
+        "endMs":  25293,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " same",
+        "startMs":  25293,
+        "endMs":  25485,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approval",
+        "startMs":  25485,
+        "endMs":  26128,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  26128,
+        "endMs":  26208,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Maqam",
+        "startMs":  26208,
+        "endMs":  26517,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " rejects",
+        "startMs":  26517,
+        "endMs":  26805,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " it",
+        "startMs":  26805,
+        "endMs":  27771,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Execution",
+        "startMs":  27771,
+        "endMs":  28256,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " count",
+        "startMs":  28256,
+        "endMs":  28468,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " stays",
+        "startMs":  28468,
+        "endMs":  28736,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " at",
+        "startMs":  28736,
+        "endMs":  28817,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " one",
+        "startMs":  28817,
+        "endMs":  29661,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " The",
+        "startMs":  29661,
+        "endMs":  29721,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " file",
+        "startMs":  29712,
+        "endMs":  29975,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " stays",
+        "startMs":  29975,
+        "endMs":  30238,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " unchanged",
+        "startMs":  30238,
+        "endMs":  31750,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " The",
+        "startMs":  31750,
+        "endMs":  31810,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " successful",
+        "startMs":  31800,
+        "endMs":  32240,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " call",
+        "startMs":  32240,
+        "endMs":  32472,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " records",
+        "startMs":  32472,
+        "endMs":  32750,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " source",
+        "startMs":  32750,
+        "endMs":  32988,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " evidence",
+        "startMs":  32988,
+        "endMs":  33630,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " hashes",
+        "startMs":  33630,
+        "endMs":  33928,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  33928,
+        "endMs":  33999,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " content",
+        "startMs":  33999,
+        "endMs":  34677,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  34677,
+        "endMs":  34778,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " links",
+        "startMs":  34778,
+        "endMs":  34980,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " a",
+        "startMs":  34980,
+        "endMs":  35040,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " claim",
+        "startMs":  35015,
+        "endMs":  35263,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " to",
+        "startMs":  35263,
+        "endMs":  35339,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " that",
+        "startMs":  35339,
+        "endMs":  35501,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " evidence",
+        "startMs":  35501,
+        "endMs":  35774,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " in",
+        "startMs":  35774,
+        "endMs":  35839,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  35839,
+        "endMs":  35899,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " same",
+        "startMs":  35890,
+        "endMs":  36128,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " run",
+        "startMs":  36128,
+        "endMs":  37346,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " The",
+        "startMs":  37346,
+        "endMs":  37406,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " final",
+        "startMs":  37397,
+        "endMs":  37664,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " report",
+        "startMs":  37664,
+        "endMs":  37963,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " shows",
+        "startMs":  37963,
+        "endMs":  38200,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " one",
+        "startMs":  38200,
+        "endMs":  38357,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " execution",
+        "startMs":  38357,
+        "endMs":  39181,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " one",
+        "startMs":  39181,
+        "endMs":  39313,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approval",
+        "startMs":  39313,
+        "endMs":  39606,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " consumption",
+        "startMs":  39606,
+        "endMs":  40395,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " one",
+        "startMs":  40395,
+        "endMs":  40551,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " evidence",
+        "startMs":  40551,
+        "endMs":  40839,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " record",
+        "startMs":  40839,
+        "endMs":  41396,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " one",
+        "startMs":  41396,
+        "endMs":  41552,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " supported",
+        "startMs":  41552,
+        "endMs":  41901,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " claim",
+        "startMs":  41901,
+        "endMs":  42507,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " and",
+        "startMs":  42507,
+        "endMs":  42599,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " zero",
+        "startMs":  42599,
+        "endMs":  42847,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " unsupported",
+        "startMs":  42847,
+        "endMs":  43286,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " claims",
+        "startMs":  43286,
+        "endMs":  44702,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Policy",
+        "startMs":  44702,
+        "endMs":  45051,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " before",
+        "startMs":  45051,
+        "endMs":  45309,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " execution",
+        "startMs":  45309,
+        "endMs":  46466,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Exact",
+        "startMs":  46466,
+        "endMs":  46760,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " approval",
+        "startMs":  46760,
+        "endMs":  47053,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " for",
+        "startMs":  47053,
+        "endMs":  47164,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  47164,
+        "endMs":  47225,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " call",
+        "startMs":  47225,
+        "endMs":  48125,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Evidence",
+        "startMs":  48125,
+        "endMs":  48398,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " behind",
+        "startMs":  48398,
+        "endMs":  48685,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " the",
+        "startMs":  48685,
+        "endMs":  48746,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " claim",
+        "startMs":  48746,
+        "endMs":  49975,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Install",
+        "startMs":  49975,
+        "endMs":  50293,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " Maqam",
+        "startMs":  50293,
+        "endMs":  50638,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " from",
+        "startMs":  50638,
+        "endMs":  50794,
+        "timestampMs":  null,
+        "confidence":  null
+    },
+    {
+        "text":  " npm",
+        "startMs":  50794,
+        "endMs":  51271,
+        "timestampMs":  null,
+        "confidence":  null
+    }
+]
