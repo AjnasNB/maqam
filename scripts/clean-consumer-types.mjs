@@ -32,7 +32,7 @@ function runNpm(args, options = {}) {
 }
 
 try {
-  const packed = JSON.parse(runNpm([
+  const packReport = JSON.parse(runNpm([
     "pack",
     "--json",
     "--ignore-scripts",
@@ -40,7 +40,20 @@ try {
     "--pack-destination",
     temporaryRoot
   ], { capture: true, env: { npm_config_dry_run: "false" } }));
-  if (!Array.isArray(packed) || packed.length !== 1 || !packed[0].filename) {
+  // npm <=11 reports an array, while npm 12 reports an object keyed by the
+  // package name. Normalize both CLI shapes, then keep the check
+  // fail-closed so this fixture never installs an ambiguous artifact.
+  const packed = Array.isArray(packReport)
+    ? packReport
+    : packReport && typeof packReport === "object"
+      ? Object.values(packReport)
+      : [];
+  if (
+    packed.length !== 1
+    || packed[0]?.name !== "maqam"
+    || packed[0]?.version !== "0.2.4"
+    || !packed[0]?.filename
+  ) {
     throw new Error("npm pack did not report exactly one Maqam artifact.");
   }
 
