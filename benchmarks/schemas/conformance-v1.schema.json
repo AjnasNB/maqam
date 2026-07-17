@@ -28,7 +28,7 @@
       "properties": {
         "shortName": { "const": "MGES" },
         "profile": { "const": "governance-boundary-conformance" },
-        "version": { "const": "1.0.0" },
+        "version": { "enum": ["1.0.0", "1.1.0"] },
         "externallyStandardized": { "const": false },
         "externallyCertified": { "const": false }
       }
