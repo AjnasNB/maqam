@@ -65,7 +65,7 @@ try {
     type: "module"
   }, null, 2));
   await writeFile(join(consumerDirectory, "consumer.ts"), [
-    "import { AgentRuntime, PolicyEngine, ResearchSourceRegistry, ToolGateway, crawl, createCrawlerTool, createRssAtomSourceAdapter, createWebCrawlerSourceAdapter, defineResearchSourceAdapter, defineResearchToolCaller, parseRssAtom, registerToolAdapter, defineToolAdapter, runToolAdapterConformance } from \"maqam\";",
+    "import { AgentRuntime, PolicyEngine, ResearchSourceRegistry, ToolGateway, crawl, createCrawlerTool, createRssAtomResearchAdapter, createRssAtomSourceAdapter, createWebCrawlerSourceAdapter, defineResearchSourceAdapter, defineResearchToolCaller, parseRssAtom, registerToolAdapter, defineToolAdapter, runToolAdapterConformance } from \"maqam\";",
     "import { createMaqamServer } from \"maqam/server\";",
     "void AgentRuntime;",
     "void crawl;",
@@ -77,7 +77,18 @@ try {
     "const sourceCaller = defineResearchToolCaller({ call: async () => [{ uri: \"https://example.com/\", text: \"fixture\" }] });",
     "const sources = new ResearchSourceRegistry({ adapters: [sourceAdapter], toolCaller: sourceCaller });",
     "void sources.route({ channel: \"web\", input: { url: \"https://example.com/\" } });",
-    "void parseRssAtom('<rss version=\"2.0\"><channel><title>x</title></channel></rss>', \"https://example.com/feed.xml\");",
+    "const parsedFeed = parseRssAtom('<rss version=\"2.0\"><channel><title>x</title></channel></rss>', \"https://example.com/feed.xml\");",
+    "const parserHasNoNetwork: false = parsedFeed.provenance.networkAccess;",
+    "void parserHasNoNetwork;",
+    "const readFeed = createRssAtomResearchAdapter(async () => '<rss version=\"2.0\"><channel><title>x</title></channel></rss>');",
+    "void readFeed({ url: \"https://example.com/feed.xml\" }).then((feed) => {",
+    "  const parserNetworkAccess: false = feed.provenance.parserNetworkAccess;",
+    "  const retrieval: \"host-supplied-reader\" = feed.provenance.retrieval;",
+    "  const retrievalNetworkAccess: \"host-defined\" = feed.provenance.retrievalNetworkAccess;",
+    "  void parserNetworkAccess; void retrieval; void retrievalNetworkAccess;",
+    "  // @ts-expect-error Reader provenance deliberately does not claim retrieval was offline.",
+    "  void feed.provenance.networkAccess;",
+    "});",
     "void createRssAtomSourceAdapter(async () => '<rss version=\"2.0\"><channel><title>x</title></channel></rss>');",
     "void createWebCrawlerSourceAdapter(crawl);",
     "void createWebCrawlerSourceAdapter(createCrawlerTool());",

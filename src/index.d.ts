@@ -26,14 +26,26 @@ export interface RssAtomFeedProvenance {
   contentHash: string;
   parser: string;
   networkAccess: false;
-  requestedUrl?: string;
-  finalUrl?: string;
-  status?: number | null;
-  contentType?: string | null;
-  retrievedAt?: string | null;
 }
 
-export interface RssAtomFeed {
+export interface RssAtomResearchFeedProvenance {
+  sourceUrl: string;
+  format: "rss2" | "atom";
+  contentHash: string;
+  parser: string;
+  parserNetworkAccess: false;
+  retrieval: "host-supplied-reader";
+  retrievalNetworkAccess: "host-defined";
+  requestedUrl: string;
+  finalUrl: string;
+  status: number | null;
+  contentType: string | null;
+  retrievedAt: string | null;
+}
+
+export interface RssAtomFeed<
+  TProvenance extends RssAtomFeedProvenance | RssAtomResearchFeedProvenance = RssAtomFeedProvenance
+> {
   sourceUrl: string;
   format: "rss2" | "atom";
   title: string;
@@ -44,8 +56,10 @@ export interface RssAtomFeed {
   updatedAt: string | null;
   items: RssAtomItem[];
   contentHash: string;
-  provenance: RssAtomFeedProvenance;
+  provenance: TProvenance;
 }
+
+export type RssAtomResearchFeed = RssAtomFeed<RssAtomResearchFeedProvenance>;
 
 export interface CrawlRedirect {
   from: string;
@@ -201,7 +215,7 @@ export function parseRssAtom(
 export function createRssAtomResearchAdapter(
   readDocument: RssAtomDocumentReader,
   options?: RssAtomParserOptions
-): (input: { url: string }, context?: unknown) => Promise<RssAtomFeed>;
+): (input: { url: string }, context?: unknown) => Promise<RssAtomResearchFeed>;
 
 export interface ResearchDocumentCitationInput {
   uri: string;

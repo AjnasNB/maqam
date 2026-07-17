@@ -135,4 +135,3 @@ Also add application tests proving:
 - fatal approval, policy, and security failures do not fall through;
 - ordinary source unavailability follows the intended preference order; and
 - UI output treats every source field as untrusted text.
-
