@@ -7,10 +7,13 @@ import worker, { MEDIA_OBJECTS, parseByteRange, serveMedia } from "../src/index.
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const publicRoot = path.join(root, "public");
+const ignoredDirectories = new Set(["node_modules", ".wrangler", ".wrangler-dry-run"]);
 
 const walk = async (directory) => {
   const entries = await readdir(directory, { withFileTypes: true });
-  const nested = await Promise.all(entries.map(async (entry) => {
+  const nested = await Promise.all(entries.filter((entry) => (
+    !entry.isDirectory() || !ignoredDirectories.has(entry.name)
+  )).map(async (entry) => {
     const full = path.join(directory, entry.name);
     return entry.isDirectory() ? walk(full) : [full];
   }));

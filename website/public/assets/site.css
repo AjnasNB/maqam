@@ -158,6 +158,12 @@ button {
   text-decoration: none;
 }
 
+.desktop-nav a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+}
+
 .desktop-nav a:hover,
 .desktop-nav a[aria-current="page"],
 .mobile-nav a:hover,
@@ -170,7 +176,7 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.48rem;
-  min-height: 38px;
+  min-height: 44px;
   padding: 0.5rem 0.8rem;
   border: 1px solid var(--line-strong);
   background: var(--surface);
@@ -196,7 +202,7 @@ button {
 .nav-toggle,
 .docs-toggle {
   display: none;
-  min-height: 40px;
+  min-height: 44px;
   border: 1px solid var(--line-strong);
   background: var(--surface);
   color: var(--text);
@@ -211,7 +217,8 @@ button {
 
 .mobile-nav a {
   display: block;
-  padding: 0.7rem 0;
+  min-height: 44px;
+  padding: 0.78rem 0;
 }
 
 .hero {
@@ -754,7 +761,8 @@ button {
   margin-top: 1.5rem;
 }
 
-.docs-sidebar h2 {
+.docs-sidebar h2,
+.docs-nav-title {
   margin: 0 0 0.5rem;
   color: var(--faint);
   font-family: var(--mono);
@@ -1072,6 +1080,11 @@ tr:last-child td {
   text-decoration: none;
 }
 
+.footer-grid a {
+  min-height: 24px;
+  padding-block: 0.2rem;
+}
+
 .sr-only,
 .live-region {
   position: absolute;
@@ -1088,6 +1101,12 @@ tr:last-child td {
 @media (max-width: 960px) {
   .desktop-nav {
     display: none;
+  }
+
+  .docs-sidebar a {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
   }
 
   .nav-toggle {

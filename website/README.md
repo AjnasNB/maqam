@@ -4,10 +4,13 @@ This directory contains the open-source static site for `maqamagent.com`. It use
 
 ## Local checks
 
+Use Node.js 22 or newer. Wrangler is pinned in this workspace so the local runtime supports the configured compatibility date.
+
 ```sh
 cd website
+npm ci
 npm run check
-wrangler dev --local --port 8791
+npm run dev
 ```
 
 Open `http://127.0.0.1:8791`. The Worker adds security headers and delegates static files to the `ASSETS` binding. In production, requests for `www.maqamagent.com` receive an HTTPS `308` redirect to the apex hostname while preserving the path and query string.
@@ -15,7 +18,7 @@ Open `http://127.0.0.1:8791`. The Worker adds security headers and delegates sta
 Release media is served from the `MEDIA` R2 binding. Public paths are fixed in `src/index.js`; arbitrary bucket keys are never accepted from the URL. To test locally, seed Wrangler's local R2 store with the release files before opening a media route.
 
 ```sh
-wrangler r2 object put maqam-media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4 --file ../demo/remotion/out/maqam-exact-approval-demo.mp4 --content-type video/mp4 --local
+npx wrangler r2 object put maqam-media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4 --file ../demo/remotion/out/maqam-exact-approval-demo.mp4 --content-type video/mp4 --local
 ```
 
 ## Dry run and deployment
@@ -24,7 +27,7 @@ The repository does not contain account IDs, route IDs, API tokens, or R2 creden
 
 ```sh
 npm run deploy:dry
-wrangler deploy
+npx wrangler deploy
 ```
 
 The Wrangler configuration declares `maqamagent.com` and `www.maqamagent.com` as Worker custom domains and binds the existing `maqam-media` bucket. Deployment can create domain records and certificates only in an authorized Cloudflare zone. Verify that neither hostname already has a conflicting CNAME record. Do not commit account-specific identifiers.

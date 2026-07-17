@@ -12,6 +12,9 @@
     "deploy:dry": "wrangler deploy --dry-run --outdir .wrangler-dry-run"
   },
   "engines": {
-    "node": ">=20.18.1"
+    "node": ">=22.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "4.112.0"
   }
 }
