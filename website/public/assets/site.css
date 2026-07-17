@@ -235,7 +235,7 @@ button {
 .page-hero h1 {
   margin: 0;
   max-width: 12ch;
-  font-size: clamp(3.2rem, 7vw, 6.25rem);
+  font-size: clamp(3rem, 6.2vw, 5.35rem);
   font-weight: 800;
   letter-spacing: -0.065em;
   line-height: 0.93;
@@ -382,7 +382,7 @@ button {
 .section-head h2,
 .article h2 {
   margin: 0;
-  font-size: clamp(2.1rem, 5vw, 4.3rem);
+  font-size: clamp(2rem, 4.3vw, 3.65rem);
   font-weight: 780;
   letter-spacing: -0.052em;
   line-height: 1;
@@ -565,14 +565,14 @@ button {
 .video-heading h3 {
   max-width: 18ch;
   margin: 0 auto;
-  font-size: clamp(2.2rem, 5vw, 4.5rem);
+  font-size: clamp(2.1rem, 4.4vw, 3.8rem);
   font-weight: 780;
   letter-spacing: -0.052em;
   line-height: 0.98;
 }
 
 .video-heading h3 {
-  font-size: clamp(2rem, 4vw, 3.6rem);
+  font-size: clamp(1.9rem, 3.7vw, 3.15rem);
 }
 
 .video-heading > p:not(.eyebrow) {
@@ -725,7 +725,7 @@ button {
 
 .page-hero h1 {
   max-width: 15ch;
-  font-size: clamp(3rem, 7vw, 6rem);
+  font-size: clamp(2.8rem, 5.8vw, 5rem);
 }
 
 .page-hero p {
@@ -792,7 +792,7 @@ button {
 .docs-content h1,
 .article h1 {
   margin: 0 0 1rem;
-  font-size: clamp(2.6rem, 6vw, 4.7rem);
+  font-size: clamp(2.45rem, 5vw, 4rem);
   letter-spacing: -0.055em;
   line-height: 1;
 }
@@ -801,7 +801,7 @@ button {
 .article h2 {
   margin: 4.2rem 0 1rem;
   padding-top: 1rem;
-  font-size: clamp(1.8rem, 4vw, 2.9rem);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
   scroll-margin-top: calc(var(--nav-height) + 1rem);
 }
 
@@ -1225,7 +1225,7 @@ tr:last-child td {
   .hero h1,
   .page-hero h1 {
     max-width: 100%;
-    font-size: clamp(2.55rem, 13vw, 3.6rem);
+    font-size: clamp(2.4rem, 11.5vw, 3.2rem);
     letter-spacing: -0.055em;
     text-wrap: balance;
   }
