@@ -61,6 +61,32 @@ for (const file of htmlFiles) {
   requireMatch(/<a\s+class="skip-link"\s+href="#main">/i, "missing skip link");
   requireMatch(/<main\b[^>]*\bid="main"/i, "missing main landmark id");
 
+  if (/0\.2\.3|candidate pending exact release approval/i.test(source)) {
+    failures.push(`${label}: contains stale pre-0.2.4 publication wording`);
+  }
+
+  const tableCount = (source.match(/<table\b/gi) || []).length;
+  const captionCount = (source.match(/<caption\b/gi) || []).length;
+  if (tableCount !== captionCount) {
+    failures.push(`${label}: expected one caption per table; tables=${tableCount}, captions=${captionCount}`);
+  }
+
+  for (const match of source.matchAll(/<th\b([^>]*)>/gi)) {
+    if (!/\bscope="(?:row|col)"/i.test(match[1])) failures.push(`${label}: table header missing row or column scope`);
+  }
+
+  for (const match of source.matchAll(/<div\s+class="table-wrap"([^>]*)>/gi)) {
+    const attributes = match[1];
+    if (!/\btabindex="0"/i.test(attributes) || !/\brole="region"/i.test(attributes) || !/\baria-label="[^"]+"/i.test(attributes)) {
+      failures.push(`${label}: table wrapper must be a labelled keyboard-scrollable region`);
+    }
+  }
+
+  if (label === "index.html") {
+    requireMatch(/v0\.2\.4 is live/i, "homepage must identify the live 0.2.4 release");
+    requireMatch(/maqam@0\.2\.4/i, "homepage install command must pin maqam@0.2.4");
+  }
+
   if (label === path.join("articles", "exact-agent-approvals", "index.html")) {
     requireMatch(
       /allowedOrigins:\s*\["https:\/\/registry\.npmjs\.org"\]/,

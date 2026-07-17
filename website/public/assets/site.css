@@ -7,7 +7,7 @@
   --line-strong: #46554b;
   --text: #edf1ee;
   --muted: #aab5ad;
-  --faint: #758079;
+  --faint: #78837c;
   --accent: #82bd91;
   --accent-strong: #a7d6b2;
   --danger: #dd8178;
@@ -222,12 +222,12 @@ button {
 }
 
 .hero {
-  min-height: calc(100dvh - var(--nav-height));
+  min-height: min(720px, calc(100dvh - var(--nav-height)));
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(420px, 1.18fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
   align-items: center;
-  gap: clamp(2rem, 6vw, 6rem);
-  padding-block: clamp(3rem, 7vw, 5.5rem);
+  gap: clamp(2rem, 4.5vw, 4.5rem);
+  padding-block: clamp(3rem, 5vw, 4.5rem);
 }
 
 .hero > * {
@@ -235,24 +235,53 @@ button {
 }
 
 .hero-copy {
-  max-width: 580px;
+  max-width: 620px;
 }
 
-.hero h1,
-.page-hero h1 {
+.hero h1 {
   margin: 0;
-  max-width: 12ch;
-  font-size: clamp(3rem, 6.2vw, 5.35rem);
+  max-width: 14ch;
+  font-size: clamp(2.75rem, 4.25vw, 4.25rem);
   font-weight: 800;
-  letter-spacing: -0.065em;
-  line-height: 0.93;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
 }
 
 .hero-copy > p {
   max-width: 40ch;
-  margin: 1.6rem 0 0;
+  margin: 1.25rem 0 0;
   color: var(--muted);
-  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  font-size: clamp(1rem, 1.45vw, 1.16rem);
+}
+
+.hero-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 1.5rem 0 0;
+  border: 1px solid var(--line-strong);
+  background: var(--line-strong);
+}
+
+.hero-facts > div {
+  padding: 0.75rem 0.85rem;
+  background: var(--surface);
+}
+
+.hero-facts dt {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-facts dd {
+  margin: 0.2rem 0 0;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
 .hero-actions,
@@ -260,7 +289,7 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 .button {
@@ -297,7 +326,7 @@ button {
   max-width: 100%;
   margin: 0;
   min-height: 0;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 2;
   border: 1px solid var(--line);
   overflow: hidden;
 }
@@ -307,6 +336,12 @@ button {
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+.hero-media picture {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .hero-media figcaption {
@@ -333,6 +368,14 @@ button {
   font-size: 0.78rem;
 }
 
+.release-state.is-live {
+  border-left-color: var(--accent);
+}
+
+.release-state a {
+  color: var(--accent-strong);
+}
+
 .release-state strong {
   color: var(--text);
   text-transform: uppercase;
@@ -345,7 +388,7 @@ button {
 
 .proof-grid {
   display: grid;
-  grid-template-columns: 1.25fr repeat(4, 1fr);
+  grid-template-columns: 1.25fr repeat(5, 1fr);
 }
 
 .proof-grid > * {
@@ -374,7 +417,7 @@ button {
 }
 
 .section {
-  padding-block: clamp(4.5rem, 9vw, 8rem);
+  padding-block: clamp(3.5rem, 6vw, 6rem);
 }
 
 .section + .section {
@@ -383,16 +426,16 @@ button {
 
 .section-head {
   max-width: 760px;
-  margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+  margin-bottom: clamp(2rem, 3.5vw, 3.25rem);
 }
 
 .section-head h2,
 .article h2 {
   margin: 0;
-  font-size: clamp(2rem, 4.3vw, 3.65rem);
+  font-size: clamp(1.9rem, 3vw, 2.75rem);
   font-weight: 780;
   letter-spacing: -0.052em;
-  line-height: 1;
+  line-height: 1.08;
 }
 
 .section-head p,
@@ -400,7 +443,85 @@ button {
   max-width: 60ch;
   margin: 1rem 0 0;
   color: var(--muted);
-  font-size: 1.08rem;
+  font-size: 1.02rem;
+}
+
+.system-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(420px, 1.18fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+  margin-bottom: clamp(2.25rem, 4vw, 3.5rem);
+}
+
+.system-intro .section-head {
+  margin-bottom: 0;
+}
+
+.system-visual {
+  margin: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.system-visual picture,
+.system-visual img {
+  display: block;
+  width: 100%;
+}
+
+.system-visual img {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.system-visual figcaption {
+  padding: 0.75rem 0.9rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 2rem;
+  border: 1px solid var(--line-strong);
+  background: var(--line-strong);
+}
+
+.recipe-card {
+  min-width: 0;
+  padding: 1.25rem;
+  background: var(--surface);
+}
+
+.recipe-card .recipe-number {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+}
+
+.recipe-card h3 {
+  margin: 0.65rem 0 0;
+  font-size: 1.05rem;
+}
+
+.recipe-card p {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.recipe-card code {
+  display: block;
+  margin-top: 0.9rem;
+  color: var(--accent-strong);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
 }
 
 .eyebrow {
@@ -484,7 +605,18 @@ button {
 
 .media-frame--art > img,
 .media-frame--art > picture > img {
+  aspect-ratio: auto;
   object-position: center;
+}
+
+.page-hero .media-frame {
+  max-width: 960px;
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.docs-content > .media-frame,
+.article > .media-frame {
+  margin-block: 2rem;
 }
 
 .media-frame figcaption,
@@ -572,14 +704,14 @@ button {
 .video-heading h3 {
   max-width: 18ch;
   margin: 0 auto;
-  font-size: clamp(2.1rem, 4.4vw, 3.8rem);
+  font-size: clamp(2rem, 3.4vw, 3rem);
   font-weight: 780;
   letter-spacing: -0.052em;
-  line-height: 0.98;
+  line-height: 1.04;
 }
 
 .video-heading h3 {
-  font-size: clamp(1.9rem, 3.7vw, 3.15rem);
+  font-size: clamp(1.75rem, 2.8vw, 2.4rem);
 }
 
 .video-heading > p:not(.eyebrow) {
@@ -726,13 +858,17 @@ button {
 }
 
 .page-hero {
-  padding-block: clamp(4rem, 9vw, 8rem);
+  padding-block: clamp(3.5rem, 6vw, 6rem);
   border-bottom: 1px solid var(--line);
 }
 
 .page-hero h1 {
-  max-width: 15ch;
-  font-size: clamp(2.8rem, 5.8vw, 5rem);
+  margin: 0;
+  max-width: 17ch;
+  font-size: clamp(2.5rem, 4vw, 3.75rem);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 1;
 }
 
 .page-hero p {
@@ -800,16 +936,16 @@ button {
 .docs-content h1,
 .article h1 {
   margin: 0 0 1rem;
-  font-size: clamp(2.45rem, 5vw, 4rem);
+  font-size: clamp(2.25rem, 3.8vw, 3.25rem);
   letter-spacing: -0.055em;
-  line-height: 1;
+  line-height: 1.04;
 }
 
 .docs-content h2,
 .article h2 {
-  margin: 4.2rem 0 1rem;
+  margin: 3.25rem 0 1rem;
   padding-top: 1rem;
-  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-size: clamp(1.65rem, 2.6vw, 2.1rem);
   scroll-margin-top: calc(var(--nav-height) + 1rem);
 }
 
@@ -931,6 +1067,21 @@ button {
   margin: 1.5rem 0;
   overflow-x: auto;
   border: 1px solid var(--line-strong);
+}
+
+.table-wrap:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+table caption {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  text-align: left;
 }
 
 table {
@@ -1125,20 +1276,25 @@ tr:last-child td {
     min-height: auto;
   }
 
+  .system-intro,
+  .recipe-grid {
+    grid-template-columns: 1fr;
+  }
+
   .hero-media {
     min-height: 0;
     border: 1px solid var(--line);
   }
 
   .proof-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .proof-grid > * {
     border-bottom: 1px solid var(--line);
   }
 
-  .proof-grid > :nth-child(odd) {
+  .proof-grid > :nth-child(3n + 1) {
     border-left: 0;
   }
 
@@ -1238,15 +1394,25 @@ tr:last-child td {
   .hero,
   .section,
   .page-hero {
-    padding-block: 3.5rem;
+    padding-block: 3rem;
   }
 
-  .hero h1,
-  .page-hero h1 {
-    max-width: 100%;
-    font-size: clamp(2.4rem, 11.5vw, 3.2rem);
+  .hero h1 {
+    max-width: 12ch;
+    font-size: clamp(2.05rem, 8.5vw, 2.5rem);
     letter-spacing: -0.055em;
     text-wrap: balance;
+  }
+
+  .page-hero h1 {
+    max-width: 100%;
+    font-size: clamp(2.05rem, 8.5vw, 2.5rem);
+    letter-spacing: -0.055em;
+    text-wrap: balance;
+  }
+
+  .hero-facts {
+    grid-template-columns: 1fr;
   }
 
   .hero-actions,

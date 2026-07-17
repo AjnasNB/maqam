@@ -1,6 +1,6 @@
 # Website asset provenance
 
-This file records the source and intended use of static website artwork and remotely served candidate-release media. Maqam 0.2.4 is not public on npm until its exact release approval completes.
+This file records the source and intended use of static website artwork and remotely served release media. Maqam 0.2.4 was published through npm Trusted Publishing on 2026-07-17.
 
 ## Static assets
 
@@ -12,6 +12,10 @@ This file records the source and intended use of static website artwork and remo
 | `public/assets/productloop-ecosystem.png` | Codex generated image `exec-0578709a-409f-4283-8a60-91161cf095f1.png` | Generated for this release on 2026-07-16 | ProductLoop ecosystem illustration |
 | `public/assets/benchmark-metrology-v2.png` | OpenAI image generation, original release artwork | Generated for this release on 2026-07-17 | Benchmark methodology and measurement illustration |
 | `public/assets/community-workbench-v2.png` | OpenAI image generation, original release artwork | Generated for this release on 2026-07-17 | Open-source contribution and modular-review illustration |
+| `public/assets/maqam-exact-gate-3d.png` | OpenAI image generation, original website artwork | Generated on 2026-07-17 as a dark isometric gate with one approved capsule and rejected alternate paths | Homepage exact-approval concept |
+| `public/assets/productloop-modular-hub-3d.png` | OpenAI image generation, original website artwork | Generated on 2026-07-17 as a central composition hub with eight independent modules | ProductLoop package-family map |
+| `public/assets/integration-dock-3d.png` | OpenAI image generation, original website artwork | Generated on 2026-07-17 as a provider-neutral adapter dock with a controlled gateway | Integration and provider-boundary pages |
+| `public/assets/evidence-metrology-3d.png` | OpenAI image generation, original website artwork | Generated on 2026-07-17 as a metrology instrument linking execution, evidence, and conformance | Benchmark, security, roadmap, and release evidence |
 
 The generated artwork was created specifically for Maqam, then copied into the committed public asset directory. No external stock image, third-party logo, or runtime generation dependency is used.
 

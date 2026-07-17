@@ -35,7 +35,7 @@
       <p class="lede">MGES v1 keeps local performance regression evidence separate from deterministic governance-boundary conformance.</p>
 
       <figure class="media-frame media-frame--art">
-        <picture><source srcset="/assets/benchmark-metrology-v2.webp" type="image/webp"><img src="/assets/benchmark-metrology-v2.png" width="1672" height="941" alt="Precision metrology workbench comparing a direct tool path with a governed Maqam path" fetchpriority="high"></picture>
+        <picture><source srcset="/assets/evidence-metrology-3d.webp" type="image/webp"><img src="/assets/evidence-metrology-3d.png" width="1536" height="1024" alt="Precision metrology workbench comparing direct and governed Maqam execution evidence" loading="lazy"></picture>
         <figcaption>A visual model of the two measured paths. The numerical evidence remains the raw JSON and reproducible fixture below.</figcaption>
       </figure>
 
@@ -48,15 +48,16 @@
 
       <h2 id="landscape">How MGES fits the benchmark landscape</h2>
       <p>No cited industry initiative or agent benchmark certifies exact side-effect approval integrity across frameworks. The closest references answer different questions, so they should complement MGES rather than be presented as substitutes or endorsements.</p>
-      <div class="table-wrap">
+      <div class="table-wrap" tabindex="0" role="region" aria-label="MGES benchmark landscape comparison">
         <table>
-          <thead><tr><th>Reference</th><th>What it evaluates or defines</th><th>Relationship to MGES</th></tr></thead>
+          <caption class="sr-only">Industry references, their evaluation scope, and relationship to the project-defined MGES suite</caption>
+          <thead><tr><th scope="col">Reference</th><th scope="col">What it evaluates or defines</th><th scope="col">Relationship to MGES</th></tr></thead>
           <tbody>
-            <tr><td><a href="https://www.nist.gov/artificial-intelligence/ai-agent-standards-initiative">NIST AI Agent Standards Initiative</a></td><td>Emerging interoperability, security, identity, and trust work for agents.</td><td>Standards context; it does not approve or certify MGES.</td></tr>
-            <tr><td><a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/">OWASP Top 10 for Agentic Applications</a></td><td>A risk taxonomy for agentic systems.</td><td>Use it to map threats and mitigations; MGES tests selected implementation invariants.</td></tr>
-            <tr><td><a href="https://arxiv.org/abs/2311.12983">GAIA</a></td><td>General-assistant capability on real-world questions requiring reasoning and tools.</td><td>Capability evaluation, not approval-boundary conformance.</td></tr>
-            <tr><td><a href="https://arxiv.org/abs/2308.03688">AgentBench</a></td><td>LLM-agent capability across interactive environments.</td><td>Agent performance evaluation, not a security certification.</td></tr>
-            <tr><td><strong>MGES v1</strong></td><td>Maqam local-call overhead and 12 named governance-boundary fixtures.</td><td>Project-specific regression evidence with public raw artifacts.</td></tr>
+            <tr><th scope="row"><a href="https://www.nist.gov/artificial-intelligence/ai-agent-standards-initiative">NIST AI Agent Standards Initiative</a></th><td>Emerging interoperability, security, identity, and trust work for agents.</td><td>Standards context; it does not approve or certify MGES.</td></tr>
+            <tr><th scope="row"><a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/">OWASP Top 10 for Agentic Applications</a></th><td>A risk taxonomy for agentic systems.</td><td>Use it to map threats and mitigations; MGES tests selected implementation invariants.</td></tr>
+            <tr><th scope="row"><a href="https://arxiv.org/abs/2311.12983">GAIA</a></th><td>General-assistant capability on real-world questions requiring reasoning and tools.</td><td>Capability evaluation, not approval-boundary conformance.</td></tr>
+            <tr><th scope="row"><a href="https://arxiv.org/abs/2308.03688">AgentBench</a></th><td>LLM-agent capability across interactive environments.</td><td>Agent performance evaluation, not a security certification.</td></tr>
+            <tr><th scope="row"><strong>MGES v1</strong></th><td>Maqam local-call overhead and 12 named governance-boundary fixtures.</td><td>Project-specific regression evidence with public raw artifacts.</td></tr>
           </tbody>
         </table>
       </div>
@@ -78,17 +79,18 @@
 
       <h2 id="method">Local-call performance method</h2>
       <p>The fixture is a sequential asynchronous in-process handler that returns <code>input.value + 1</code>. One path calls it directly. The other path routes it through <code>ToolGateway</code>, an allowlist <code>PolicyEngine</code>, canonical input handling, limits, and tracing.</p>
-      <div class="table-wrap">
+      <div class="table-wrap" tabindex="0" role="region" aria-label="MGES recorded performance method parameters">
         <table>
-          <thead><tr><th>Parameter</th><th>Recorded value</th></tr></thead>
+          <caption class="sr-only">Recorded parameters for the MGES local-call performance method</caption>
+          <thead><tr><th scope="col">Parameter</th><th scope="col">Recorded value</th></tr></thead>
           <tbody>
-            <tr><td>Environment</td><td>Node 24.15.0, Windows x64, AMD Ryzen 7 4800H</td></tr>
-            <tr><td>Observations</td><td>30 per variant, each in a fresh child process</td></tr>
-            <tr><td>Order</td><td>Alternating direct/governed and governed/direct paired rounds</td></tr>
-            <tr><td>Direct batch</td><td>250,000 warmup iterations, then 5,000,000 measured iterations</td></tr>
-            <tr><td>Governed batch</td><td>500 warmup iterations, then 5,000 measured iterations</td></tr>
-            <tr><td>Timer</td><td><code>process.hrtime.bigint()</code>, process startup outside the measured interval</td></tr>
-            <tr><td>Interval</td><td>10,000 deterministic percentile-bootstrap resamples for the sample median</td></tr>
+            <tr><th scope="row">Environment</th><td>Node 24.15.0, Windows x64, AMD Ryzen 7 4800H</td></tr>
+            <tr><th scope="row">Observations</th><td>30 per variant, each in a fresh child process</td></tr>
+            <tr><th scope="row">Order</th><td>Alternating direct/governed and governed/direct paired rounds</td></tr>
+            <tr><th scope="row">Direct batch</th><td>250,000 warmup iterations, then 5,000,000 measured iterations</td></tr>
+            <tr><th scope="row">Governed batch</th><td>500 warmup iterations, then 5,000 measured iterations</td></tr>
+            <tr><th scope="row">Timer</th><td><code>process.hrtime.bigint()</code>, process startup outside the measured interval</td></tr>
+            <tr><th scope="row">Interval</th><td>10,000 deterministic percentile-bootstrap resamples for the sample median</td></tr>
           </tbody>
         </table>
       </div>

@@ -62,7 +62,7 @@ const handler = async (value) => value.value + 1;</code></pre></div>
 
       <h2>Why batch sizes differ</h2>
       <p>The direct handler only performs an asynchronous addition, so a short direct batch would be dominated by scheduling noise. The governed path allocates snapshots and trace records, so it reaches a stable timing window with fewer operations.</p>
-      <div class="table-wrap"><table><thead><tr><th>Variant</th><th>Warmup operations</th><th>Timed operations per observation</th></tr></thead><tbody><tr><td>Direct</td><td>250,000</td><td>5,000,000</td></tr><tr><td>Governed</td><td>500</td><td>5,000</td></tr></tbody></table></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="MGES batch size comparison"><table><caption class="sr-only">Warmup and timed operation counts for direct and governed MGES variants</caption><thead><tr><th scope="col">Variant</th><th scope="col">Warmup operations</th><th scope="col">Timed operations per observation</th></tr></thead><tbody><tr><th scope="row">Direct</th><td>250,000</td><td>5,000,000</td></tr><tr><th scope="row">Governed</th><td>500</td><td>5,000</td></tr></tbody></table></div>
       <p>Each observation divides its own elapsed time by its own operation count. Both median timed batches exceeded the project's 100 ms minimum in the recorded run.</p>
 
       <h2>Fresh processes and alternating order</h2>
@@ -81,15 +81,15 @@ operations per second at median = 1,000,000,000 / median nanoseconds</code></pre
       <p>The derived rate is a sequential local rate, not a concurrency or capacity measurement. MGES reports paired absolute added time and avoids promoting a governed/direct ratio because the direct baseline intentionally does almost no work.</p>
 
       <h2>The clean MGES v1 result</h2>
-      <div class="table-wrap"><table><thead><tr><th>Field</th><th>Recorded result</th></tr></thead><tbody>
-        <tr><td>Runtime and host</td><td>Node 24.15.0, Windows x64, AMD Ryzen 7 4800H</td></tr>
-        <tr><td>Observations</td><td>30 fresh processes per variant</td></tr>
-        <tr><td>Governed median</td><td>127.498 microseconds per call</td></tr>
-        <tr><td>95% bootstrap interval</td><td>126.334 to 128.942 microseconds per call</td></tr>
-        <tr><td>Sequential rate at median</td><td>7,843.288 calls per second</td></tr>
-        <tr><td>Paired added median</td><td>127.422 microseconds per call</td></tr>
-        <tr><td>Governed coefficient of variation</td><td>5.572%</td></tr>
-        <tr><td>Project publication checks</td><td>PASS, 5 of 5</td></tr>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Clean MGES v1 recorded result"><table><caption class="sr-only">Environment, observation count, timing result, and publication checks for the clean MGES v1 run</caption><thead><tr><th scope="col">Field</th><th scope="col">Recorded result</th></tr></thead><tbody>
+        <tr><th scope="row">Runtime and host</th><td>Node 24.15.0, Windows x64, AMD Ryzen 7 4800H</td></tr>
+        <tr><th scope="row">Observations</th><td>30 fresh processes per variant</td></tr>
+        <tr><th scope="row">Governed median</th><td>127.498 microseconds per call</td></tr>
+        <tr><th scope="row">95% bootstrap interval</th><td>126.334 to 128.942 microseconds per call</td></tr>
+        <tr><th scope="row">Sequential rate at median</th><td>7,843.288 calls per second</td></tr>
+        <tr><th scope="row">Paired added median</th><td>127.422 microseconds per call</td></tr>
+        <tr><th scope="row">Governed coefficient of variation</th><td>5.572%</td></tr>
+        <tr><th scope="row">Project publication checks</th><td>PASS, 5 of 5</td></tr>
       </tbody></table></div>
       <p>The publication checks require 30 observations, coefficient of variation no greater than 10% for both variants, and median timed batches of at least 100 ms. These are suite stability gates, not an industry acceptance rule.</p>
       <p>An earlier calibrated run failed because outliers pushed governed variation to 85.33%. The headline result was withheld. Timed batches were lengthened, no observations were deleted, and the declared threshold was not weakened.</p>

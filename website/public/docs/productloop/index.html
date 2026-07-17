@@ -41,6 +41,10 @@
         <strong>The product model</strong>
         Start with Maqam for the focused execution boundary. Start with <code>productloop-os</code> when one application needs the broader package family and tested composition helpers.
       </div>
+      <figure class="media-frame media-frame--art">
+        <picture><source srcset="/assets/productloop-modular-hub-3d.webp" type="image/webp"><img src="/assets/productloop-modular-hub-3d.png" width="1536" height="1024" alt="Modular ProductLoop hub connecting Maqam with eight named package boundaries" loading="lazy"></picture>
+        <figcaption>ProductLoop OS composes focused packages around Maqam while preserving a named responsibility boundary for each module.</figcaption>
+      </figure>
 
       <section id="overview-video" class="docs-media" data-video-block>
         <h2>Watch the package map</h2>
@@ -65,23 +69,24 @@ npx productloop-os@0.2.0 demo</code></pre></div>
 
       <div class="callout">
         <strong>Public registry status</strong>
-        All nine ProductLoop packages below are public on npm at the exact versions shown. Maqam is listed separately at public 0.2.3; its 0.2.4 candidate is pending exact release approval.
+        All nine ProductLoop packages below are public on npm at the exact versions shown. Maqam 0.2.4 is also public and listed separately.
       </div>
 
-      <div class="table-wrap">
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Public ProductLoop package versions and responsibilities">
         <table>
-          <thead><tr><th>Package / namespace</th><th>Public version</th><th>npm</th><th>Primary job</th><th>Important boundary</th></tr></thead>
+          <caption class="sr-only">Public ProductLoop package versions, npm links, responsibilities, and boundaries</caption>
+          <thead><tr><th scope="col">Package / namespace</th><th scope="col">Public version</th><th scope="col">npm</th><th scope="col">Primary job</th><th scope="col">Important boundary</th></tr></thead>
           <tbody>
-            <tr><td><code>productloop-os</code></td><td>0.2.0</td><td><a href="https://www.npmjs.com/package/productloop-os">npm</a></td><td>Umbrella composition and named namespaces</td><td>Not a hosted control plane</td></tr>
-            <tr><td><code>maqam</code></td><td>0.2.3</td><td><a href="https://www.npmjs.com/package/maqam">npm</a></td><td>Exact gateway approvals, workflows, evidence, worker adapters, HTTP crawling</td><td>Only registered gateway calls are governed</td></tr>
-            <tr><td><code>ajnas-runtime</code> / <code>runtime</code></td><td>0.2.0</td><td><a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></td><td>Ordered policy-gated tool execution</td><td>Fail-closed without an explicit policy</td></tr>
-            <tr><td><code>ajnas-policy</code> / <code>policy</code></td><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-policy">npm</a></td><td>Declarative decisions and audit receipts</td><td>Does not execute tools</td></tr>
-            <tr><td><code>ajnas-approvals</code> / <code>approvals</code></td><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></td><td>Human review state machine</td><td>Transport and identity remain host concerns</td></tr>
-            <tr><td><code>ajnas-provenance</code> / <code>provenance</code></td><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-provenance">npm</a></td><td>Hash-linked traces and signed bundles</td><td>Tamper evidence is not tamper prevention</td></tr>
-            <tr><td><code>ajnas-skills-registry</code> / <code>skills</code></td><td>0.2.0</td><td><a href="https://www.npmjs.com/package/ajnas-skills-registry">npm</a></td><td>Signed skill manifests and install policy</td><td>Does not sandbox skill code</td></tr>
-            <tr><td><code>ajnas-connectors</code> / <code>connectors</code></td><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-connectors">npm</a></td><td>Connector manifests and trust evaluation</td><td>Does not call external services</td></tr>
-            <tr><td><code>ajnas-evals</code> / <code>evals</code></td><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-evals">npm</a></td><td>Deterministic assertions over artifacts</td><td>Adapters supply the real executions</td></tr>
-            <tr><td><code>ajnas-browser-research</code> / <code>browserResearch</code></td><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-browser-research">npm</a></td><td>Governed plans, replay, citations, evidence</td><td>Not a browser engine</td></tr>
+            <tr><th scope="row"><code>productloop-os</code></th><td>0.2.0</td><td><a href="https://www.npmjs.com/package/productloop-os">npm</a></td><td>Umbrella composition and named namespaces</td><td>Not a hosted control plane</td></tr>
+            <tr><th scope="row"><code>maqam</code></th><td>0.2.4</td><td><a href="https://www.npmjs.com/package/maqam">npm</a></td><td>Exact gateway approvals, workflows, evidence, worker adapters, HTTP crawling</td><td>Only registered gateway calls are governed</td></tr>
+            <tr><th scope="row"><code>ajnas-runtime</code> / <code>runtime</code></th><td>0.2.0</td><td><a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></td><td>Ordered policy-gated tool execution</td><td>Fail-closed without an explicit policy</td></tr>
+            <tr><th scope="row"><code>ajnas-policy</code> / <code>policy</code></th><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-policy">npm</a></td><td>Declarative decisions and audit receipts</td><td>Does not execute tools</td></tr>
+            <tr><th scope="row"><code>ajnas-approvals</code> / <code>approvals</code></th><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></td><td>Human review state machine</td><td>Transport and identity remain host concerns</td></tr>
+            <tr><th scope="row"><code>ajnas-provenance</code> / <code>provenance</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-provenance">npm</a></td><td>Hash-linked traces and signed bundles</td><td>Tamper evidence is not tamper prevention</td></tr>
+            <tr><th scope="row"><code>ajnas-skills-registry</code> / <code>skills</code></th><td>0.2.0</td><td><a href="https://www.npmjs.com/package/ajnas-skills-registry">npm</a></td><td>Signed skill manifests and install policy</td><td>Does not sandbox skill code</td></tr>
+            <tr><th scope="row"><code>ajnas-connectors</code> / <code>connectors</code></th><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-connectors">npm</a></td><td>Connector manifests and trust evaluation</td><td>Does not call external services</td></tr>
+            <tr><th scope="row"><code>ajnas-evals</code> / <code>evals</code></th><td>0.1.1</td><td><a href="https://www.npmjs.com/package/ajnas-evals">npm</a></td><td>Deterministic assertions over artifacts</td><td>Adapters supply the real executions</td></tr>
+            <tr><th scope="row"><code>ajnas-browser-research</code> / <code>browserResearch</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-browser-research">npm</a></td><td>Governed plans, replay, citations, evidence</td><td>Not a browser engine</td></tr>
           </tbody>
         </table>
       </div>
@@ -131,7 +136,7 @@ console.log(result.status, os.trace.events.length);</code></pre></div>
         </section>
 
         <section class="package-entry" id="maqam">
-          <header><h2>maqam</h2><span class="package-version">public 0.2.3 · 0.2.4 candidate pending approval · <a href="https://www.npmjs.com/package/maqam">npm</a></span></header>
+          <header><h2>maqam</h2><span class="package-version">public 0.2.4 · <a href="https://www.npmjs.com/package/maqam">npm</a></span></header>
           <div class="package-body">
             <p>Provides the higher-level exact approval gateway, workflow runtime, evidence ledger, worker adapters, local console, and bounded HTTP crawler.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#maqam-code">Copy</button><pre><code id="maqam-code">import { PolicyEngine, ToolGateway } from "maqam";

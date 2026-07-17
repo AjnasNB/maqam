@@ -39,4 +39,4 @@ The Wrangler configuration declares `maqamagent.com` and `www.maqamagent.com` as
 - External SDK examples are labeled as host integration sketches when they are not shipped or tested by this repository.
 - MGES is a project-defined regression suite, not a standard, certification, security score, competitor ranking, capacity benchmark, or SLA.
 
-The public information architecture includes the runnable quickstart, the exact package atlas, a category-based comparison, the public roadmap, unified candidate release notes, security and integration documentation, benchmark methodology, technical articles, and community contribution paths. The site checker validates these internal routes together with the Worker redirect and media response semantics.
+The public information architecture includes the runnable quickstart, the exact package atlas, a category-based comparison, the public roadmap, unified release notes, security and integration documentation, benchmark methodology, technical articles, and community contribution paths. The site checker validates these internal routes together with the Worker redirect and media response semantics.

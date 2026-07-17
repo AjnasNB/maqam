@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>0.2.4 candidate integration preview | Maqam documentation</title>
-  <meta name="description" content="Source-preview documentation for the Maqam 0.2.4 candidate adapter API. These APIs are not exports of public npm 0.2.3.">
+  <title>Maqam 0.2.4 integrations | Maqam documentation</title>
+  <meta name="description" content="Public documentation for the Maqam 0.2.4 provider-neutral adapter API and explicit provider boundaries.">
   <meta name="theme-color" content="#0b0e0d">
   <link rel="canonical" href="https://maqamagent.com/docs/integrations/">
   <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
@@ -26,32 +26,36 @@
     <aside class="docs-sidebar" aria-label="Integration documentation">
       <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Integration menu <span aria-hidden="true">+</span></button>
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
-        <nav aria-label="Integration types"><p class="docs-nav-title">0.2.4 source preview</p><a href="#source-preview">Candidate status</a><a href="#contract">Contract</a><a href="#sdk">SDK</a><a href="#http">HTTP</a><a href="#mcp">MCP-shaped</a><a href="#productloop">ProductLoop OS</a><a href="#conformance">Conformance</a></nav>
+        <nav aria-label="Integration types"><p class="docs-nav-title">0.2.4 integrations</p><a href="#source-preview">Release status</a><a href="#contract">Contract</a><a href="#sdk">SDK</a><a href="#http">HTTP</a><a href="#mcp">MCP-shaped</a><a href="#productloop">ProductLoop OS</a><a href="#conformance">Conformance</a></nav>
         <nav aria-label="External runtimes"><p class="docs-nav-title">External runtimes</p><a href="#google-adk">Google ADK</a><a href="#agent-365">Microsoft Agent 365</a><a href="#checklist">Deployment checklist</a></nav>
       </div>
     </aside>
 
     <article class="docs-content">
-      <h1>0.2.4 candidate integration preview</h1>
-      <p class="lede">This page documents source-only candidate APIs. Public npm 0.2.3 does not export them.</p>
-      <div class="callout callout-danger" id="source-preview">
-        <strong>Candidate source only, pending exact release approval</strong>
-        <code>defineToolAdapter()</code>, <code>registerToolAdapter()</code>, and <code>runToolAdapterConformance()</code> are present in the reviewed 0.2.4 candidate source and candidate tarball. They are not available from public <code>maqam@0.2.3</code>. Do not run an unpinned <code>npm install maqam</code> and expect these examples to compile.
+      <h1>Maqam 0.2.4 integrations</h1>
+      <p class="lede">This page documents the provider-neutral adapter APIs published in <code>maqam@0.2.4</code>.</p>
+      <div class="callout" id="source-preview">
+        <strong>Published in 0.2.4</strong>
+        <code>defineToolAdapter()</code>, <code>registerToolAdapter()</code>, and <code>runToolAdapterConformance()</code> are available from public npm. Pin <code>maqam@0.2.4</code> so these examples resolve to the reviewed API surface.
       </div>
-      <p>The final candidate source commit is not recorded yet. For a non-release source review, inspect the current repository and run its verification. Do not treat this checkout as the exact publication artifact:</p>
-      <div class="code-shell"><button class="copy-button" type="button" data-copy="#candidate-source-code">Copy</button><pre><code id="candidate-source-code">git clone https://github.com/AjnasNB/maqam.git
+      <figure class="media-frame media-frame--art">
+        <picture><source srcset="/assets/integration-dock-3d.webp" type="image/webp"><img src="/assets/integration-dock-3d.png" width="1536" height="1024" alt="Integration dock routing host-supplied SDK, HTTP, MCP-shaped, and function operations through one Maqam gateway" loading="lazy"></picture>
+        <figcaption>Provider clients stay host-supplied; only explicitly registered operations cross the Maqam policy and approval boundary.</figcaption>
+      </figure>
+      <p>For source review, inspect the exact npm <code>gitHead</code> and run the repository verification at that commit:</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#release-source-code">Copy</button><pre><code id="release-source-code">git clone https://github.com/AjnasNB/maqam.git
 cd maqam
+git checkout e1f6d3f9cf0d4aac277fc5e6ba1de3ae2c93a701
 npm ci
-npm test
-npm run test:consumer-types
+npm run verify
 npm pack --dry-run</code></pre></div>
-      <p>The final public install command remains <code>npm install maqam@0.2.3</code> until 0.2.4 is approved and the npm registry reports it as latest.</p>
+      <p>Install the public release with <code>npm install maqam@0.2.4</code>.</p>
       <div class="callout callout-warning">
         <strong>Boundary statement</strong>
         Maqam does not bundle provider SDKs, a native MCP client or server, provider discovery, protocol authentication, an HTTP service client, a connector marketplace, or secret storage.
       </div>
 
-      <h2 id="contract">Define a static adapter (0.2.4 candidate)</h2>
+      <h2 id="contract">Define a static adapter</h2>
       <p>The adapter name is the policy identity. Declare transport, effects, risk, description, and invocation explicitly.</p>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#adapter-code">Copy</button><pre><code id="adapter-code">import {
   PolicyEngine,
@@ -146,7 +150,7 @@ registerToolAdapter(gateway, mcpAdapter);</code></pre></div>
       </div>
 
       <h2 id="productloop">ProductLoop OS composition</h2>
-      <p>Public <code>productloop-os@0.2.0</code> exposes a Maqam gateway. The adapter helpers shown here still come from the local Maqam 0.2.4 candidate, not from public npm 0.2.3. Registration remains explicit.</p>
+      <p>Public <code>productloop-os@0.2.0</code> exposes a Maqam gateway. The adapter helpers shown here come from public <code>maqam@0.2.4</code>. Registration remains explicit.</p>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#productloop-adapter">Copy</button><pre><code id="productloop-adapter">import { createProductLoopOS } from "productloop-os";
 import {
   defineToolAdapter,
@@ -239,7 +243,7 @@ export const governedSlug = new FunctionTool({
         <li><a href="https://learn.microsoft.com/en-us/microsoft-agent-365/tooling-servers-overview">Official Work IQ tooling server overview</a></li>
       </ul>
 
-      <h2 id="conformance">Run the candidate conformance probe</h2>
+      <h2 id="conformance">Run the conformance probe</h2>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#conformance-code">Copy</button><pre><code id="conformance-code">import { runToolAdapterConformance } from "maqam";
 
 const report = await runToolAdapterConformance(adapter, {

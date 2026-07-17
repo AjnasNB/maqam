@@ -32,7 +32,7 @@
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
         <nav aria-label="Maqam guide">
           <p class="docs-nav-title">Maqam</p>
-          <a href="#install">Public 0.2.3 install</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#candidate-preview">0.2.4 source preview</a><a href="#boundary">Boundary</a>
+          <a href="#install">Public 0.2.4 install</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#adapter-apis">0.2.4 adapter APIs</a><a href="#boundary">Boundary</a>
         </nav>
         <nav aria-label="Other documentation">
           <p class="docs-nav-title">More</p>
@@ -42,34 +42,34 @@
     </aside>
 
     <article class="docs-content">
-      <h1>Maqam 0.2.3 public quickstart</h1>
-      <p class="lede">Run the public npm surface here. Candidate-only 0.2.4 APIs are separated below.</p>
+      <h1>Maqam 0.2.4 quickstart</h1>
+      <p class="lede">Run the public npm package, exact-approval proof, and adapter APIs released in 0.2.4.</p>
       <div class="callout">
         <strong>Requirements</strong>
         Node.js 20.18.1 or newer. The built-in proof needs no model key, hosted account, browser, database, or external side effect.
       </div>
-      <div class="callout callout-warning">
+      <div class="callout">
         <strong>Current package state</strong>
-        Latest public npm: 0.2.3 · 0.2.4 candidate pending exact release approval. Every install command in this quickstart pins 0.2.3. Versioned R2 media is candidate evidence, not proof of npm publication.
+        Latest public npm: 0.2.4. Every install command in this quickstart pins the verified public release.
       </div>
 
-      <h2 id="install">Install public npm 0.2.3</h2>
+      <h2 id="install">Install public npm 0.2.4</h2>
       <p>Use the pinned command-line proof without modifying a project, or pin the public package in your dependency manifest.</p>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#install-code">Copy</button>
         <pre><code id="install-code"># One-off proof from the public release
-npx -y maqam@0.2.3 demo approval
+npx -y maqam@0.2.4 demo approval
 
 # Pinned project dependency
-npm install maqam@0.2.3</code></pre>
+npm install maqam@0.2.4</code></pre>
       </div>
 
       <h2 id="proof">Run the exact-approval proof</h2>
       <p>The demo creates an isolated temporary workspace, performs one exact approved write, verifies the file, and removes the workspace.</p>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#proof-code">Copy</button>
-        <pre><code id="proof-code">npx -y maqam@0.2.3 demo approval
-npx -y maqam@0.2.3 demo approval --json</code></pre>
+        <pre><code id="proof-code">npx -y maqam@0.2.4 demo approval
+npx -y maqam@0.2.4 demo approval --json</code></pre>
       </div>
       <p>Expected checkpoints:</p>
       <div class="code-shell">
@@ -210,7 +210,7 @@ console.log(result.stats);</code></pre>
       </div>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#crawler-cli">Copy</button>
-        <pre><code id="crawler-cli">npx --yes --package=maqam@0.2.3 maqam-crawl https://example.com \
+        <pre><code id="crawler-cli">npx --yes --package=maqam@0.2.4 maqam-crawl https://example.com \
   --max-pages 25 \
   --delay 250 \
   --jsonl \
@@ -238,17 +238,17 @@ console.log(result.stats);</code></pre>
       <h2 id="console">Run the local console</h2>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#console-code">Copy</button>
-        <pre><code id="console-code">npx -y maqam@0.2.3
+        <pre><code id="console-code">npx -y maqam@0.2.4
 # Open http://127.0.0.1:8787</code></pre>
       </div>
       <p>The console binds to loopback by default. Remote binding requires authentication, an explicit Host allowlist, trusted UI origins, and deployment-level egress controls.</p>
 
-      <h2 id="candidate-preview">0.2.4 candidate source preview</h2>
-      <div class="callout callout-warning">
-        <strong>Not available from public npm yet</strong>
-        <code>defineToolAdapter()</code>, <code>registerToolAdapter()</code>, and <code>runToolAdapterConformance()</code> are 0.2.4 candidate APIs in the reviewed source and candidate tarball. They are not exports of public npm 0.2.3. Do not use an unpinned <code>npm install maqam</code> command expecting these APIs until 0.2.4 is published after exact approval.
+      <h2 id="adapter-apis">0.2.4 adapter APIs</h2>
+      <div class="callout">
+        <strong>Available from public npm</strong>
+        <code>defineToolAdapter()</code>, <code>registerToolAdapter()</code>, and <code>runToolAdapterConformance()</code> are public exports of <code>maqam@0.2.4</code>. Pin the version so installs remain reproducible.
       </div>
-      <p>Use the <a href="/docs/integrations/">candidate integration guide</a> only when intentionally evaluating the exact source candidate. Keep production projects on <code>maqam@0.2.3</code> until the npm package state changes.</p>
+      <p>Use the <a href="/docs/integrations/">integration guide</a> for static adapter examples and explicit provider boundaries. Production projects should pin <code>maqam@0.2.4</code>.</p>
 
       <h2 id="boundary">Know the boundary</h2>
       <dl class="definition-grid">
