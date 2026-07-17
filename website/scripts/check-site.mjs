@@ -8,6 +8,28 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const publicRoot = path.join(root, "public");
 const ignoredDirectories = new Set(["node_modules", ".wrangler", ".wrangler-dry-run"]);
+const approvedProductVisuals = new Set([
+  "/assets/approval-gate-art.png",
+  "/assets/community-workbench-v2.png",
+  "/assets/evidence-article.png",
+  "/assets/evidence-metrology-3d.png",
+  "/assets/integration-dock-3d.png",
+  "/assets/maqam-exact-gate-3d.png",
+  "/assets/productloop-modular-hub-3d.png"
+]);
+const requiredProductVisuals = new Map([
+  ["index.html", ["/assets/maqam-exact-gate-3d.png", "/assets/productloop-modular-hub-3d.png", "/assets/evidence-metrology-3d.png"]],
+  [path.join("why", "index.html"), ["/assets/maqam-exact-gate-3d.png"]],
+  [path.join("community", "index.html"), ["/assets/community-workbench-v2.png"]],
+  [path.join("roadmap", "index.html"), ["/assets/evidence-metrology-3d.png"]],
+  [path.join("releases", "v0.2.4", "index.html"), ["/assets/evidence-metrology-3d.png"]],
+  [path.join("docs", "benchmark", "index.html"), ["/assets/evidence-metrology-3d.png"]],
+  [path.join("docs", "integrations", "index.html"), ["/assets/integration-dock-3d.png"]],
+  [path.join("docs", "productloop", "index.html"), ["/assets/productloop-modular-hub-3d.png"]],
+  [path.join("docs", "security", "index.html"), ["/assets/evidence-metrology-3d.png"]],
+  [path.join("articles", "benchmarking-governance", "index.html"), ["/assets/approval-gate-art.png"]],
+  [path.join("articles", "exact-agent-approvals", "index.html"), ["/assets/evidence-article.png"]]
+]);
 
 const walk = async (directory) => {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -54,6 +76,12 @@ for (const file of htmlFiles) {
   const requireMatch = (pattern, message) => {
     if (!pattern.test(source)) failures.push(`${label}: ${message}`);
   };
+
+  for (const requiredVisual of requiredProductVisuals.get(label) || []) {
+    if (!source.includes('src="' + requiredVisual + '"')) {
+      failures.push(label + ": missing required product visual " + requiredVisual);
+    }
+  }
 
   requireMatch(/<html\s+lang="en">/i, "missing English document language");
   requireMatch(/<title>[^<]+<\/title>/i, "missing title");
@@ -123,6 +151,13 @@ for (const file of htmlFiles) {
 
   for (const match of source.matchAll(/<img\b([^>]*)>/gi)) {
     if (!/\balt="[^"]*"/i.test(match[1])) failures.push(`${label}: image missing alt attribute`);
+  }
+
+  for (const match of source.matchAll(/<img\b([^>]*)>/gi)) {
+    const src = match[1].match(/\bsrc="([^"]+)"/i)?.[1];
+    if (src?.startsWith("/assets/") && !src.endsWith(".svg") && !approvedProductVisuals.has(src)) {
+      failures.push(label + ": unreviewed conceptual image " + src + "; use a product-specific 3D visual or real product proof");
+    }
   }
 
   for (const match of source.matchAll(/\bdata-copy="([^"]+)"/g)) {
