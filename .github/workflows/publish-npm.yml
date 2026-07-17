@@ -289,7 +289,7 @@ jobs:
             echo "- SHA-256: \`${registry_sha256}\`"
             echo "- Integrity: \`${published_integrity}\`"
             echo "- Authentication: npm Trusted Publishing (OIDC)"
-            echo "- Provenance predicate: `${published_predicate}`"
+            echo "- Provenance predicate: \`${published_predicate}\`"
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Verify installed registry signatures and attestations
