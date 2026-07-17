@@ -14,6 +14,7 @@ For provider-specific prerequisites, runnable templates and explicit bypass warn
 | SDK | The same governed adapter boundary | Installed SDK, configured client, credentials and retries |
 | HTTP | The same governed adapter boundary and input-origin policy evaluation | HTTP client, authentication, redirect/DNS controls, rate limits and response validation |
 | MCP-style | A static local adapter name and governed invocation | MCP client, connection, discovery, protocol validation, authentication and remote tool arguments |
+| Governed source | Ordered adapter descriptors, normalized documents, fatal-error fallback rules and `ToolCaller` routing | Provider client/reader, credentials, rate limits, provider terms and exact gateway registration |
 | ProductLoop OS | Compatibility with its exposed `maqamGateway` | Explicit registration, record correlation, persistence and failure recovery |
 
 The `transport` field is a descriptive label. It does not activate a protocol implementation.
@@ -137,6 +138,49 @@ registerToolAdapter(gateway, mcpAdapter);
 
 This is an MCP-shaped wrapper, not native MCP support. The host owns client lifecycle, capability negotiation, schema validation, authentication, cancellation and protocol errors. Provider-internal actions remain subject to the provider's own permissions and sandbox.
 
+## Governed source adapters
+
+When several retrieval backends serve one logical research channel, register each backend twice at the appropriate boundary:
+
+1. define its source descriptor with a stable `id`, `channel`, and `toolName`;
+2. register its handler under that exact `toolName` in `ToolGateway`; and
+3. give `ResearchSourceRegistry` a `ToolCaller` bound to the gateway.
+
+```js
+import {
+  ResearchSourceRegistry,
+  defineResearchSourceAdapter,
+  defineResearchToolCaller
+} from "maqam";
+
+const source = defineResearchSourceAdapter({
+  id: "provider.search.v1",
+  channel: "research",
+  toolName: "research.provider.search",
+  authentication: "required",
+  capabilities: ["read", "search"],
+  read: (input) => providerClient.search(input)
+});
+
+gateway.registerTool(source.toolName, source.read, {
+  effects: ["network:read"],
+  risk: "medium"
+});
+
+const sources = new ResearchSourceRegistry({
+  adapters: [source],
+  toolCaller: defineResearchToolCaller({ call: gateway.call.bind(gateway) })
+});
+```
+
+Use `sources.route({ channel: "research", input, allowAuthenticated: true }, context)` for governed calls. `allowAuthenticated` is a deliberate route opt-in, not authentication. Construct the client with host-managed credentials and do not put secrets in `input`.
+
+`routeUngoverned()` calls the descriptor's direct `read` function. It bypasses gateway policy, approvals, call ceilings and trace capture. It exists for explicit integration work and must not be represented as a governed path.
+
+Ordinary unavailability can fall through to the next configured backend. Policy, approval, authentication/authorization, crawler-security, robots, goal-scope and tool-call-limit failures stop the route. This avoids turning a denied operation into an implicit request to a different provider.
+
+See [Governed Sources](governed-sources.md) for the complete normalized-document, fallback, source-doctor, RSS/Atom and security contracts.
+
 ## Machine-readable conformance probe
 
 `runToolAdapterConformance()` performs one adapter invocation through an isolated, allowlisted gateway and returns a frozen JSON-compatible report:
@@ -214,3 +258,4 @@ ProductLoop's connector registry, runtime, approvals, provenance and Maqam store
 7. Run the conformance probe against a fixture, then run provider-specific integration tests in a restricted environment.
 8. Verify the application has no direct client path that bypasses the adapter.
 9. Persist and reconcile run, approval, trace and evidence records when in-process storage is insufficient.
+10. For source registries, prove allow dispatches once, deny dispatches zero times, and fatal errors never fall through.

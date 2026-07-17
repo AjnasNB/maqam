@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Maqam 0.2.4 integrations | Maqam documentation</title>
-  <meta name="description" content="Public documentation for the Maqam 0.2.4 provider-neutral adapter API and explicit provider boundaries.">
+  <title>Maqam 0.3.0 integrations | Maqam documentation</title>
+  <meta name="description" content="Provider-neutral Maqam tool and research-source adapters with explicit SDK, HTTP, MCP-shaped, provider, and enforcement boundaries.">
   <meta name="theme-color" content="#0b0e0d">
   <link rel="canonical" href="https://maqamagent.com/docs/integrations/">
   <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
@@ -16,40 +16,41 @@
   <header class="site-header">
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
-      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/" aria-current="page">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/" aria-current="page">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
-    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/" aria-current="page">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/" aria-current="page">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
   </header>
 
   <main id="main" class="shell docs-layout">
     <aside class="docs-sidebar" aria-label="Integration documentation">
       <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Integration menu <span aria-hidden="true">+</span></button>
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
-        <nav aria-label="Integration types"><p class="docs-nav-title">0.2.4 integrations</p><a href="#source-preview">Release status</a><a href="#contract">Contract</a><a href="#sdk">SDK</a><a href="#http">HTTP</a><a href="#mcp">MCP-shaped</a><a href="#productloop">ProductLoop OS</a><a href="#conformance">Conformance</a></nav>
+        <nav aria-label="Integration types"><p class="docs-nav-title">0.3.0 integrations</p><a href="#source-preview">Release status</a><a href="#contract">Tool contract</a><a href="#research-sources">Source adapters</a><a href="#sdk">SDK</a><a href="#http">HTTP</a><a href="#mcp">MCP-shaped</a><a href="#productloop">ProductLoop OS</a><a href="#conformance">Conformance</a></nav>
         <nav aria-label="External runtimes"><p class="docs-nav-title">External runtimes</p><a href="#google-adk">Google ADK</a><a href="#agent-365">Microsoft Agent 365</a><a href="#checklist">Deployment checklist</a></nav>
       </div>
     </aside>
 
     <article class="docs-content">
-      <h1>Maqam 0.2.4 integrations</h1>
-      <p class="lede">This page documents the provider-neutral adapter APIs published in <code>maqam@0.2.4</code>.</p>
+      <h1>Maqam 0.3.0 integrations</h1>
+      <p class="lede">Use static tool adapters for side effects and static research-source adapters for normalized reads. In both cases, the host supplies the real client and keeps the enforcement path explicit.</p>
       <div class="callout" id="source-preview">
-        <strong>Published in 0.2.4</strong>
-        <code>defineToolAdapter()</code>, <code>registerToolAdapter()</code>, and <code>runToolAdapterConformance()</code> are available from public npm. Pin <code>maqam@0.2.4</code> so these examples resolve to the reviewed API surface.
+        <strong>Current 0.3.0 API line</strong>
+        The 0.2 tool-adapter contract remains available. Version 0.3.0 adds source adapters, ordered registry routing, normalized research documents, offline source checks, and RSS or Atom helpers. Pin <code>maqam@0.3.0</code> so examples resolve to one reviewed API surface.
       </div>
       <figure class="media-frame media-frame--art">
         <picture><source srcset="/assets/integration-dock-3d.webp" type="image/webp"><img src="/assets/integration-dock-3d.png" width="1536" height="1024" alt="Integration dock routing host-supplied SDK, HTTP, MCP-shaped, and function operations through one Maqam gateway" loading="lazy"></picture>
         <figcaption>Provider clients stay host-supplied; only explicitly registered operations cross the Maqam policy and approval boundary.</figcaption>
       </figure>
-      <p>For source review, inspect the exact npm <code>gitHead</code> and run the repository verification at that commit:</p>
+      <p>For source review, inspect the exact npm <code>gitHead</code>, check out that commit, and run repository verification:</p>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#release-source-code">Copy</button><pre><code id="release-source-code">git clone https://github.com/AjnasNB/maqam.git
 cd maqam
-git checkout e1f6d3f9cf0d4aac277fc5e6ba1de3ae2c93a701
+# Replace &lt;npm-git-head&gt; with the registry value for 0.3.0
+git checkout &lt;npm-git-head&gt;
 npm ci
 npm run verify
 npm pack --dry-run</code></pre></div>
-      <p>Install the public release with <code>npm install maqam@0.2.4</code>.</p>
+      <p>Install the pinned release line with <code>npm install maqam@0.3.0</code>. Confirm that the registry version and tagged source exist before production rollout.</p>
       <div class="callout callout-warning">
         <strong>Boundary statement</strong>
         Maqam does not bundle provider SDKs, a native MCP client or server, provider discovery, protocol authentication, an HTTP service client, a connector marketplace, or secret storage.
@@ -88,6 +89,11 @@ console.log(await gateway.call(
   { runId: "release_1" }
 ));</code></pre></div>
       <p>The invoked adapter receives the detached, deeply frozen input that policy evaluated. Adapter output remains trusted input from the host integration. Defining an adapter does not validate or record that output as evidence.</p>
+
+      <h2 id="research-sources">Research source adapters</h2>
+      <p><code>defineResearchSourceAdapter()</code> gives one backend a static adapter id, channel, tool name, priority, authentication mode, capabilities, optional direct reader, and optional offline check. <code>ResearchSourceRegistry.route()</code> invokes the selected tool name through a required host ToolCaller and normalizes output into frozen <code>ResearchDocument</code> records.</p>
+      <div class="callout callout-warning"><strong>Different adapter, same enforcement rule</strong>Register the source adapter's read function under its declared tool name and bind the registry ToolCaller to that gateway. Calling <code>adapter.read</code> or <code>routeUngoverned()</code> directly bypasses gateway policy.</div>
+      <p>The full ordering, fallback, doctor, RSS or Atom, and Agent Reach comparison is in the <a href="/docs/sources/">governed sources guide</a>.</p>
 
       <h2 id="sdk">SDK operation</h2>
       <p>Construct and authenticate the client in trusted host configuration. Do not place API tokens in canonical adapter input or evidence.</p>
@@ -150,7 +156,7 @@ registerToolAdapter(gateway, mcpAdapter);</code></pre></div>
       </div>
 
       <h2 id="productloop">ProductLoop OS composition</h2>
-      <p>Public <code>productloop-os@0.2.1</code> exposes a Maqam gateway. The adapter helpers shown here come from public <code>maqam@0.2.4</code>. Registration remains explicit.</p>
+      <p>Public <code>productloop-os@0.2.1</code> exposes a Maqam gateway. The adapter helpers shown here are available in <code>maqam@0.3.0</code>. Registration remains explicit.</p>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#productloop-adapter">Copy</button><pre><code id="productloop-adapter">import { createProductLoopOS } from "productloop-os";
 import {
   defineToolAdapter,

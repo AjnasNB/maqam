@@ -6,7 +6,7 @@ import { spawnSync } from "node:child_process";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SUITE_VERSION = "1.0.0";
+const SUITE_VERSION = "1.1.0";
 const SCHEMA = "maqam.benchmark.performance/v1";
 const REPOSITORY_ROOT = fileURLToPath(new URL("../", import.meta.url));
 const WORKER = fileURLToPath(new URL("./_governance-worker.mjs", import.meta.url));
@@ -399,7 +399,7 @@ async function main() {
     },
     fixture: {
       operation: "Sequential async in-process handler returning input.value + 1",
-      input: { value: 41, nested: { release: "0.2.x" } },
+      input: { value: 41, nested: { release: "0.3.x" } },
       directPath: "Call the same handler directly.",
       governedPath: "Call a registered tool through ToolGateway and an allowlist PolicyEngine with tracing enabled.",
       excluded: [

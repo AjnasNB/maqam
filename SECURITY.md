@@ -4,7 +4,7 @@ Maqam is designed for governed local agent workflows. Treat every tool, connecto
 
 ## Supported Version
 
-Security fixes are prepared against `maqam@0.2.4` and later reviewed 0.2.x releases. Version 0.2.4 adds a fail-closed host-adapter descriptor/conformance boundary and project-defined governance evaluation fixtures without weakening the descriptor-validation protections introduced in 0.2.2. Version 0.2.3 added the reproducible exact-approval demo; 0.2.2 superseded 0.2.1 for authority-boundary integrity under prototype pollution.
+The latest verified public release is `maqam@0.2.4`; security fixes are prepared on the current `0.3.0` source candidate and backported only when maintainers explicitly choose to support an older line. Version 0.3.0 adds a fail-closed governed-source caller boundary, fatal-error fallback rules, explicit authenticated-source opt-in, offline bounded feed parsing, and exact cross-origin crawler controls. It preserves the adapter descriptor/conformance and authority-boundary protections introduced in 0.2.x.
 
 ## Reporting Issues
 
@@ -33,10 +33,23 @@ Report security issues privately to the package owner before public disclosure. 
 - Crawler `onPage` and `onError` callbacks receive detached, frozen payloads and remain inside the total crawl deadline and caller cancellation boundary.
 - Configure cross-origin console access only with exact `allowedUiOrigins` values. Wildcards, `null`, paths, credentials, query strings, and fragments are rejected; origin-less browser cross-site API requests remain denied.
 
+## Governed Source Boundary
+
+- Construct `ResearchSourceRegistry` with a `toolCaller` bound to `ToolGateway.call`. `route()` fails closed without it.
+- Register each adapter handler under the exact declared `toolName` and apply explicit policy, origins, effects, risk, and call limits there. Registry registration alone does not register or govern a tool.
+- Treat `routeUngoverned()` as an explicit bypass. It offers ordered direct reads and normalization but no gateway policy, approval, call ceiling, or trace capture.
+- Never fall through after a policy denial, approval requirement, authentication/authorization failure, crawler security or robots denial, goal-scope conflict, or tool-call limit. Maqam classifies these errors as fatal for source routing.
+- Adapters marked `authentication: "required"` need an explicit `allowAuthenticated: true` route option. This flag does not authenticate, obtain a token, import cookies, or authorize the caller; the host owns those controls.
+- Keep adapter credentials in host-managed secret storage. Do not place tokens, cookies, session exports, passwords, or private records in route input, metadata, trace details, or evidence excerpts.
+- Treat every normalized `ResearchDocument` field as untrusted content. Escape it in the UI and do not execute returned markup, commands, links, or embedded instructions.
+- Keep source `check()` implementations local and deterministic. `doctor()` applies timeout and result validation but cannot sandbox arbitrary host JavaScript or prove that a custom check is offline or side-effect free.
+- `parseRssAtom()` performs no network request and rejects DTD/entity declarations. The host-supplied reader used by RSS/Atom adapter factories still needs DNS/redirect authorization, byte/time limits, egress controls, and credential isolation.
+- The crawler CLI no longer supports `--all-origins`. Use repeatable exact `--allowed-origin` values; this remains an application scope decision, not a substitute for deployment egress control.
+
 ## External Agent Boundary
 
 Maqam governs only calls routed through registered adapters. Provider event records can show internal commands and file changes, but they are not a substitute for preventive provider permissions. The local console intentionally exposes no HTTP route that launches coding agents.
 
 ## Release Approval
 
-Publishing is blocked unless the exact package, version, registry, command, artifact filename/size/integrity, and Git commit have explicit user approval. Automation runs may prepare release artifacts, but must not publish to npm, GitHub, social channels, or other external systems without that approval.
+Publishing is blocked unless the exact package, version, registry, command, artifact filename/size/integrity, and Git commit have explicit maintainer approval. Automation may prepare artifacts and the protected trusted-publishing workflow may publish only after that exact approval and GitHub environment gate. It must not publish a different artifact or publish to npm, GitHub, social channels, or other external systems without the corresponding authorization.

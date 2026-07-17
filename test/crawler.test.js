@@ -22,10 +22,35 @@ before(async () => {
       res.setHeader("content-type", "text/html");
       res.end(`
         <html>
-          <head><title>Home</title><meta name="description" content="Home description"></head>
+          <head>
+            <title>Home</title>
+            <meta name="description" content="Home description">
+            <link rel="alternate" type="application/rss+xml" href="/feed.xml">
+          </head>
           <body><main><h1>Home page</h1><p>Hello crawler.</p><a href="/about">About</a><a href="/private">Private</a></main></body>
         </html>
       `);
+      return;
+    }
+    if (req.url === "/feed.xml") {
+      res.setHeader("content-type", "application/rss+xml");
+      res.end(`<?xml version="1.0"?>
+        <rss version="2.0"><channel>
+          <title>Maqam fixture feed</title>
+          <link>${baseUrl}/</link>
+          <description>Governed feed updates.</description>
+          <item>
+            <guid>fixture-entry-1</guid>
+            <title>Feed entry</title>
+            <link>${baseUrl}/feed-entry</link>
+            <description><![CDATA[<p>Bounded <strong>feed</strong> content.</p>]]></description>
+          </item>
+        </channel></rss>`);
+      return;
+    }
+    if (req.url === "/feed-entry") {
+      res.setHeader("content-type", "text/html");
+      res.end("<html><body><main><h1>Feed entry</h1><p>Entry page.</p></main></body></html>");
       return;
     }
     if (req.url === "/about") {
@@ -52,11 +77,13 @@ after(async () => {
 });
 
 test("extractPage returns agent-friendly fields", () => {
-  const page = extractPage("<html><head><title>Test</title></head><body><main><h1>Hello</h1><p>World</p></main></body></html>", "https://example.com/");
+  const page = extractPage("<html><head><title>Test</title><link rel='alternate' type='application/atom+xml' href='/feed.atom'></head><body><main><h1>Hello</h1><p>World</p></main></body></html>", "https://example.com/");
   assert.equal(page.title, "Test");
   assert.equal(page.h1, "Hello");
   assert.match(page.markdown, /Hello/);
   assert.match(page.text, /World/);
+  assert.equal(page.sourceType, "web");
+  assert.deepEqual(page.feedLinks, ["https://example.com/feed.atom"]);
 });
 
 test("crawler respects robots.txt and extracts linked pages", async () => {
@@ -83,4 +110,38 @@ test("crawler can discover sitemap URLs", async () => {
   });
 
   assert.ok(pages.some((page) => page.url.endsWith("/about")));
+});
+
+test("crawler parses a seeded RSS document into bounded agent-friendly records", async () => {
+  const pages = await crawl({
+    seeds: [`${baseUrl}/feed.xml`],
+    maxPages: 1,
+    maxDepth: 0,
+    delayMs: 0,
+    allowPrivateNetworks: true
+  });
+
+  assert.equal(pages.length, 1);
+  assert.equal(pages[0].sourceType, "feed");
+  assert.equal(pages[0].title, "Maqam fixture feed");
+  assert.deepEqual(pages[0].links, [`${baseUrl}/feed-entry`]);
+  assert.equal(pages[0].feed.format, "rss2");
+  assert.equal(pages[0].feed.items[0].title, "Feed entry");
+  assert.match(pages[0].feed.items[0].markdown, /Bounded \*\*feed\*\* content/);
+  assert.match(pages[0].contentHash, /^sha256:[a-f0-9]{64}$/);
+});
+
+test("crawler discovers same-origin feed links only when explicitly enabled", async () => {
+  const pages = await crawl({
+    seeds: [`${baseUrl}/`],
+    includeFeeds: true,
+    maxPages: 4,
+    maxDepth: 1,
+    concurrency: 2,
+    delayMs: 0,
+    allowPrivateNetworks: true
+  });
+
+  assert.ok(pages.some((page) => page.url.endsWith("/feed.xml") && page.sourceType === "feed"));
+  assert.equal(pages.some((page) => page.url.endsWith("/feed-entry")), false);
 });

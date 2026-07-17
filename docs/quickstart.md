@@ -2,6 +2,8 @@
 
 This quickstart proves the exact-approval path locally. It needs Node.js 20.18.1 or later and does not need a model key, hosted account, browser, database, or external side effect.
 
+`maqam@0.2.4` is the latest verified public package while the 0.3.0 source candidate is under review. Commands below stay pinned to the public artifact. After 0.3.0 is published and registry-verified, replace the pin with `@0.3.0` to try Governed Sources.
+
 ## 1. Run The Built-In Proof
 
 From any directory:
@@ -130,6 +132,29 @@ Replace the fake handler only after defining:
 
 Only calls routed through the registered `ToolGateway` path are governed. Evidence and claims must be explicitly recorded by the handler or workflow. Current approval, runtime, trace, and evidence state is in-process unless the host exports and protects it.
 
+## 4. Try Governed Sources From The 0.3 Source Tree
+
+From a checkout of the 0.3.0 candidate:
+
+```bash
+npm install
+node examples/governed-sources.mjs
+```
+
+The example uses an offline RSS fixture, registers the RSS handler under its declared `toolName`, binds `ResearchSourceRegistry` to `ToolGateway.call`, routes one normalized document, and prints the gateway trace. It does not need a provider account or network request.
+
+The important boundary is:
+
+```text
+ResearchSourceRegistry.route()
+  -> bound ToolCaller
+  -> ToolGateway.call(adapter.toolName, ...)
+  -> policy / approval / trace
+  -> registered source handler
+```
+
+`route()` fails closed if no caller is bound. `routeUngoverned()` is available only for an intentional direct integration and bypasses policy, approvals, call ceilings, and trace capture. Read [Governed Sources](governed-sources.md) before connecting a remote provider or credentials.
+
 ## Cleanup And Reset
 
 The built-in approval demo removes its temporary workspace automatically and writes no Maqam state to your home directory.
@@ -156,5 +181,7 @@ Stop a running local console with `Ctrl+C`. The current console has no bundled d
 - [Why Maqam](why-maqam.md)
 - [Complete usage guide](usage.md)
 - [Coding-agent adapters](external-agents.md)
+- [Governed Sources](governed-sources.md)
+- [0.3 migration guide](migration-0.3.md)
 - [Detailed comparison](comparison.md)
 - [Security policy](../SECURITY.md)

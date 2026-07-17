@@ -119,7 +119,7 @@ test("maqam reports its installed package version", () => {
     const result = runCli(option);
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stderr, "");
-    assert.equal(result.stdout, "0.2.4\n");
+    assert.equal(result.stdout, "0.3.0\n");
   }
 });
 
@@ -128,6 +128,6 @@ test("maqam crawler aliases report the installed package version", () => {
     const result = runCrawlerCli(option);
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stderr, "");
-    assert.equal(result.stdout, "0.2.4\n");
+    assert.equal(result.stdout, "0.3.0\n");
   }
 });

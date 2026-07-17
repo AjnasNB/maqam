@@ -10,7 +10,17 @@ Maqam serves developers, platform engineers, security teams, and compliance revi
 
 ## Product Purpose
 
-Maqam is a provider-neutral governance and orchestration layer. It accepts function workers, object workers, command-line agents, and connectors behind one policy gateway, then records the run, tool decisions, approvals, outputs, evidence, and limits. Success means a reviewer can determine what was requested, what was allowed, what executed, what changed, and which human approved a sensitive action.
+Maqam is a provider-neutral governed execution boundary, not a full agent orchestrator. It accepts function workers, object workers, command-line agents, and connectors behind one policy gateway, then records the run, tool decisions, approvals, outputs, evidence, and limits. Success means a reviewer can determine what was requested, what was allowed, what executed, what changed, and which authenticated human approved a sensitive action through the host application.
+
+In one sentence: **Maqam checks policy before a registered agent action, binds approval to the exact call, executes that approved call once, and records evidence for review.**
+
+## Governed Sources
+
+Maqam 0.3 adds an ordered research-source layer for teams that have multiple backends such as public HTTP, RSS/Atom, a licensed provider, or an internal index. The source registry selects a backend, sends its exact tool name through `ToolGateway`, and normalizes the result to one document contract.
+
+The value is consistent governance across otherwise different retrieval systems. The registry does not log into providers, import browser cookies, install external tools, run a browser, bypass anti-bot systems, or make an unregistered operation governed. Direct `routeUngoverned()` use must be labeled as a bypass.
+
+ProductLoop OS remains the wider modular companion ecosystem. Maqam is the guarded execution door; ProductLoop supplies separately consumable runtime, policy, approval, provenance, evaluation, connector, skill, and research modules around it. Their state and contracts do not merge automatically.
 
 ## Brand Personality
 

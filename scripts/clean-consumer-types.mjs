@@ -51,7 +51,7 @@ try {
   if (
     packed.length !== 1
     || packed[0]?.name !== "maqam"
-    || packed[0]?.version !== "0.2.4"
+    || packed[0]?.version !== "0.3.0"
     || !packed[0]?.filename
   ) {
     throw new Error("npm pack did not report exactly one Maqam artifact.");
@@ -65,7 +65,7 @@ try {
     type: "module"
   }, null, 2));
   await writeFile(join(consumerDirectory, "consumer.ts"), [
-    "import { AgentRuntime, PolicyEngine, ToolGateway, crawl, defineToolAdapter, registerToolAdapter, runToolAdapterConformance } from \"maqam\";",
+    "import { AgentRuntime, PolicyEngine, ResearchSourceRegistry, ToolGateway, crawl, createCrawlerTool, createRssAtomSourceAdapter, createWebCrawlerSourceAdapter, defineResearchSourceAdapter, defineResearchToolCaller, parseRssAtom, registerToolAdapter, defineToolAdapter, runToolAdapterConformance } from \"maqam\";",
     "import { createMaqamServer } from \"maqam/server\";",
     "void AgentRuntime;",
     "void crawl;",
@@ -73,6 +73,14 @@ try {
     "const adapter = defineToolAdapter({ name: \"fixture.echo\", transport: \"function\", description: \"Echo a typed fixture.\", effects: [], risk: \"low\", invoke: async (input: { value: string }) => ({ value: input.value }) });",
     "registerToolAdapter(gateway, adapter);",
     "void runToolAdapterConformance(adapter, { input: { value: \"ok\" }, verifyOutput: (output) => output.value === \"ok\" });",
+    "const sourceAdapter = defineResearchSourceAdapter({ id: \"fixture.web\", channel: \"web\", toolName: \"source.web.fixture\", capabilities: [\"read\"], read: async () => [{ uri: \"https://example.com/\", text: \"fixture\" }] });",
+    "const sourceCaller = defineResearchToolCaller({ call: async () => [{ uri: \"https://example.com/\", text: \"fixture\" }] });",
+    "const sources = new ResearchSourceRegistry({ adapters: [sourceAdapter], toolCaller: sourceCaller });",
+    "void sources.route({ channel: \"web\", input: { url: \"https://example.com/\" } });",
+    "void parseRssAtom('<rss version=\"2.0\"><channel><title>x</title></channel></rss>', \"https://example.com/feed.xml\");",
+    "void createRssAtomSourceAdapter(async () => '<rss version=\"2.0\"><channel><title>x</title></channel></rss>');",
+    "void createWebCrawlerSourceAdapter(crawl);",
+    "void createWebCrawlerSourceAdapter(createCrawlerTool());",
     "const server = createMaqamServer();",
     "server.close();",
     ""
@@ -97,7 +105,7 @@ try {
     join(consumerDirectory, "node_modules", "maqam", "package.json"),
     "utf8"
   ));
-  if (installed.version !== "0.2.4" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
+  if (installed.version !== "0.3.0" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
     throw new Error("The packed Maqam manifest does not expose the reviewed Node type dependency.");
   }
   run(process.execPath, [tscPath, "-p", join(consumerDirectory, "tsconfig.json")], {

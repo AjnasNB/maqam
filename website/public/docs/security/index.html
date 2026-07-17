@@ -16,17 +16,17 @@
   <header class="site-header">
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
-      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/" aria-current="page">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam/security">Security</a></nav>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/" aria-current="page">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam/security">Security</a></nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
-    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam/security">Security</a></nav>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam/security">Security</a></nav>
   </header>
 
   <main id="main" class="shell docs-layout">
     <aside class="docs-sidebar" aria-label="Security documentation">
       <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Security menu <span aria-hidden="true">+</span></button>
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
-        <nav aria-label="Security sections"><p class="docs-nav-title">Security model</p><a href="#boundary">Boundary</a><a href="#policy">Policy</a><a href="#approval">Approval</a><a href="#adapters">Adapters</a><a href="#crawler">Crawler</a><a href="#agents">External agents</a><a href="#evidence">Evidence</a><a href="#deployment">Deployment</a><a href="#report">Report an issue</a></nav>
+        <nav aria-label="Security sections"><p class="docs-nav-title">Security model</p><a href="#boundary">Boundary</a><a href="#policy">Policy</a><a href="#approval">Approval</a><a href="#adapters">Adapters</a><a href="#sources">Sources</a><a href="#crawler">Crawler</a><a href="#agents">External agents</a><a href="#evidence">Evidence</a><a href="#deployment">Deployment</a><a href="#report">Report an issue</a></nav>
       </div>
     </aside>
 
@@ -93,12 +93,24 @@ const gateway = new ToolGateway({
         <li>Validate external output before using it as evidence or passing it to another side effect.</li>
       </ul>
 
+      <h2 id="sources">Research source routing</h2>
+      <p>The 0.3.0 source registry is an ordering and normalization layer. It becomes a governed path only when <code>route()</code> receives a ToolCaller bound to a real configured gateway. A direct adapter read or <code>routeUngoverned()</code> remains outside that enforcement path.</p>
+      <ul>
+        <li>Give every source backend one static adapter id, channel, and tool name.</li>
+        <li>Do not fall through after policy, approval, authentication, or crawler security denials.</li>
+        <li>Require explicit <code>allowAuthenticated</code> for adapters that declare authentication, then keep credentials and session state in trusted host code.</li>
+        <li>Treat doctor results as offline adapter checks, not live credential, network, provider, or content-truth verification.</li>
+        <li>Validate every adapter response into a bounded <code>ResearchDocument</code> before storing it or using it as evidence.</li>
+      </ul>
+      <div class="callout callout-warning"><strong>No implicit platform access</strong>Source adapter declarations cannot request shell commands, package installation, cookie extraction, or implicit login. A host can still write unsafe adapter code, so review the actual reader and execution environment.</div>
+
       <h2 id="crawler">Crawler controls</h2>
-      <p>The built-in crawler accepts public HTTP or HTTPS targets, checks all DNS answers, pins each connection, re-authorizes redirects, rejects embedded URL credentials, and blocks private, loopback, link-local, reserved, and other special-purpose destinations by default.</p>
+      <p>The built-in crawler accepts public HTTP or HTTPS targets, checks all DNS answers, pins each connection, re-authorizes redirects, rejects embedded URL credentials, and blocks private, loopback, link-local, reserved, and other special-purpose destinations by default. Optional RSS and Atom discovery stays inside the same origin, request, depth, byte, and duration ceilings.</p>
       <ul>
         <li>Keep private-network crawling disabled for untrusted input.</li>
         <li>The trusted private-network opt-in does not permit link-local metadata endpoints.</li>
         <li>Respect robots.txt, access controls, site terms, authorization, per-origin delay, response byte limits, and total crawl deadlines.</li>
+        <li>The offline feed parser rejects DTD and entity declarations, sanitizes embedded content, and returns only credential-free HTTP or HTTPS item links.</li>
         <li>Use deployment egress controls even when application-level SSRF checks are enabled.</li>
       </ul>
 

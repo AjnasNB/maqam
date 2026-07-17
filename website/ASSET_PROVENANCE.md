@@ -1,6 +1,6 @@
 # Website asset provenance
 
-This file records the source and intended use of static website artwork and remotely served release media. Maqam 0.2.4 was published through npm Trusted Publishing on 2026-07-17.
+This file records the source and intended use of static website artwork and remotely served release media. Maqam 0.2.4 was published through npm Trusted Publishing on 2026-07-17. The 0.3.0 website reuses the same reviewed product-specific artwork and historical release media; it adds no unrelated stock or generated image.
 
 ## Static assets
 
@@ -18,6 +18,8 @@ This file records the source and intended use of static website artwork and remo
 | `public/assets/evidence-metrology-3d.png` | OpenAI image generation, original website artwork | Generated on 2026-07-17 as a metrology instrument linking execution, evidence, and conformance | Benchmark, security, roadmap, and release evidence |
 
 The generated artwork was created specifically for Maqam, then copied into the committed public asset directory. No external stock image, third-party logo, or runtime generation dependency is used.
+
+The 0.3.0 governed-sources guide and release page reuse `integration-dock-3d.png` and its WebP derivative because the visual represents static adapters entering one controlled gateway. Reuse is intentional: no new image is presented as release evidence, and the artwork does not imply a provider partnership, live network verification, or Agent Reach affiliation.
 
 Matching `.webp` files are high-quality delivery derivatives generated from the committed PNG masters. Pages use `<picture>` so supported browsers receive the smaller WebP while PNG remains the fallback and social-card source.
 

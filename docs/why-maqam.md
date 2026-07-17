@@ -113,6 +113,10 @@ Run a CLI agent through fixed startup configuration, a controlled working direct
 
 Route collection through origin policy and bounded crawler settings, attach records to the active run, connect claims to evidence ids, and reject unsupported claims before a report leaves the workflow.
 
+Maqam 0.3 adds Governed Sources for applications with several retrieval backends. The registry can prefer an internal index, RSS/Atom source, licensed search provider, or public-web adapter, but the selected operation still executes through its exact registered `ToolGateway` name and returns one normalized document shape. This avoids rewriting policy and evidence plumbing for every provider.
+
+Fallback is not a security bypass: ordinary unavailability may try another backend, while policy, approval, authentication/authorization, crawler-security, robots, goal-scope, and call-limit failures stop immediately. Authenticated sources need explicit route opt-in, and the host still owns credentials and provider permissions.
+
 ### Internal and customer-facing tools
 
 Apply the same gateway semantics to email, ticketing, billing, repository, database, browser, and administrative connectors. The connector still needs its own authentication and least-privilege credentials.
@@ -123,15 +127,17 @@ Use a durable workflow engine such as LangGraph or Microsoft Agent Framework whe
 
 See the [dated open-source comparison](comparison.md) for sources, stronger alternatives, and current limitations.
 
-## What The Current Evaluation Establishes
+Agent Reach is a useful reference for broad, explicit source-channel setup and diagnostics. Maqam does not reproduce its automatic installation, browser-cookie/session reuse, or platform coverage. Maqam's narrower value is to put a host-supplied source operation behind the same exact policy/approval boundary as every other registered tool and normalize the returned documents. The implementation is independent; see [provenance and licenses](provenance-and-licenses.md).
+
+## What The Published 0.2.4 Evaluation Establishes
 
 The project-defined [Maqam Governance Evaluation Suite (MGES) v1](../benchmarks/README.md) evaluates two different things without combining them into a marketing score.
 
-The local-call performance profile reports a clean-source `127.498 microseconds/call` median on Node 24.15.0, Windows x64, and an AMD Ryzen 7 4800H. Its 95% bootstrap interval for the sample median is `126.334-128.942 microseconds/call`; 30 fresh-process observations produced a `5.572%` governed coefficient of variation and passed all five project stability checks. The timed path excludes model, network, storage, human review and concurrency.
+The historical 0.2.4 local-call performance profile reports a clean-source `127.498 microseconds/call` median on Node 24.15.0, Windows x64, and an AMD Ryzen 7 4800H. Its 95% bootstrap interval for the sample median is `126.334-128.942 microseconds/call`; 30 fresh-process observations produced a `5.572%` governed coefficient of variation and passed all five project stability checks. The timed path excludes model, network, storage, human review and concurrency.
 
 The governance-boundary profile passes `12/12` project-defined fixtures covering default denial, fail-closed policy, exact run/tool/input approval binding, changed-input and replay rejection, immutable detached input, atomic multi-approval consumption, evidence attribution, and redacted denial traces.
 
-Neither result is a globally accepted benchmark, security certification, penetration test, OWASP compliance statement, competitor ranking, or proof that unregistered code cannot bypass Maqam. The [raw results and claim templates](../benchmarks/README.md) publish the exact scope and limitations; the [technical article](articles/benchmarking-agent-governance.md) explains the design.
+Neither result is a globally accepted benchmark, security certification, penetration test, OWASP compliance statement, competitor ranking, or proof that unregistered code cannot bypass Maqam. The figures must not be presented as a 0.3.0 measurement. A fresh run is required when fingerprinted source changes. The [raw results and claim templates](../benchmarks/README.md) publish the exact scope and limitations; the [technical article](articles/benchmarking-agent-governance.md) explains the design.
 
 ## Maqam And ProductLoop OS
 
@@ -149,6 +155,9 @@ npm install maqam
 - Approval records are structurally validated, not cryptographically signed or authenticated.
 - Evidence hashes and links record provenance; they do not prove factual correctness.
 - The built-in crawler is an HTTP/HTML connector, not a JavaScript-rendering browser or distributed crawl platform.
+- Governed Sources does not install provider tools, log into platforms, import browser cookies/sessions, or bundle social-channel backends.
+- `routeUngoverned()` is a deliberate direct bypass and carries no gateway policy, approval, call ceiling, or trace guarantee.
+- Source-doctor checks are host functions; timeout and validation do not prove they are offline or side-effect free.
 - Provider-reported usage and activity can be observed after execution; not every provider exposes a preventive hard limit for every measure.
 - Calls that bypass registered adapters are outside Maqam's control.
 - Passing tests is evidence for covered cases, not proof that the software has no defects.

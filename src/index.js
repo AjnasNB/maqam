@@ -3,6 +3,7 @@ import * as cheerio from "cheerio";
 import robotsParser from "robots-parser";
 import TurndownService from "turndown";
 import { createCrawlerSecurityError, withPinnedFetch } from "./crawler/security.js";
+import { parseRssAtom } from "./research/adapters/rss.js";
 import {
   snapshotJsonValue,
   snapshotOwnDataArray,
@@ -16,6 +17,7 @@ const CRAWL_OPTION_KEYS = [
   "seeds", "urls", "maxPages", "maxSeeds", "maxRequests", "maxQueue",
   "maxLinksPerPage", "maxDepth", "concurrency", "sameOrigin", "allowedOrigins",
   "includeSitemaps", "maxSitemaps", "maxUrlsPerSitemap", "obeyRobots",
+  "includeFeeds", "maxFeedLinks", "maxFeedItems",
   "allowPrivateNetworks", "userAgent", "delayMs", "timeoutMs", "maxDurationMs",
   "maxBytes", "maxRedirects", "maxRetries", "retryDelayMs", "signal", "dnsLookup",
   "onPage", "onError"
@@ -27,7 +29,7 @@ const CRAWLER_CONTEXT_KEYS = [
   "outputs", "trace"
 ];
 const CRAWL_BOOLEAN_KEYS = [
-  "sameOrigin", "includeSitemaps", "obeyRobots", "allowPrivateNetworks"
+  "sameOrigin", "includeSitemaps", "includeFeeds", "obeyRobots", "allowPrivateNetworks"
 ];
 
 function snapshotStringArray(value, label) {
@@ -236,6 +238,9 @@ function normalizeOptions(input, seedCount) {
     includeSitemaps: input.includeSitemaps === true,
     maxSitemaps: integerOption(input.maxSitemaps, "maxSitemaps", 20, 0, 1_000),
     maxUrlsPerSitemap: integerOption(input.maxUrlsPerSitemap, "maxUrlsPerSitemap", 5_000, 1, 50_000),
+    includeFeeds: input.includeFeeds === true,
+    maxFeedLinks: integerOption(input.maxFeedLinks, "maxFeedLinks", 20, 1, 200),
+    maxFeedItems: integerOption(input.maxFeedItems, "maxFeedItems", 100, 1, 1_000),
     obeyRobots: input.obeyRobots !== false,
     allowPrivateNetworks: input.allowPrivateNetworks === true,
     userAgent,
@@ -469,6 +474,22 @@ function extractLinks($, baseUrl, maxLinks) {
   return [...links];
 }
 
+function extractFeedLinks($, baseUrl, maxLinks) {
+  const links = new Set();
+  $("link[href]").each((_, element) => {
+    if (links.size >= maxLinks) return false;
+    const rel = ($(element).attr("rel") || "").toLowerCase().split(/\s+/).filter(Boolean);
+    const type = ($(element).attr("type") || "").toLowerCase().split(";", 1)[0].trim();
+    if (!rel.includes("alternate") || !["application/rss+xml", "application/atom+xml"].includes(type)) {
+      return undefined;
+    }
+    const resolved = toUrl($(element).attr("href"), baseUrl);
+    if (resolved && isHttpUrl(resolved)) links.add(normalizeUrl(resolved));
+    return undefined;
+  });
+  return [...links];
+}
+
 function cleanForExtraction($) {
   $("script, style, noscript, template, svg, canvas, iframe, object, embed").remove();
   $("[hidden], [aria-hidden='true']").remove();
@@ -477,7 +498,7 @@ function cleanForExtraction($) {
 export function extractPage(html, url, options = {}) {
   options = snapshotOwnDataRecord(options, {
     label: "extractPage options",
-    recognizedKeys: ["maxLinksPerPage"]
+    recognizedKeys: ["maxLinksPerPage", "maxFeedLinks"]
   });
   const $ = cheerio.load(html);
   cleanForExtraction($);
@@ -488,6 +509,8 @@ export function extractPage(html, url, options = {}) {
   const canonical = toUrl($("link[rel='canonical']").attr("href") || url, url);
   const maxLinks = integerOption(options.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 20_000);
   const links = extractLinks($, url, maxLinks);
+  const maxFeedLinks = integerOption(options.maxFeedLinks, "maxFeedLinks", 20, 1, 200);
+  const feedLinks = extractFeedLinks($, url, maxFeedLinks);
   const language = ($("html").attr("lang") || "").trim() || null;
 
   const main = $("main, article, [role='main']").first();
@@ -503,6 +526,7 @@ export function extractPage(html, url, options = {}) {
   const markdown = turndown.turndown(htmlFragment).replace(/\n{3,}/g, "\n\n").trim();
 
   return {
+    sourceType: "web",
     url,
     canonical,
     title,
@@ -512,7 +536,48 @@ export function extractPage(html, url, options = {}) {
     text,
     markdown,
     links,
+    feedLinks,
     fetchedAt: new Date().toISOString()
+  };
+}
+
+function looksLikeRssAtom(text, contentType) {
+  if (/application\/(?:rss|atom)\+xml/i.test(contentType || "")) return true;
+  return /^\s*(?:<\?xml[^>]*>\s*)?(?:<!--[\s\S]*?-->\s*)*<(?:rss|feed)(?:\s|>)/i
+    .test(String(text).slice(0, 4_096));
+}
+
+function feedToPage(feed, fetchedAt) {
+  const textSections = [];
+  const markdownSections = [];
+  if (feed.title) {
+    textSections.push(feed.title);
+    markdownSections.push(`# ${feed.title}`);
+  }
+  if (feed.description) {
+    textSections.push(feed.description);
+    markdownSections.push(feed.description);
+  }
+  for (const item of feed.items) {
+    const itemText = item.text || item.title || item.url;
+    textSections.push([item.title, itemText].filter(Boolean).join("\n"));
+    const body = item.markdown || item.text || "";
+    markdownSections.push(`## [${item.title || item.url}](${item.url})${body ? `\n\n${body}` : ""}`);
+  }
+  return {
+    sourceType: "feed",
+    url: feed.sourceUrl,
+    canonical: feed.sourceUrl,
+    title: feed.title || "",
+    description: feed.description || "",
+    h1: feed.title || "",
+    language: feed.language || null,
+    text: textSections.join("\n\n").trim(),
+    markdown: markdownSections.join("\n\n").trim(),
+    links: feed.items.map((item) => item.url),
+    feedLinks: [],
+    feed,
+    fetchedAt
   };
 }
 
@@ -754,9 +819,16 @@ export async function crawlDetailed(input = {}) {
         if (seenFinal.has(result.finalUrl)) return null;
         seenFinal.add(result.finalUrl);
 
-        const page = extractPage(result.text, result.finalUrl, {
-          maxLinksPerPage: options.maxLinksPerPage
-        });
+        const fetchedAt = new Date().toISOString();
+        const page = looksLikeRssAtom(result.text, result.contentType)
+          ? feedToPage(parseRssAtom(result.text, result.finalUrl, {
+            maxItems: options.maxFeedItems,
+            maxInputBytes: Math.min(10 * 1024 * 1024, Math.max(1_024, options.maxBytes))
+          }), fetchedAt)
+          : extractPage(result.text, result.finalUrl, {
+            maxLinksPerPage: options.maxLinksPerPage,
+            maxFeedLinks: options.maxFeedLinks
+          });
         page.status = result.status;
         page.contentType = result.contentType;
         page.bytes = result.bytes;
@@ -803,6 +875,9 @@ export async function crawlDetailed(input = {}) {
       }
       if (page.depth < options.maxDepth) {
         for (const link of page.links) enqueue(link, page.depth + 1, page.url);
+        if (options.includeFeeds) {
+          for (const feedLink of page.feedLinks) enqueue(feedLink, page.depth + 1, page.url);
+        }
       }
     }
   }
@@ -854,6 +929,30 @@ export {
 export { createReleaseGateReport } from "./framework/release-gate.js";
 export { createResearchWorkflow } from "./framework/research-workflow.js";
 export { classifyIpAddress, isPublicIpAddress, resolveUrlTarget } from "./crawler/security.js";
+export {
+  normalizeResearchDocument,
+  normalizeResearchDocuments,
+  defineResearchSourceAdapter,
+  describeResearchSourceAdapter,
+  isResearchSourceAdapter,
+  RESEARCH_SOURCE_AUTHENTICATION_MODES,
+  classifyResearchSourceError,
+  isFatalResearchSourceError,
+  ResearchSourceAuthenticationRequiredError,
+  ResearchSourceToolCallerRequiredError,
+  ResearchSourceUnavailableError,
+  checkResearchSourceAdapter,
+  runResearchSourceDoctor,
+  RESEARCH_SOURCE_CHECK_STATUSES,
+  defineResearchToolCaller,
+  ResearchSourceRegistry,
+  createWebCrawlerSourceAdapter
+} from "./research/index.js";
+export {
+  parseRssAtom,
+  createRssAtomResearchAdapter,
+  createRssAtomSourceAdapter
+} from "./research/adapters/rss.js";
 
 function boundedNumber(requested, configured, fallback, mode = "max") {
   const boundary = configured ?? fallback;
@@ -926,6 +1025,8 @@ export function createCrawlerTool(defaultOptions = {}) {
       maxRetries: boundedNumber(input.maxRetries, configured.maxRetries, 2),
       maxSitemaps: boundedNumber(input.maxSitemaps, configured.maxSitemaps, 20),
       maxUrlsPerSitemap: boundedNumber(input.maxUrlsPerSitemap, configured.maxUrlsPerSitemap, 5_000),
+      maxFeedLinks: boundedNumber(input.maxFeedLinks, configured.maxFeedLinks, 20),
+      maxFeedItems: boundedNumber(input.maxFeedItems, configured.maxFeedItems, 100),
       retryDelayMs: boundedNumber(input.retryDelayMs, configured.retryDelayMs, 250, "min"),
       sameOrigin,
       obeyRobots: configured.obeyRobots === false ? input.obeyRobots === true : true,
@@ -933,6 +1034,7 @@ export function createCrawlerTool(defaultOptions = {}) {
       allowedOrigins,
       userAgent: configured.userAgent || input.userAgent,
       includeSitemaps: input.includeSitemaps === true && configured.includeSitemaps !== false,
+      includeFeeds: input.includeFeeds === true && configured.includeFeeds !== false,
       signal: signals.length > 1 ? AbortSignal.any(signals) : signals[0] || null,
       dnsLookup: configured.dnsLookup || null,
       onPage: configured.onPage || null,

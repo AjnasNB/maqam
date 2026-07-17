@@ -6,17 +6,15 @@ on:
       version:
         description: Exact package version to publish
         required: true
-        default: 0.2.4
+        default: 0.3.0
         type: string
       expected_sha256:
         description: Approved SHA-256 of the npm tarball
         required: true
-        default: f4751f4f4ef3a4a97631f8ebddc72cb03962cc52d7ae983f9d0188de9a6318cb
         type: string
       expected_integrity:
         description: Approved npm sha512 integrity
         required: true
-        default: sha512-/VHGyLNele7rp7At6HGZhrw5UxOF9rlcPWHWZ+7srMz47zhhEBbkJXgKQTdZRA0MLQTGqGs8sKFhNnhgjIPWlA==
         type: string
       confirmation:
         description: Type publish maqam@VERSION
