@@ -13,16 +13,16 @@ On Node 24.15.0, Windows x64 and an AMD Ryzen 7 4800H, the MGES local-call profi
 
 | Metric | Result |
 |---|---:|
-| Governed median | **151.090 microseconds/call** |
-| 95% bootstrap interval for the sample median | **148.341-154.484 microseconds/call** |
-| Sequential rate at the median | **6,618.582 calls/second** |
-| Governed coefficient of variation | **7.615%** |
+| Governed median | **125.228 microseconds/call** |
+| 95% bootstrap interval for the sample median | **123.157-125.711 microseconds/call** |
+| Sequential rate at the median | **7,985.443 calls/second** |
+| Governed coefficient of variation | **2.219%** |
 | Observations | **30 fresh processes per variant** |
 | Project publication checks | **PASS (4/4 required; direct-CV diagnostic also passed)** |
 
 The timed fixture excludes model inference, network and filesystem I/O, durable storage, human review, process startup and concurrent load. The rate is a derived sequential rate, not a concurrent capacity claim.
 
-The artifact records source commit `e57c1f8757ca863cc3bf57e76e024f115e624949` with `workingTreeDirty: false` and fingerprints every benchmark and implementation file in the measured path. Later release commits may change files outside the measured path, but any change to a fingerprinted source requires another run.
+The artifact records source commit `11707f2397e3f13388dba9d1e33f0379ad535e43` with `workingTreeDirty: false` and fingerprints every benchmark and implementation file in the measured path. Later release commits may change files outside the measured path, but any change to a fingerprinted source requires another run.
 
 The separate governance-boundary profile currently records **14/14 project-defined fixtures passed**, including denial before dispatch, fail-closed policy, exact run/tool/input approval scope, changed-input and replay rejection, immutable detached input, atomic multi-approval consumption, evidence scoping, redacted denial traces, fatal source-denial behavior, and normalized ordered fallback. This is regression evidence only—not proof that Maqam or a deployment is secure.
 
@@ -45,7 +45,7 @@ npm run benchmark:mges:performance
 
 ## Acceptable compact wording
 
-> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 151.090 microseconds median per governed call (95% bootstrap interval for the sample median: 148.341-154.484; 30 fresh-process observations; governed CV 7.615%; required project checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
+> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 125.228 microseconds median per governed call (95% bootstrap interval for the sample median: 123.157-125.711; 30 fresh-process observations; governed CV 2.219%; required project checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
 
 For conformance:
 
