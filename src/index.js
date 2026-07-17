@@ -572,10 +572,44 @@ export function extractPage(html, url, options = {}) {
   };
 }
 
+function isXmlWhitespaceCode(code) {
+  return code === 0x09 || code === 0x0a || code === 0x0d || code === 0x20 || code === 0xfeff;
+}
+
+function skipXmlWhitespace(value, start) {
+  let offset = start;
+  while (offset < value.length && isXmlWhitespaceCode(value.charCodeAt(offset))) offset += 1;
+  return offset;
+}
+
+function leadingFeedElementOffset(value) {
+  let offset = skipXmlWhitespace(value, 0);
+  if (value.slice(offset, offset + 5).toLowerCase() === "<?xml") {
+    const declarationEnd = value.indexOf("?>", offset + 5);
+    if (declarationEnd === -1) return -1;
+    offset = skipXmlWhitespace(value, declarationEnd + 2);
+  }
+  while (value.startsWith("<!--", offset)) {
+    const commentEnd = value.indexOf("-->", offset + 4);
+    if (commentEnd === -1) return -1;
+    offset = skipXmlWhitespace(value, commentEnd + 3);
+  }
+  return offset;
+}
+
+function startsWithFeedElement(value, offset, name) {
+  const prefix = `<${name}`;
+  if (value.slice(offset, offset + prefix.length).toLowerCase() !== prefix) return false;
+  const boundary = value.charCodeAt(offset + prefix.length);
+  return boundary === 0x3e || isXmlWhitespaceCode(boundary);
+}
+
 function looksLikeRssAtom(text, contentType) {
   if (/application\/(?:rss|atom)\+xml/i.test(contentType || "")) return true;
-  return /^\s*(?:<\?xml[^>]*>\s*)?(?:<!--[\s\S]*?-->\s*)*<(?:rss|feed)(?:\s|>)/i
-    .test(String(text).slice(0, 4_096));
+  const sample = String(text).slice(0, 4_096);
+  const offset = leadingFeedElementOffset(sample);
+  return offset !== -1
+    && (startsWithFeedElement(sample, offset, "rss") || startsWithFeedElement(sample, offset, "feed"));
 }
 
 function feedToPage(feed, fetchedAt) {

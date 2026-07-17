@@ -48,6 +48,15 @@ before(async () => {
         </channel></rss>`);
       return;
     }
+    if (req.url === "/commented-feed.xml") {
+      res.setHeader("content-type", "text/plain");
+      res.end(`${"<!--bounded-->".repeat(250)}<rss version="2.0"><channel>
+        <title>Commented fixture feed</title>
+        <link>${baseUrl}/</link>
+        <description>Linear feed sniffing.</description>
+      </channel></rss>`);
+      return;
+    }
     if (req.url === "/feed-entry") {
       res.setHeader("content-type", "text/html");
       res.end("<html><body><main><h1>Feed entry</h1><p>Entry page.</p></main></body></html>");
@@ -147,6 +156,21 @@ test("crawler parses a seeded RSS document into bounded agent-friendly records",
   assert.equal(pages[0].feed.items[0].title, "Feed entry");
   assert.match(pages[0].feed.items[0].markdown, /Bounded \*\*feed\*\* content/);
   assert.match(pages[0].contentHash, /^sha256:[a-f0-9]{64}$/);
+});
+
+test("crawler detects a feed after many leading comments without regex backtracking", async () => {
+  const pages = await crawl({
+    seeds: [`${baseUrl}/commented-feed.xml`],
+    maxPages: 1,
+    maxDepth: 0,
+    maxDurationMs: 2_000,
+    delayMs: 0,
+    allowPrivateNetworks: true
+  });
+
+  assert.equal(pages.length, 1);
+  assert.equal(pages[0].sourceType, "feed");
+  assert.equal(pages[0].title, "Commented fixture feed");
 });
 
 test("crawler discovers same-origin feed links only when explicitly enabled", async () => {
