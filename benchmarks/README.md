@@ -92,31 +92,34 @@ Options:
 
 ### Project publication checks
 
-The runner marks an artifact `publicationCandidate: true` only when all of these project rules pass:
+MGES v1.1 uses criteria version 2. The runner marks an artifact `publicationCandidate: true` only when all required project rules pass:
 
 - at least 30 observations per variant;
-- coefficient of variation no greater than 10% for each variant;
+- governed coefficient of variation no greater than 10%;
 - median timed batch of at least 100 ms for each variant.
+
+The direct-path coefficient of variation remains a published diagnostic, but it is not a required gate. The intentionally near-zero direct handler is dominated by cross-process CPU-frequency noise and is not the product path or a headline claim. Its raw observations, interval, CV, and paired contribution remain in the artifact.
 
 These thresholds are MGES stability rules. They are not universal acceptance criteria. A pass does not control CPU affinity, CPU frequency, virtualization, thermal state, or background load; each artifact discloses those uncontrolled conditions. Do not remove outliers or silently change thresholds to obtain a pass.
 
 ### Current clean-source baseline
 
-[`2026-07-16-mges-performance-windows-node24.json`](results/2026-07-16-mges-performance-windows-node24.json) records a full passing run:
+[`2026-07-18-mges-performance-windows-node24.json`](results/2026-07-18-mges-performance-windows-node24.json) records a clean-source passing MGES v1.1.0 run:
 
 | Field | Observed value |
 |---|---:|
 | Environment | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
-| Governed median | **127.498 microseconds/call** |
-| 95% bootstrap interval for the sample median | **126.334-128.942 microseconds/call** |
-| Sequential rate at the median | **7,843.288 calls/second** |
-| Paired added median | **127.422 microseconds/call** |
-| Governed coefficient of variation | **5.572%** |
-| MGES project publication checks | **PASS (5/5)** |
+| Governed median | **151.090 microseconds/call** |
+| 95% bootstrap interval for the sample median | **148.341-154.484 microseconds/call** |
+| Sequential rate at the median | **6,618.582 calls/second** |
+| Paired added median | **151.019 microseconds/call** |
+| Governed coefficient of variation | **7.615%** |
+| Direct coefficient of variation (diagnostic) | **7.361%** |
+| MGES project publication checks | **PASS (4/4 required; direct diagnostic also passed)** |
 
-The artifact records clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d` with `workingTreeDirty: false`. It includes SHA-256 fingerprints for every benchmark and implementation file in the measured path. The follow-up release commit may add results, documentation, and media, but any change to a fingerprinted source requires another run.
+The artifact records clean source commit `e57c1f8757ca863cc3bf57e76e024f115e624949` with `workingTreeDirty: false`. It includes SHA-256 fingerprints for every benchmark and implementation file in the measured path. The follow-up release commit may add results, documentation, and media, but any change to a fingerprinted source requires another run.
 
-The earlier [`2026-07-16-windows-node24.json`](results/2026-07-16-windows-node24.json) is retained as a legacy seven-sample result. It is superseded for public presentation because it did not include the v1 isolation, raw observations, uncertainty interval, or publication checks.
+The earlier [`2026-07-16-mges-performance-windows-node24.json`](results/2026-07-16-mges-performance-windows-node24.json) is retained as the 0.2.4 baseline, and [`2026-07-16-windows-node24.json`](results/2026-07-16-windows-node24.json) remains a legacy seven-sample result. Neither is relabeled as 0.3.0 evidence.
 
 ### What the number excludes
 
@@ -132,7 +135,7 @@ Run:
 npm run benchmark:mges:conformance
 ```
 
-The current [`2026-07-16-mges-conformance-windows-node24.json`](results/2026-07-16-mges-conformance-windows-node24.json) records **12/12 passing project-defined fixtures**:
+The current [`2026-07-18-mges-conformance-windows-node24.json`](results/2026-07-18-mges-conformance-windows-node24.json) records **14/14 passing project-defined fixtures**:
 
 | ID | Invariant exercised |
 |---|---|
@@ -148,6 +151,8 @@ The current [`2026-07-16-mges-conformance-windows-node24.json`](results/2026-07-
 | MGES-C10 | Multi-approval consumption is atomic |
 | MGES-C11 | Gateway evidence attribution is bound to the real run, task and tool |
 | MGES-C12 | A denial trace is present, coded and secret-redacted |
+| MGES-C13 | A policy denial on a source route stops every backend before dispatch |
+| MGES-C14 | Ordinary source unavailability falls back in order and binds normalized provenance |
 
 This profile reports pass/fail evidence, not a weighted score. Case duration is diagnostic only and must not be used as a performance result. A pass confirms those fixtures on the recorded source fingerprint; it is not a penetration test, proof of semantic correctness, formal verification, compliance assessment, or security certification.
 
@@ -167,17 +172,17 @@ This is a relevance crosswalk only. It does not establish OWASP compliance or en
 
 ### Compact, acceptable form
 
-> MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 127.498 microseconds median per governed call (95% bootstrap interval for the sample median: 126.334-128.942; 30 fresh-process observations; CV 5.572%). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. Raw JSON: [artifact](results/2026-07-16-mges-performance-windows-node24.json).
+> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 151.090 microseconds median per governed call (95% bootstrap interval for the sample median: 148.341-154.484; 30 fresh-process observations; governed CV 7.615%; required checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. Raw JSON: [artifact](results/2026-07-18-mges-performance-windows-node24.json).
 
 For conformance:
 
-> MGES v1 governance-boundary profile: 12/12 project-defined fixtures passed on the recorded source fingerprint. This is regression evidence, not a security score, penetration test or certification. Raw JSON: [artifact](results/2026-07-16-mges-conformance-windows-node24.json).
+> MGES v1.1.0 governance-boundary profile: 14/14 project-defined fixtures passed on the recorded source fingerprint. This is regression evidence, not a security score, penetration test or certification. Raw JSON: [artifact](results/2026-07-18-mges-conformance-windows-node24.json).
 
 ### Do not publish
 
 - “Maqam is 137 microseconds globally.”
 - “Maqam is 7,843 times faster” or any comparison that did not run the same representative workload.
-- “12/12 means Maqam is secure.”
+- “14/14 means Maqam is secure.”
 - “NIST-, SPEC- or OWASP-certified.”
 - A point estimate without environment, interval, sample count, scope and raw artifact.
 

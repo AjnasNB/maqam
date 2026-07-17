@@ -3,7 +3,7 @@
   "name": "maqamagent-site",
   "main": "src/index.js",
   "compatibility_date": "2026-07-17",
-  "workers_dev": true,
+  "workers_dev": false,
   "routes": [
     {
       "pattern": "maqamagent.com",

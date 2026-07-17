@@ -294,7 +294,7 @@ Use `createWebCrawlerSourceAdapter(createCrawlerTool({...}))` to expose the boun
 
 `routeUngoverned()` performs an explicit direct read and normalization without gateway policy, approvals, call ceilings, or trace. Do not call it a governed route.
 
-Run offline health checks with `await sources.doctor({ timeoutMs: 2000 })`. Checks report readiness only and cannot prove that arbitrary host code is side-effect free. See [Governed Sources](governed-sources.md) for the full adapter, document, fallback, doctor, RSS/Atom, and security contracts.
+Run bounded host-defined health checks with `await sources.doctor({ timeoutMs: 2000 })`. Checks report readiness only; timeout cancellation is cooperative, and Maqam cannot prove that arbitrary host code is offline or side-effect free. See [Governed Sources](governed-sources.md) for the full adapter, document, fallback, doctor, RSS/Atom, and security contracts.
 
 ## Framework SDK
 

@@ -145,6 +145,17 @@ test("defineResearchSourceAdapter produces an immutable data-first contract", ()
   });
 });
 
+test("source adapter descriptions label checks as host-supplied", () => {
+  const adapter = defineResearchSourceAdapter({
+    id: "web.checked",
+    channel: "web",
+    toolName: "research.web.checked",
+    check: async () => ({ status: "ready" })
+  });
+
+  assert.equal(describeResearchSourceAdapter(adapter).check, "host-supplied");
+});
+
 test("source adapter definitions reject executable configuration and unsafe properties", () => {
   let getterCalls = 0;
   const accessor = {

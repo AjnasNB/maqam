@@ -17,6 +17,12 @@ const approvedProductVisuals = new Set([
   "/assets/maqam-exact-gate-3d.png",
   "/assets/productloop-modular-hub-3d.png"
 ]);
+const productVisualDimensions = new Map([
+  ["/assets/evidence-metrology-3d.png", [1586, 992]],
+  ["/assets/integration-dock-3d.png", [1586, 992]],
+  ["/assets/maqam-exact-gate-3d.png", [1586, 992]],
+  ["/assets/productloop-modular-hub-3d.png", [1568, 1003]]
+]);
 const requiredProductVisuals = new Map([
   ["index.html", ["/assets/maqam-exact-gate-3d.png", "/assets/productloop-modular-hub-3d.png", "/assets/evidence-metrology-3d.png"]],
   [path.join("why", "index.html"), ["/assets/maqam-exact-gate-3d.png"]],
@@ -92,7 +98,7 @@ for (const file of htmlFiles) {
   requireMatch(/<main\b[^>]*\bid="main"/i, "missing main landmark id");
 
   if (source.includes('class="site-header"') && !source.includes('href="/releases/v0.3.0/"')) {
-    failures.push(`${label}: primary navigation must link the current 0.3.0 release`);
+    failures.push(`${label}: primary navigation must link the 0.3.0 release record`);
   }
 
   if (/0\.2\.3|candidate pending exact release approval/i.test(source)) {
@@ -117,8 +123,9 @@ for (const file of htmlFiles) {
   }
 
   if (label === "index.html") {
-    requireMatch(/v0\.3\.0 is the current release line/i, "homepage must identify the current 0.3.0 release line");
-    requireMatch(/maqam@0\.3\.0/i, "homepage install command must pin maqam@0.3.0");
+    requireMatch(/v0\.3\.0 release candidate/i, "homepage must identify 0.3.0 as a release candidate");
+    requireMatch(/npm artifact, provenance, and tag verification are still required/i, "homepage must name the remaining release verification gate");
+    requireMatch(/Run only after npm, provenance, and tag verification[\s\S]{0,120}maqam@0\.3\.0/i, "homepage install command must be gated by registry verification");
     requireMatch(/Maqam is a security turnstile for agent actions/i, "homepage must include the plain-English Maqam definition");
   }
 
@@ -144,6 +151,7 @@ for (const file of htmlFiles) {
 
   if (label === path.join("docs", "productloop", "index.html")) {
     requireMatch(/productloop-os@0\.2\.1/, "ProductLoop install command must pin productloop-os@0.2.1");
+    requireMatch(/records intended package versions, not a blanket live-registry guarantee/i, "ProductLoop atlas must avoid a blanket npm publication claim");
     for (const [packageName, version] of [
       ["productloop-os", "0.2.1"],
       ["ajnas-runtime", "0.2.1"],
@@ -160,7 +168,7 @@ for (const file of htmlFiles) {
         `${packageName} must show public version ${version}`
       );
     }
-    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.0<\/td>/, "ProductLoop atlas must show the current Maqam 0.3.0 line");
+    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.0 candidate<\/td>/, "ProductLoop atlas must show Maqam 0.3.0 as a candidate");
   }
 
   if (label === path.join("articles", "exact-agent-approvals", "index.html")) {
@@ -185,6 +193,15 @@ for (const file of htmlFiles) {
     const src = match[1].match(/\bsrc="([^"]+)"/i)?.[1];
     if (src?.startsWith("/assets/") && !src.endsWith(".svg") && !approvedProductVisuals.has(src)) {
       failures.push(label + ": unreviewed conceptual image " + src + "; use a product-specific 3D visual or real product proof");
+    }
+
+    const expectedDimensions = productVisualDimensions.get(src);
+    if (expectedDimensions) {
+      const width = Number(match[1].match(/\bwidth="(\d+)"/i)?.[1]);
+      const height = Number(match[1].match(/\bheight="(\d+)"/i)?.[1]);
+      if (width !== expectedDimensions[0] || height !== expectedDimensions[1]) {
+        failures.push(`${label}: ${src} must declare its intrinsic ${expectedDimensions[0]}x${expectedDimensions[1]} dimensions`);
+      }
     }
   }
 

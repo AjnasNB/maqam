@@ -80,25 +80,24 @@ round 3: direct   -> governed
 operations per second at median = 1,000,000,000 / median nanoseconds</code></pre></div>
       <p>The derived rate is a sequential local rate, not a concurrency or capacity measurement. MGES reports paired absolute added time and avoids promoting a governed/direct ratio because the direct baseline intentionally does almost no work.</p>
 
-      <h2>The clean MGES v1 result</h2>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="Clean MGES v1 recorded result"><table><caption class="sr-only">Environment, observation count, timing result, and publication checks for the clean MGES v1 run</caption><thead><tr><th scope="col">Field</th><th scope="col">Recorded result</th></tr></thead><tbody>
+      <h2>The clean MGES v1.1 result</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Clean MGES v1.1 recorded result"><table><caption class="sr-only">Environment, observation count, timing result, and publication checks for the clean MGES v1.1 run</caption><thead><tr><th scope="col">Field</th><th scope="col">Recorded result</th></tr></thead><tbody>
         <tr><th scope="row">Runtime and host</th><td>Node 24.15.0, Windows x64, AMD Ryzen 7 4800H</td></tr>
         <tr><th scope="row">Observations</th><td>30 fresh processes per variant</td></tr>
-        <tr><th scope="row">Governed median</th><td>127.498 microseconds per call</td></tr>
-        <tr><th scope="row">95% bootstrap interval</th><td>126.334 to 128.942 microseconds per call</td></tr>
-        <tr><th scope="row">Sequential rate at median</th><td>7,843.288 calls per second</td></tr>
-        <tr><th scope="row">Paired added median</th><td>127.422 microseconds per call</td></tr>
-        <tr><th scope="row">Governed coefficient of variation</th><td>5.572%</td></tr>
-        <tr><th scope="row">Project publication checks</th><td>PASS, 5 of 5</td></tr>
+        <tr><th scope="row">Governed median</th><td>151.090 microseconds per call</td></tr>
+        <tr><th scope="row">95% bootstrap interval</th><td>148.341 to 154.484 microseconds per call</td></tr>
+        <tr><th scope="row">Sequential rate at median</th><td>6,618.582 calls per second</td></tr>
+        <tr><th scope="row">Paired added median</th><td>151.019 microseconds per call</td></tr>
+        <tr><th scope="row">Governed coefficient of variation</th><td>7.615%</td></tr>
+        <tr><th scope="row">Project publication checks</th><td>PASS, 4 of 4 required; direct-CV diagnostic also passed</td></tr>
       </tbody></table></div>
-      <p>The publication checks require 30 observations, coefficient of variation no greater than 10% for both variants, and median timed batches of at least 100 ms. These are suite stability gates, not an industry acceptance rule.</p>
-      <p>An earlier calibrated run failed because outliers pushed governed variation to 85.33%. The headline result was withheld. Timed batches were lengthened, no observations were deleted, and the declared threshold was not weakened.</p>
-      <p>The clean artifact records commit <code>44c198f9eab1ea3a2dedb1f784413a2733b7745d</code>, <code>workingTreeDirty: false</code>, and SHA-256 fingerprints for benchmark and implementation files. A changed fingerprint requires another run.</p>
-      <div class="button-row"><a class="button button-primary" href="/media/mges-performance.json">Download performance JSON</a><a class="button" href="/media/mges-conformance.json">Download conformance JSON</a></div>
+      <p>Criteria version 2 requires 30 observations, governed variation no greater than 10%, and median timed batches of at least 100 ms for both variants. Direct variation remains visible as a diagnostic because the near-zero baseline is dominated by cross-process CPU-frequency noise. These are suite stability gates, not an industry acceptance rule.</p>
+      <p>The clean artifact records commit <code>e57c1f8757ca863cc3bf57e76e024f115e624949</code>, <code>workingTreeDirty: false</code>, and SHA-256 fingerprints for benchmark and implementation files. A changed fingerprint requires another run.</p>
+      <div class="button-row"><a class="button button-primary" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-performance-windows-node24.json">Open performance JSON</a><a class="button" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-conformance-windows-node24.json">Open conformance JSON</a></div>
 
       <h2>Conformance is not latency</h2>
-      <p>The governance-boundary profile executes 12 deterministic fixtures covering deny-by-default construction, denial before dispatch, fail-closed policy evaluation, safe input handling, exact approval scope, replay rejection, call limits, detached handler input, evidence isolation, atomic multi-approval consumption, attribution, and redacted denial traces.</p>
-      <p>The recorded artifact reports 12 of 12 fixtures passing. MGES does not turn that into a percentage security score because equal weighting would imply equal risk and coverage. That has not been established.</p>
+      <p>The governance-boundary profile executes 14 deterministic fixtures covering deny-by-default construction, denial before dispatch, fail-closed policy evaluation, safe input handling, exact approval scope, replay rejection, call limits, detached handler input, evidence isolation, atomic multi-approval consumption, attribution, redacted denial traces, fatal source denial, and normalized ordered fallback.</p>
+      <p>The recorded artifact reports 14 of 14 fixtures passing. MGES does not turn that into a percentage security score because equal weighting would imply equal risk and coverage. That has not been established.</p>
 
       <h2>Relationship to OWASP agentic risks</h2>
       <p>The OWASP Top 10 for Agentic Applications 2026 is a peer-reviewed risk framework. MGES is neither a substitute nor an OWASP certification.</p>
@@ -121,12 +120,12 @@ operations per second at median = 1,000,000,000 / median nanoseconds</code></pre
       <p>Signed artifacts indexed by suite version, source fingerprint, environment, and profile could separate one machine's observation from independently reproduced results.</p>
 
       <h2>How to quote the result responsibly</h2>
-      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-performance">Copy</button><pre><code id="quote-performance">MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H:
-127.498 microseconds median per governed call (95% bootstrap interval for the
-sample median: 126.334 to 128.942; 30 fresh-process observations; CV 5.572%).
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-performance">Copy</button><pre><code id="quote-performance">MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H:
+151.090 microseconds median per governed call (95% bootstrap interval for the
+sample median: 148.341 to 154.484; 30 fresh-process observations; governed CV 7.615%).
 Local in-process component benchmark; excludes model, network, storage, and
 concurrency; not a competitor benchmark or SLA.</code></pre></div>
-      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-conformance">Copy</button><pre><code id="quote-conformance">MGES v1 governance-boundary profile: 12 of 12 project-defined fixtures passed
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-conformance">Copy</button><pre><code id="quote-conformance">MGES v1.1.0 governance-boundary profile: 14 of 14 project-defined fixtures passed
 on the recorded source fingerprint. This is regression evidence, not a
 security score, penetration test, or certification.</code></pre></div>
       <p>A result without its objective, fixture, environment, uncertainty, limitations, and raw artifact is not a benchmark report. It is an anecdote.</p>

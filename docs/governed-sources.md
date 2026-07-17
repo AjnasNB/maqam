@@ -135,7 +135,7 @@ Required fields:
 - `channel`: logical source class used by route requests;
 - `toolName`: the exact `ToolGateway` registration that executes the adapter.
 
-Optional fields describe priority, authentication, capabilities, metadata, a direct `read` implementation, and an offline `check` function. Adapter definitions intentionally have no shell command, cookie-import, implicit login, or automatic installer field.
+Optional fields describe priority, authentication, capabilities, metadata, a direct `read` implementation, and a host-supplied `check` function. Built-in checks are local and deterministic; Maqam cannot prove that an arbitrary custom check is offline. Adapter definitions intentionally have no shell command, cookie-import, implicit login, or automatic installer field.
 
 Register the same handler under the same `toolName` before calling `route()`. The registry does not register tools on the gateway for you.
 
@@ -162,7 +162,7 @@ const result = await sources.route({
 
 Fallback is intentionally narrow:
 
-- `ResearchSourceUnavailableError` and ordinary adapter failures may try the next backend and are recorded in `attempts`.
+- Only an explicit `ResearchSourceUnavailableError` may try the next backend and is recorded in `attempts`. Unknown exceptions, malformed output, and HTTP authorization or server failures stop the route rather than being reclassified as availability.
 - policy denials, approval requirements, authentication/authorization failures, crawler security denials, robots denials, goal-scope conflicts, tool-call ceilings, and other classified security errors stop immediately;
 - an adapter with `authentication: "required"` stops unless the request sets `allowAuthenticated: true` explicitly;
 - `allowAuthenticated` is only an opt-in signal. It does not obtain, import, or validate credentials.
@@ -267,7 +267,7 @@ const report = await sources.doctor({
 
 Reports distinguish `ready`, `degraded`, `unavailable`, `blocked`, and `error`. A check reports adapter readiness; it does not authorize a later call and does not prove that remote credentials, a provider, or the network will remain available.
 
-Checks receive an abort signal and adapter description. They are host JavaScript functions. Maqam applies timeout and result validation, but cannot prove that a custom check is offline or side-effect free. Keep checks local and deterministic; never use them to log in, mutate provider state, import browser cookies, or probe private data.
+Checks receive an abort signal and adapter description. They are host JavaScript functions. Maqam aborts the signal when the report deadline expires and validates the returned result, but cancellation remains cooperative: arbitrary host code may ignore the signal. Maqam cannot prove that a custom check is offline or side-effect free. Keep checks local and deterministic; never use them to log in, mutate provider state, import browser cookies, or probe private data.
 
 ## Security Checklist
 

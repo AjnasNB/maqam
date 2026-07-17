@@ -4,7 +4,7 @@ Maqam is designed for governed local agent workflows. Treat every tool, connecto
 
 ## Supported Version
 
-The latest verified public release is `maqam@0.2.4`; security fixes are prepared on the current `0.3.0` source candidate and backported only when maintainers explicitly choose to support an older line. Version 0.3.0 adds a fail-closed governed-source caller boundary, fatal-error fallback rules, explicit authenticated-source opt-in, offline bounded feed parsing, and exact cross-origin crawler controls. It preserves the adapter descriptor/conformance and authority-boundary protections introduced in 0.2.x.
+The maintained source line is `0.3.x`. Treat a version as a supported public artifact only after its exact npm record, provenance, integrity, registry `gitHead`, matching Git tag, and GitHub release have been verified; source metadata alone is not publication proof. Version 0.3.0 adds a fail-closed governed-source caller boundary, fatal-error fallback rules, explicit authenticated-source opt-in, offline bounded feed parsing, and exact cross-origin crawler controls. The published `0.2.4` artifact remains historical, and security fixes are backported only when maintainers explicitly choose to support an older line.
 
 ## Reporting Issues
 

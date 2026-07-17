@@ -85,12 +85,19 @@ test("doctor converts invalid or accessor check output into an isolated error", 
   assert.equal(report.checks[1].status, "ready");
 });
 
-test("doctor applies a bounded timeout without executing any command schema", async () => {
-  const delayed = checkedAdapter("delayed", () => new Promise(() => {}));
+test("doctor applies a bounded timeout and cooperatively aborts the host check", async () => {
+  let observedSignal = null;
+  const delayed = checkedAdapter("delayed", (context) => new Promise((_, reject) => {
+    observedSignal = context.signal;
+    context.signal.addEventListener("abort", () => reject(context.signal.reason), { once: true });
+  }));
   const startedAt = Date.now();
   const result = await checkResearchSourceAdapter(delayed, { timeoutMs: 20 });
   assert.equal(result.status, "error");
   assert.equal(result.error.error.code, "RESEARCH_SOURCE_CHECK_TIMEOUT");
+  assert.ok(observedSignal instanceof AbortSignal);
+  assert.equal(observedSignal.aborted, true);
+  assert.equal(observedSignal.reason.code, "RESEARCH_SOURCE_CHECK_TIMEOUT");
   assert.ok(Date.now() - startedAt < 1_000);
 
   assert.throws(
@@ -154,5 +161,9 @@ test("doctor options and results reject inherited or accessor authority", async 
   await assert.rejects(
     () => checkResearchSourceAdapter(adapter, inherited),
     /plain object/
+  );
+  await assert.rejects(
+    () => checkResearchSourceAdapter(adapter, { signal: {} }),
+    /must be an AbortSignal/
   );
 });

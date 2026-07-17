@@ -141,7 +141,7 @@ export function describeResearchSourceAdapter(value) {
     capabilities: adapter.capabilities,
     metadata: adapter.metadata,
     directRead: adapter.read === null ? "unavailable" : "explicitly-ungoverned-only",
-    check: adapter.check === null ? "unavailable" : "offline"
+    check: adapter.check === null ? "unavailable" : "host-supplied"
   }, {
     label: "Research source adapter description",
     allowNullPrototype: true,

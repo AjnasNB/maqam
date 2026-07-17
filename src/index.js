@@ -10,7 +10,7 @@ import {
   snapshotOwnDataRecord
 } from "./framework/boundary.js";
 
-const DEFAULT_USER_AGENT = "Maqam/0.2 (+https://github.com/AjnasNB/maqam)";
+const DEFAULT_USER_AGENT = "Maqam/0.3 (+https://github.com/AjnasNB/maqam)";
 const DEFAULT_MAX_BYTES = 3 * 1024 * 1024;
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const CRAWL_OPTION_KEYS = [
@@ -225,16 +225,22 @@ function normalizeOptions(input, seedCount) {
     throw new TypeError("userAgent must be 1-256 characters without line breaks.");
   }
 
+  const sameOriginOnly = input.sameOrigin !== false;
+  const allowedOrigins = normalizeAllowedOrigins(input.allowedOrigins || []);
+  if (!sameOriginOnly && allowedOrigins.length === 0) {
+    throw new TypeError("sameOrigin=false requires a non-empty allowedOrigins list.");
+  }
+
   return {
     maxPages,
     maxSeeds,
     maxRequests: integerOption(input.maxRequests, "maxRequests", Math.min(50_000, Math.max(50, maxPages * 8)), 1, 50_000),
     maxQueue: integerOption(input.maxQueue, "maxQueue", Math.min(100_000, Math.max(100, maxPages * 20)), 1, 100_000),
-    maxLinksPerPage: integerOption(input.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 20_000),
+    maxLinksPerPage: integerOption(input.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 10_000),
     maxDepth: integerOption(input.maxDepth, "maxDepth", 20, 0, 100),
     concurrency: integerOption(input.concurrency, "concurrency", 4, 1, 64),
-    sameOrigin: input.sameOrigin !== false,
-    allowedOrigins: normalizeAllowedOrigins(input.allowedOrigins || []),
+    sameOrigin: sameOriginOnly,
+    allowedOrigins,
     includeSitemaps: input.includeSitemaps === true,
     maxSitemaps: integerOption(input.maxSitemaps, "maxSitemaps", 20, 0, 1_000),
     maxUrlsPerSitemap: integerOption(input.maxUrlsPerSitemap, "maxUrlsPerSitemap", 5_000, 1, 50_000),
@@ -495,19 +501,44 @@ function cleanForExtraction($) {
   $("[hidden], [aria-hidden='true']").remove();
 }
 
+function sanitizeMarkdownUrls($, baseUrl) {
+  $("a[href]").each((_, element) => {
+    const resolved = toUrl($(element).attr("href"), baseUrl);
+    if (!resolved || !isHttpUrl(resolved)) {
+      $(element).replaceWith($(element).contents());
+      return;
+    }
+    $(element).attr("href", normalizeUrl(resolved));
+  });
+  $("img[src]").each((_, element) => {
+    const resolved = toUrl($(element).attr("src"), baseUrl);
+    if (!resolved || !isHttpUrl(resolved)) {
+      $(element).remove();
+      return;
+    }
+    $(element).attr("src", normalizeUrl(resolved));
+  });
+}
+
 export function extractPage(html, url, options = {}) {
   options = snapshotOwnDataRecord(options, {
     label: "extractPage options",
     recognizedKeys: ["maxLinksPerPage", "maxFeedLinks"]
   });
+  if (!isHttpUrl(url)) throw new TypeError("extractPage url must be an HTTP(S) URL.");
+  url = normalizeUrl(url);
   const $ = cheerio.load(html);
   cleanForExtraction($);
+  sanitizeMarkdownUrls($, url);
 
   const title = ($("title").first().text() || $("h1").first().text() || "").trim().replace(/\s+/g, " ");
   const description = ($("meta[name='description']").attr("content") || "").trim();
   const h1 = $("h1").first().text().trim().replace(/\s+/g, " ");
-  const canonical = toUrl($("link[rel='canonical']").attr("href") || url, url);
-  const maxLinks = integerOption(options.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 20_000);
+  const canonicalCandidate = toUrl($("link[rel='canonical']").attr("href") || url, url);
+  const canonical = canonicalCandidate && isHttpUrl(canonicalCandidate)
+    ? normalizeUrl(canonicalCandidate)
+    : url;
+  const maxLinks = integerOption(options.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 10_000);
   const links = extractLinks($, url, maxLinks);
   const maxFeedLinks = integerOption(options.maxFeedLinks, "maxFeedLinks", 20, 1, 200);
   const feedLinks = extractFeedLinks($, url, maxFeedLinks);
@@ -838,7 +869,7 @@ export async function crawlDetailed(input = {}) {
         page.redirectChain = result.redirectChain;
         page.etag = result.etag;
         page.lastModified = result.lastModified;
-        page.robotsAllowed = true;
+        if (options.obeyRobots) page.robotsAllowed = true;
         return page;
       } catch (error) {
         if (options.signal?.aborted) throw abortError(options.signal);
@@ -900,7 +931,13 @@ export async function crawlDetailed(input = {}) {
 }
 
 export async function crawl(input = {}) {
-  return (await crawlDetailed(input)).pages;
+  const result = await crawlDetailed(input);
+  if (result.pages.length === 0 && result.stats.skippedByRobots > 0) {
+    const error = new Error("robots.txt denied every usable crawl result.");
+    error.code = "ROBOTS_DENIED";
+    throw error;
+  }
+  return result.pages;
 }
 
 export { discoverSitemapUrls, normalizeUrl };

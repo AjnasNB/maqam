@@ -118,7 +118,7 @@ export function createWebCrawlerSourceAdapter(hostCrawler) {
     },
     check: async () => ({
       status: "ready",
-      message: "The host crawler adapter is registered; this offline check does not perform a crawl or test the network.",
+      message: "The host crawler adapter is registered; this local check does not perform a crawl or test the network.",
       details: {
         registrationReady: true,
         liveVerified: false
@@ -142,4 +142,3 @@ export function createWebCrawlerSourceAdapter(hostCrawler) {
     }
   });
 }
-

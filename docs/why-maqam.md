@@ -139,6 +139,12 @@ The governance-boundary profile passes `12/12` project-defined fixtures covering
 
 Neither result is a globally accepted benchmark, security certification, penetration test, OWASP compliance statement, competitor ranking, or proof that unregistered code cannot bypass Maqam. The figures must not be presented as a 0.3.0 measurement. A fresh run is required when fingerprinted source changes. The [raw results and claim templates](../benchmarks/README.md) publish the exact scope and limitations; the [technical article](articles/benchmarking-agent-governance.md) explains the design.
 
+## What The 0.3.0 Candidate Evaluation Establishes
+
+MGES v1.1.0 reran from clean commit `e57c1f8757ca863cc3bf57e76e024f115e624949`. Its Windows/Node 24 local-call profile records a `151.090 microseconds/call` governed median, a `148.341-154.484` 95% bootstrap interval for the sample median, and `7.615%` governed CV across 30 fresh-process observations. All four required criteria-version-2 stability checks passed; the published direct-path CV diagnostic also passed.
+
+The conformance profile passes `14/14` named fixtures. The two new cases establish only that a source policy denial stops all registered backends before dispatch, and that ordinary unavailability can fall back in deterministic order while binding the normalized document to the selected adapter. They do not establish provider correctness, network isolation, factual accuracy, or universal security.
+
 ## Maqam And ProductLoop OS
 
 Maqam is the focused product and install for teams that want the governance boundary described above:
@@ -161,6 +167,6 @@ npm install maqam
 - Provider-reported usage and activity can be observed after execution; not every provider exposes a preventive hard limit for every measure.
 - Calls that bypass registered adapters are outside Maqam's control.
 - Passing tests is evidence for covered cases, not proof that the software has no defects.
-- The current MGES artifacts record clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d`; rerun them if any fingerprinted implementation or benchmark source changes.
+- The current MGES artifacts record clean source commit `e57c1f8757ca863cc3bf57e76e024f115e624949`; rerun them if any fingerprinted implementation or benchmark source changes.
 
 Those limits are part of the product boundary, not footnotes to hide. The [public roadmap](../ROADMAP.md) identifies which ones Maqam intends to address next.

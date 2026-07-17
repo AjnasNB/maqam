@@ -97,6 +97,32 @@ test("ResearchSourceRegistry follows deterministic priority and explicit backend
   assert.ok(Object.isFrozen(result.attempts));
 });
 
+test("fallback provenance timestamps the successful retrieval rather than route start", async () => {
+  let now = "2026-07-18T01:00:00.000Z";
+  const registry = createRegistry({
+    clock: () => new Date(now),
+    adapters: [
+      adapter("unavailable", {
+        priority: 1,
+        read: async () => {
+          now = "2026-07-18T01:00:05.000Z";
+          throw new ResearchSourceUnavailableError("try next");
+        }
+      }),
+      adapter("winner", {
+        priority: 2,
+        read: async () => {
+          now = "2026-07-18T01:00:09.000Z";
+          return [{ uri: "https://example.com/winner", text: "winner" }];
+        }
+      })
+    ]
+  });
+
+  const result = await registry.route({ channel: "web" });
+  assert.equal(result.documents[0].retrievedAt, "2026-07-18T01:00:09.000Z");
+});
+
 test("governed routing dispatches the exact tool identity and a denial executes zero backends", async () => {
   let deniedBackendCalls = 0;
   let fallbackBackendCalls = 0;
@@ -202,11 +228,27 @@ test("registry preferences are snapshotted and validated against channel members
   );
 });
 
-test("policy, approval, and security denials are fatal and never fall through", async (t) => {
+test("registry enforces one adapter identity per ToolGateway tool name", () => {
+  assert.throws(
+    () => new ResearchSourceRegistry({
+      adapters: [
+        adapter("public", { authentication: "none" }),
+        {
+          ...adapter("private", { authentication: "required" }),
+          toolName: "research.public"
+        }
+      ]
+    }),
+    /tool 'research\.public' is already registered/
+  );
+});
+
+test("policy, approval, crawler-security, and robots denials are fatal and never fall through", async (t) => {
   const cases = [
     ["policy", () => new PolicyDeniedError("blocked")],
     ["approval", () => new ApprovalRequiredError("review required")],
-    ["security", () => Object.assign(new Error("private target"), { code: "CRAWLER_URL_BLOCKED" })]
+    ["security", () => Object.assign(new Error("private target"), { code: "CRAWLER_URL_BLOCKED" })],
+    ["robots", () => Object.assign(new Error("robots denied"), { code: "ROBOTS_DENIED" })]
   ];
 
   for (const [name, createError] of cases) {
@@ -270,8 +312,9 @@ test("authenticated adapters require explicit opt-in and cannot become silent fa
   assert.equal(laterCalls, 0);
 });
 
-test("malformed adapter output is isolated and a clean backend can still succeed", async () => {
+test("malformed adapter output fails closed without trying another backend", async () => {
   let getterCalls = 0;
+  let fallbackCalls = 0;
   const unsafeDocument = { uri: "https://example.com/unsafe", text: "unsafe" };
   Object.defineProperty(unsafeDocument, "metadata", {
     enumerable: true,
@@ -285,14 +328,51 @@ test("malformed adapter output is isolated and a clean backend can still succeed
       adapter("unsafe", { priority: 1, read: async () => [unsafeDocument] }),
       adapter("safe", {
         priority: 2,
-        read: async () => [{ uri: "https://example.com/safe", text: "safe" }]
+        read: async () => {
+          fallbackCalls += 1;
+          return [{ uri: "https://example.com/safe", text: "safe" }];
+        }
       })
     ]
   });
-  const result = await registry.route({ channel: "web" });
+  await assert.rejects(
+    () => registry.route({ channel: "web" }),
+    /own enumerable data property/
+  );
   assert.equal(getterCalls, 0);
-  assert.equal(result.adapter.id, "safe");
-  assert.match(result.attempts[0].classification.error.message, /own enumerable data property/);
+  assert.equal(fallbackCalls, 0);
+});
+
+test("unknown and HTTP authorization failures fail closed without fallback", async (t) => {
+  const cases = [
+    ["unknown", new Error("adapter bug")],
+    ["http-401", Object.assign(new Error("HTTP 401"), { status: 401 })],
+    ["http-403", Object.assign(new Error("HTTP 403"), { status: 403 })]
+  ];
+
+  for (const [name, expected] of cases) {
+    await t.test(name, async () => {
+      let fallbackCalls = 0;
+      const registry = createRegistry({
+        adapters: [
+          adapter(`${name}.failed`, { priority: 1, read: async () => { throw expected; } }),
+          adapter(`${name}.fallback`, {
+            priority: 2,
+            read: async () => {
+              fallbackCalls += 1;
+              return [{ uri: "https://example.com/fallback", text: "fallback" }];
+            }
+          })
+        ]
+      });
+      await assert.rejects(
+        () => registry.route({ channel: "web" }),
+        (error) => error === expected
+      );
+      assert.equal(fallbackCalls, 0);
+      assert.equal(classifyResearchSourceError(expected).kind, "failure");
+    });
+  }
 });
 
 test("routing boundaries reject accessors, inherited authority, and invalid preferences", async () => {

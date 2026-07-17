@@ -117,7 +117,11 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(migration03, /^# Migrating To Maqam 0\.3/m);
   assert.match(migration03, /--allowed-origin/);
   assert.match(release03, /^# Maqam 0\.3\.0 Release Record/m);
-  assert.match(release03, /release candidate/i);
+  assert.match(release03, /exact-artifact release record/i);
+  assert.match(readme, /0\.3\.0 release line/i);
+  assert.match(readme, /source metadata alone is not publication proof/i);
+  assert.match(quickstart, /npx -y maqam@0\.3\.0 demo approval/);
+  assert.doesNotMatch(quickstart, /maqam@0\.2\.4/);
   assert.match(comparison, /OpenAI Agents SDK/);
   assert.match(comparison, /LangGraph/);
   assert.match(roadmap, /^# Maqam Public Roadmap/m);
@@ -146,7 +150,7 @@ test("public docs and brand assets match Maqam identity", () => {
 
 test("release governance docs require approval before publishing", () => {
   assert.match(changelog, /^# Changelog/m);
-  assert.match(changelog, /## 0\.3\.0 \(candidate\) - 2026-07-18/);
+  assert.match(changelog, /## 0\.3\.0 - 2026-07-18/);
   assert.match(changelog, /## 0\.2\.4 - 2026-07-17/);
   assert.match(changelog, /## 0\.2\.1 - 2026-07-15/);
   assert.match(changelog, /Fail-closed governance/);

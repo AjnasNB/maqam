@@ -27,28 +27,28 @@ Every conformance claim must include:
 
 ## Approved compact performance wording
 
-> MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 127.498 microseconds median per governed call (95% bootstrap interval for the sample median: 126.334-128.942; 30 fresh-process observations; CV 5.572%; project checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. [Raw JSON](results/2026-07-16-mges-performance-windows-node24.json).
+> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 151.090 microseconds median per governed call (95% bootstrap interval for the sample median: 148.341-154.484; 30 fresh-process observations; governed CV 7.615%; required project checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. [Raw JSON](results/2026-07-18-mges-performance-windows-node24.json).
 
-The current raw artifact records clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d`. Prefix a future result with **“Provisional result:”** whenever its artifact reports `workingTreeDirty: true` or it has not passed the declared project checks.
+The current raw artifact records clean source commit `e57c1f8757ca863cc3bf57e76e024f115e624949`. Prefix a future result with **“Provisional result:”** whenever its artifact reports `workingTreeDirty: true` or it has not passed the declared required project checks.
 
 ## Approved compact conformance wording
 
-> MGES v1 governance-boundary profile: 12/12 project-defined fixtures passed on the recorded source fingerprint. Regression evidence only—not a security score, penetration test, formal proof, compliance result or certification. [Raw JSON](results/2026-07-16-mges-conformance-windows-node24.json).
+> MGES v1.1.0 governance-boundary profile: 14/14 project-defined fixtures passed on the recorded source fingerprint. Regression evidence only—not a security score, penetration test, formal proof, compliance result or certification. [Raw JSON](results/2026-07-18-mges-conformance-windows-node24.json).
 
 ## Video card
 
 Use no more than these three levels:
 
 ```text
-127.498 microseconds/call median
-126.334-128.942 microseconds · 95% bootstrap interval · 30 observations
+151.090 microseconds/call median
+148.341-154.484 microseconds · 95% bootstrap interval · 30 observations
 Local Node 24/Windows component fixture; no model/network/storage; not a competitor benchmark or SLA
 ```
 
 For conformance:
 
 ```text
-12 / 12 MGES fixtures passed
+14 / 14 MGES fixtures passed
 Exact approval scope · replay denial · atomic consumption · evidence attribution
 Project-defined regression evidence; not a security certification
 ```
@@ -97,7 +97,7 @@ If those conditions are absent, publish a capability comparison and keep perform
 - “NIST benchmark,” “SPEC benchmark,” or “OWASP-certified.”
 - “Maqam is 137 microseconds” without the fixture and environment.
 - “7,843 calls/second throughput” without saying sequential rate at the observed median.
-- “12/12 secure.”
+- “14/14 secure.”
 - A ratio to the trivial direct handler.
 - A competitor speed claim from unmatched product defaults.
 - A point estimate without uncertainty and raw data.

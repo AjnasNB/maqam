@@ -16,7 +16,7 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 > **Release status — 2026-07-17:** [`maqam@0.2.4`](https://www.npmjs.com/package/maqam) is live on npm with trusted-publishing provenance. The matching [`v0.2.4` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) includes the reviewed tarball, checksums, benchmark artifacts, videos, transcripts, and product-specific 3D release art.
 
-> **0.3.0 source candidate — 2026-07-18:** this branch adds governed source routing, normalized research documents, offline RSS/Atom parsing, feed-aware crawling, and exact cross-origin CLI controls. It is not a publication claim. See the [candidate record](docs/release-0.3.0.md) and [migration guide](docs/migration-0.3.md); `maqam@0.2.4` remains the latest verified public package until the 0.3 artifact is approved and registry-verified.
+> **0.3.0 release line — 2026-07-18:** this line adds governed source routing, normalized research documents, offline RSS/Atom parsing, feed-aware crawling, and exact cross-origin CLI controls. Verify public availability from the exact [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) registry record, provenance, integrity, matching Git tag, and GitHub release; source metadata alone is not publication proof. See the [release record](docs/release-0.3.0.md) and [migration guide](docs/migration-0.3.md).
 
 [Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
 
@@ -30,7 +30,7 @@ They are one ecosystem with explicit boundaries, not one silently merged runtime
 
 | Choose | When you need |
 |---|---|
-| `maqam@0.2.4` (current public) / `0.3.0` (source candidate) | One compact boundary around tool calls, exact approvals, worker adapters, traces, evidence, governed source routing, or bounded HTTP/feed research |
+| `maqam@0.3.0` (after exact registry verification) | One compact boundary around tool calls, exact approvals, worker adapters, traces, evidence, governed source routing, or bounded HTTP/feed research |
 | `productloop-os@0.2.1` | The wider modular package family for runtime, policy, approvals, provenance, skills, connectors, evaluations, and research |
 | Both beneath an orchestrator | Google ADK, OpenAI Agents SDK, LangGraph, or another agent loop already plans work and Maqam should govern selected side effects |
 
@@ -63,7 +63,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 | [Public roadmap](https://maqamagent.com/roadmap/) and [source roadmap](https://github.com/AjnasNB/maqam/blob/main/ROADMAP.md) | Shipped baseline, next work, exit criteria, and explicit non-goals |
 | [Community hub](https://maqamagent.com/community/), [contributing](https://github.com/AjnasNB/maqam/blob/main/CONTRIBUTING.md), and [governance](https://github.com/AjnasNB/maqam/blob/main/GOVERNANCE.md) | Questions, examples, issues, forks, reviewed pull requests, and maintenance policy |
 | [0.2.4 release note](https://maqamagent.com/releases/v0.2.4/), [source release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md), [Release checklist](https://github.com/AjnasNB/maqam/blob/main/docs/release-checklist.md), and [Provenance and license notes](https://github.com/AjnasNB/maqam/blob/main/docs/provenance-and-licenses.md) | Exact package map, verification evidence, MGES caveats, provenance, licenses, and approval history |
-| [0.3.0 candidate record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.3.0.md) and [0.3 migration guide](https://github.com/AjnasNB/maqam/blob/main/docs/migration-0.3.md) | New source-routing surface, breaking CLI change, required verification, exact-artifact approval, and historical-evidence rules |
+| [0.3.0 release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.3.0.md) and [0.3 migration guide](https://github.com/AjnasNB/maqam/blob/main/docs/migration-0.3.md) | New source-routing surface, breaking CLI change, required verification, exact-artifact approval, and historical-evidence rules |
 
 Articles: [Your Agent Approval May Not Authorize the Input That Actually Executes](https://maqamagent.com/articles/exact-agent-approvals/) · [Benchmarking an Agent-Governance Boundary Without Fooling Yourself](https://maqamagent.com/articles/benchmarking-governance/)
 
@@ -158,7 +158,8 @@ Agent systems fail in production when tools run outside policy, outputs cannot b
 Maqam requires Node.js 20.18.1 or later.
 
 ```bash
-npm install -g maqam
+npm view maqam@0.3.0 version dist.integrity gitHead
+npm install -g maqam@0.3.0
 ```
 
 Run the exact-approval proof without a model key or hosted account:
@@ -182,7 +183,7 @@ Then open `http://127.0.0.1:8787`.
 Use inside a project:
 
 ```bash
-npm install maqam
+npm install maqam@0.3.0
 ```
 
 ## Crawler CLI
@@ -416,19 +417,19 @@ npm audit --omit=dev
 npm pack --dry-run
 ```
 
-The project-defined [Maqam Governance Evaluation Suite (MGES) v1](benchmarks/README.md) keeps performance and conformance separate. Its clean-source 30-observation Windows/Node 24 local-call result is `127.498 microseconds/call` median, with a `126.334-128.942 microseconds/call` 95% bootstrap interval for the sample median and `5.572%` coefficient of variation. The separate governance profile passes `12/12` named fixtures.
+The project-defined [Maqam Governance Evaluation Suite (MGES) v1.1.0](benchmarks/README.md) keeps performance and conformance separate. Its clean-source 30-observation Windows/Node 24 local-call result is `151.090 microseconds/call` median, with a `148.341-154.484 microseconds/call` 95% bootstrap interval for the sample median and `7.615%` governed coefficient of variation. The separate governance profile passes `14/14` named fixtures, including two governed-source routing cases.
 
-Those figures are local regression evidence, not a globally standardized benchmark, cross-product speed comparison, security score, certification, network benchmark, or production SLA. Read the [raw artifacts, complete methodology and publication wording](benchmarks/README.md) or the detailed article, [Benchmarking an agent-governance boundary without fooling yourself](docs/articles/benchmarking-agent-governance.md), before quoting them. The artifacts record clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d`; later release commits may change files outside the measured path, but any change to a fingerprinted source requires another run.
+Those figures are local regression evidence, not a globally standardized benchmark, cross-product speed comparison, security score, certification, network benchmark, or production SLA. Read the [raw artifacts, complete methodology and publication wording](benchmarks/README.md) or the detailed article, [Benchmarking an agent-governance boundary without fooling yourself](docs/articles/benchmarking-agent-governance.md), before quoting them. The artifacts record clean source commit `e57c1f8757ca863cc3bf57e76e024f115e624949`; later release commits may change files outside the measured path, but any change to a fingerprinted source requires another run.
 
 The npm tarball intentionally excludes the large brand-board and presentation PNG files; those remain in the source repository. Only the logo and files required by the local console ship as runtime app assets.
 
 ## Publish
 
-The latest verified public package is `maqam@0.2.4`; this source tree is preparing `0.3.0`. Do not republish an existing version or describe the candidate as live. The next release uses the maintainer-approved [trusted npm publishing workflow](https://github.com/AjnasNB/maqam/actions/workflows/publish-npm.yml), which rebuilds and verifies the exact approved artifact before npm's OIDC publisher accepts it.
+Package metadata targets `maqam@0.3.0`. Source metadata is not proof of publication: verify the exact npm version record, integrity, provenance, registry `gitHead`, matching Git tag, and GitHub release before describing the artifact as public. Do not republish an existing version. Releases use the maintainer-approved [trusted npm publishing workflow](https://github.com/AjnasNB/maqam/actions/workflows/publish-npm.yml), which rebuilds and verifies the exact approved artifact before npm's OIDC publisher accepts it.
 
 Before a new version is approved, the final clean commit must pass the complete release checklist, a fresh tarball must be inspected and installed in a clean consumer, and the package owner must approve that artifact's filename, byte size, integrity, SHA-256, version, registry, command, and Git commit. After publication, verify the registry integrity, provenance, and `gitHead`, then create the matching annotated tag and GitHub release.
 
-See the [0.3.0 candidate release record](docs/release-0.3.0.md) for required evidence. The [0.2.4 source release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md) and [public GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) remain historical evidence for that artifact.
+See the [0.3.0 release record](docs/release-0.3.0.md) for required evidence. The [0.2.4 source release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md) and [public GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) remain historical evidence for that artifact.
 
 ## License
 

@@ -322,7 +322,7 @@ export interface ResearchSourceAdapterDescription {
   readonly capabilities: readonly string[];
   readonly metadata: Readonly<JsonObject>;
   readonly directRead: "unavailable" | "explicitly-ungoverned-only";
-  readonly check: "unavailable" | "offline";
+  readonly check: "unavailable" | "host-supplied";
 }
 
 export type ResearchSourceReadContext = AgentExecutionContext | Readonly<{

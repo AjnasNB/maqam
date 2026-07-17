@@ -1,6 +1,6 @@
 # Maqam 0.3.0 Release Record
 
-**Status:** release candidate. This file records the intended `0.3.0` surface and required evidence; it is not proof that the package has been published. Until registry verification succeeds, `maqam@0.2.4` remains the latest verified public npm release.
+**Status:** exact-artifact release record. This file describes the `0.3.0` surface and required evidence; verify public availability from the npm registry, provenance, integrity, Git tag, and GitHub release rather than trusting source metadata alone.
 
 ## Release Intent
 
@@ -9,7 +9,7 @@ Maqam 0.3.0 extends the governed execution boundary with ordered research-source
 ### Added
 
 - `ResearchSourceRegistry` with deterministic priority, explicit backend preferences, bounded attempt records, fatal-error stop rules, and normalized `ResearchDocument` output.
-- `defineResearchSourceAdapter`, `defineResearchToolCaller`, source error classes/classification, and offline source-doctor reports.
+- `defineResearchSourceAdapter`, `defineResearchToolCaller`, source error classes/classification, and bounded host-defined source-doctor reports.
 - Offline RSS 2.0/Atom parsing plus host-reader and source-adapter factories with no implicit network access.
 - Crawler feed discovery and parsing with explicit item/link budgets.
 - Safer CLI controls for requests, depth, bytes, duration, retries, exact cross-origin permission, detailed failures, statistics, and fail-on-error behavior.
@@ -57,7 +57,14 @@ Required matrices and focused evidence:
 - public exports, declarations, clean-consumer compile, and packed-file assertions;
 - MGES performance and conformance rerun when fingerprinted files change.
 
-Do not copy the historical 0.2.4 benchmark result into this release as if it measured 0.3.0. Preserve 0.2.4 evidence for its own artifact and attach a fresh 0.3.0 run when required by the benchmark fingerprint.
+Do not copy the historical 0.2.4 benchmark result into this release as if it measured 0.3.0. Preserve 0.2.4 evidence for its own artifact.
+
+Fresh MGES v1.1.0 evidence was generated from clean source commit `e57c1f8757ca863cc3bf57e76e024f115e624949`:
+
+- [performance JSON](../benchmarks/results/2026-07-18-mges-performance-windows-node24.json): 30 fresh-process observations, `151.090 microseconds/call` governed median, `148.341-154.484` 95% bootstrap interval, `7.615%` governed CV, and all four required criteria-version-2 checks passed;
+- [conformance JSON](../benchmarks/results/2026-07-18-mges-conformance-windows-node24.json): `14/14` named deterministic fixtures passed, including fatal source-policy denial and normalized ordered fallback.
+
+These are local project regression results, not a globally standardized benchmark, security score, certification, competitor ranking, capacity test, or SLA.
 
 ## Exact Artifact Approval
 

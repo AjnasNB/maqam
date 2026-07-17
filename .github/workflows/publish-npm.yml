@@ -8,6 +8,10 @@ on:
         required: true
         default: 0.3.0
         type: string
+      expected_size_bytes:
+        description: Approved npm tarball size in bytes
+        required: true
+        type: string
       expected_sha256:
         description: Approved SHA-256 of the npm tarball
         required: true
@@ -35,8 +39,10 @@ jobs:
     timeout-minutes: 20
     outputs:
       sha256: ${{ steps.pack.outputs.sha256 }}
+      size_bytes: ${{ steps.pack.outputs.size_bytes }}
     env:
       EXPECTED_VERSION: ${{ inputs.version }}
+      EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
       EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
       EXPECTED_INTEGRITY: ${{ inputs.expected_integrity }}
       CONFIRMATION: ${{ inputs.confirmation }}
@@ -51,6 +57,10 @@ jobs:
           fi
           if [[ ! "${EXPECTED_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
             echo "Invalid version input." >&2
+            exit 1
+          fi
+          if [[ ! "${EXPECTED_SIZE_BYTES}" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Expected tarball size must be a positive integer number of bytes." >&2
             exit 1
           fi
           if [[ ! "${EXPECTED_SHA256}" =~ ^[0-9a-f]{64}$ ]]; then
@@ -142,6 +152,11 @@ jobs:
           npm pack --ignore-scripts --pack-destination "${pack_dir}" --json > "${RUNNER_TEMP}/pack.json"
           tarball="${pack_dir}/maqam-${EXPECTED_VERSION}.tgz"
           test -f "${tarball}"
+          actual_size_bytes="$(wc -c < "${tarball}" | tr -d '[:space:]')"
+          if [[ "${actual_size_bytes}" != "${EXPECTED_SIZE_BYTES}" ]]; then
+            echo "Tarball size mismatch: ${actual_size_bytes} bytes" >&2
+            exit 1
+          fi
           actual_sha256="$(sha256sum "${tarball}" | awk '{print $1}')"
           if [[ "${actual_sha256}" != "${EXPECTED_SHA256}" ]]; then
             echo "Tarball SHA-256 mismatch: ${actual_sha256}" >&2
@@ -153,11 +168,13 @@ jobs:
             exit 1
           fi
           echo "sha256=${actual_sha256}" >> "${GITHUB_OUTPUT}"
+          echo "size_bytes=${actual_size_bytes}" >> "${GITHUB_OUTPUT}"
           {
             echo "## Approved npm artifact"
             echo
             echo "- Package: \`maqam@${EXPECTED_VERSION}\`"
             echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Size: \`${actual_size_bytes}\` bytes"
             echo "- SHA-256: \`${actual_sha256}\`"
             echo "- Integrity: \`${actual_integrity}\`"
             echo "- Registry state: version not yet published"
@@ -176,6 +193,7 @@ jobs:
       id-token: write
     env:
       EXPECTED_VERSION: ${{ inputs.version }}
+      EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
       EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
       EXPECTED_INTEGRITY: ${{ inputs.expected_integrity }}
     steps:
@@ -200,6 +218,11 @@ jobs:
           mkdir -p "${pack_dir}"
           npm pack --ignore-scripts --pack-destination "${pack_dir}" --json > "${RUNNER_TEMP}/publish-pack.json"
           tarball="${pack_dir}/maqam-${EXPECTED_VERSION}.tgz"
+          actual_size_bytes="$(wc -c < "${tarball}" | tr -d '[:space:]')"
+          if [[ "${actual_size_bytes}" != "${EXPECTED_SIZE_BYTES}" ]]; then
+            echo "Artifact size changed between verification and approval: ${actual_size_bytes} bytes" >&2
+            exit 1
+          fi
           actual_sha256="$(sha256sum "${tarball}" | awk '{print $1}')"
           if [[ "${actual_sha256}" != "${EXPECTED_SHA256}" ]]; then
             echo "Artifact changed between verification and approval." >&2
@@ -212,6 +235,10 @@ jobs:
           fi
           if [[ "${{ needs.verify.outputs.sha256 }}" != "${EXPECTED_SHA256}" ]]; then
             echo "Verification job output does not match the approved hash." >&2
+            exit 1
+          fi
+          if [[ "${{ needs.verify.outputs.size_bytes }}" != "${EXPECTED_SIZE_BYTES}" ]]; then
+            echo "Verification job output does not match the approved byte size." >&2
             exit 1
           fi
 
@@ -273,6 +300,11 @@ jobs:
           mkdir -p "${registry_dir}"
           npm pack "maqam@${EXPECTED_VERSION}" --ignore-scripts --pack-destination "${registry_dir}" >/dev/null
           registry_tarball="${registry_dir}/maqam-${EXPECTED_VERSION}.tgz"
+          registry_size_bytes="$(wc -c < "${registry_tarball}" | tr -d '[:space:]')"
+          if [[ "${registry_size_bytes}" != "${EXPECTED_SIZE_BYTES}" ]]; then
+            echo "Downloaded registry tarball does not match the approved byte size." >&2
+            exit 1
+          fi
           registry_sha256="$(sha256sum "${registry_tarball}" | awk '{print $1}')"
           if [[ "${registry_sha256}" != "${EXPECTED_SHA256}" ]]; then
             echo "Downloaded registry tarball does not match the approved SHA-256." >&2
@@ -284,6 +316,7 @@ jobs:
             echo
             echo "- Package: \`maqam@${published_version}\`"
             echo "- Commit / gitHead: \`${published_git_head}\`"
+            echo "- Size: \`${registry_size_bytes}\` bytes"
             echo "- SHA-256: \`${registry_sha256}\`"
             echo "- Integrity: \`${published_integrity}\`"
             echo "- Authentication: npm Trusted Publishing (OIDC)"

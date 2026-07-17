@@ -29,7 +29,11 @@ function snapshotCheckOptions(value) {
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > MAX_TIMEOUT_MS) {
     throw new TypeError(`Research source check timeoutMs must be a safe integer between 1 and ${MAX_TIMEOUT_MS}.`);
   }
-  return { timeoutMs, signal: options.signal ?? null };
+  const signal = options.signal ?? null;
+  if (signal !== null && !(signal instanceof AbortSignal)) {
+    throw new TypeError("Research source check signal must be an AbortSignal or null.");
+  }
+  return { timeoutMs, signal };
 }
 
 function normalizeCheckResult(value, adapter) {
@@ -101,13 +105,43 @@ function failedCheck(adapter, error) {
   });
 }
 
-async function withTimeout(operation, timeoutMs, adapterId) {
+function checkAbortReason(signal) {
+  if (signal.reason instanceof Error) return signal.reason;
+  return new MaqamError("Research source check was aborted.", {
+    code: "RESEARCH_SOURCE_CHECK_ABORTED"
+  });
+}
+
+function linkedCheckController(parentSignal) {
+  const controller = new AbortController();
+  if (parentSignal === null) return { controller, cleanup: () => {} };
+  const forwardAbort = () => controller.abort(checkAbortReason(parentSignal));
+  if (parentSignal.aborted) {
+    forwardAbort();
+    return { controller, cleanup: () => {} };
+  }
+  parentSignal.addEventListener("abort", forwardAbort, { once: true });
+  return {
+    controller,
+    cleanup: () => parentSignal.removeEventListener("abort", forwardAbort)
+  };
+}
+
+async function withTimeout(operation, timeoutMs, adapterId, controller) {
   let timer;
+  let onAbort;
+  const { signal } = controller;
+  if (signal.aborted) throw checkAbortReason(signal);
   try {
     return await Promise.race([
-      Promise.resolve().then(operation),
+      Promise.resolve().then(() => {
+        if (signal.aborted) throw checkAbortReason(signal);
+        return operation();
+      }),
       new Promise((_, reject) => {
-        timer = setTimeout(() => reject(new MaqamError(
+        onAbort = () => reject(checkAbortReason(signal));
+        signal.addEventListener("abort", onAbort, { once: true });
+        timer = setTimeout(() => controller.abort(new MaqamError(
           `Check for research source adapter '${adapterId}' timed out.`,
           {
             code: "RESEARCH_SOURCE_CHECK_TIMEOUT",
@@ -118,6 +152,7 @@ async function withTimeout(operation, timeoutMs, adapterId) {
     ]);
   } finally {
     if (timer !== undefined) clearTimeout(timer);
+    if (onAbort) signal.removeEventListener("abort", onAbort);
   }
 }
 
@@ -130,6 +165,7 @@ export async function checkResearchSourceAdapter(value, options = {}) {
   const adapter = defineResearchSourceAdapter(value);
   const config = snapshotCheckOptions(options);
   if (adapter.check === null) return unavailableCheck(adapter);
+  const linked = linkedCheckController(config.signal);
 
   try {
     const context = Object.create(null);
@@ -141,17 +177,24 @@ export async function checkResearchSourceAdapter(value, options = {}) {
         writable: false
       },
       signal: {
-        value: config.signal,
+        value: linked.controller.signal,
         enumerable: true,
         configurable: false,
         writable: false
       }
     });
     Object.freeze(context);
-    const rawResult = await withTimeout(() => adapter.check(context), config.timeoutMs, adapter.id);
+    const rawResult = await withTimeout(
+      () => adapter.check(context),
+      config.timeoutMs,
+      adapter.id,
+      linked.controller
+    );
     return normalizeCheckResult(rawResult, adapter);
   } catch (error) {
     return failedCheck(adapter, error);
+  } finally {
+    linked.cleanup();
   }
 }
 

@@ -2,14 +2,14 @@
 
 This quickstart proves the exact-approval path locally. It needs Node.js 20.18.1 or later and does not need a model key, hosted account, browser, database, or external side effect.
 
-`maqam@0.2.4` is the latest verified public package while the 0.3.0 source candidate is under review. Commands below stay pinned to the public artifact. After 0.3.0 is published and registry-verified, replace the pin with `@0.3.0` to try Governed Sources.
+Commands below target the exact `maqam@0.3.0` release line. Before running them, confirm that `npm view maqam@0.3.0 version dist.integrity gitHead` returns the reviewed version, integrity, and commit; source metadata alone is not proof that the package is public.
 
 ## 1. Run The Built-In Proof
 
 From any directory:
 
 ```bash
-npx -y maqam@0.2.4 demo approval
+npx -y maqam@0.3.0 demo approval
 ```
 
 Expected checkpoints:
@@ -29,7 +29,7 @@ PASS
 The command creates a temporary isolated workspace, performs one exact approved file write, verifies it, and removes the workspace. Add `--json` for the deterministic machine-readable report used by the launch video:
 
 ```bash
-npx -y maqam@0.2.4 demo approval --json
+npx -y maqam@0.3.0 demo approval --json
 ```
 
 ## 2. Install In A Project
@@ -38,7 +38,7 @@ npx -y maqam@0.2.4 demo approval --json
 mkdir maqam-quickstart
 cd maqam-quickstart
 npm init -y
-npm install maqam@0.2.4
+npm install maqam@0.3.0
 ```
 
 Create `approval.mjs` with this local, side-effect-free example:
@@ -132,9 +132,9 @@ Replace the fake handler only after defining:
 
 Only calls routed through the registered `ToolGateway` path are governed. Evidence and claims must be explicitly recorded by the handler or workflow. Current approval, runtime, trace, and evidence state is in-process unless the host exports and protects it.
 
-## 4. Try Governed Sources From The 0.3 Source Tree
+## 4. Try Governed Sources From The 0.3 Release Source
 
-From a checkout of the 0.3.0 candidate:
+From a checkout matching the reviewed 0.3.0 release commit:
 
 ```bash
 npm install

@@ -5,7 +5,9 @@ import {
   snapshotJsonValue,
   snapshotOwnDataRecord
 } from "../../framework/boundary.js";
+import { MaqamError } from "../../framework/errors.js";
 import { defineResearchSourceAdapter } from "../source-adapter.js";
+import { ResearchSourceUnavailableError } from "../source-error.js";
 
 const PARSER_ID = "maqam:rss-atom-offline-v1";
 const OPTION_KEYS = [
@@ -624,6 +626,33 @@ function snapshotReaderResponse(value, requestedUrl) {
   });
 }
 
+function requireSuccessfulReaderResponse(response) {
+  const { status } = response;
+  if (status === null || (status >= 200 && status < 300)) return;
+  const details = { status, finalUrl: response.finalUrl };
+  if (status === 401) {
+    throw new MaqamError("The RSS/Atom reader requires authentication.", {
+      code: "AUTHENTICATION_HTTP_401",
+      details
+    });
+  }
+  if (status === 403) {
+    throw new MaqamError("The RSS/Atom reader denied authorization.", {
+      code: "AUTHORIZATION_HTTP_403",
+      details
+    });
+  }
+  if (status === 404 || status === 410) {
+    throw new ResearchSourceUnavailableError("The RSS/Atom source is unavailable.", {
+      details
+    });
+  }
+  throw new MaqamError(`The RSS/Atom reader returned HTTP ${status}.`, {
+    code: "RESEARCH_SOURCE_HTTP_ERROR",
+    details
+  });
+}
+
 /**
  * Create an adapter around a host-supplied governed document reader. This
  * factory deliberately has no fetch fallback and never performs network I/O.
@@ -648,11 +677,19 @@ export function createRssAtomResearchAdapter(readDocument, options = {}) {
       await readDocument(readerRequest, context),
       request.url
     );
+    requireSuccessfulReaderResponse(response);
     const parsed = parseRssAtom(response.body, response.finalUrl, config);
+    const {
+      networkAccess: parserNetworkAccess,
+      ...parserProvenance
+    } = parsed.provenance;
     return snapshotJsonValue({
       ...parsed,
       provenance: {
-        ...parsed.provenance,
+        ...parserProvenance,
+        parserNetworkAccess,
+        retrieval: "host-supplied-reader",
+        retrievalNetworkAccess: "host-defined",
         requestedUrl: request.url,
         finalUrl: response.finalUrl,
         status: response.status,
@@ -688,7 +725,8 @@ export function createRssAtomSourceAdapter(readDocument, options = {}) {
     metadata: {
       parser: PARSER_ID,
       retrieval: "host-supplied-governed-reader",
-      networkAccess: false
+      parserNetworkAccess: false,
+      implicitNetworkAccess: false
     },
     check: async () => ({
       status: "ready",

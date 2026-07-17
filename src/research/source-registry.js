@@ -12,7 +12,6 @@ import {
 import { normalizeResearchDocuments } from "./research-document.js";
 import {
   classifyResearchSourceError,
-  isFatalResearchSourceError,
   ResearchSourceAuthenticationRequiredError,
   ResearchSourceToolCallerRequiredError,
   ResearchSourceUnavailableError
@@ -189,6 +188,7 @@ function failedAttempt(adapter, error) {
 
 export class ResearchSourceRegistry {
   #entries = new Map();
+  #toolNames = new Set();
   #preferences;
   #clock;
   #toolCaller;
@@ -220,10 +220,14 @@ export class ResearchSourceRegistry {
     if (this.#entries.has(adapter.id)) {
       throw new TypeError(`Research source adapter '${adapter.id}' is already registered.`);
     }
+    if (this.#toolNames.has(adapter.toolName)) {
+      throw new TypeError(`Research source tool '${adapter.toolName}' is already registered by another adapter.`);
+    }
     this.#entries.set(adapter.id, {
       adapter,
       index: this.#registrationIndex
     });
+    this.#toolNames.add(adapter.toolName);
     this.#registrationIndex += 1;
     return describeResearchSourceAdapter(adapter);
   }
@@ -316,7 +320,6 @@ export class ResearchSourceRegistry {
     }
 
     const attempts = [];
-    let retrievedAt = null;
     for (const { adapter } of entries) {
       if (adapter.authentication === "required" && !request.allowAuthenticated) {
         throw new ResearchSourceAuthenticationRequiredError(
@@ -333,8 +336,6 @@ export class ResearchSourceRegistry {
         );
       }
 
-      if (retrievedAt === null) retrievedAt = observedTimestamp(this.#clock);
-
       try {
         const adapterContext = snapshotJsonValue({
           adapter: describeResearchSourceAdapter(adapter)
@@ -345,6 +346,7 @@ export class ResearchSourceRegistry {
           rejectRepeatedReferences: false
         });
         const rawDocuments = await invoke(adapter, executionInput, adapterContext);
+        const retrievedAt = observedTimestamp(this.#clock);
         const documents = normalizeResearchDocuments(rawDocuments, {
           adapterId: adapter.id,
           channel: adapter.channel,
@@ -366,7 +368,8 @@ export class ResearchSourceRegistry {
           rejectRepeatedReferences: false
         });
       } catch (error) {
-        if (isFatalResearchSourceError(error)) throw error;
+        const classification = classifyResearchSourceError(error);
+        if (classification.kind !== "unavailable") throw error;
         attempts.push(failedAttempt(adapter, error));
       }
     }

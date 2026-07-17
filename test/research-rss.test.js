@@ -6,6 +6,7 @@ import {
   createRssAtomSourceAdapter,
   parseRssAtom
 } from "../src/research/adapters/rss.js";
+import { ResearchSourceUnavailableError } from "../src/research/source-error.js";
 
 const RSS_SOURCE = "https://feeds.example.com/news/feed.xml";
 
@@ -279,6 +280,10 @@ test("createRssAtomResearchAdapter only uses its governed host reader and record
     assert.equal(result.provenance.status, 200);
     assert.equal(result.provenance.contentType, "application/rss+xml; charset=utf-8");
     assert.equal(result.provenance.retrievedAt, "2026-07-17T12:34:56.000Z");
+    assert.equal(result.provenance.parserNetworkAccess, false);
+    assert.equal(result.provenance.retrieval, "host-supplied-reader");
+    assert.equal(result.provenance.retrievalNetworkAccess, "host-defined");
+    assert.equal(Object.hasOwn(result.provenance, "networkAccess"), false);
     assert.ok(Object.isFrozen(result));
     assert.ok(Object.isFrozen(result.provenance));
   } finally {
@@ -321,6 +326,35 @@ test("createRssAtomResearchAdapter accepts string bodies and rejects hostile rea
   );
 });
 
+test("RSS/Atom reader HTTP status controls parsing and fallback eligibility", async (t) => {
+  const body = rssDocument(
+    "<item><title>One</title><link>https://example.com/1</link></item>"
+  );
+  const cases = [
+    [401, "AUTHENTICATION_HTTP_401", false],
+    [403, "AUTHORIZATION_HTTP_403", false],
+    [404, "RESEARCH_SOURCE_UNAVAILABLE", true],
+    [410, "RESEARCH_SOURCE_UNAVAILABLE", true],
+    [500, "RESEARCH_SOURCE_HTTP_ERROR", false]
+  ];
+
+  for (const [status, code, unavailable] of cases) {
+    await t.test(String(status), async () => {
+      const adapter = createRssAtomResearchAdapter(async () => ({
+        body,
+        finalUrl: RSS_SOURCE,
+        status,
+        contentType: "application/rss+xml"
+      }));
+      await assert.rejects(
+        () => adapter({ url: RSS_SOURCE }),
+        (error) => error.code === code
+          && (error instanceof ResearchSourceUnavailableError) === unavailable
+      );
+    });
+  }
+});
+
 test("createRssAtomSourceAdapter emits registry-ready ResearchDocument inputs", async () => {
   const adapter = createRssAtomSourceAdapter(async () => rssDocument(`
     <item>
@@ -333,6 +367,9 @@ test("createRssAtomSourceAdapter emits registry-ready ResearchDocument inputs", 
   assert.equal(adapter.id, "rss-atom.direct");
   assert.equal(adapter.channel, "rss-atom");
   assert.equal(adapter.toolName, "research.rss-atom.direct");
+  assert.equal(adapter.metadata.parserNetworkAccess, false);
+  assert.equal(adapter.metadata.implicitNetworkAccess, false);
+  assert.equal(Object.hasOwn(adapter.metadata, "networkAccess"), false);
   const documents = await adapter.read({ url: RSS_SOURCE }, {});
   assert.equal(documents.length, 1);
   assert.equal(documents[0].uri, "https://example.com/source-adapter-1");

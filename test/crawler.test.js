@@ -86,6 +86,24 @@ test("extractPage returns agent-friendly fields", () => {
   assert.deepEqual(page.feedLinks, ["https://example.com/feed.atom"]);
 });
 
+test("extractPage removes active URL schemes from Markdown and canonical metadata", () => {
+  const page = extractPage(`
+    <html><head><link rel="canonical" href="file:///etc/passwd"></head><body><main>
+      <a href="javascript:alert(1)">unsafe link</a>
+      <a href="/safe">safe link</a>
+      <img alt="unsafe image" src="data:image/svg+xml,<svg onload=alert(1)>">
+      <img alt="safe image" src="/safe.png">
+    </main></body></html>
+  `, "https://example.com/page");
+
+  assert.equal(page.canonical, "https://example.com/page");
+  assert.deepEqual(page.links, ["https://example.com/safe"]);
+  assert.doesNotMatch(page.markdown, /javascript:|data:|file:/i);
+  assert.match(page.markdown, /unsafe link/);
+  assert.match(page.markdown, /\[safe link\]\(https:\/\/example\.com\/safe\)/);
+  assert.match(page.markdown, /!\[safe image\]\(https:\/\/example\.com\/safe\.png\)/);
+});
+
 test("crawler respects robots.txt and extracts linked pages", async () => {
   const pages = await crawl({
     seeds: [`${baseUrl}/`],

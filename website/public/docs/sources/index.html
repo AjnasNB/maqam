@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Governed research sources | Maqam documentation</title>
-  <meta name="description" content="Route normalized research documents through ordered source adapters, explicit Maqam policy, offline health checks, and a feed-aware bounded crawler.">
+  <meta name="description" content="Route normalized research documents through ordered source adapters, explicit Maqam policy, host-defined health checks, and a feed-aware bounded crawler.">
   <meta name="theme-color" content="#0b0e0d">
   <link rel="canonical" href="https://maqamagent.com/docs/sources/">
   <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
@@ -33,16 +33,16 @@
 
     <article class="docs-content">
       <h1>Governed research sources</h1>
-      <p class="lede">Maqam 0.3.0 adds a provider-neutral source registry: applications can normalize research records, choose ordered backends, run offline checks, and route reads through an existing governed tool boundary.</p>
+      <p class="lede">The Maqam 0.3.0 candidate adds a provider-neutral source registry: applications can normalize research records, choose ordered backends, run bounded host-defined checks, and route reads through an existing governed tool boundary.</p>
       <figure class="media-frame media-frame--art">
-        <picture><source srcset="/assets/integration-dock-3d.webp" type="image/webp"><img src="/assets/integration-dock-3d.png" width="1536" height="1024" alt="Three-dimensional source dock routing reviewed research adapters through one Maqam policy gate" loading="lazy"></picture>
+        <picture><source srcset="/assets/integration-dock-3d.webp" type="image/webp"><img src="/assets/integration-dock-3d.png" width="1586" height="992" alt="Three-dimensional source dock routing reviewed research adapters through one Maqam policy gate" loading="lazy"></picture>
         <figcaption>Each backend keeps a static adapter identity and tool name. Governed routing calls that tool name through the host-supplied ToolCaller.</figcaption>
       </figure>
 
       <h2 id="model">The model</h2>
       <dl class="definition-grid">
         <dt>ResearchDocument</dt><dd>A frozen versioned record with HTTP or HTTPS URI, text or Markdown, source adapter identity, channel, retrieval time, authors, metadata, and citations.</dd>
-        <dt>Source adapter</dt><dd>A static id, channel, tool name, priority, declared capabilities, optional direct reader, and optional offline check.</dd>
+        <dt>Source adapter</dt><dd>A static id, channel, tool name, priority, declared capabilities, optional direct reader, and optional host-defined check.</dd>
         <dt>Registry</dt><dd>Deterministic ordering, explicit backend preferences, normalized output, attempt records, and strict error classification.</dd>
         <dt>ToolCaller</dt><dd>The host-owned call function used by <code>route()</code>. Bind it to a configured <code>ToolGateway</code> to enforce Maqam policy.</dd>
       </dl>
@@ -103,7 +103,7 @@ console.log(result.governance.mode);
 console.log(result.documents[0]);</code></pre></div>
 
       <h2 id="fallback">Fallback is narrow and fail closed</h2>
-      <p>Adapters are ordered by explicit backend preference, then priority and registration order. The registry can try the next backend after an unavailable or ordinary adapter failure. It does not fall through after a policy denial, approval requirement, security error, or explicit authentication requirement.</p>
+      <p>Adapters are ordered by explicit backend preference, then priority and registration order. The registry can try the next backend only after an explicit <code>ResearchSourceUnavailableError</code>. Unknown exceptions, malformed output, HTTP authorization or server failures, policy denial, approval requirements, security errors, and authentication requirements stop the route.</p>
       <ul>
         <li>Authenticated adapters require <code>allowAuthenticated: true</code>; the host still owns credentials and session policy.</li>
         <li>Adapter output is fully validated before any normalized document collection is returned.</li>
@@ -111,8 +111,8 @@ console.log(result.documents[0]);</code></pre></div>
         <li>A backend preference changes ordering only. It cannot add an adapter or weaken its tool policy.</li>
       </ul>
 
-      <h2 id="doctor">Offline source doctor</h2>
-      <p><code>registry.doctor()</code> runs each registered in-process check independently with a timeout and returns ready, degraded, unavailable, blocked, or error status. One broken check cannot hide the others.</p>
+      <h2 id="doctor">Source doctor</h2>
+      <p><code>registry.doctor()</code> runs each registered in-process check independently with a timeout and returns ready, degraded, unavailable, blocked, or error status. One broken check cannot hide the others. The timeout aborts the supplied signal, but host code must cooperate with cancellation.</p>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#source-doctor-code">Copy</button><pre><code id="source-doctor-code">const report = await registry.doctor({
   channel: "docs",
   timeoutMs: 2_000
@@ -126,7 +126,7 @@ console.table(report.checks.map((check) => ({
 })));</code></pre></div>
       <div class="callout">
         <strong>What doctor proves</strong>
-        Only the adapter's registered offline check. It does not prove live credentials, network access, provider availability, content truth, or production capacity unless a separately reviewed check explicitly tests those things.
+        Only the adapter's registered host-defined check. Built-in checks are local, but Maqam cannot prove a custom check is offline or side-effect free. Doctor does not prove live credentials, provider availability, content truth, or production capacity unless a separately reviewed check explicitly tests those things.
       </div>
 
       <h2 id="feeds">RSS, Atom, and feed-aware crawling</h2>

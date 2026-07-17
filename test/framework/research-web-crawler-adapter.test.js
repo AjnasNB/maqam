@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
+import { createServer } from "node:http";
 import { test } from "node:test";
 import { PolicyEngine } from "../../src/framework/policy.js";
 import { ToolGateway } from "../../src/framework/tool-gateway.js";
 import {
   ResearchSourceRegistry,
   ResearchSourceUnavailableError,
+  createCrawlerTool,
   createWebCrawlerSourceAdapter,
   defineResearchSourceAdapter
 } from "../../src/index.js";
@@ -121,6 +123,71 @@ test("empty host crawler output is explicit unavailability and permits an ordere
   );
 });
 
+test("a robots-only crawler result is fatal and never dispatches a source fallback", async () => {
+  let pageHits = 0;
+  const server = createServer((request, response) => {
+    if (request.url === "/robots.txt") {
+      response.setHeader("content-type", "text/plain");
+      response.end("User-agent: *\nDisallow: /blocked\n");
+      return;
+    }
+    pageHits += 1;
+    response.setHeader("content-type", "text/html");
+    response.end("<main>must not be fetched</main>");
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const origin = `http://127.0.0.1:${server.address().port}`;
+
+  try {
+    const web = createWebCrawlerSourceAdapter(createCrawlerTool({
+      allowedOrigins: [origin],
+      allowPrivateNetworks: true,
+      delayMs: 0,
+      maxPages: 1,
+      maxRetries: 0
+    }));
+    const fallback = defineResearchSourceAdapter({
+      id: "web.robots-fallback",
+      channel: "web",
+      toolName: "research.web.robots-fallback",
+      priority: 200
+    });
+    let fallbackCalls = 0;
+    const gateway = new ToolGateway({
+      policyEngine: new PolicyEngine({
+        allowedTools: [web.toolName, fallback.toolName],
+        allowedOrigins: [origin]
+      })
+    });
+    gateway.registerTool(web.toolName, web.read, {
+      effects: ["network:read"],
+      risk: "low"
+    });
+    gateway.registerTool(fallback.toolName, async () => {
+      fallbackCalls += 1;
+      return [{ uri: `${origin}/fallback`, text: "must not run" }];
+    });
+    const registry = new ResearchSourceRegistry({
+      adapters: [web, fallback],
+      toolCaller: { call: gateway.call.bind(gateway) }
+    });
+
+    await assert.rejects(
+      () => registry.route({
+        channel: "web",
+        input: { seeds: [`${origin}/blocked`], maxPages: 1 }
+      }, { runId: "robots_source_fixture" }),
+      (error) => error.code === "ROBOTS_DENIED"
+    );
+    assert.equal(pageHits, 0);
+    assert.equal(fallbackCalls, 0);
+    assert.deepEqual(gateway.trace.map((entry) => entry.toolName), [web.toolName]);
+    assert.equal(gateway.trace[0].status, "failed");
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
 test("web crawler source snapshots hostile pages without invoking accessors", async () => {
   let getterCalls = 0;
   const page = {
@@ -155,4 +222,3 @@ test("web crawler source has no internal network or authentication fallback", as
     /host-supplied crawler function/
   );
 });
-

@@ -2,17 +2,17 @@
 
 All notable Maqam changes are tracked here before release.
 
-## 0.3.0 (candidate) - 2026-07-18
+## 0.3.0 - 2026-07-18
 
 Governed source routing, normalized research documents, RSS/Atom support, and safer crawler controls.
 
-**Release status:** the source and package metadata are preparing `0.3.0`. It has not been published or tagged. `maqam@0.2.4` remains the latest verified public npm release until the exact 0.3.0 artifact passes the release checklist, receives maintainer approval, is published by the trusted OIDC workflow, and is verified in the registry. See [docs/release-0.3.0.md](docs/release-0.3.0.md).
+**Release verification:** use the npm version record, provenance, integrity, Git tag, and GitHub release to verify public availability. Source metadata alone is not proof that a version was published. See [docs/release-0.3.0.md](docs/release-0.3.0.md).
 
 ### Added
 
 - `ResearchSourceRegistry`, source-adapter descriptors, a bound `ToolCaller` contract, deterministic backend preferences, bounded attempt records, and normalized `ResearchDocument` output.
 - Source error classification that allows ordinary availability fallback while stopping policy, approval, authentication, authorization, crawler-security, robots, goal-scope, and tool-call-limit failures.
-- Offline source-doctor checks with timeouts, error isolation, and readiness summaries.
+- Bounded host-defined source-doctor checks with cooperative timeout cancellation, error isolation, and readiness summaries.
 - Offline RSS 2.0/Atom parsing with bounded, sanitized output, content hashes, and host-reader/source-adapter factories that perform no implicit network access.
 - Feed discovery and parsing for the bounded crawler, plus a governed source example, complete guide, and 0.3 migration notes.
 - Crawler CLI budgets for requests, depth, bytes, duration, retries, feed links/items, detailed failures, statistics, and fail-on-error behavior.
