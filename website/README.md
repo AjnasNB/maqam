@@ -32,6 +32,17 @@ npx wrangler deploy
 
 The Wrangler configuration declares `maqamagent.com` and `www.maqamagent.com` as Worker custom domains and binds the existing `maqam-media` bucket. Deployment can create domain records and certificates only in an authorized Cloudflare zone. Verify that neither hostname already has a conflicting CNAME record. Do not commit account-specific identifiers.
 
+## GitHub to Cloudflare deployment
+
+The `Deploy website` GitHub Actions workflow runs for changes under `website/` on `main`. It installs the pinned tools, runs the complete site contract check, creates a Wrangler dry-run artifact, and deploys only after those checks pass.
+
+Configure these GitHub Actions values in the `AjnasNB/maqam` repository:
+
+- Repository variable `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account that owns `maqamagent-site`.
+- Repository secret `CLOUDFLARE_API_TOKEN`: a scoped token with permission to deploy this Worker, its custom domains, and the declared R2 binding.
+
+The workflow intentionally succeeds with a warning when either value is missing, so pull and push verification remain useful without leaking or inventing credentials. Once both values exist, every verified website change on `main` is deployed automatically. Local Wrangler OAuth credentials are never copied into GitHub.
+
 ## Content boundaries
 
 - Maqam is the focused TypeScript governance boundary.

@@ -113,6 +113,13 @@ for (const file of htmlFiles) {
   if (label === "index.html") {
     requireMatch(/v0\.2\.4 is live/i, "homepage must identify the live 0.2.4 release");
     requireMatch(/maqam@0\.2\.4/i, "homepage install command must pin maqam@0.2.4");
+    requireMatch(/Maqam is a security turnstile for agent actions/i, "homepage must include the plain-English Maqam definition");
+  }
+
+  if (label === path.join("docs", "index.html")) {
+    requireMatch(/security turnstile for actions performed by software agents/i, "docs must define Maqam in plain English");
+    requireMatch(/The modular toolbox around Maqam/i, "docs must define ProductLoop OS in plain English");
+    requireMatch(/Calls that bypass the gateway remain outside Maqam's control/i, "docs must state the gateway bypass boundary");
   }
 
   if (label === path.join("docs", "productloop", "index.html")) {

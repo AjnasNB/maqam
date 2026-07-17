@@ -32,7 +32,7 @@
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
         <nav aria-label="Maqam guide">
           <p class="docs-nav-title">Maqam</p>
-          <a href="#install">Public 0.2.4 install</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#adapter-apis">0.2.4 adapter APIs</a><a href="#boundary">Boundary</a>
+          <a href="#start-here">Start here</a><a href="#install">Public 0.2.4 install</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#adapter-apis">0.2.4 adapter APIs</a><a href="#boundary">Boundary</a>
         </nav>
         <nav aria-label="Other documentation">
           <p class="docs-nav-title">More</p>
@@ -44,6 +44,18 @@
     <article class="docs-content">
       <h1>Maqam 0.2.4 quickstart</h1>
       <p class="lede">Run the public npm package, exact-approval proof, and adapter APIs released in 0.2.4.</p>
+      <h2 id="start-here">Start here: the product in plain English</h2>
+      <dl class="definition-grid">
+        <dt>Maqam</dt><dd>A security turnstile for actions performed by software agents. It checks policy, binds approval to the exact input that will run, permits that approved call once, and records the decision and result.</dd>
+        <dt>ProductLoop OS</dt><dd>The modular toolbox around Maqam. It adds focused packages for runtime, policy, approval workflows, provenance, skills, connector trust, evaluations, and browser-research records.</dd>
+        <dt>Use Maqam alone</dt><dd>When a TypeScript application needs one compact execution boundary around functions, SDK calls, CLI workers, file writes, publishing, or bounded HTTP research.</dd>
+        <dt>Use ProductLoop too</dt><dd>When the application also needs the broader package family and explicit composition helpers. ProductLoop does not turn the modules into a hidden hosted control plane.</dd>
+      </dl>
+      <div class="callout callout-warning">
+        <strong>Where it sits</strong>
+        Keep Google ADK, OpenAI Agents SDK, LangGraph, Microsoft tooling, or your own agent loop for planning and orchestration. Route selected real side effects through a registered Maqam <code>ToolGateway</code>. Calls that bypass the gateway remain outside Maqam's control.
+      </div>
+      <p>Typical uses include approving one exact npm publish, deployment, refund, CRM update, email send, filesystem write, or research crawl. The five-step mental model is: propose the call, evaluate policy, bind approval to the canonical input, dispatch once, then retain trace and evidence records.</p>
       <div class="callout">
         <strong>Requirements</strong>
         Node.js 20.18.1 or newer. The built-in proof needs no model key, hosted account, browser, database, or external side effect.

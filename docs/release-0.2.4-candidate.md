@@ -1,11 +1,12 @@
-# Maqam 0.2.4 Candidate and ProductLoop OS Release Note
+# Maqam 0.2.4 and ProductLoop OS Release Record
 
-Date: 2026-07-16
-Status: candidate documentation; not an npm or GitHub release
+Prepared: 2026-07-16
+Published: 2026-07-17
+Status: released to npm and GitHub
 
-The latest public Maqam package is [`maqam@0.2.3`](https://www.npmjs.com/package/maqam). The repository is preparing `maqam@0.2.4`, but that candidate has not been published to npm and does not have a `v0.2.4` GitHub tag or release. Publishing remains blocked until the final commit is clean, the final npm tarball is rebuilt and inspected, and the package owner explicitly approves that exact artifact identity.
+[`maqam@0.2.4`](https://www.npmjs.com/package/maqam) is public on npm. The matching [`v0.2.4` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) publishes the reviewed tarball, artifact manifest, checksums, benchmark JSON, narrated videos, transcripts, and product-specific 3D release assets.
 
-The versioned `/v0.2.4/` media directory at [maqamagent.com](https://maqamagent.com) identifies the candidate media set. It is not evidence that the npm package has been published.
+This file keeps its original `release-0.2.4-candidate.md` path so existing links remain valid. Its contents now record the completed release rather than the pre-publication state.
 
 ## One Ecosystem, Two Roles
 
@@ -17,34 +18,33 @@ Install Maqam when the immediate need is a compact governed tool boundary, crawl
 
 ## Public Package Map
 
-These ProductLoop versions were already public before the Maqam 0.2.4 candidate was prepared:
+The current companion package release is [`productloop-os@0.2.1`](https://www.npmjs.com/package/productloop-os), with its own [`v0.2.1` GitHub release](https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.1):
 
 | Package | Public version | Role |
 |---|---:|---|
-| `productloop-os` | `0.2.0` | Umbrella, named namespaces, composition helpers and dependency doctor |
-| `ajnas-runtime` | `0.2.0` | Ordered policy-gated workflows and tool calls |
-| `ajnas-skills-registry` | `0.2.0` | Skill manifests, signatures and install policy |
-| `ajnas-provenance` | `0.1.2` | Hash-linked traces, bundles, signatures and redaction |
-| `ajnas-policy` | `0.1.1` | Declarative allow, deny and approval decisions |
-| `ajnas-evals` | `0.1.1` | Deterministic assertions and verifiable evaluation reports |
-| `ajnas-connectors` | `0.1.1` | Connector manifests, permission context and trust evaluation |
-| `ajnas-approvals` | `0.1.1` | Review tickets, delegation, escalation and decision adapters |
-| `ajnas-browser-research` | `0.1.2` | Governed research plans, replay, citations and provenance exports |
+| `productloop-os` | `0.2.1` | Umbrella, named namespaces, composition helpers and dependency doctor |
+| `ajnas-runtime` | `0.2.1` | Ordered policy-gated workflows and tool calls |
+| `ajnas-skills-registry` | `0.2.1` | Skill manifests, signatures and install policy |
+| `ajnas-provenance` | `0.1.3` | Hash-linked traces, bundles, signatures and redaction |
+| `ajnas-policy` | `0.1.2` | Declarative allow, deny and approval decisions |
+| `ajnas-evals` | `0.1.2` | Deterministic assertions and verifiable evaluation reports |
+| `ajnas-connectors` | `0.1.2` | Connector manifests, permission context and trust evaluation |
+| `ajnas-approvals` | `0.1.2` | Review tickets, delegation, escalation and decision adapters |
+| `ajnas-browser-research` | `0.1.3` | Governed research plans, replay, citations and provenance exports |
 
 Maqam release state:
 
 | Package | State |
 |---|---|
-| `maqam@0.2.3` | Latest public npm and GitHub release |
-| `maqam@0.2.4` | Candidate source; pending final artifact verification and exact owner approval |
+| `maqam@0.2.4` | Public on npm and GitHub; npm `gitHead` is `e1f6d3f9cf0d4aac277fc5e6ba1de3ae2c93a701` |
 
-## Candidate Highlights
+## Release Highlights
 
 - MGES v1 separates a local-call performance profile from 12 named governance-boundary conformance fixtures, publishes raw observations and source fingerprints, and supplies copy-safe claim rules.
 - Host-supplied SDK, HTTP, MCP-style and custom functions can use typed adapter descriptors and the same registered `ToolGateway` boundary. Maqam does not provide provider authentication, MCP discovery, protocol clients or automatic interception of provider-internal tools.
 - The [Google ADK and Microsoft Agent 365 guide](integrations-google-adk-agent365.md) provides integration templates and explicit bypass warnings. The examples are not native provider integrations, partnerships or certifications.
 - The public [Maqam documentation site](https://maqamagent.com/docs/) now joins the quickstart, ProductLoop package atlas, integration boundary, benchmark methodology, security guidance, articles and community entry points.
-- Three narrated proof videos are available from immutable candidate-media paths with captions.
+- Three narrated proof videos are available from stable release-media paths with captions included in the players.
 
 ## Videos
 
@@ -56,17 +56,18 @@ Maqam release state:
 
 ## Verification Evidence
 
-Candidate verification completed on 2026-07-16 includes:
+Release verification completed on 2026-07-17 includes:
 
-- Maqam `npm test`: 202/202 tests passed locally.
+- Maqam `npm test`: 204/204 tests passed.
 - Maqam clean-consumer TypeScript compilation: passed.
 - Maqam production dependency audit: zero known vulnerabilities.
-- Maqam CI before the final documentation commit: Node.js 20, 22 and 24 jobs passed at commit `eeb0de484b6f49cfd8989fad5da61a3722e91d6d`.
-- ProductLoop OS full workspace verification: 124 tests across nine public packages, workspace builds and typechecks, umbrella integration, dependency doctor, clean-consumer declarations and all nine package previews passed.
+- Maqam CI passed on Node.js 20, 22 and 24 for the published source commit `e1f6d3f9cf0d4aac277fc5e6ba1de3ae2c93a701`.
+- The published `maqam-0.2.4.tgz` is 191,585 bytes with SHA-256 `f4751f4f4ef3a4a97631f8ebddc72cb03962cc52d7ae983f9d0188de9a6318cb` and npm integrity `sha512-/VHGyLNele7rp7At6HGZhrw5UxOF9rlcPWHWZ+7srMz47zhhEBbkJXgKQTdZRA0MLQTGqGs8sKFhNnhgjIPWlA==`.
+- ProductLoop OS full workspace verification covered nine public packages, workspace builds and typechecks, umbrella integration, dependency doctor, clean-consumer declarations and all package previews.
 - ProductLoop OS production dependency audit: zero known vulnerabilities across the audited 55 production dependencies.
-- ProductLoop OS CI: Node.js 20.x, 22.x and 24.x jobs passed for public release commit `21e35e9c1461be547f9cf5ac5dc68312b99841fc`.
+- ProductLoop OS release source is tagged at commit `30c82e6ea6c2c039cf09d8c0bfbb41caf6171dc8`.
 
-These checks cover the behavior and environments they exercised; they are not proof that the software is error-free. The final Maqam commit and exact npm artifact must be verified again before publication.
+These checks cover the behavior and environments they exercised; they are not proof that the software is error-free, secure in every deployment, or compatible with every provider.
 
 ## MGES v1 Evidence and Limits
 
@@ -93,18 +94,9 @@ MGES is project-defined regression evidence. It is not globally standardized, in
 
 Read the [security policy](../SECURITY.md), [integration guide](integrations-google-adk-agent365.md), [comparison](comparison.md) and [Why Maqam](why-maqam.md) before production deployment.
 
-## Release Gate
+## Completed Release Gate
 
-The final release sequence is deliberately incomplete:
-
-1. Commit the final candidate documentation and source.
-2. Run the complete test, consumer-type and production-audit gates from that clean commit.
-3. Build a fresh npm tarball and record its filename, byte size, SHA-256, npm integrity and Git commit.
-4. Install that exact tarball into a clean external consumer and verify Maqam and ProductLoop compatibility.
-5. Present the exact artifact identity to the package owner and wait for explicit approval.
-6. Only after approval, publish to npm, verify registry integrity and `gitHead`, then create the matching Git tag and GitHub release.
-
-No tarball filename, size, digest or integrity value is recorded here because the final artifact does not exist yet. Reusing an earlier candidate identity after documentation or source changes would invalidate the approval boundary.
+The release followed the repository's exact-artifact process: clean source verification, fresh packing, manifest and digest generation, clean-consumer installation, explicit maintainer approval, trusted npm publication, registry integrity and `gitHead` verification, then the matching annotated tag and GitHub release. Future versions must repeat that process with a newly built artifact; the 0.2.4 approval cannot authorize a different version or changed tarball.
 
 ## Documentation and Community
 
