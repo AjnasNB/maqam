@@ -83,6 +83,14 @@ test("doctor converts invalid or accessor check output into an isolated error", 
   assert.equal(report.checks[0].status, "error");
   assert.match(report.checks[0].message, /own enumerable data property/);
   assert.equal(report.checks[1].status, "ready");
+
+  for (const details of [null, [], "details", 1, true]) {
+    const invalidDetails = await checkResearchSourceAdapter(
+      checkedAdapter("invalid-details", async () => ({ status: "ready", details }))
+    );
+    assert.equal(invalidDetails.status, "error");
+    assert.match(invalidDetails.message, /Research source check details.*must be a plain JSON object/);
+  }
 });
 
 test("doctor applies a bounded timeout and cooperatively aborts the host check", async () => {
@@ -165,5 +173,9 @@ test("doctor options and results reject inherited or accessor authority", async 
   await assert.rejects(
     () => checkResearchSourceAdapter(adapter, { signal: {} }),
     /must be an AbortSignal/
+  );
+  await assert.rejects(
+    () => checkResearchSourceAdapter(adapter, { timeoutMs: null }),
+    /timeoutMs must be a safe integer/
   );
 });

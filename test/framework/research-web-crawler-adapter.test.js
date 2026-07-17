@@ -8,7 +8,8 @@ import {
   ResearchSourceUnavailableError,
   createCrawlerTool,
   createWebCrawlerSourceAdapter,
-  defineResearchSourceAdapter
+  defineResearchSourceAdapter,
+  parseRssAtom
 } from "../../src/index.js";
 
 test("createWebCrawlerSourceAdapter routes a host crawler through its exact ToolGateway identity", async () => {
@@ -204,6 +205,54 @@ test("web crawler source snapshots hostile pages without invoking accessors", as
   const source = createWebCrawlerSourceAdapter(async () => [page]);
   await assert.rejects(() => source.read({}, {}), /own enumerable data property/);
   assert.equal(getterCalls, 0);
+});
+
+test("web crawler source validates typed page metadata before normalization", async () => {
+  const cases = [
+    ["sourceType", "other", /sourceType must be 'web' or 'feed'/],
+    ["canonical", 1, /canonical must be null or a string/],
+    ["links", {}, /links must be an array/],
+    ["feed", {}, /feed requires sourceUrl/],
+    ["status", "200", /status must be a safe integer/],
+    ["bytes", null, /bytes must be a safe integer/],
+    ["depth", [], /depth must be a safe integer/],
+    ["discoveredFrom", 1, /discoveredFrom must be null or a string/],
+    ["redirectChain", {}, /redirectChain must be an array/],
+    ["etag", 1, /etag must be null or a string/],
+    ["lastModified", true, /lastModified must be null or a string/],
+    ["robotsAllowed", "yes", /robotsAllowed must be a boolean/]
+  ];
+  for (const [field, value, expected] of cases) {
+    const source = createWebCrawlerSourceAdapter(async () => [{
+      url: "https://example.com/typed",
+      text: "typed",
+      [field]: value
+    }]);
+    await assert.rejects(() => source.read({}, {}), expected);
+  }
+
+  const invalidRedirect = createWebCrawlerSourceAdapter(async () => [{
+    url: "https://example.com/redirect",
+    text: "redirect",
+    redirectChain: [{}]
+  }]);
+  await assert.rejects(
+    () => invalidRedirect.read({}, {}),
+    /redirectChain\[0\] requires from/
+  );
+
+  const feed = parseRssAtom(
+    '<rss version="2.0"><channel><title>Feed</title><item><title>One</title><link>https://example.com/one</link></item></channel></rss>',
+    "https://example.com/feed.xml"
+  );
+  const validFeed = createWebCrawlerSourceAdapter(async () => [{
+    url: "https://example.com/feed.xml",
+    text: "Feed",
+    sourceType: "feed",
+    feed
+  }]);
+  const [document] = await validFeed.read({}, {});
+  assert.equal(document.metadata.feed.contentHash, feed.contentHash);
 });
 
 test("web crawler source has no internal network or authentication fallback", async () => {

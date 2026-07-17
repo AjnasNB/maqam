@@ -55,6 +55,19 @@ function snapshotCrawlerOptions(value = {}, label = "Crawler options") {
       throw new TypeError(`${label}.${key} must be a boolean.`);
     }
   }
+  for (const [key, minimum, maximum] of [
+    ["maxFeedLinks", 1, 200],
+    ["maxFeedItems", 1, 1_000]
+  ]) {
+    if (snapshot[key] !== undefined
+      && (!Number.isSafeInteger(snapshot[key])
+        || snapshot[key] < minimum
+        || snapshot[key] > maximum)) {
+      throw new TypeError(
+        `${label}.${key} must be a safe integer between ${minimum} and ${maximum}.`
+      );
+    }
+  }
   if (snapshot.userAgent !== undefined && typeof snapshot.userAgent !== "string") {
     throw new TypeError(`${label}.userAgent must be a string.`);
   }

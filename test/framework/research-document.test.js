@@ -106,6 +106,33 @@ test("ResearchDocument boundaries reject accessors, inheritance, prototypes, and
     () => normalizeResearchDocument({ uri: "https://example.com", text: "safe", execute: true }, provenance),
     /Unknown ResearchDocument field 'execute'/
   );
+  for (const metadata of [null, [], "metadata", 1, true]) {
+    assert.throws(
+      () => normalizeResearchDocument({ uri: "https://example.com", text: "safe", metadata }, provenance),
+      /ResearchDocument metadata must be a plain JSON object/
+    );
+  }
+  for (const [field, message] of [
+    ["contentType", /ResearchDocument\.contentType must be a non-empty string/],
+    ["authors", /ResearchDocument authors must be an array/],
+    ["citations", /ResearchDocument citations must be an array/]
+  ]) {
+    assert.throws(
+      () => normalizeResearchDocument({
+        uri: "https://example.com",
+        text: "safe",
+        [field]: null
+      }, provenance),
+      message
+    );
+  }
+  assert.throws(
+    () => normalizeResearchDocument(
+      { uri: "https://example.com", text: "safe" },
+      { ...provenance, retrievedAt: null }
+    ),
+    /retrievedAt must be a non-empty string/
+  );
 });
 
 test("defineResearchSourceAdapter produces an immutable data-first contract", () => {
@@ -184,6 +211,32 @@ test("source adapter definitions reject executable configuration and unsafe prop
     }),
     /Unknown Research source adapter field 'command'/
   );
+  for (const metadata of [null, [], "metadata", 1, true]) {
+    assert.throws(
+      () => defineResearchSourceAdapter({
+        id: "invalid-metadata",
+        channel: "web",
+        toolName: "research.invalid-metadata",
+        metadata
+      }),
+      /Research source adapter metadata must be a plain JSON object/
+    );
+  }
+  for (const [field, message] of [
+    ["priority", /priority must be a safe integer/],
+    ["authentication", /authentication must be 'none' or 'required'/],
+    ["capabilities", /capabilities must be an array/]
+  ]) {
+    assert.throws(
+      () => defineResearchSourceAdapter({
+        id: `invalid-${field}`,
+        channel: "web",
+        toolName: `research.invalid-${field}`,
+        [field]: null
+      }),
+      message
+    );
+  }
   assert.throws(
     () => defineResearchSourceAdapter({
       id: "auth",

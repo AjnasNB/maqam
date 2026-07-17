@@ -130,6 +130,18 @@ test("crawler authority options must be own data and cannot change after tool cr
   );
 });
 
+test("createCrawlerTool validates feed limits when the boundary is configured", () => {
+  for (const key of ["maxFeedLinks", "maxFeedItems"]) {
+    for (const value of [null, [], {}, true, "10", 0, Number.POSITIVE_INFINITY]) {
+      assert.throws(
+        () => createCrawlerTool({ [key]: value }),
+        new RegExp(`${key} must be a safe integer`)
+      );
+    }
+  }
+  assert.equal(typeof createCrawlerTool({ maxFeedLinks: 10, maxFeedItems: 50 }), "function");
+});
+
 test("crawler option accessors are rejected without invocation", async () => {
   let getterCalls = 0;
   const options = {};

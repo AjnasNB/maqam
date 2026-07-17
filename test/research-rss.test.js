@@ -222,6 +222,12 @@ test("parseRssAtom snapshots options and rejects inherited/accessor/unknown fiel
     () => parseRssAtom(xml, RSS_SOURCE, { surprise: true }),
     /Unknown RSS\/Atom parser options field 'surprise'/
   );
+  for (const key of ["maxItems", "maxInputBytes", "maxTextChars", "maxMetadataChars", "maxTotalTextChars"]) {
+    assert.throws(
+      () => parseRssAtom(xml, RSS_SOURCE, { [key]: null }),
+      new RegExp(`parser option ${key} must be a safe integer`)
+    );
+  }
 
   const previous = Object.getOwnPropertyDescriptor(Object.prototype, "maxItems");
   try {
@@ -323,6 +329,25 @@ test("createRssAtomResearchAdapter accepts string bodies and rejects hostile rea
   assert.throws(
     () => createRssAtomResearchAdapter(null),
     /host-supplied readDocument function/
+  );
+  for (const field of ["url", "finalUrl"]) {
+    const invalidUrlAdapter = createRssAtomResearchAdapter(async () => ({
+      body: rssDocument(""),
+      [field]: null
+    }));
+    await assert.rejects(
+      () => invalidUrlAdapter({ url: RSS_SOURCE }),
+      /Feed URL must be a non-empty string/
+    );
+  }
+  const shadowedInvalidUrlAdapter = createRssAtomResearchAdapter(async () => ({
+    body: rssDocument(""),
+    url: null,
+    finalUrl: RSS_SOURCE
+  }));
+  await assert.rejects(
+    () => shadowedInvalidUrlAdapter({ url: RSS_SOURCE }),
+    /Feed URL must be a non-empty string/
   );
 });
 

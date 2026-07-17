@@ -20,12 +20,19 @@ const MAX_ADAPTERS = 10_000;
 const MAX_TIMEOUT_MS = 300_000;
 const MAX_MESSAGE_LENGTH = 100_000;
 
+function snapshotJsonObject(value, options) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${options.label} must be a plain JSON object.`);
+  }
+  return snapshotJsonValue(value, options);
+}
+
 function snapshotCheckOptions(value) {
   const options = snapshotOwnDataRecord(value, {
     label: "Research source check options",
     recognizedKeys: CHECK_OPTION_KEYS
   });
-  const timeoutMs = options.timeoutMs ?? 5_000;
+  const timeoutMs = options.timeoutMs === undefined ? 5_000 : options.timeoutMs;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > MAX_TIMEOUT_MS) {
     throw new TypeError(`Research source check timeoutMs must be a safe integer between 1 and ${MAX_TIMEOUT_MS}.`);
   }
@@ -56,7 +63,7 @@ function normalizeCheckResult(value, adapter) {
     adapter: describeResearchSourceAdapter(adapter),
     status: result.status,
     message: result.message ?? null,
-    details: snapshotJsonValue(result.details ?? {}, {
+    details: snapshotJsonObject(result.details === undefined ? {} : result.details, {
       label: `Research source check details for '${adapter.id}'`,
       maximumDepth: 30,
       maximumNodes: 100_000,

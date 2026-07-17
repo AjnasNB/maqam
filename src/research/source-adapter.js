@@ -15,6 +15,13 @@ const MAX_CAPABILITIES = 1_000;
 const MAX_PRIORITY = 1_000_000;
 const DEFINED_ADAPTERS = new WeakSet();
 
+function snapshotJsonObject(value, options) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${options.label} must be a plain JSON object.`);
+  }
+  return snapshotJsonValue(value, options);
+}
+
 function boundedString(value, label, maximumLength) {
   if (typeof value !== "string" || value.trim() === "") {
     throw new TypeError(`${label} must be a non-empty string.`);
@@ -87,11 +94,11 @@ export function defineResearchSourceAdapter(value) {
     throw new TypeError("Research source adapter check must be a function when provided.");
   }
 
-  const priority = input.priority ?? 100;
+  const priority = input.priority === undefined ? 100 : input.priority;
   if (!Number.isSafeInteger(priority) || priority < 0 || priority > MAX_PRIORITY) {
     throw new TypeError(`Research source adapter priority must be a safe integer between 0 and ${MAX_PRIORITY}.`);
   }
-  const authentication = input.authentication ?? "none";
+  const authentication = input.authentication === undefined ? "none" : input.authentication;
   if (!AUTHENTICATION_MODES.has(authentication)) {
     throw new TypeError("Research source adapter authentication must be 'none' or 'required'.");
   }
@@ -99,7 +106,7 @@ export function defineResearchSourceAdapter(value) {
   const id = researchSourceIdentifier(input.id, "Research source adapter id");
   const channel = researchSourceIdentifier(input.channel, "Research source adapter channel");
   const toolName = researchSourceIdentifier(input.toolName, "Research source adapter toolName");
-  const metadata = snapshotJsonValue(input.metadata ?? {}, {
+  const metadata = snapshotJsonObject(input.metadata === undefined ? {} : input.metadata, {
     label: "Research source adapter metadata",
     maximumDepth: 30,
     maximumNodes: 100_000,
@@ -118,7 +125,9 @@ export function defineResearchSourceAdapter(value) {
       : boundedString(input.label, "Research source adapter label", MAX_LABEL_LENGTH),
     priority,
     authentication,
-    capabilities: Object.freeze(normalizeCapabilities(input.capabilities ?? [])),
+    capabilities: Object.freeze(normalizeCapabilities(
+      input.capabilities === undefined ? [] : input.capabilities
+    )),
     metadata,
     read: input.read ?? null,
     check: input.check ?? null

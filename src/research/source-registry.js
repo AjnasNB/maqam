@@ -27,10 +27,101 @@ const ROUTE_CONTEXT_KEYS = new Set([
   "approvalEvidence", "evidence", "evidenceLedger", "approvals", "tools",
   "outputs", "trace"
 ]);
+const CONTEXT_GOAL_KEYS = new Set([
+  "runId", "objective", "allowedTools", "allowedOrigins", "budget", "approvalId",
+  "approvalIds", "requestedBy", "approvalEvidence"
+]);
 const LIST_KEYS = new Set(["channel"]);
 const DOCTOR_KEYS = new Set(["channel", "adapterIds", "timeoutMs", "signal"]);
 const MAX_ADAPTERS = 10_000;
 const MAX_PREFERENCES = 10_000;
+
+function nonEmptyString(value, label) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new TypeError(`${label} must be a non-empty string.`);
+  }
+  return value;
+}
+
+function contextStringArray(value, label) {
+  const items = snapshotOwnDataArray(value, {
+    label,
+    maximumLength: MAX_PREFERENCES
+  });
+  for (let index = 0; index < items.length; index += 1) {
+    items[index] = nonEmptyString(items[index], `${label}[${index}]`);
+  }
+  return snapshotJsonValue(items, { label, freeze: true });
+}
+
+function contextJsonObject(value, label) {
+  const result = snapshotJsonValue(value, {
+    label,
+    maximumDepth: 100,
+    maximumNodes: 100_000,
+    maximumCollectionSize: 100_000,
+    maximumStringLength: 5_000_000,
+    allowNullPrototype: true,
+    freeze: true
+  });
+  if (result === null || typeof result !== "object" || Array.isArray(result)) {
+    throw new TypeError(`${label} must be a plain JSON object.`);
+  }
+  return result;
+}
+
+function contextGoal(value) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError("Research source route context.goal must be a plain JSON object.");
+  }
+  const goal = snapshotOwnDataRecord(value, {
+    label: "Research source route context.goal",
+    recognizedKeys: CONTEXT_GOAL_KEYS,
+    rejectUnknown: false
+  });
+  for (const key of ["runId", "objective", "approvalId", "requestedBy"]) {
+    if (goal[key] !== undefined) {
+      goal[key] = nonEmptyString(goal[key], `Research source route context.goal.${key}`);
+    }
+  }
+  for (const key of ["allowedTools", "allowedOrigins", "approvalIds", "approvalEvidence"]) {
+    if (goal[key] !== undefined) {
+      goal[key] = contextStringArray(
+        goal[key],
+        `Research source route context.goal.${key}`
+      );
+    }
+  }
+  if (goal.budget !== undefined) {
+    goal.budget = contextJsonObject(
+      goal.budget,
+      "Research source route context.goal.budget"
+    );
+  }
+  return contextJsonObject(goal, "Research source route context.goal");
+}
+
+function contextAuthorizationScope(value) {
+  const scope = snapshotOwnDataRecord(value, {
+    label: "Research source route context.authorizationScope",
+    recognizedKeys: new Set(["allowedOrigins", "originsExplicit", "originsUnrestricted"])
+  });
+  for (const key of ["allowedOrigins", "originsExplicit", "originsUnrestricted"]) {
+    if (!Object.hasOwn(scope, key)) {
+      throw new TypeError(`Research source route context.authorizationScope requires ${key}.`);
+    }
+  }
+  scope.allowedOrigins = contextStringArray(
+    scope.allowedOrigins,
+    "Research source route context.authorizationScope.allowedOrigins"
+  );
+  for (const key of ["originsExplicit", "originsUnrestricted"]) {
+    if (typeof scope[key] !== "boolean") {
+      throw new TypeError(`Research source route context.authorizationScope.${key} must be a boolean.`);
+    }
+  }
+  return Object.freeze(scope);
+}
 
 function backendList(value, label) {
   const backends = snapshotOwnDataArray(value, {
@@ -96,11 +187,57 @@ export function defineResearchToolCaller(value) {
 }
 
 function snapshotRouteContext(value) {
-  return Object.freeze(snapshotOwnDataRecord(value, {
+  const context = snapshotOwnDataRecord(value, {
     label: "Research source route context",
     recognizedKeys: ROUTE_CONTEXT_KEYS,
     rejectUnknown: false
-  }));
+  });
+  for (const key of ["runId", "taskId", "requestedBy"]) {
+    if (context[key] !== undefined) {
+      context[key] = nonEmptyString(context[key], `Research source route context.${key}`);
+    }
+  }
+  if (context.approvalId !== undefined && context.approvalId !== null) {
+    context.approvalId = nonEmptyString(
+      context.approvalId,
+      "Research source route context.approvalId"
+    );
+  }
+  for (const key of ["authorizedOrigins", "approvalIds", "approvalEvidence"]) {
+    if (context[key] !== undefined) {
+      context[key] = contextStringArray(
+        context[key],
+        `Research source route context.${key}`
+      );
+    }
+  }
+  if (context.goal !== undefined && context.goal !== null) {
+    context.goal = contextGoal(context.goal);
+  }
+  if (context.limits !== undefined && context.limits !== null) {
+    context.limits = contextJsonObject(context.limits, "Research source route context.limits");
+  }
+  if (context.authorizationScope !== undefined && context.authorizationScope !== null) {
+    context.authorizationScope = contextAuthorizationScope(context.authorizationScope);
+  }
+  if (context.signal !== undefined && !(context.signal instanceof AbortSignal)) {
+    throw new TypeError("Research source route context.signal must be an AbortSignal.");
+  }
+  if (context.outputs !== undefined) {
+    context.outputs = contextJsonObject(context.outputs, "Research source route context.outputs");
+  }
+  for (const key of ["approvals", "trace"]) {
+    if (context[key] !== undefined && !Array.isArray(context[key])) {
+      throw new TypeError(`Research source route context.${key} must be an array.`);
+    }
+  }
+  for (const key of ["evidence", "evidenceLedger", "tools"]) {
+    if (context[key] !== undefined && context[key] !== null
+      && (typeof context[key] !== "object" && typeof context[key] !== "function")) {
+      throw new TypeError(`Research source route context.${key} must be an object or null.`);
+    }
+  }
+  return Object.freeze(context);
 }
 
 function observedTimestamp(clock) {
@@ -122,7 +259,7 @@ function normalizeRouteRequest(value) {
   if (request.allowAuthenticated !== undefined && typeof request.allowAuthenticated !== "boolean") {
     throw new TypeError("Research source route request allowAuthenticated must be a boolean.");
   }
-  const input = snapshotJsonValue(request.input ?? {}, {
+  const input = snapshotJsonValue(request.input === undefined ? {} : request.input, {
     label: "Research source route input",
     maximumDepth: 100,
     maximumNodes: 100_000,
@@ -199,12 +336,14 @@ export class ResearchSourceRegistry {
       label: "ResearchSourceRegistry options",
       recognizedKeys: REGISTRY_OPTION_KEYS
     });
-    this.#preferences = snapshotPreferences(input.preferences ?? {});
+    this.#preferences = snapshotPreferences(
+      input.preferences === undefined ? {} : input.preferences
+    );
     this.#clock = normalizeClock(input.clock);
     this.#toolCaller = input.toolCaller === undefined
       ? null
       : defineResearchToolCaller(input.toolCaller);
-    const adapters = snapshotOwnDataArray(input.adapters ?? [], {
+    const adapters = snapshotOwnDataArray(input.adapters === undefined ? [] : input.adapters, {
       label: "ResearchSourceRegistry options.adapters",
       maximumLength: MAX_ADAPTERS
     });

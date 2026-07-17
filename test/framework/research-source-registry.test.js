@@ -400,6 +400,47 @@ test("routing boundaries reject accessors, inherited authority, and invalid pref
     () => registry.route({ channel: "web", input: ["not", "an", "object"] }),
     /plain JSON object/
   );
+  await assert.rejects(
+    () => registry.route({ channel: "web", input: null }),
+    /plain JSON object/
+  );
+  assert.throws(
+    () => new ResearchSourceRegistry({ adapters: null }),
+    /options\.adapters must be an array/
+  );
+  assert.throws(
+    () => new ResearchSourceRegistry({ preferences: null }),
+    /preferences must be a plain object/
+  );
+
+  const invalidContexts = [
+    [{ runId: null }, /context\.runId must be a non-empty string/],
+    [{ taskId: 1 }, /context\.taskId must be a non-empty string/],
+    [{ requestedBy: [] }, /context\.requestedBy must be a non-empty string/],
+    [{ goal: [] }, /context\.goal must be a plain JSON object/],
+    [{ goal: { runId: null } }, /context\.goal\.runId must be a non-empty string/],
+    [{ goal: { objective: [] } }, /context\.goal\.objective must be a non-empty string/],
+    [{ goal: { allowedTools: false } }, /context\.goal\.allowedTools must be an array/],
+    [{ goal: { allowedOrigins: {} } }, /context\.goal\.allowedOrigins must be an array/],
+    [{ goal: { budget: [] } }, /context\.goal\.budget must be a plain JSON object/],
+    [{ goal: { approvalId: 1 } }, /context\.goal\.approvalId must be a non-empty string/],
+    [{ goal: { approvalIds: "approval-1" } }, /context\.goal\.approvalIds must be an array/],
+    [{ goal: { requestedBy: false } }, /context\.goal\.requestedBy must be a non-empty string/],
+    [{ goal: { approvalEvidence: null } }, /context\.goal\.approvalEvidence must be an array/],
+    [{ limits: "none" }, /context\.limits must be a plain JSON object/],
+    [{ signal: null }, /context\.signal must be an AbortSignal/],
+    [{ authorizedOrigins: "https:\/\/example.com" }, /authorizedOrigins must be an array/],
+    [{ approvalIds: {} }, /approvalIds must be an array/],
+    [{ approvalEvidence: true }, /approvalEvidence must be an array/],
+    [{ approvalId: 1 }, /context\.approvalId must be a non-empty string/],
+    [{ authorizationScope: {} }, /authorizationScope requires allowedOrigins/]
+  ];
+  for (const [context, expected] of invalidContexts) {
+    await assert.rejects(
+      () => registry.route({ channel: "web" }, context),
+      expected
+    );
+  }
 });
 
 test("complete backend failure exposes detached attempts without leaking mutable errors", async () => {

@@ -18,6 +18,13 @@ const MAX_URI_LENGTH = 100_000;
 const MAX_TEXT_LENGTH = 5_000_000;
 const MAX_SHORT_TEXT_LENGTH = 100_000;
 
+function snapshotJsonObject(value, options) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${options.label} must be a plain JSON object.`);
+  }
+  return snapshotJsonValue(value, options);
+}
+
 function boundedString(value, label, maximumLength, { empty = false, nullable = false } = {}) {
   if (nullable && value === null) return null;
   if (typeof value !== "string" || (!empty && value.trim() === "")) {
@@ -103,7 +110,7 @@ function normalizeProvenance(value) {
     adapterId: identifier(provenance.adapterId, "ResearchDocument provenance.adapterId"),
     channel: identifier(provenance.channel, "ResearchDocument provenance.channel"),
     retrievedAt: timestamp(
-      provenance.retrievedAt ?? new Date().toISOString(),
+      provenance.retrievedAt === undefined ? new Date().toISOString() : provenance.retrievedAt,
       "ResearchDocument provenance.retrievedAt"
     )
   };
@@ -151,19 +158,23 @@ export function normalizeResearchDocument(value, provenance) {
     text,
     markdown,
     contentType: boundedString(
-      input.contentType ?? "text/plain",
+      input.contentType === undefined ? "text/plain" : input.contentType,
       "ResearchDocument.contentType",
       MAX_IDENTIFIER_LENGTH
     ),
     language: input.language === undefined || input.language === null
       ? null
       : boundedString(input.language, "ResearchDocument.language", MAX_IDENTIFIER_LENGTH),
-    authors: stringArray(input.authors ?? [], "ResearchDocument authors", MAX_AUTHORS),
+    authors: stringArray(
+      input.authors === undefined ? [] : input.authors,
+      "ResearchDocument authors",
+      MAX_AUTHORS
+    ),
     publishedAt: input.publishedAt === undefined || input.publishedAt === null
       ? null
       : timestamp(input.publishedAt, "ResearchDocument.publishedAt"),
     retrievedAt,
-    metadata: snapshotJsonValue(input.metadata ?? {}, {
+    metadata: snapshotJsonObject(input.metadata === undefined ? {} : input.metadata, {
       label: "ResearchDocument metadata",
       maximumDepth: 30,
       maximumNodes: 100_000,
@@ -172,7 +183,7 @@ export function normalizeResearchDocument(value, provenance) {
       allowNullPrototype: true,
       freeze: true
     }),
-    citations: normalizeCitations(input.citations ?? [])
+    citations: normalizeCitations(input.citations === undefined ? [] : input.citations)
   }, {
     label: "Normalized ResearchDocument",
     allowNullPrototype: true,

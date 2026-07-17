@@ -1,62 +1,62 @@
 export type JsonObject = Record<string, unknown>;
 
 export interface RssAtomItemProvenance {
-  sourceUrl: string;
-  format: "rss2" | "atom";
-  itemId: string;
-  contentHash: string;
-  parser: string;
+  readonly sourceUrl: string;
+  readonly format: "rss2" | "atom";
+  readonly itemId: string;
+  readonly contentHash: string;
+  readonly parser: string;
 }
 
 export interface RssAtomItem {
-  id: string;
-  url: string;
-  title: string;
-  author: string | null;
-  publishedAt: string | null;
-  text: string;
-  markdown: string;
-  contentHash: string;
-  provenance: RssAtomItemProvenance;
+  readonly id: string;
+  readonly url: string;
+  readonly title: string;
+  readonly author: string | null;
+  readonly publishedAt: string | null;
+  readonly text: string;
+  readonly markdown: string;
+  readonly contentHash: string;
+  readonly provenance: RssAtomItemProvenance;
 }
 
 export interface RssAtomFeedProvenance {
-  sourceUrl: string;
-  format: "rss2" | "atom";
-  contentHash: string;
-  parser: string;
-  networkAccess: false;
+  readonly sourceUrl: string;
+  readonly format: "rss2" | "atom";
+  readonly contentHash: string;
+  readonly parser: string;
+  readonly networkAccess: false;
 }
 
 export interface RssAtomResearchFeedProvenance {
-  sourceUrl: string;
-  format: "rss2" | "atom";
-  contentHash: string;
-  parser: string;
-  parserNetworkAccess: false;
-  retrieval: "host-supplied-reader";
-  retrievalNetworkAccess: "host-defined";
-  requestedUrl: string;
-  finalUrl: string;
-  status: number | null;
-  contentType: string | null;
-  retrievedAt: string | null;
+  readonly sourceUrl: string;
+  readonly format: "rss2" | "atom";
+  readonly contentHash: string;
+  readonly parser: string;
+  readonly parserNetworkAccess: false;
+  readonly retrieval: "host-supplied-reader";
+  readonly retrievalNetworkAccess: "host-defined";
+  readonly requestedUrl: string;
+  readonly finalUrl: string;
+  readonly status: number | null;
+  readonly contentType: string | null;
+  readonly retrievedAt: string | null;
 }
 
 export interface RssAtomFeed<
   TProvenance extends RssAtomFeedProvenance | RssAtomResearchFeedProvenance = RssAtomFeedProvenance
 > {
-  sourceUrl: string;
-  format: "rss2" | "atom";
-  title: string;
-  description: string;
-  homeUrl: string | null;
-  language: string | null;
-  author: string | null;
-  updatedAt: string | null;
-  items: RssAtomItem[];
-  contentHash: string;
-  provenance: TProvenance;
+  readonly sourceUrl: string;
+  readonly format: "rss2" | "atom";
+  readonly title: string;
+  readonly description: string;
+  readonly homeUrl: string | null;
+  readonly language: string | null;
+  readonly author: string | null;
+  readonly updatedAt: string | null;
+  readonly items: readonly RssAtomItem[];
+  readonly contentHash: string;
+  readonly provenance: TProvenance;
 }
 
 export type RssAtomResearchFeed = RssAtomFeed<RssAtomResearchFeedProvenance>;
@@ -187,9 +187,9 @@ export interface RssAtomParserOptions {
 }
 
 export interface RssAtomReaderRequest {
-  url: string;
-  maxBytes: number;
-  acceptedFormats: readonly ["rss2", "atom"];
+  readonly url: string;
+  readonly maxBytes: number;
+  readonly acceptedFormats: readonly ["rss2", "atom"];
 }
 
 export interface RssAtomReaderResponse {
@@ -285,8 +285,8 @@ export type ResearchSourceCheckStatus = "ready" | "degraded" | "unavailable";
 export type ResearchSourceReportStatus = ResearchSourceCheckStatus | "blocked" | "error";
 
 export interface ResearchSourceCheckInput {
-  adapter: ResearchSourceAdapterDescription;
-  signal: AbortSignal | null;
+  readonly adapter: ResearchSourceAdapterDescription;
+  readonly signal: AbortSignal;
 }
 
 export interface ResearchSourceCheckOutput {
@@ -294,6 +294,15 @@ export interface ResearchSourceCheckOutput {
   message?: string;
   details?: JsonObject;
 }
+
+export type ResearchSourceReadHandler = (
+  input: Readonly<JsonObject>,
+  context: ResearchSourceReadContext
+) => readonly ResearchDocumentInput[] | Promise<readonly ResearchDocumentInput[]>;
+
+export type ResearchSourceCheckHandler = (
+  context: ResearchSourceCheckInput
+) => ResearchSourceCheckOutput | Promise<ResearchSourceCheckOutput>;
 
 export interface ResearchSourceAdapterSpec {
   id: string;
@@ -304,13 +313,8 @@ export interface ResearchSourceAdapterSpec {
   authentication?: ResearchSourceAuthenticationMode;
   capabilities?: readonly string[];
   metadata?: JsonObject;
-  read?: (
-    input: Readonly<JsonObject>,
-    context: ResearchSourceReadContext
-  ) => readonly ResearchDocumentInput[] | Promise<readonly ResearchDocumentInput[]>;
-  check?: (
-    context: ResearchSourceCheckInput
-  ) => ResearchSourceCheckOutput | Promise<ResearchSourceCheckOutput>;
+  read?: ResearchSourceReadHandler;
+  check?: ResearchSourceCheckHandler;
 }
 
 export interface ResearchSourceAdapter {
@@ -322,8 +326,8 @@ export interface ResearchSourceAdapter {
   readonly authentication: ResearchSourceAuthenticationMode;
   readonly capabilities: readonly string[];
   readonly metadata: Readonly<JsonObject>;
-  readonly read: ResearchSourceAdapterSpec["read"] | null;
-  readonly check: ResearchSourceAdapterSpec["check"] | null;
+  readonly read: ResearchSourceReadHandler | null;
+  readonly check: ResearchSourceCheckHandler | null;
 }
 
 export interface ResearchSourceAdapterDescription {
@@ -346,7 +350,9 @@ export type ResearchSourceReadContext = AgentExecutionContext | Readonly<{
 export const RESEARCH_SOURCE_AUTHENTICATION_MODES: readonly ResearchSourceAuthenticationMode[];
 export const RESEARCH_SOURCE_CHECK_STATUSES: readonly ResearchSourceReportStatus[];
 
-export function defineResearchSourceAdapter(spec: ResearchSourceAdapterSpec): ResearchSourceAdapter;
+export function defineResearchSourceAdapter(
+  spec: ResearchSourceAdapterSpec | ResearchSourceAdapter
+): ResearchSourceAdapter;
 export function describeResearchSourceAdapter(
   adapter: ResearchSourceAdapter | ResearchSourceAdapterSpec
 ): ResearchSourceAdapterDescription;
@@ -414,6 +420,10 @@ export interface ResearchSourceDoctorReport {
   readonly checks: readonly ResearchSourceCheckRecord[];
 }
 
+export type ResearchSourceErrorRecord = Readonly<
+  Omit<ErrorRecord, "details"> & { details: Readonly<JsonObject> }
+>;
+
 export class ResearchSourceRegistry {
   constructor(options?: ResearchSourceRegistryOptions);
   register(adapter: ResearchSourceAdapter | ResearchSourceAdapterSpec): ResearchSourceAdapterDescription;
@@ -428,7 +438,7 @@ export class ResearchSourceRegistry {
 export interface ResearchSourceErrorClassification {
   readonly kind: "fatal" | "unavailable" | "failure";
   readonly fatal: boolean;
-  readonly error: Readonly<ErrorRecord>;
+  readonly error: ResearchSourceErrorRecord;
 }
 
 export class ResearchSourceUnavailableError extends MaqamError {}
@@ -450,10 +460,14 @@ export function createRssAtomSourceAdapter(
   options?: RssAtomParserOptions
 ): ResearchSourceAdapter;
 
+export type WebCrawlerSourcePage = Readonly<
+  Pick<CrawlPage, "url"> & Partial<Omit<CrawlPage, "url">>
+>;
+
 export type WebCrawlerSourceHost = (
   input?: CrawlOptions,
   context?: AgentToolInvocationContext
-) => readonly CrawlPage[] | Promise<readonly CrawlPage[]>;
+) => readonly WebCrawlerSourcePage[] | Promise<readonly WebCrawlerSourcePage[]>;
 
 export function createWebCrawlerSourceAdapter(
   hostCrawler: WebCrawlerSourceHost

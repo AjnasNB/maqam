@@ -100,7 +100,7 @@ function snapshotOptions(options = {}) {
     recognizedKeys: OPTION_KEYS
   });
   for (const key of OPTION_KEYS) {
-    const value = snapshot[key] ?? DEFAULTS[key];
+    const value = snapshot[key] === undefined ? DEFAULTS[key] : snapshot[key];
     const [minimum, maximum] = LIMITS[key];
     snapshot[key] = safeInteger(value, `RSS/Atom parser option ${key}`, minimum, maximum);
   }
@@ -604,7 +604,12 @@ function snapshotReaderResponse(value, requestedUrl) {
   });
   if (!Object.hasOwn(snapshot, "body")) throw new TypeError("RSS/Atom reader response requires body.");
   if (typeof snapshot.body !== "string") throw new TypeError("RSS/Atom reader response.body must be a string.");
-  const finalUrl = safeHttpUrl(snapshot.finalUrl ?? snapshot.url ?? requestedUrl, undefined, { required: true });
+  const responseUrl = snapshot.url === undefined
+    ? requestedUrl
+    : safeHttpUrl(snapshot.url, undefined, { required: true });
+  const finalUrl = snapshot.finalUrl === undefined
+    ? responseUrl
+    : safeHttpUrl(snapshot.finalUrl, undefined, { required: true });
   let status = null;
   if (snapshot.status !== undefined && snapshot.status !== null) {
     status = safeInteger(snapshot.status, "RSS/Atom reader response.status", 100, 599);
