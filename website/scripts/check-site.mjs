@@ -87,6 +87,26 @@ for (const file of htmlFiles) {
     requireMatch(/maqam@0\.2\.4/i, "homepage install command must pin maqam@0.2.4");
   }
 
+  if (label === path.join("docs", "productloop", "index.html")) {
+    requireMatch(/productloop-os@0\.2\.1/, "ProductLoop install command must pin productloop-os@0.2.1");
+    for (const [packageName, version] of [
+      ["productloop-os", "0.2.1"],
+      ["ajnas-runtime", "0.2.1"],
+      ["ajnas-skills-registry", "0.2.1"],
+      ["ajnas-provenance", "0.1.3"],
+      ["ajnas-policy", "0.1.2"],
+      ["ajnas-evals", "0.1.2"],
+      ["ajnas-connectors", "0.1.2"],
+      ["ajnas-approvals", "0.1.2"],
+      ["ajnas-browser-research", "0.1.3"]
+    ]) {
+      requireMatch(
+        new RegExp(`<code>${packageName}<\\/code>[\\s\\S]{0,120}<td>${version}<\\/td>`),
+        `${packageName} must show public version ${version}`
+      );
+    }
+  }
+
   if (label === path.join("articles", "exact-agent-approvals", "index.html")) {
     requireMatch(
       /allowedOrigins:\s*\["https:\/\/registry\.npmjs\.org"\]/,
@@ -124,10 +144,13 @@ for (const file of htmlFiles) {
     if (/^(?:https?:)?\/\//i.test(value)) failures.push(`${label}: stylesheet is external: ${value}`);
   }
 
+  const srcsetReferences = [...source.matchAll(/\bsrcset="([^"]+)"/g)].flatMap((match) => (
+    match[1].split(",").map((candidate) => candidate.trim().split(/\s+/, 1)[0])
+  ));
   const localReferences = [
     ...source.matchAll(/\b(?:href|src|poster)="(\/[^"]*)"/g),
     ...source.matchAll(/<track\b[^>]*\bsrc="(\/[^"]*)"/g)
-  ].map((match) => match[1]);
+  ].map((match) => match[1]).concat(srcsetReferences.filter((reference) => reference.startsWith("/")));
 
   for (const reference of new Set(localReferences)) {
     const pathname = reference.split(/[?#]/, 1)[0];
