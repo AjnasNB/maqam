@@ -71,7 +71,7 @@ test("createWebCrawlerSourceAdapter routes a host crawler through its exact Tool
   }, { runId: "web_source_fixture" });
   assert.equal(calls.length, 1);
   assert.equal(calls[0].toolName, source.toolName);
-  assert.deepEqual(calls[0].input.seeds, ["https://example.com/research"]);
+  assert.deepEqual([...calls[0].input.seeds], ["https://example.com/research"]);
   assert.equal(result.documents.length, 1);
   assert.equal(result.documents[0].source.adapterId, "web-crawler.direct");
   assert.equal(result.documents[0].uri, "https://example.com/research");
