@@ -59,9 +59,9 @@ Required matrices and focused evidence:
 
 Do not copy the historical 0.2.4 benchmark result into this release as if it measured 0.3.0. Preserve 0.2.4 evidence for its own artifact.
 
-Fresh MGES v1.1.0 evidence was generated from clean source commit `11707f2397e3f13388dba9d1e33f0379ad535e43`:
+Fresh MGES v1.1.0 evidence was generated from clean source commit `50d9fa92d6ba195cba15c943cfeec789374b9184`:
 
-- [performance JSON](../benchmarks/results/2026-07-18-mges-performance-windows-node24.json): 30 fresh-process observations, `125.228 microseconds/call` governed median, `123.157-125.711` 95% bootstrap interval, `2.219%` governed CV, and all four required criteria-version-2 checks passed;
+- [performance JSON](../benchmarks/results/2026-07-18-mges-performance-windows-node24.json): 30 fresh-process observations, `123.773 microseconds/call` governed median, `122.659-126.087` 95% bootstrap interval, `2.930%` governed CV, and all four required criteria-version-2 checks passed;
 - [conformance JSON](../benchmarks/results/2026-07-18-mges-conformance-windows-node24.json): `14/14` named deterministic fixtures passed, including fatal source-policy denial and normalized ordered fallback.
 
 These are local project regression results, not a globally standardized benchmark, security score, certification, competitor ranking, capacity test, or SLA.

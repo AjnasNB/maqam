@@ -27,9 +27,9 @@ Every conformance claim must include:
 
 ## Approved compact performance wording
 
-> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 125.228 microseconds median per governed call (95% bootstrap interval for the sample median: 123.157-125.711; 30 fresh-process observations; governed CV 2.219%; required project checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. [Raw JSON](results/2026-07-18-mges-performance-windows-node24.json).
+> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 123.773 microseconds median per governed call (95% bootstrap interval for the sample median: 122.659-126.087; 30 fresh-process observations; governed CV 2.930%; required project checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. [Raw JSON](results/2026-07-18-mges-performance-windows-node24.json).
 
-The current raw artifact records clean source commit `11707f2397e3f13388dba9d1e33f0379ad535e43`. Prefix a future result with **“Provisional result:”** whenever its artifact reports `workingTreeDirty: true` or it has not passed the declared required project checks.
+The current raw artifact records clean source commit `50d9fa92d6ba195cba15c943cfeec789374b9184`. Prefix a future result with **“Provisional result:”** whenever its artifact reports `workingTreeDirty: true` or it has not passed the declared required project checks.
 
 ## Approved compact conformance wording
 
@@ -40,8 +40,8 @@ The current raw artifact records clean source commit `11707f2397e3f13388dba9d1e3
 Use no more than these three levels:
 
 ```text
-125.228 microseconds/call median
-123.157-125.711 microseconds · 95% bootstrap interval · 30 observations
+123.773 microseconds/call median
+122.659-126.087 microseconds · 95% bootstrap interval · 30 observations
 Local Node 24/Windows component fixture; no model/network/storage; not a competitor benchmark or SLA
 ```
 

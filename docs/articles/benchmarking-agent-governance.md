@@ -113,19 +113,19 @@ The current clean-source artifact is [`2026-07-18-mges-performance-windows-node2
 |---|---:|
 | Runtime and host | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
 | Observations | 30 fresh processes per variant |
-| Governed median | **125.228 microseconds/call** |
-| 95% bootstrap interval for the sample median | **123.157-125.711 microseconds/call** |
-| Sequential rate at the median | **7,985.443 calls/second** |
-| Paired added median | **125.169 microseconds/call** |
-| Governed coefficient of variation | **2.219%** |
-| Direct coefficient of variation (diagnostic) | **5.134%** |
+| Governed median | **123.773 microseconds/call** |
+| 95% bootstrap interval for the sample median | **122.659-126.087 microseconds/call** |
+| Sequential rate at the median | **8,079.310 calls/second** |
+| Paired added median | **123.716 microseconds/call** |
+| Governed coefficient of variation | **2.930%** |
+| Direct coefficient of variation (diagnostic) | **8.853%** |
 | Project publication checks | **PASS (4/4 required; direct diagnostic also passed)** |
 
 MGES v1.1 criteria version 2 requires 30 observations, governed coefficient of variation no greater than 10%, and median timed batches of at least 100 ms for both variants. Direct-path CV remains a reported diagnostic because the near-zero baseline is dominated by cross-process CPU-frequency noise; no direct observation is removed. These are stability gates chosen for this suite, not an industry acceptance rule.
 
 Earlier review runs showed why raw stability gates matter: uncontrolled background load can move cross-process CV above the declared ceiling even when the fixture is unchanged. No observations were deleted. Criteria version 2 keeps the product-path 10% ceiling, both minimum batch-duration gates, and all raw direct diagnostics while no longer treating the near-zero direct baseline as a product stability gate.
 
-The passing artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It records clean source commit `11707f2397e3f13388dba9d1e33f0379ad535e43` and `workingTreeDirty: false`. Later release commits may change files outside the measured path; any change to a fingerprinted source requires another run.
+The passing artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It records clean source commit `50d9fa92d6ba195cba15c943cfeec789374b9184` and `workingTreeDirty: false`. Later release commits may change files outside the measured path; any change to a fingerprinted source requires another run.
 
 ## Conformance is not another latency metric
 
@@ -214,7 +214,7 @@ Artifacts could be signed and indexed by suite version, source fingerprint, clea
 
 A defensible compact statement is:
 
-> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 125.228 microseconds median per governed call (95% bootstrap interval for the sample median: 123.157-125.711; 30 fresh-process observations; governed CV 2.219%; required checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
+> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 123.773 microseconds median per governed call (95% bootstrap interval for the sample median: 122.659-126.087; 30 fresh-process observations; governed CV 2.930%; required checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
 
 For conformance:
 

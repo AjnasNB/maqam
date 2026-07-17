@@ -109,15 +109,15 @@ These thresholds are MGES stability rules. They are not universal acceptance cri
 | Field | Observed value |
 |---|---:|
 | Environment | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
-| Governed median | **125.228 microseconds/call** |
-| 95% bootstrap interval for the sample median | **123.157-125.711 microseconds/call** |
-| Sequential rate at the median | **7,985.443 calls/second** |
-| Paired added median | **125.169 microseconds/call** |
-| Governed coefficient of variation | **2.219%** |
-| Direct coefficient of variation (diagnostic) | **5.134%** |
+| Governed median | **123.773 microseconds/call** |
+| 95% bootstrap interval for the sample median | **122.659-126.087 microseconds/call** |
+| Sequential rate at the median | **8,079.310 calls/second** |
+| Paired added median | **123.716 microseconds/call** |
+| Governed coefficient of variation | **2.930%** |
+| Direct coefficient of variation (diagnostic) | **8.853%** |
 | MGES project publication checks | **PASS (4/4 required; direct diagnostic also passed)** |
 
-The artifact records clean source commit `11707f2397e3f13388dba9d1e33f0379ad535e43` with `workingTreeDirty: false`. It includes SHA-256 fingerprints for every benchmark and implementation file in the measured path. The follow-up release commit may add results, documentation, and media, but any change to a fingerprinted source requires another run.
+The artifact records clean source commit `50d9fa92d6ba195cba15c943cfeec789374b9184` with `workingTreeDirty: false`. It includes SHA-256 fingerprints for every benchmark and implementation file in the measured path. The follow-up release commit may add results, documentation, and media, but any change to a fingerprinted source requires another run.
 
 The earlier [`2026-07-16-mges-performance-windows-node24.json`](results/2026-07-16-mges-performance-windows-node24.json) is retained as the 0.2.4 baseline, and [`2026-07-16-windows-node24.json`](results/2026-07-16-windows-node24.json) remains a legacy seven-sample result. Neither is relabeled as 0.3.0 evidence.
 
@@ -172,7 +172,7 @@ This is a relevance crosswalk only. It does not establish OWASP compliance or en
 
 ### Compact, acceptable form
 
-> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 125.228 microseconds median per governed call (95% bootstrap interval for the sample median: 123.157-125.711; 30 fresh-process observations; governed CV 2.219%; required checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. Raw JSON: [artifact](results/2026-07-18-mges-performance-windows-node24.json).
+> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 123.773 microseconds median per governed call (95% bootstrap interval for the sample median: 122.659-126.087; 30 fresh-process observations; governed CV 2.930%; required checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. Raw JSON: [artifact](results/2026-07-18-mges-performance-windows-node24.json).
 
 For conformance:
 
