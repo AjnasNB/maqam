@@ -291,7 +291,7 @@ export interface ResearchSourceCheckInput {
 
 export interface ResearchSourceCheckOutput {
   status: ResearchSourceCheckStatus;
-  message?: string | null;
+  message?: string;
   details?: JsonObject;
 }
 

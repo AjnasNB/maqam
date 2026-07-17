@@ -66,6 +66,7 @@ try {
   }, null, 2));
   await writeFile(join(consumerDirectory, "consumer.ts"), [
     "import { AgentRuntime, PolicyEngine, ResearchSourceRegistry, ToolGateway, crawl, createCrawlerTool, createRssAtomResearchAdapter, createRssAtomSourceAdapter, createWebCrawlerSourceAdapter, defineResearchSourceAdapter, defineResearchToolCaller, parseRssAtom, registerToolAdapter, defineToolAdapter, runToolAdapterConformance } from \"maqam\";",
+    "import type { ResearchSourceCheckOutput } from \"maqam\";",
     "import { createMaqamServer } from \"maqam/server\";",
     "void AgentRuntime;",
     "void crawl;",
@@ -74,6 +75,9 @@ try {
     "registerToolAdapter(gateway, adapter);",
     "void runToolAdapterConformance(adapter, { input: { value: \"ok\" }, verifyOutput: (output) => output.value === \"ok\" });",
     "const sourceAdapter = defineResearchSourceAdapter({ id: \"fixture.web\", channel: \"web\", toolName: \"source.web.fixture\", capabilities: [\"read\"], read: async () => [{ uri: \"https://example.com/\", text: \"fixture\" }] });",
+    "// @ts-expect-error A host check message must be a string when it is provided.",
+    "const invalidCheckMessage: ResearchSourceCheckOutput = { status: \"ready\", message: null };",
+    "void invalidCheckMessage;",
     "const sourceCaller = defineResearchToolCaller({ call: async () => [{ uri: \"https://example.com/\", text: \"fixture\" }] });",
     "const sources = new ResearchSourceRegistry({ adapters: [sourceAdapter], toolCaller: sourceCaller });",
     "void sources.route({ channel: \"web\", input: { url: \"https://example.com/\" } });",
