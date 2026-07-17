@@ -1,6 +1,9 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { formatApprovalDemo, runApprovalDemo } from "../src/maqam/approval-demo.js";
 import { startMaqamServer } from "../src/maqam/server.js";
+
+const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
 function readDemoArgs(argv) {
   if (argv[0] !== "demo") return null;
@@ -22,6 +25,7 @@ function readArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--help" || argument === "-h") options.help = true;
+    else if (argument === "--version" || argument === "-v") options.version = true;
     else if (argument === "--port") options.port = Number(argv[++index]);
     else if (argument === "--host") options.host = argv[++index];
     else if (argument === "--allowed-origin") options.allowedOrigins.push(argv[++index]);
@@ -56,6 +60,7 @@ Options:
   --allowed-host <host>           HTTP Host allowlist for non-loopback binding; repeatable
   --allow-private-networks        Trusted startup opt-in for loopback/private crawl targets
   --allow-cross-origin-crawls     Permit cross-origin links within --allowed-origin entries
+  --version                       Print the installed Maqam version
   --help                          Show this help
 
 Demo options:
@@ -75,6 +80,7 @@ try {
   } else {
     const options = readArgs(argv);
     if (options.help) usage();
+    else if (options.version) process.stdout.write(`${version}\n`);
     else {
       const server = startMaqamServer(options);
       server.once("error", (error) => {

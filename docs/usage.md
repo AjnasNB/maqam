@@ -182,6 +182,7 @@ ajnas-agent-crawler https://example.com
 | `--jsonl` | Output JSON Lines instead of a JSON array. | off |
 | `--output <file>` | Write output to a file. | stdout |
 | `--user-agent <ua>` | Use a custom user agent. | Maqam default |
+| `--version`, `-v` | Print the installed Maqam version. | off |
 | `--help` | Show CLI help. | off |
 
 ### Crawler Output

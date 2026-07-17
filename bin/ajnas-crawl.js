@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-import { createWriteStream } from "node:fs";
+import { createWriteStream, readFileSync } from "node:fs";
 import { crawl } from "../src/index.js";
+
+const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
 function usage() {
   console.log(`
@@ -19,6 +21,7 @@ Options:
   --jsonl               Output JSON Lines instead of a JSON array
   --output <file>       Write output to a file
   --user-agent <ua>     Custom user agent
+  --version             Print the installed Maqam version
   --help                Show this help
 
 This crawler is Maqam's first governed connector. It respects robots.txt by default and does not bypass access controls.
@@ -43,6 +46,8 @@ function readArgs(argv) {
     const arg = argv[i];
     if (arg === "--help" || arg === "-h") {
       options.help = true;
+    } else if (arg === "--version" || arg === "-v") {
+      options.version = true;
     } else if (arg === "--max-pages") {
       options.maxPages = Number(argv[++i]);
     } else if (arg === "--concurrency") {
@@ -88,6 +93,10 @@ async function main() {
   const { urls, options } = readArgs(process.argv.slice(2));
   if (options.help) {
     usage();
+    return;
+  }
+  if (options.version) {
+    process.stdout.write(`${version}\n`);
     return;
   }
   if (!urls.length) {

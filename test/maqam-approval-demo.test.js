@@ -6,9 +6,18 @@ import { runApprovalDemo } from "../src/maqam/approval-demo.js";
 
 const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
 const maqamBin = fileURLToPath(new URL("../bin/maqam.js", import.meta.url));
+const crawlerBin = fileURLToPath(new URL("../bin/ajnas-crawl.js", import.meta.url));
 
 function runCli(...args) {
   return spawnSync(process.execPath, [maqamBin, ...args], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    windowsHide: true
+  });
+}
+
+function runCrawlerCli(...args) {
+  return spawnSync(process.execPath, [crawlerBin, ...args], {
     cwd: repositoryRoot,
     encoding: "utf8",
     windowsHide: true
@@ -103,4 +112,22 @@ test("maqam demo approval emits stable human-readable proof and rejects unknown 
   assert.equal(invalid.status, 1);
   assert.equal(invalid.stdout, "");
   assert.match(invalid.stderr, /Unknown demo option: --unsafe/);
+});
+
+test("maqam reports its installed package version", () => {
+  for (const option of ["--version", "-v"]) {
+    const result = runCli(option);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stderr, "");
+    assert.equal(result.stdout, "0.2.4\n");
+  }
+});
+
+test("maqam crawler aliases report the installed package version", () => {
+  for (const option of ["--version", "-v"]) {
+    const result = runCrawlerCli(option);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stderr, "");
+    assert.equal(result.stdout, "0.2.4\n");
+  }
 });

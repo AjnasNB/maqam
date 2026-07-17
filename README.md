@@ -147,6 +147,7 @@ Run the exact-approval proof without a model key or hosted account:
 ```bash
 maqam demo approval
 maqam demo approval --json
+maqam --version
 ```
 
 The flow requests approval, rejects altered input with `APPROVAL_SCOPE_MISMATCH` while executions remain zero, executes the exact input once, rejects replay with `APPROVAL_INVALID`, and links `ev_1` to `claim_1`.
