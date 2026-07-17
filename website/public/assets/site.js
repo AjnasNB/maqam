@@ -83,7 +83,7 @@ document.querySelectorAll("video[data-proof-video]").forEach((video) => {
   };
   on(video, "loadedmetadata", markReady);
   on(video, "error", () => {
-    if (status) status.textContent = "The release video could not be loaded. Use the MP4 link below.";
+    if (status) status.textContent = "The release video could not be loaded. Retry or open this page in a browser with MP4 support.";
   });
   if (video.readyState >= 1) markReady();
 });

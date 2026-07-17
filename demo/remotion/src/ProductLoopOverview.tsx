@@ -28,10 +28,10 @@ const Hook: React.FC<{ readonly duration: number }> = ({ duration }) => {
     <OverviewScene durationInFrames={duration}>
       <div style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: 76, flex: 1, alignItems: "center" }}>
         <div>
-          <OverviewEyebrow tone={tone}>Ecosystem overview</OverviewEyebrow>
+          <OverviewEyebrow tone={tone}>What is ProductLoop OS? · ecosystem overview</OverviewEyebrow>
           <OverviewTitle maxWidth={920}>Governance is a system, not one guard.</OverviewTitle>
           <div style={{ marginTop: 28, color: overviewPalette.muted, fontSize: 37, lineHeight: 1.32, maxWidth: 820 }}>
-            ProductLoop OS composes policy-gated workflow primitives in TypeScript.
+            For teams composing provider-neutral, policy-gated workflow primitives in TypeScript.
           </div>
         </div>
         <div style={{ position: "relative", height: 560 }}>

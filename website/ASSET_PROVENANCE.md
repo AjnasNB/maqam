@@ -10,12 +10,16 @@ This file records the source and intended use of static website artwork and remo
 | `public/assets/approval-gate-art.png` | Codex generated image `exec-1549a141-c9d6-49c8-ad79-fbc777742bf2.png` | Generated for this release on 2026-07-16 | Benchmark article hero |
 | `public/assets/evidence-article.png` | Codex generated image `exec-7cc1c0d7-d0d2-43d3-abec-736520a349c3.png` | Generated for this release on 2026-07-16 | Exact-approval article hero |
 | `public/assets/productloop-ecosystem.png` | Codex generated image `exec-0578709a-409f-4283-8a60-91161cf095f1.png` | Generated for this release on 2026-07-16 | ProductLoop ecosystem illustration |
+| `public/assets/benchmark-metrology-v2.png` | OpenAI image generation, original release artwork | Generated for this release on 2026-07-17 | Benchmark methodology and measurement illustration |
+| `public/assets/community-workbench-v2.png` | OpenAI image generation, original release artwork | Generated for this release on 2026-07-17 | Open-source contribution and modular-review illustration |
 
-The generated-image sources are local build inputs under `C:\Users\20cs0\.codex\generated_images\019f65d0-13bf-7a90-953f-7460e3d72d19`. The copied files are committed build assets, so the website does not depend on that local directory at runtime.
+The generated artwork was created specifically for Maqam, then copied into the committed public asset directory. No external stock image, third-party logo, or runtime generation dependency is used.
+
+Matching `.webp` files are high-quality delivery derivatives generated from the committed PNG masters. Pages use `<picture>` so supported browsers receive the smaller WebP while PNG remains the fallback and social-card source.
 
 ## R2 release media
 
-The Worker exposes only fixed public paths from the `maqam-media` R2 bucket. The exact-approval sources are assembled under `D:\skill box\release-assets\maqam-v0.2.4`. ProductLoop and crawler video sources and their QA records are under `demo/remotion/out` before release upload.
+The Worker exposes only fixed public paths from the `maqam-media` R2 bucket. Release media is assembled from the repository's `demo/remotion/out` renders and the versioned release-asset staging directory before upload.
 
 | Public path | R2 object key | Source |
 |---|---|---|

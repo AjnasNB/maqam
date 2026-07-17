@@ -352,10 +352,10 @@ const HookScene: React.FC<{ readonly proof: DemoProof }> = ({ proof }) => {
     <SceneShell durationInFrames={sceneTiming.hook.duration}>
       <div style={{ display: "flex", flex: 1, gap: 80, alignItems: "center" }}>
         <div style={{ width: 800 }}>
-          <Eyebrow>One write request</Eyebrow>
+          <Eyebrow>What is Maqam? · one write request</Eyebrow>
           <Title maxWidth={790}>Approval should mean this exact action.</Title>
           <div style={{ marginTop: 28, color: palette.muted, fontSize: 38, lineHeight: 1.3 }}>
-            Not a blanket yes. Not a reusable permission.
+            A TypeScript enforcement boundary for agents that trigger real side effects.
           </div>
         </div>
         <Terminal style={{ flex: 1, opacity: interpolate(frame, [18, 42], [0, 1], {

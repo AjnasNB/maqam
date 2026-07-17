@@ -27,12 +27,14 @@ const localOptions = {
   maxRetries: 0
 };
 
+const fixturePageHtml = "<main><h1>Crawler fixture page</h1></main>";
+
 test("maxPages is exact under concurrency and onPage fires only for returned pages", async () => {
   let hits = 0;
   const baseUrl = await listen((request, response) => {
     hits += 1;
     response.setHeader("content-type", "text/html");
-    response.end(`<main><h1>${request.url}</h1></main>`);
+    response.end(fixturePageHtml);
   });
   const observed = [];
   const pages = await crawl({
@@ -59,7 +61,7 @@ test("crawler performs concurrent fetches while preserving per-origin start dela
     await new Promise((resolve) => setTimeout(resolve, 90));
     active -= 1;
     response.setHeader("content-type", "text/html");
-    response.end(`<main><h1>${request.url}</h1></main>`);
+    response.end(fixturePageHtml);
   });
 
   const pages = await crawl({
@@ -277,7 +279,7 @@ test("nested sitemap traversal obeys maxSitemaps exactly", async () => {
       return;
     }
     response.setHeader("content-type", "text/html");
-    response.end(`<main><h1>${request.url}</h1></main>`);
+    response.end(fixturePageHtml);
   });
 
   const result = await crawlDetailed({
@@ -313,7 +315,7 @@ test("each sitemap document is capped by maxUrlsPerSitemap", async () => {
       return;
     }
     response.setHeader("content-type", "text/html");
-    response.end(`<main><h1>${request.url}</h1></main>`);
+    response.end(fixturePageHtml);
   });
 
   const pages = await crawl({

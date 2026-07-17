@@ -28,7 +28,7 @@ const Hook: React.FC<{ readonly duration: number }> = ({ duration }) => {
     <OverviewScene durationInFrames={duration}>
       <div style={{ display: "grid", gridTemplateColumns: "0.96fr 1.04fr", gap: 76, flex: 1, alignItems: "center" }}>
         <div>
-          <OverviewEyebrow tone={tone}>Governed research connector</OverviewEyebrow>
+          <OverviewEyebrow tone={tone}>What is the Maqam crawler? · governed research connector</OverviewEyebrow>
           <OverviewTitle maxWidth={850}>Bound the crawl before the first request.</OverviewTitle>
           <div style={{ marginTop: 27, color: overviewPalette.muted, fontSize: 36, lineHeight: 1.34 }}>
             HTTP + HTML extraction. No browser automation claim.

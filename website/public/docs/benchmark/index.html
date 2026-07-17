@@ -26,7 +26,7 @@
     <aside class="docs-sidebar" aria-label="Benchmark documentation">
       <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Benchmark menu <span aria-hidden="true">+</span></button>
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
-        <nav aria-label="Benchmark sections"><h2>MGES v1</h2><a href="#verdict">Verdict</a><a href="#result">Measured result</a><a href="#method">Method</a><a href="#conformance">Conformance</a><a href="#reproduce">Reproduce</a><a href="#publish">Publish safely</a><a href="#standards">Standards context</a></nav>
+        <nav aria-label="Benchmark sections"><h2>MGES v1</h2><a href="#verdict">Verdict</a><a href="#landscape">Landscape fit</a><a href="#result">Measured result</a><a href="#method">Method</a><a href="#conformance">Conformance</a><a href="#reproduce">Reproduce</a><a href="#publish">Publish safely</a><a href="#standards">Standards context</a></nav>
       </div>
     </aside>
 
@@ -34,12 +34,33 @@
       <h1>Maqam Governance Evaluation Suite</h1>
       <p class="lede">MGES v1 keeps local performance regression evidence separate from deterministic governance-boundary conformance.</p>
 
+      <figure class="media-frame media-frame--art">
+        <picture><source srcset="/assets/benchmark-metrology-v2.webp" type="image/webp"><img src="/assets/benchmark-metrology-v2.png" width="1672" height="941" alt="Precision metrology workbench comparing a direct tool path with a governed Maqam path" fetchpriority="high"></picture>
+        <figcaption>A visual model of the two measured paths. The numerical evidence remains the raw JSON and reproducible fixture below.</figcaption>
+      </figure>
+
       <h2 id="verdict">Verdict</h2>
       <div class="callout callout-warning">
-        <strong>MGES is project-defined and nonstandard</strong>
+        <strong>MGES is project-defined, not globally accepted</strong>
         MGES is not a certification, security score, penetration test, formal proof, competitor benchmark, capacity result, end-to-end agent benchmark, or production SLA.
       </div>
-      <p>The useful claim is narrow: the MGES method, environment, source fingerprint, raw observations, project checks, and deterministic fixtures are public and reproducible. This page does not make a claim about whether other global or ecosystem benchmark suites exist.</p>
+      <p>The useful claim is narrow: the MGES method, environment, source fingerprint, raw observations, project checks, and deterministic fixtures are public and reproducible. Use it as a release regression and conformance profile for Maqam's approval boundary, never as an industry seal.</p>
+
+      <h2 id="landscape">How MGES fits the benchmark landscape</h2>
+      <p>No cited industry initiative or agent benchmark certifies exact side-effect approval integrity across frameworks. The closest references answer different questions, so they should complement MGES rather than be presented as substitutes or endorsements.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Reference</th><th>What it evaluates or defines</th><th>Relationship to MGES</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://www.nist.gov/artificial-intelligence/ai-agent-standards-initiative">NIST AI Agent Standards Initiative</a></td><td>Emerging interoperability, security, identity, and trust work for agents.</td><td>Standards context; it does not approve or certify MGES.</td></tr>
+            <tr><td><a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/">OWASP Top 10 for Agentic Applications</a></td><td>A risk taxonomy for agentic systems.</td><td>Use it to map threats and mitigations; MGES tests selected implementation invariants.</td></tr>
+            <tr><td><a href="https://arxiv.org/abs/2311.12983">GAIA</a></td><td>General-assistant capability on real-world questions requiring reasoning and tools.</td><td>Capability evaluation, not approval-boundary conformance.</td></tr>
+            <tr><td><a href="https://arxiv.org/abs/2308.03688">AgentBench</a></td><td>LLM-agent capability across interactive environments.</td><td>Agent performance evaluation, not a security certification.</td></tr>
+            <tr><td><strong>MGES v1</strong></td><td>Maqam local-call overhead and 12 named governance-boundary fixtures.</td><td>Project-specific regression evidence with public raw artifacts.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Recommended presentation:</strong> report MGES beside its environment and raw artifacts, map relevant failure modes to OWASP, follow emerging NIST work, and use capability benchmarks separately when evaluating the model or agent as a whole.</p>
 
       <h2 id="result">Measured result</h2>
       <dl class="definition-grid">
@@ -136,7 +157,7 @@ competitor benchmark, or production SLA.</code></pre></div>
       <p>Always keep the environment, profile, interval, observation count, variability, caveat, and raw-artifact link beside the headline number.</p>
 
       <h2 id="standards">Standards context</h2>
-      <p>The broader standards landscape is active. NIST has launched an AI Agent Standards Initiative, but that does not make MGES a NIST benchmark. Node.js benchmark guidance is used as a reproducibility reference. SPEC reporting policy is a useful example of disclosure discipline, but MGES is not a SPEC suite.</p>
+      <p>The broader standards landscape is active. NIST has launched an AI Agent Standards Initiative, but that does not make MGES a NIST benchmark. OWASP supplies a peer-reviewed risk vocabulary, not a pass/fail certification. Node.js benchmark guidance is used as a reproducibility reference. SPEC reporting policy is a useful example of disclosure discipline, but MGES is not a SPEC suite.</p>
       <ul>
         <li><a href="https://www.nist.gov/artificial-intelligence/ai-agent-standards-initiative">NIST AI Agent Standards Initiative</a></li>
         <li><a href="https://doi.org/10.6028/NIST.AI.800-2.ipd">NIST AI 800-2 initial public draft</a></li>

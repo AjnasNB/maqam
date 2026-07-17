@@ -63,7 +63,7 @@
       </div>
       <figure class="hero-media">
         <img src="/media/releases/maqam/v0.2.4/maqam-demo-poster.png" width="1920" height="1080" alt="Maqam proof showing an altered call blocked, one exact approved call passed, and approval replay blocked" fetchpriority="high">
-        <figcaption>Real output from the deterministic <code>maqam demo approval --json</code> flow.</figcaption>
+        <figcaption>Real output from the deterministic maqam demo approval --json flow.</figcaption>
       </figure>
     </section>
 
@@ -172,14 +172,18 @@
       </div>
     </section>
 
-    <section class="section" id="proof-video">
-      <div class="shell video-layout" data-video-block>
-        <div class="video-notes">
-          <strong>60 seconds</strong>
-          <p>1920 by 1080, captioned, locally narrated, and rendered from real command output.</p>
-          <p id="exact-video-status" data-video-status>Loading video metadata.</p>
-          <p><a href="/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.vtt">Download VTT captions</a><br><a href="/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.srt">Download SRT captions</a></p>
-        </div>
+    <section class="section" id="proof-video" aria-labelledby="what-is-maqam-heading">
+      <div class="shell video-showcase" data-video-block>
+        <header class="video-heading">
+          <p class="eyebrow">What is Maqam?</p>
+          <h2 id="what-is-maqam-heading">One exact approval between an agent and a side effect.</h2>
+          <p>Maqam is an open-source TypeScript execution boundary. It is for teams whose agents can write files, call APIs, trigger workflows, or crawl the web and who need review to stay bound to the exact input that runs.</p>
+          <dl class="video-facts">
+            <div><dt>Who uses it</dt><dd>Agent platform, security, workflow, and TypeScript teams.</dd></div>
+            <div><dt>Use it for</dt><dd>Policy checks, exact approvals, one-use execution, traces, and evidence.</dd></div>
+            <div><dt>Why it exists</dt><dd>A human-readable prompt alone does not bind the bytes a tool eventually receives.</dd></div>
+          </dl>
+        </header>
         <figure class="media-frame">
           <video data-proof-video controls preload="metadata" aria-describedby="exact-video-status" poster="/media/releases/maqam/v0.2.4/maqam-demo-poster.png">
             <source src="/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4" type="video/mp4">
@@ -188,6 +192,7 @@
           </video>
           <figcaption>The proof requests approval, blocks changed input, runs the exact call once, blocks replay, and links evidence to a claim.</figcaption>
         </figure>
+        <div class="video-meta"><span>60 seconds</span><span>1920 × 1080</span><span>Local narration</span><span>English captions included</span><span id="exact-video-status" data-video-status>Loading video metadata.</span></div>
       </div>
     </section>
 
@@ -199,14 +204,17 @@
           <p>Three captioned candidate-release demos separate Maqam's exact-call proof from the ProductLoop package map and the crawler's network limits.</p>
         </header>
         <div class="video-library">
-          <article class="video-entry" data-video-block>
-            <div class="video-entry-copy">
-              <p class="eyebrow">ProductLoop OS</p>
-              <h3>One operating layer, named package boundaries.</h3>
-              <p>The ecosystem overview shows what each module contributes, where Maqam sits, and which host responsibilities remain outside the package family.</p>
-              <p id="productloop-video-status" data-video-status>Loading video metadata.</p>
-              <p><a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4">Open MP4</a><br><a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.vtt">Download VTT captions</a><br><a href="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.srt">Download SRT captions</a></p>
-            </div>
+          <article class="video-showcase" data-video-block>
+            <header class="video-heading">
+              <p class="eyebrow">What is ProductLoop OS?</p>
+              <h3>One composition layer with named package boundaries.</h3>
+              <p>ProductLoop OS is for teams that want provider-neutral runtime, policy, approval, provenance, connector, skill, evaluation, and research primitives under one explicit TypeScript package map. Maqam remains the focused enforcement subsystem inside that larger ecosystem.</p>
+              <dl class="video-facts">
+                <div><dt>Who uses it</dt><dd>Teams assembling an inspectable agent platform from small packages.</dd></div>
+                <div><dt>Use it for</dt><dd>Composing reviewed modules without pretending they share one hidden control plane.</dd></div>
+                <div><dt>Why it exists</dt><dd>To make package ownership, bridges, and host responsibilities visible.</dd></div>
+              </dl>
+            </header>
             <figure class="media-frame">
               <video data-proof-video controls preload="metadata" aria-describedby="productloop-video-status" poster="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-poster.png">
                 <source src="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4" type="video/mp4">
@@ -215,15 +223,19 @@
               </video>
               <figcaption>A 55-second package and responsibility map for ProductLoop OS.</figcaption>
             </figure>
+            <div class="video-meta"><span>55 seconds</span><span>1920 × 1080</span><span>Local narration</span><span>English captions included</span><span id="productloop-video-status" data-video-status>Loading video metadata.</span></div>
           </article>
-          <article class="video-entry" data-video-block>
-            <div class="video-entry-copy">
-              <p class="eyebrow">Maqam crawler</p>
-              <h3>Governed research with explicit network limits.</h3>
-              <p>The crawler demo follows policy, bounded fetching, source records, and citations while naming the browser rendering and distributed crawling features it does not provide.</p>
-              <p id="crawler-video-status" data-video-status>Loading video metadata.</p>
-              <p><a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4">Open MP4</a><br><a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt">Download VTT captions</a><br><a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.srt">Download SRT captions</a></p>
-            </div>
+          <article class="video-showcase" data-video-block>
+            <header class="video-heading">
+              <p class="eyebrow">What is the Maqam crawler?</p>
+              <h3>Governed HTTP research with explicit network limits.</h3>
+              <p>The crawler is for agents that need bounded public HTTP and HTML research with source records, redirect controls, robots handling, citations, and evidence. It deliberately does not execute page JavaScript or replace a browser-rendering provider or distributed crawl fleet.</p>
+              <dl class="video-facts">
+                <div><dt>Who uses it</dt><dd>Research, retrieval, monitoring, and evidence-producing agent workflows.</dd></div>
+                <div><dt>Use it for</dt><dd>Budgeted public-web fetches that enter the same policy and trace boundary.</dd></div>
+                <div><dt>Why it exists</dt><dd>Network scope, redirects, bytes, depth, and evidence should be explicit before a crawl begins.</dd></div>
+              </dl>
+            </header>
             <figure class="media-frame">
               <video data-proof-video controls preload="metadata" aria-describedby="crawler-video-status" poster="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research-poster.png">
                 <source src="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4" type="video/mp4">
@@ -232,13 +244,14 @@
               </video>
               <figcaption>A 55-second walkthrough of governed crawling, citations, and boundaries.</figcaption>
             </figure>
+            <div class="video-meta"><span>55 seconds</span><span>1920 × 1080</span><span>Local narration</span><span>English captions included</span><span id="crawler-video-status" data-video-status>Loading video metadata.</span></div>
           </article>
         </div>
       </div>
     </section>
 
     <section class="section">
-      <div class="shell benchmark-layout">
+      <div class="shell benchmark-showcase">
         <div class="benchmark-copy">
           <blockquote>127.498 microseconds per governed local call, measured as a clean-source regression profile.</blockquote>
           <p>The separate conformance profile passed 12 of 12 named governance-boundary fixtures.</p>
