@@ -141,7 +141,7 @@ Neither result is a globally accepted benchmark, security certification, penetra
 
 ## What The 0.3.0 Candidate Evaluation Establishes
 
-MGES v1.1.0 reran from clean commit `50d9fa92d6ba195cba15c943cfeec789374b9184`. Its Windows/Node 24 local-call profile records a `123.773 microseconds/call` governed median, a `122.659-126.087` 95% bootstrap interval for the sample median, and `2.930%` governed CV across 30 fresh-process observations. All four required criteria-version-2 stability checks passed; the published direct-path CV diagnostic also passed.
+MGES v1.1.0 reran from clean commit `bceaebfa2a4059bc63acd23eccf4fafee794a295`. Its Windows/Node 24 local-call profile records a `124.303 microseconds/call` governed median, a `123.712-125.695` 95% bootstrap interval for the sample median, and `2.010%` governed CV across 30 fresh-process observations. All four required criteria-version-2 stability checks passed; the published direct-path CV diagnostic also passed.
 
 The conformance profile passes `14/14` named fixtures. The two new cases establish only that a source policy denial stops all registered backends before dispatch, and that ordinary unavailability can fall back in deterministic order while binding the normalized document to the selected adapter. They do not establish provider correctness, network isolation, factual accuracy, or universal security.
 
@@ -167,6 +167,6 @@ npm install maqam
 - Provider-reported usage and activity can be observed after execution; not every provider exposes a preventive hard limit for every measure.
 - Calls that bypass registered adapters are outside Maqam's control.
 - Passing tests is evidence for covered cases, not proof that the software has no defects.
-- The current MGES artifacts record clean source commit `50d9fa92d6ba195cba15c943cfeec789374b9184`; rerun them if any fingerprinted implementation or benchmark source changes.
+- The current MGES artifacts record clean source commit `bceaebfa2a4059bc63acd23eccf4fafee794a295`; rerun them if any fingerprinted implementation or benchmark source changes.
 
 Those limits are part of the product boundary, not footnotes to hide. The [public roadmap](../ROADMAP.md) identifies which ones Maqam intends to address next.

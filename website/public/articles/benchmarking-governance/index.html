@@ -84,15 +84,15 @@ operations per second at median = 1,000,000,000 / median nanoseconds</code></pre
       <div class="table-wrap" tabindex="0" role="region" aria-label="Clean MGES v1.1 recorded result"><table><caption class="sr-only">Environment, observation count, timing result, and publication checks for the clean MGES v1.1 run</caption><thead><tr><th scope="col">Field</th><th scope="col">Recorded result</th></tr></thead><tbody>
         <tr><th scope="row">Runtime and host</th><td>Node 24.15.0, Windows x64, AMD Ryzen 7 4800H</td></tr>
         <tr><th scope="row">Observations</th><td>30 fresh processes per variant</td></tr>
-        <tr><th scope="row">Governed median</th><td>123.773 microseconds per call</td></tr>
-        <tr><th scope="row">95% bootstrap interval</th><td>122.659 to 126.087 microseconds per call</td></tr>
-        <tr><th scope="row">Sequential rate at median</th><td>8,079.310 calls per second</td></tr>
-        <tr><th scope="row">Paired added median</th><td>123.716 microseconds per call</td></tr>
-        <tr><th scope="row">Governed coefficient of variation</th><td>2.930%</td></tr>
+        <tr><th scope="row">Governed median</th><td>124.303 microseconds per call</td></tr>
+        <tr><th scope="row">95% bootstrap interval</th><td>123.712 to 125.695 microseconds per call</td></tr>
+        <tr><th scope="row">Sequential rate at median</th><td>8,044.843 calls per second</td></tr>
+        <tr><th scope="row">Paired added median</th><td>124.245 microseconds per call</td></tr>
+        <tr><th scope="row">Governed coefficient of variation</th><td>2.010%</td></tr>
         <tr><th scope="row">Project publication checks</th><td>PASS, 4 of 4 required; direct-CV diagnostic also passed</td></tr>
       </tbody></table></div>
       <p>Criteria version 2 requires 30 observations, governed variation no greater than 10%, and median timed batches of at least 100 ms for both variants. Direct variation remains visible as a diagnostic because the near-zero baseline is dominated by cross-process CPU-frequency noise. These are suite stability gates, not an industry acceptance rule.</p>
-      <p>The clean artifact records commit <code>50d9fa92d6ba195cba15c943cfeec789374b9184</code>, <code>workingTreeDirty: false</code>, and SHA-256 fingerprints for benchmark and implementation files. A changed fingerprint requires another run.</p>
+      <p>The clean artifact records commit <code>bceaebfa2a4059bc63acd23eccf4fafee794a295</code>, <code>workingTreeDirty: false</code>, and SHA-256 fingerprints for benchmark and implementation files. A changed fingerprint requires another run.</p>
       <div class="button-row"><a class="button button-primary" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-performance-windows-node24.json">Open performance JSON</a><a class="button" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-conformance-windows-node24.json">Open conformance JSON</a></div>
 
       <h2>Conformance is not latency</h2>
@@ -121,8 +121,8 @@ operations per second at median = 1,000,000,000 / median nanoseconds</code></pre
 
       <h2>How to quote the result responsibly</h2>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-performance">Copy</button><pre><code id="quote-performance">MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H:
-123.773 microseconds median per governed call (95% bootstrap interval for the
-sample median: 122.659 to 126.087; 30 fresh-process observations; governed CV 2.930%).
+124.303 microseconds median per governed call (95% bootstrap interval for the
+sample median: 123.712 to 125.695; 30 fresh-process observations; governed CV 2.010%).
 Local in-process component benchmark; excludes model, network, storage, and
 concurrency; not a competitor benchmark or SLA.</code></pre></div>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-conformance">Copy</button><pre><code id="quote-conformance">MGES v1.1.0 governance-boundary profile: 14 of 14 project-defined fixtures passed

@@ -9,10 +9,10 @@
     "externallyStandardized": false,
     "externallyCertified": false
   },
-  "measuredAt": "2026-07-17T20:41:29.610Z",
+  "measuredAt": "2026-07-17T21:23:05.480Z",
   "repository": {
     "available": true,
-    "commit": "50d9fa92d6ba195cba15c943cfeec789374b9184",
+    "commit": "bceaebfa2a4059bc63acd23eccf4fafee794a295",
     "workingTreeDirty": false
   },
   "environment": {
@@ -24,7 +24,7 @@
   },
   "sourceFingerprint": {
     "algorithm": "sha256",
-    "combined": "68d0e4e61ebb3e6235b9c702dc3dc436f14138deee5bc9fbf44078f90d98429e",
+    "combined": "617262aa4e0532d12b75e7703ddc1bddaaafa25ee9c8e424dad8dea050dadd9d",
     "files": [
       {
         "path": "benchmarks/governance-conformance.mjs",
@@ -32,7 +32,7 @@
       },
       {
         "path": "src/index.js",
-        "sha256": "8720e08f24b55c904c0497806af1dbf311ec5e97f2687bba8f1f889b77670a1b"
+        "sha256": "d8fd7e4508d9c7a41a354ff6d40ffd8ec6778c1cef09c8b5bd04e36dcb9412c9"
       },
       {
         "path": "src/framework/tool-gateway.js",
@@ -68,11 +68,11 @@
       },
       {
         "path": "src/research/research-document.js",
-        "sha256": "626f397fd4dfd9e02fe4a2a0973dcf84d4f9cb144e67dc2136b96b838b8d6069"
+        "sha256": "5186e3c6342b71f4f64dc48e400acf7208d641dbdb9d7a0aa79baf925d60f265"
       },
       {
         "path": "src/research/source-adapter.js",
-        "sha256": "726606bfa8077528e91f2d0ea0cde3a2b862bfb4d20be2450c8ecec6ea733d95"
+        "sha256": "b02a4114d3d565e8ac2715d265497efde271ca12d7da42841ae30d35feb41e14"
       },
       {
         "path": "src/research/source-error.js",
@@ -80,7 +80,7 @@
       },
       {
         "path": "src/research/source-registry.js",
-        "sha256": "5ae103e6d1d5855f47eb732fe66fe318c9a3b362029dacb93eb8ec26fb725892"
+        "sha256": "da82baa6afa0999d2bb49993e1155c879a847a44043ade507827f059b7409963"
       }
     ]
   },
@@ -96,7 +96,7 @@
       "property": "deny-by-default-construction",
       "threat": "An execution gateway is created without an explicit policy boundary.",
       "status": "pass",
-      "durationMs": 0.367,
+      "durationMs": 0.379,
       "evidence": {
         "constructorRejected": true,
         "errorType": "TypeError"
@@ -107,7 +107,7 @@
       "property": "policy-denial-blocks-dispatch",
       "threat": "A registered tool is invoked even though policy denies it.",
       "status": "pass",
-      "durationMs": 4.048,
+      "durationMs": 3.791,
       "evidence": {
         "rejectionCode": "POLICY_DENIED",
         "handlerExecutions": 0
@@ -118,7 +118,7 @@
       "property": "policy-evaluation-fails-closed",
       "threat": "A policy backend exception falls through to tool execution.",
       "status": "pass",
-      "durationMs": 0.512,
+      "durationMs": 0.417,
       "evidence": {
         "rejectionCode": "POLICY_EVALUATION_FAILED",
         "handlerExecutions": 0
@@ -129,7 +129,7 @@
       "property": "accessor-input-rejected-without-execution",
       "threat": "Input accessors execute while authorization data is being canonicalized.",
       "status": "pass",
-      "durationMs": 0.305,
+      "durationMs": 0.239,
       "evidence": {
         "rejectionCode": "APPROVAL_INPUT_INVALID",
         "getterExecutions": 0,
@@ -142,7 +142,7 @@
       "property": "approval-bound-to-run-tool-and-canonical-input",
       "threat": "An approval for one exact call authorizes a changed run, tool, or payload.",
       "status": "pass",
-      "durationMs": 5.296,
+      "durationMs": 6.055,
       "evidence": {
         "changedRunCode": "APPROVAL_SCOPE_MISMATCH",
         "changedInputCode": "APPROVAL_SCOPE_MISMATCH",
@@ -157,7 +157,7 @@
       "property": "approval-single-use-by-default",
       "threat": "A consumed approval can be replayed for a second execution.",
       "status": "pass",
-      "durationMs": 2.462,
+      "durationMs": 2.517,
       "evidence": {
         "replayCode": "APPROVAL_INVALID",
         "handlerExecutions": 1,
@@ -169,7 +169,7 @@
       "property": "per-run-call-limit-enforced",
       "threat": "A caller raises a policy-owned call limit and executes again.",
       "status": "pass",
-      "durationMs": 0.856,
+      "durationMs": 0.827,
       "evidence": {
         "rejectionCode": "TOOL_CALL_LIMIT_EXCEEDED",
         "handlerExecutions": 1,
@@ -181,7 +181,7 @@
       "property": "handler-input-is-detached-and-immutable",
       "threat": "The handler receives a mutable caller-owned object that can change after authorization.",
       "status": "pass",
-      "durationMs": 0.521,
+      "durationMs": 0.56,
       "evidence": {
         "detached": true,
         "rootFrozen": true,
@@ -196,7 +196,7 @@
       "property": "cross-run-evidence-does-not-support-a-claim",
       "threat": "Evidence from another run is treated as support for a claim.",
       "status": "pass",
-      "durationMs": 1.306,
+      "durationMs": 1.372,
       "evidence": {
         "evidenceId": "ev_1",
         "mismatchedClaimId": "claim_1",
@@ -211,7 +211,7 @@
       "property": "multi-approval-consumption-is-atomic",
       "threat": "A failed multi-approval call partially consumes the still-valid approval.",
       "status": "pass",
-      "durationMs": 2.571,
+      "durationMs": 2.34,
       "evidence": {
         "rejectionCode": "APPROVAL_INVALID",
         "firstApprovalConsumptions": 0,
@@ -224,7 +224,7 @@
       "property": "gateway-evidence-attribution-is-run-task-and-tool-scoped",
       "threat": "A handler forges the run, task, or tool attribution on evidence it records.",
       "status": "pass",
-      "durationMs": 1.582,
+      "durationMs": 0.99,
       "evidence": {
         "attemptedAttribution": {
           "runId": "forged_run",
@@ -243,7 +243,7 @@
       "property": "denial-trace-is-redacted-and-coded",
       "threat": "A denied call omits an audit trace or writes caller secrets into it.",
       "status": "pass",
-      "durationMs": 0.553,
+      "durationMs": 0.419,
       "evidence": {
         "rejectionCode": "POLICY_DENIED",
         "traceStatus": "denied",
@@ -257,7 +257,7 @@
       "property": "source-policy-denial-stops-all-backends",
       "threat": "A denied research source silently falls through to a second backend.",
       "status": "pass",
-      "durationMs": 2.268,
+      "durationMs": 2.312,
       "evidence": {
         "rejectionCode": "POLICY_DENIED",
         "primaryExecutions": 0,
@@ -269,7 +269,7 @@
       "property": "source-unavailability-falls-back-and-normalizes",
       "threat": "An ordinary backend outage prevents an ordered source fallback or returns an unbound record.",
       "status": "pass",
-      "durationMs": 2.135,
+      "durationMs": 2.217,
       "evidence": {
         "selectedAdapter": "conformance.ready",
         "attempts": [

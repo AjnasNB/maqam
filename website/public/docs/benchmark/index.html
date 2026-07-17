@@ -65,11 +65,11 @@
 
       <h2 id="result">Measured result</h2>
       <dl class="definition-grid">
-        <dt>Governed median</dt><dd>123.773 microseconds per sequential in-process call.</dd>
-        <dt>95% interval</dt><dd>122.659 to 126.087 microseconds for the sample median using deterministic percentile bootstrap.</dd>
-        <dt>Variability</dt><dd>2.930% governed coefficient of variation across 30 observations.</dd>
-        <dt>Derived rate</dt><dd>8,079.310 sequential calls per second at the measured median. This is not a concurrent-load capacity claim.</dd>
-        <dt>Paired added median</dt><dd>123.716 microseconds compared with the direct fixture path.</dd>
+        <dt>Governed median</dt><dd>124.303 microseconds per sequential in-process call.</dd>
+        <dt>95% interval</dt><dd>123.712 to 125.695 microseconds for the sample median using deterministic percentile bootstrap.</dd>
+        <dt>Variability</dt><dd>2.010% governed coefficient of variation across 30 observations.</dd>
+        <dt>Derived rate</dt><dd>8,044.843 sequential calls per second at the measured median. This is not a concurrent-load capacity claim.</dd>
+        <dt>Paired added median</dt><dd>124.245 microseconds compared with the direct fixture path.</dd>
         <dt>Conformance</dt><dd>14 of 14 named deterministic fixtures passed.</dd>
       </dl>
       <figure class="media-frame">
@@ -144,7 +144,7 @@ cd maqam
 npm ci
 npm run benchmark:mges:conformance
 npm run benchmark:mges:performance</code></pre></div>
-      <p>The clean-source artifacts record source commit <code>50d9fa92d6ba195cba15c943cfeec789374b9184</code>. Later release commits can change documentation and media without changing the measured path. Any change to a fingerprinted implementation or benchmark source requires another run.</p>
+      <p>The clean-source artifacts record source commit <code>bceaebfa2a4059bc63acd23eccf4fafee794a295</code>. Later release commits can change documentation and media without changing the measured path. Any change to a fingerprinted implementation or benchmark source requires another run.</p>
       <ul>
         <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-performance-windows-node24.json">Raw performance JSON</a></li>
         <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-conformance-windows-node24.json">Raw conformance JSON</a></li>
@@ -155,9 +155,9 @@ npm run benchmark:mges:performance</code></pre></div>
 
       <h2 id="publish">Safe publication wording</h2>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#claim-code">Copy</button><pre><code id="claim-code">MGES v1.1.0 local-call profile on Node 24.15.0, Windows x64,
-and Ryzen 7 4800H: 123.773 microseconds median per governed
-call, with a 122.659 to 126.087 microsecond 95% bootstrap
-interval, 30 fresh-process observations, and 2.930% governed CV.
+and Ryzen 7 4800H: 124.303 microseconds median per governed
+call, with a 123.712 to 125.695 microsecond 95% bootstrap
+interval, 30 fresh-process observations, and 2.010% governed CV.
 The separate boundary profile passed 14 of 14 deterministic
 fixtures. Project-defined local regression evidence, not a
 standard, certification, security score, capacity result,
