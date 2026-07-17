@@ -53,30 +53,39 @@ test("maxPages is exact under concurrency and onPage fires only for returned pag
 test("crawler performs concurrent fetches while preserving per-origin start delay", async () => {
   let active = 0;
   let maxActive = 0;
-  const starts = [];
+  const gatedStarts = [];
   const baseUrl = await listen(async (request, response) => {
-    starts.push(Date.now());
     active += 1;
     maxActive = Math.max(maxActive, active);
-    await new Promise((resolve) => setTimeout(resolve, 90));
+    // Leave a wide overlap window so a busy CI runner cannot make concurrent
+    // requests appear serial merely because the event loop was delayed.
+    await new Promise((resolve) => setTimeout(resolve, 240));
     active -= 1;
     response.setHeader("content-type", "text/html");
     response.end(fixturePageHtml);
   });
+  const crawlBaseUrl = baseUrl.replace("127.0.0.1", "localhost");
 
   const pages = await crawl({
     ...localOptions,
-    seeds: ["/a", "/b", "/c"].map((path) => `${baseUrl}${path}`),
+    seeds: ["/a", "/b", "/c"].map((path) => `${crawlBaseUrl}${path}`),
     maxPages: 3,
     concurrency: 3,
-    delayMs: 80
+    delayMs: 80,
+    dnsLookup: async () => {
+      // DNS resolution begins immediately after the per-origin gate. Recording
+      // it avoids conflating the gate interval with variable socket setup time.
+      gatedStarts.push(Date.now());
+      return [{ address: "127.0.0.1", family: 4 }];
+    }
   });
 
   assert.equal(pages.length, 3);
   assert.ok(maxActive >= 2, `expected overlapping requests, observed maxActive=${maxActive}`);
-  const sorted = starts.toSorted((a, b) => a - b);
+  assert.equal(gatedStarts.length, 3);
+  const sorted = gatedStarts.toSorted((a, b) => a - b);
   for (let index = 1; index < sorted.length; index += 1) {
-    assert.ok(sorted[index] - sorted[index - 1] >= 35, `request gap was ${sorted[index] - sorted[index - 1]}ms`);
+    assert.ok(sorted[index] - sorted[index - 1] >= 60, `gated request gap was ${sorted[index] - sorted[index - 1]}ms`);
   }
 });
 

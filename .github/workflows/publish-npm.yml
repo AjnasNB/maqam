@@ -1,0 +1,304 @@
+name: Publish npm (trusted)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact package version to publish
+        required: true
+        default: 0.2.4
+        type: string
+      expected_sha256:
+        description: Approved SHA-256 of the npm tarball
+        required: true
+        default: f4751f4f4ef3a4a97631f8ebddc72cb03962cc52d7ae983f9d0188de9a6318cb
+        type: string
+      expected_integrity:
+        description: Approved npm sha512 integrity
+        required: true
+        default: sha512-/VHGyLNele7rp7At6HGZhrw5UxOF9rlcPWHWZ+7srMz47zhhEBbkJXgKQTdZRA0MLQTGqGs8sKFhNnhgjIPWlA==
+        type: string
+      confirmation:
+        description: Type publish maqam@VERSION
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-maqam
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify approved artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      sha256: ${{ steps.pack.outputs.sha256 }}
+    env:
+      EXPECTED_VERSION: ${{ inputs.version }}
+      EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+      EXPECTED_INTEGRITY: ${{ inputs.expected_integrity }}
+      CONFIRMATION: ${{ inputs.confirmation }}
+    steps:
+      - name: Validate dispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then
+            echo "Trusted publishing must be dispatched from main." >&2
+            exit 1
+          fi
+          if [[ ! "${EXPECTED_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid version input." >&2
+            exit 1
+          fi
+          if [[ ! "${EXPECTED_SHA256}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "Invalid SHA-256 input." >&2
+            exit 1
+          fi
+          if [[ ! "${EXPECTED_INTEGRITY}" =~ ^sha512-[A-Za-z0-9+/]+={0,2}$ ]]; then
+            echo "Invalid integrity input." >&2
+            exit 1
+          fi
+          if [[ "${CONFIRMATION}" != "publish maqam@${EXPECTED_VERSION}" ]]; then
+            echo "Confirmation must exactly equal: publish maqam@${EXPECTED_VERSION}" >&2
+            exit 1
+          fi
+
+      - name: Checkout approved commit
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.15.0
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Setup trusted-publishing npm CLI
+        run: npm install --global npm@12.0.1 --ignore-scripts
+
+      - name: Verify toolchain
+        run: |
+          node --version
+          npm --version
+
+      - name: Verify package identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const expectedVersion = process.env.EXPECTED_VERSION;
+          const expectedRepository = "git+https://github.com/AjnasNB/maqam.git";
+          if (manifest.name !== "maqam") throw new Error(`Unexpected package name: ${manifest.name}`);
+          if (manifest.version !== expectedVersion) {
+            throw new Error(`package.json is ${manifest.version}; expected ${expectedVersion}`);
+          }
+          if (manifest.repository?.url !== expectedRepository) {
+            throw new Error(`Unexpected repository URL: ${manifest.repository?.url}`);
+          }
+          NODE
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Run complete tests
+        run: npm test
+
+      - name: Compile a clean TypeScript consumer
+        run: npm run test:consumer-types
+
+      - name: Verify website contract
+        run: npm run test:website
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      - name: Confirm version is not already published
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry_error="${RUNNER_TEMP}/npm-view-before-verify.err"
+          if npm view "maqam@${EXPECTED_VERSION}" version >/dev/null 2>"${registry_error}"; then
+            echo "maqam@${EXPECTED_VERSION} already exists; npm versions are immutable." >&2
+            exit 1
+          fi
+          if ! grep -Eq "E404|404 Not Found" "${registry_error}"; then
+            cat "${registry_error}" >&2
+            echo "Could not prove that maqam@${EXPECTED_VERSION} is unpublished." >&2
+            exit 1
+          fi
+
+      - name: Pack and verify exact artifact
+        id: pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          pack_dir="${RUNNER_TEMP}/approved-pack"
+          mkdir -p "${pack_dir}"
+          npm pack --ignore-scripts --pack-destination "${pack_dir}" --json > "${RUNNER_TEMP}/pack.json"
+          tarball="${pack_dir}/maqam-${EXPECTED_VERSION}.tgz"
+          test -f "${tarball}"
+          actual_sha256="$(sha256sum "${tarball}" | awk '{print $1}')"
+          if [[ "${actual_sha256}" != "${EXPECTED_SHA256}" ]]; then
+            echo "Tarball SHA-256 mismatch: ${actual_sha256}" >&2
+            exit 1
+          fi
+          actual_integrity="sha512-$(openssl dgst -sha512 -binary "${tarball}" | openssl base64 -A)"
+          if [[ "${actual_integrity}" != "${EXPECTED_INTEGRITY}" ]]; then
+            echo "Tarball integrity mismatch." >&2
+            exit 1
+          fi
+          echo "sha256=${actual_sha256}" >> "${GITHUB_OUTPUT}"
+          {
+            echo "## Approved npm artifact"
+            echo
+            echo "- Package: \`maqam@${EXPECTED_VERSION}\`"
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- SHA-256: \`${actual_sha256}\`"
+            echo "- Integrity: \`${actual_integrity}\`"
+            echo "- Registry state: version not yet published"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  publish:
+    name: Publish after maintainer approval
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: npm-publish
+      url: https://www.npmjs.com/package/maqam/v/${{ inputs.version }}
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      EXPECTED_VERSION: ${{ inputs.version }}
+      EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+      EXPECTED_INTEGRITY: ${{ inputs.expected_integrity }}
+    steps:
+      - name: Checkout verified commit
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.15.0
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Setup trusted-publishing npm CLI
+        run: npm install --global npm@12.0.1 --ignore-scripts
+
+      - name: Repack approved artifact before publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          pack_dir="${RUNNER_TEMP}/publish-pack"
+          mkdir -p "${pack_dir}"
+          npm pack --ignore-scripts --pack-destination "${pack_dir}" --json > "${RUNNER_TEMP}/publish-pack.json"
+          tarball="${pack_dir}/maqam-${EXPECTED_VERSION}.tgz"
+          actual_sha256="$(sha256sum "${tarball}" | awk '{print $1}')"
+          if [[ "${actual_sha256}" != "${EXPECTED_SHA256}" ]]; then
+            echo "Artifact changed between verification and approval." >&2
+            exit 1
+          fi
+          actual_integrity="sha512-$(openssl dgst -sha512 -binary "${tarball}" | openssl base64 -A)"
+          if [[ "${actual_integrity}" != "${EXPECTED_INTEGRITY}" ]]; then
+            echo "Artifact integrity changed between verification and approval." >&2
+            exit 1
+          fi
+          if [[ "${{ needs.verify.outputs.sha256 }}" != "${EXPECTED_SHA256}" ]]; then
+            echo "Verification job output does not match the approved hash." >&2
+            exit 1
+          fi
+
+      - name: Reconfirm version is unpublished
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry_error="${RUNNER_TEMP}/npm-view-before-publish.err"
+          if npm view "maqam@${EXPECTED_VERSION}" version >/dev/null 2>"${registry_error}"; then
+            echo "maqam@${EXPECTED_VERSION} already exists; refusing to publish." >&2
+            exit 1
+          fi
+          if ! grep -Eq "E404|404 Not Found" "${registry_error}"; then
+            cat "${registry_error}" >&2
+            echo "Could not prove that maqam@${EXPECTED_VERSION} is unpublished." >&2
+            exit 1
+          fi
+
+      - name: Publish with npm Trusted Publishing
+        # Directory publishing records the checked-out commit as npm gitHead.
+        # Scripts are intentionally disabled: the verify job already ran them,
+        # and the OIDC-enabled job should execute no dependency lifecycle code.
+        run: npm publish --access public --ignore-scripts --provenance
+
+      - name: Verify npm registry identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_predicate="https://slsa.dev/provenance/v1"
+          verified="false"
+          published_version=""
+          published_git_head=""
+          published_integrity=""
+          published_predicate=""
+          for attempt in {1..36}; do
+            published_version="$(npm view "maqam@${EXPECTED_VERSION}" version 2>/dev/null || true)"
+            published_git_head="$(npm view "maqam@${EXPECTED_VERSION}" gitHead 2>/dev/null || true)"
+            published_integrity="$(npm view "maqam@${EXPECTED_VERSION}" dist.integrity 2>/dev/null || true)"
+            published_predicate="$(npm view "maqam@${EXPECTED_VERSION}" dist.attestations.provenance.predicateType 2>/dev/null || true)"
+            if [[ "${published_version}" == "${EXPECTED_VERSION}" \
+              && "${published_git_head}" == "${GITHUB_SHA}" \
+              && "${published_integrity}" == "${EXPECTED_INTEGRITY}" \
+              && "${published_predicate}" == "${expected_predicate}" ]]; then
+              verified="true"
+              break
+            fi
+            sleep 5
+          done
+          if [[ "${verified}" != "true" ]]; then
+            echo "Registry verification did not converge after three minutes." >&2
+            echo "version=${published_version:-missing}" >&2
+            echo "gitHead=${published_git_head:-missing}" >&2
+            echo "integrity=${published_integrity:-missing}" >&2
+            echo "provenance predicate=${published_predicate:-missing}" >&2
+            exit 1
+          fi
+
+          registry_dir="${RUNNER_TEMP}/registry-pack"
+          mkdir -p "${registry_dir}"
+          npm pack "maqam@${EXPECTED_VERSION}" --ignore-scripts --pack-destination "${registry_dir}" >/dev/null
+          registry_tarball="${registry_dir}/maqam-${EXPECTED_VERSION}.tgz"
+          registry_sha256="$(sha256sum "${registry_tarball}" | awk '{print $1}')"
+          if [[ "${registry_sha256}" != "${EXPECTED_SHA256}" ]]; then
+            echo "Downloaded registry tarball does not match the approved SHA-256." >&2
+            exit 1
+          fi
+
+          {
+            echo "## npm publication verified"
+            echo
+            echo "- Package: \`maqam@${published_version}\`"
+            echo "- Commit / gitHead: \`${published_git_head}\`"
+            echo "- SHA-256: \`${registry_sha256}\`"
+            echo "- Integrity: \`${published_integrity}\`"
+            echo "- Authentication: npm Trusted Publishing (OIDC)"
+            echo "- Provenance predicate: `${published_predicate}`"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Verify installed registry signatures and attestations
+        shell: bash
+        run: |
+          set -euo pipefail
+          consumer_dir="${RUNNER_TEMP}/registry-consumer"
+          mkdir -p "${consumer_dir}"
+          cd "${consumer_dir}"
+          npm init --yes >/dev/null
+          npm install "maqam@${EXPECTED_VERSION}" --ignore-scripts
+          npm audit signatures
