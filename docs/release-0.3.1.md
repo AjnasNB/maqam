@@ -32,7 +32,20 @@ Generate the MGES outputs and tarball outside the repository first. After a clea
 
 ## Candidate Evidence Snapshot
 
-Pending the required two-phase sequence. Merge the implementation first, measure that exact clean main commit, and add the raw performance and conformance outputs in a separate evidence-only pull request without changing fingerprinted source. Branch-only measurements are diagnostic and are not release evidence because squash merging does not preserve their measured commit in main ancestry. The public 0.3.0 evidence remains unchanged until the clean-main follow-up lands.
+The implementation phase merged as exact clean `main` commit `513a7a0bf3711e26ca0e82b4ae1a1663553cc345`. The preparatory clean install was verified with npm `12.0.1`; MGES records Node `24.15.0`, Windows x64, and an AMD Ryzen 7 4800H. This evidence-only follow-up changes raw results, documentation, and tests, not the implementation, benchmark programs, or lockfile files recorded by the source fingerprints.
+
+- [Performance candidate](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b.json): 30 fresh-process observations, `139.173 microseconds/call` governed median, `137.898-142.079` 95% bootstrap interval, `7.476%` governed coefficient of variation, and all four required project checks passed. SHA-256: `2a6b0238b7385629677a7952d2d5e4506b8f063be36ca538f5d965caec65715a`.
+- [Conformance candidate](../benchmarks/results/2026-07-19-mges-conformance-windows-node24-main-513a7a0b.json): `14/14` named deterministic fixtures passed. SHA-256: `3bd24204b519b82f3f52d40e609a33808e8667b4b1714a67464e4c5237a913df`.
+
+Three earlier clean-main performance runs remain in the repository as transparent `REVIEW` records. Their governed coefficients of variation exceeded the predeclared 10% stability gate; no observations, source files, or thresholds were removed or changed:
+
+| Run | Governed median | Governed CV | Status | SHA-256 |
+| --- | ---: | ---: | --- | --- |
+| [Review attempt 1](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt1.json) | 158.390 microseconds | 14.223% | `REVIEW` | `09c6e3d34581529bd57d3c9a837b8afdcee30c396f13ec84d1202156b6f5d843` |
+| [Review attempt 2](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt2.json) | 158.644 microseconds | 14.860% | `REVIEW` | `f8a0af8e0955cc5ddb62e18f33605d1711f2b42524cbb5b8ae2ca7f6389c2a31` |
+| [Review attempt 3](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt3.json) | 160.523 microseconds | 12.886% | `REVIEW` | `1ebafcc6c74bcc31cd40a545802aa06e6c3d7b07c997db1c704cecbc79660950` |
+
+The passing fourth run is the candidate, not proof of global performance. MGES is a local in-process regression profile; it excludes model, network, storage, human-review, and concurrency latency and is not a competitor benchmark, SLA, security score, compliance result, or certification. The public 0.3.0 evidence remains unchanged until 0.3.1 is actually published and independently verified.
 
 ## Publication Boundary
 
