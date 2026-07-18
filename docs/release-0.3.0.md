@@ -73,10 +73,10 @@ Do not copy the historical 0.2.4 benchmark result into this release as if it mea
 
 Because GitHub squash merging rewrites pull-request commits, final 0.3.0 benchmark evidence must be generated after the implementation PR lands on `main`. Submit the resulting raw artifacts and claim updates in a second evidence-only PR. Its measured `main` commit must remain an ancestor of the final release commit and the evidence PR must not change fingerprinted source.
 
-Provisional MGES v1.1.0 implementation-PR evidence was generated from clean source commit `280e43cde71cdd6128a5c94202dd32abf6e6cdb8`. It keeps this PR testable but must be replaced by a post-squash main run before release:
+Final MGES v1.1.0 release evidence was generated from exact clean post-squash `main` commit `545fe8bbc40f21cec0f9ec2ae3954f3e75783f22`. The evidence-only PR does not alter benchmark or implementation files in the recorded source fingerprint:
 
-- [candidate performance JSON](../benchmarks/results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json): 30 fresh-process observations, `146.842 microseconds/call` governed median, `145.085-153.521` 95% bootstrap interval, `9.430%` governed CV, and all four required criteria-version-2 checks passed;
-- [candidate conformance JSON](../benchmarks/results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json): `14/14` named deterministic fixtures passed, including fatal source-policy denial and normalized ordered fallback.
+- [release performance JSON](../benchmarks/results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json): 30 fresh-process observations, `140.816 microseconds/call` governed median, `138.983-142.820` 95% bootstrap interval, `5.020%` governed CV, and all four required criteria-version-2 checks passed;
+- [release conformance JSON](../benchmarks/results/2026-07-18-mges-conformance-windows-node24-main-545fe8bb.json): `14/14` named deterministic fixtures passed, including fatal source-policy denial and normalized ordered fallback.
 
 These are local project regression results, not a globally standardized benchmark, security score, certification, competitor ranking, capacity test, or SLA.
 

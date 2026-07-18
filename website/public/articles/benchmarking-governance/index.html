@@ -80,20 +80,20 @@ round 3: direct   -> governed
 operations per second at median = 1,000,000,000 / median nanoseconds</code></pre></div>
       <p>The derived rate is a sequential local rate, not a concurrency or capacity measurement. MGES reports paired absolute added time and avoids promoting a governed/direct ratio because the direct baseline intentionally does almost no work.</p>
 
-      <h2>The clean MGES v1.1 implementation candidate</h2>
+      <h2>The clean MGES v1.1 release evidence</h2>
       <div class="table-wrap" tabindex="0" role="region" aria-label="Clean MGES v1.1 candidate result"><table><caption class="sr-only">Environment, observation count, timing result, and publication checks for the clean MGES v1.1 candidate run</caption><thead><tr><th scope="col">Field</th><th scope="col">Recorded result</th></tr></thead><tbody>
         <tr><th scope="row">Runtime and host</th><td>Node 24.15.0, Windows x64, AMD Ryzen 7 4800H</td></tr>
         <tr><th scope="row">Observations</th><td>30 fresh processes per variant</td></tr>
-        <tr><th scope="row">Governed median</th><td>146.842 microseconds per call</td></tr>
-        <tr><th scope="row">95% bootstrap interval</th><td>145.085 to 153.521 microseconds per call</td></tr>
-        <tr><th scope="row">Sequential rate at median</th><td>6,810.042 calls per second</td></tr>
-        <tr><th scope="row">Paired added median</th><td>146.767 microseconds per call</td></tr>
-        <tr><th scope="row">Governed coefficient of variation</th><td>9.430%</td></tr>
-        <tr><th scope="row">Project publication checks</th><td>PASS, 4 of 4 required; optional direct-CV diagnostic was 12.730%</td></tr>
+        <tr><th scope="row">Governed median</th><td>140.816 microseconds per call</td></tr>
+        <tr><th scope="row">95% bootstrap interval</th><td>138.983 to 142.820 microseconds per call</td></tr>
+        <tr><th scope="row">Sequential rate at median</th><td>7,101.477 calls per second</td></tr>
+        <tr><th scope="row">Paired added median</th><td>140.739 microseconds per call</td></tr>
+        <tr><th scope="row">Governed coefficient of variation</th><td>5.020%</td></tr>
+        <tr><th scope="row">Project publication checks</th><td>PASS, 4 of 4 required; optional direct-CV diagnostic was 9.888% and also passed</td></tr>
       </tbody></table></div>
       <p>Criteria version 2 requires 30 observations, governed variation no greater than 10%, and median timed batches of at least 100 ms for both variants. Direct variation remains visible as a diagnostic because the near-zero baseline is dominated by cross-process CPU-frequency noise. These are suite stability gates, not an industry acceptance rule.</p>
-      <p>The clean candidate artifact records commit <code>280e43cde71cdd6128a5c94202dd32abf6e6cdb8</code>, <code>workingTreeDirty: false</code>, and SHA-256 fingerprints for benchmark and implementation files. It requires a post-squash main rerun before release. A changed fingerprint requires another run.</p>
-      <div class="button-row"><a class="button button-primary" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json">Open candidate performance JSON</a><a class="button" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json">Open candidate conformance JSON</a></div>
+      <p>The release artifact records clean post-squash commit <code>545fe8bbc40f21cec0f9ec2ae3954f3e75783f22</code>, <code>workingTreeDirty: false</code>, and SHA-256 fingerprints for benchmark and implementation files. This evidence-only release change does not alter those files. A changed fingerprint requires another run.</p>
+      <div class="button-row"><a class="button button-primary" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json">Open release performance JSON</a><a class="button" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-conformance-windows-node24-main-545fe8bb.json">Open release conformance JSON</a></div>
 
       <h2>Conformance is not latency</h2>
       <p>The governance-boundary profile executes 14 deterministic fixtures covering deny-by-default construction, denial before dispatch, fail-closed policy evaluation, safe input handling, exact approval scope, replay rejection, call limits, detached handler input, evidence isolation, atomic multi-approval consumption, attribution, redacted denial traces, fatal source denial, and normalized ordered fallback.</p>
@@ -120,10 +120,10 @@ operations per second at median = 1,000,000,000 / median nanoseconds</code></pre
       <p>Signed artifacts indexed by suite version, source fingerprint, environment, and profile could separate one machine's observation from independently reproduced results.</p>
 
       <h2>How to quote the result responsibly</h2>
-      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-performance">Copy</button><pre><code id="quote-performance">Provisional result: MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H:
-146.842 microseconds median per governed call (95% bootstrap interval for the
-sample median: 145.085 to 153.521; 30 fresh-process observations; governed CV 9.430%).
-Implementation-PR candidate requiring a post-squash main rerun.
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-performance">Copy</button><pre><code id="quote-performance">MGES v1.1.0 local-call release profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H:
+140.816 microseconds median per governed call (95% bootstrap interval for the
+sample median: 138.983 to 142.820; 30 fresh-process observations; governed CV 5.020%).
+Measured from clean post-squash main commit 545fe8bb.
 Local in-process component benchmark; excludes model, network, storage, and
 concurrency; not a competitor benchmark or SLA.</code></pre></div>
       <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-conformance">Copy</button><pre><code id="quote-conformance">MGES v1.1.0 governance-boundary profile: 14 of 14 project-defined fixtures passed
