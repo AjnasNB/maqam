@@ -272,13 +272,15 @@ test("caption parsing is bounded and prefers manual captions over automatic capt
     }),
     captionReader: async ({ url }) => {
       assert.equal(url, automaticUrl);
-      return "WEBVTT\n\n00:00:02.000 --> 00:00:03.000\nAutomatic caption.\n";
+      return "WEBVTT\n\n00:00:02.000 --> 00:00:03.000\n<c.green>Automatic</c> caption. <script>alert(1)\n";
     }
   });
   const [document] = await adapter.read({ url: VIDEO_URL }, {});
   assert.equal(document.metadata.transcript.kind, "automatic");
   assert.equal(document.metadata.transcript.format, "vtt");
   assert.match(document.text, /\[00:02\] Automatic caption\./);
+  assert.doesNotMatch(document.text, /<|script/i);
+  assert.match(document.text, /alert\(1\)/);
 
   const oversized = createYtDlpYouTubeSourceAdapter({
     maxCaptionBytes: 1_024,

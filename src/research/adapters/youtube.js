@@ -517,6 +517,24 @@ function cueText(value) {
     .trim();
 }
 
+function stripVttMarkup(value) {
+  const source = String(value || "");
+  let result = "";
+  let insideTag = false;
+  for (const character of source) {
+    if (insideTag) {
+      if (character === ">") insideTag = false;
+      continue;
+    }
+    if (character === "<") {
+      insideTag = true;
+      continue;
+    }
+    result += character;
+  }
+  return result;
+}
+
 function json3Transcript(body, maximumCharacters) {
   let value;
   try {
@@ -557,7 +575,7 @@ function vttTranscript(body, maximumCharacters) {
     const lines = block.split(/\r?\n/).filter(Boolean);
     const timing = lines.findIndex((line) => line.includes(" --> "));
     if (timing === -1) continue;
-    const text = cueText(lines.slice(timing + 1).join(" ").replace(/<[^>]+>/g, ""));
+    const text = cueText(stripVttMarkup(lines.slice(timing + 1).join(" ")));
     if (!text || text === cues.at(-1)?.text) continue;
     const match = lines[timing].match(/(?:(\d+):)?(\d+):(\d+(?:\.\d+)?)\s+-->/);
     const startMs = match
