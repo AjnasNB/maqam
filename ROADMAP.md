@@ -1,6 +1,6 @@
 # Maqam Public Roadmap
 
-Last updated: 2026-07-18.
+Last updated: 2026-07-19.
 
 This roadmap communicates direction, not delivery dates. Items move only after their design, security boundary, compatibility impact, and maintenance cost are understood. Released behavior is documented in the README, changelog, and versioned package—not promised by this file.
 
@@ -28,7 +28,7 @@ Maqam will integrate with orchestration, model, browser, crawl, and observabilit
 - MGES v1 project-defined performance and governance-boundary profiles with raw observations, source fingerprints, uncertainty reporting, stability gates, and named conformance evidence.
 - A typed host-supplied adapter descriptor, explicit `ToolGateway` registration, and fixture conformance probe for function, SDK, HTTP, MCP-style, and custom transports.
 
-## Release Candidate: 0.3.0 Governed Sources
+## Shipped: 0.3.0 Governed Sources
 
 - Ordered `ResearchSourceRegistry` backends with explicit preferences and a normalized, frozen `ResearchDocument` contract.
 - Governed routing through an adapter's registered `ToolGateway` name, with a deliberately separate `routeUngoverned()` escape hatch.
@@ -38,13 +38,13 @@ Maqam will integrate with orchestration, model, browser, crawl, and observabilit
 - Offline bounded RSS 2.0/Atom parsing plus host-supplied reader factories; no implicit network request or login behavior.
 - Feed-aware HTTP crawling and safer CLI budgets, exact repeatable cross-origin permission, detailed failures, statistics, and fail-on-error behavior.
 
-Release exit criteria:
+The public [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) artifact and matching [`v0.3.0` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.0) completed these release gates:
 
 - public exports and declarations compile in a clean consumer;
 - allow, deny-with-zero-dispatch, fatal-no-fallback, availability-fallback, authentication-opt-in, doctor, RSS/Atom, feed-crawl, and CLI fixtures pass on Node.js 20, 22, and 24;
 - package contents, provenance, license audit, migration notes, and source-boundary documentation match the shipped artifact;
 - a fresh MGES run is attached when fingerprinted inputs changed; and
-- the exact tarball receives maintainer approval and registry verification before `v0.3.0` is tagged.
+- the exact tarball received maintainer approval and registry verification before `v0.3.0` was tagged.
 
 ## Now: Make Adoption Verifiable
 

@@ -2,10 +2,11 @@
 
 Use this checklist before publishing any Maqam release.
 
-## Release Candidate
+## Last Completed Release
 
 - Package: `maqam`
 - Version: `0.3.0`
+- State: published on npm with matching `v0.3.0` GitHub release
 - License: MIT
 - Registry target: npm public registry
 - Publish command: `npm publish --access public --ignore-scripts --provenance`

@@ -7,7 +7,7 @@ Maqam 0.3 adds governed source routing, normalized research documents, offline R
 - Require Node.js 20.18.1 or later.
 - Read the [Governed Sources guide](governed-sources.md).
 - Run the full test and clean-consumer checks against your adapters.
-- Keep `maqam@0.2.4` pinned until the reviewed 0.3.0 artifact is published and verified.
+- Verify the public [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) artifact, provenance, integrity, registry `gitHead`, and matching [`v0.3.0` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.0), then update the pinned dependency from 0.2.4.
 
 ## Crawler CLI: Replace `--all-origins`
 

@@ -1,10 +1,19 @@
 # Maqam 0.3.0 Release Record
 
-**Status:** exact-artifact release record. This file describes the `0.3.0` surface and required evidence; verify public availability from the npm registry, provenance, integrity, Git tag, and GitHub release rather than trusting source metadata alone.
+**Status:** published and registry-verified. [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) is public through npm Trusted Publishing and has a matching [`v0.3.0` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.0). Source metadata alone still does not identify the current npm dist-tag; verify the live registry and latest GitHub release before installation.
 
 ## Release Intent
 
 Maqam 0.3.0 extends the governed execution boundary with ordered research-source routing and feed-aware collection while preserving exact policy and approval semantics.
+
+### Published Artifact
+
+- npm version: `0.3.0` under the `latest` dist-tag when verified on 2026-07-19;
+- registry `gitHead`: `98c2d97dc31495ec30a0b44c5016fd76316c2074`;
+- npm integrity: `sha512-0fV354AKT6JtVMYzWcMCfjUQpJHIjaNF+bGjxq8TzcuElNVQsx3Cp5Yc062RgNJ5zSDVgUJSn1hzn04hT3jWuQ==`;
+- registry tarball SHA-256: `eb3e4a29f94fdeef9b3bcc494661e3e5ce48affb241dcda7f8a9adcf0704308b`;
+- trusted-publishing workflow: [run 29652119000](https://github.com/AjnasNB/maqam/actions/runs/29652119000); and
+- GitHub release: `v0.3.0`, published on 2026-07-18 with the reviewed tarball, manifest, checksums, and MGES artifacts.
 
 ### Added
 
@@ -39,9 +48,9 @@ On 2026-07-18, the local console completed an anonymous hosted Exa search with f
 
 The console reported one adapter attempt and one gateway call for each route, and the browser console had no warnings or errors. No developer API key, browser cookie, account login, media download, plugin, or remote component was used. This is dated compatibility evidence only: hosted availability, anonymous allowance, public captions, and upstream extraction behavior can change, so deterministic transport/process fixtures and the exact release tests remain the acceptance gate.
 
-## Required Verification
+## Release Verification
 
-The release owner must attach results from the final clean commit for:
+The exact-artifact publication gate required results from the final clean commit for:
 
 ```bash
 npm test
@@ -80,9 +89,9 @@ Final MGES v1.1.0 release evidence was generated from exact clean post-squash `m
 
 These are local project regression results, not a globally standardized benchmark, security score, certification, competitor ranking, capacity test, or SLA.
 
-## Exact Artifact Approval
+## Exact Artifact Approval Record
 
-Before the trusted npm workflow can publish, the maintainer approval must identify:
+The protected trusted-publishing workflow required maintainer approval identifying:
 
 - package `maqam` and version `0.3.0`;
 - registry `https://registry.npmjs.org/`;
@@ -93,18 +102,18 @@ Before the trusted npm workflow can publish, the maintainer approval must identi
 - clean tree and required verification results; and
 - the `publish:npm` action.
 
-The approved artifact must be rebuilt and matched in the protected GitHub environment before trusted OIDC publication.
+The approved artifact was rebuilt and matched in the protected GitHub environment before trusted OIDC publication.
 
 ## Post-Publish Verification
 
-After publication, verify before tagging or announcing:
+The post-publication verification used:
 
 ```bash
 npm view maqam@0.3.0 version dist.integrity gitHead _resolved _from
 npx -y maqam@0.3.0 demo approval
 ```
 
-Require the registry `gitHead` and integrity to match the approved evidence, and confirm `_resolved`/`_from` contain no local path. Then create annotated tag `v0.3.0` and a GitHub release that links to the npm package and exact artifacts.
+The registry `gitHead` and integrity match the approved evidence, and the matching `v0.3.0` tag and GitHub release link the npm package and exact artifacts. Re-run the commands above before installation because live registry metadata can change after this version-specific record was written.
 
 ## Historical Evidence
 

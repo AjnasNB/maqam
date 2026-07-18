@@ -32,7 +32,7 @@
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
         <nav aria-label="Maqam guide">
           <p class="docs-nav-title">Maqam</p>
-          <a href="#start-here">Start here</a><a href="#install">0.3.0 candidate install gate</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#source-routing">Source routing</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#adapter-apis">0.3.0 APIs</a><a href="#boundary">Boundary</a>
+          <a href="#start-here">Start here</a><a href="#install">Install 0.3.0</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#source-routing">Source routing</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#adapter-apis">0.3.0 APIs</a><a href="#boundary">Boundary</a>
         </nav>
         <nav aria-label="Other documentation">
           <p class="docs-nav-title">More</p>
@@ -42,7 +42,7 @@
     </aside>
 
     <article class="docs-content">
-      <h1>Maqam 0.3.0 candidate quickstart</h1>
+      <h1>Maqam 0.3.0 quickstart</h1>
       <p class="lede">Run the exact-approval proof, register a governed tool, route normalized research sources, and use the feed-aware bounded crawler.</p>
       <h2 id="start-here">Start here: the product in plain English</h2>
       <dl class="definition-grid">
@@ -61,15 +61,15 @@
         Node.js 20.18.1 or newer. The built-in proof needs no model key, hosted account, browser, database, or external side effect.
       </div>
       <div class="callout">
-        <strong>Candidate package state</strong>
-        Version 0.3.0 is a source candidate. Do not run the install commands below until the public npm version, provenance, integrity, and matching GitHub tag and release are verified.
+        <strong>Public package state</strong>
+        Version 0.3.0 is public on npm through Trusted Publishing with a matching GitHub tag and release. Verify the live version, provenance, integrity, and registry <code>gitHead</code> before installation because the npm dist-tag can advance.
       </div>
 
-      <h2 id="install">Install after 0.3.0 registry verification</h2>
-      <p>After the registry and tagged source match, use the pinned command-line proof without modifying a project or pin the package in your dependency manifest.</p>
+      <h2 id="install">Install Maqam 0.3.0</h2>
+      <p>After checking that the live registry metadata still matches the tagged source, use the pinned command-line proof without modifying a project or pin the package in your dependency manifest.</p>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#install-code">Copy</button>
-        <pre><code id="install-code"># Run only after npm, provenance, integrity, and tag verification
+        <pre><code id="install-code"># Verify npm, provenance, integrity, and the matching tag first
 # One-off proof from the verified release
 npx -y maqam@0.3.0 demo approval
 
@@ -247,7 +247,7 @@ console.log(result.stats);</code></pre>
       <p>When crawling is the main workload, install the separate <a href="https://cockroachcrawler.com/docs/">Cockroach Crawler package</a>. Its <a href="https://cockroachcrawler.com/docs/agents/">Maqam integration guide</a> shows how to keep crawler network policy inside the crawler while routing the registered tool call through Maqam policy, traces, approvals, and evidence.</p>
       <section class="docs-media" data-video-block>
         <h3>Watch the governed research flow</h3>
-        <p>The 55-second demo shows the bounded HTTP path, network limits, recorded source material, citations, and the handoff back through the governed application boundary.</p>
+        <p>This historical 0.2.4 proof video shows the bounded HTTP path, network limits, recorded source material, citations, and the handoff back through the governed application boundary. It remains labeled with its original artifact identity.</p>
         <p id="crawler-doc-video-status" data-video-status>Loading video metadata.</p>
         <figure class="media-frame">
           <video data-proof-video controls preload="metadata" aria-describedby="crawler-doc-video-status" poster="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research-poster.png">
@@ -263,7 +263,7 @@ console.log(result.stats);</code></pre>
       <h2 id="console">Run the local console</h2>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#console-code">Copy</button>
-        <pre><code id="console-code"># Run only after registry verification
+        <pre><code id="console-code"># Verify the live registry record first
 npx -y maqam@0.3.0
 # Open http://127.0.0.1:8787</code></pre>
       </div>
@@ -271,10 +271,10 @@ npx -y maqam@0.3.0
 
       <h2 id="adapter-apis">0.3.0 integration APIs</h2>
       <div class="callout">
-        <strong>Prepared in the 0.3.0 source candidate</strong>
-        The 0.2 tool-adapter APIs remain available. The 0.3.0 candidate adds <code>ResearchSourceRegistry</code>, <code>defineResearchSourceAdapter()</code>, normalized research documents, bounded host-defined source checks, and RSS or Atom helpers.
+        <strong>Published in Maqam 0.3.0</strong>
+        The 0.2 tool-adapter APIs remain available. Version 0.3.0 adds <code>ResearchSourceRegistry</code>, <code>defineResearchSourceAdapter()</code>, normalized research documents, bounded host-defined source checks, and RSS or Atom helpers.
       </div>
-      <p>Use the <a href="/docs/integrations/">integration guide</a> for tool adapters and the <a href="/docs/sources/">source guide</a> for research backends. Production projects may pin <code>maqam@0.3.0</code> only after the registry artifact and matching source release are verified.</p>
+      <p>Use the <a href="/docs/integrations/">integration guide</a> for tool adapters and the <a href="/docs/sources/">source guide</a> for research backends. Production projects can pin the published <code>maqam@0.3.0</code> artifact after verifying its registry metadata and matching source release.</p>
 
       <h2 id="boundary">Know the boundary</h2>
       <dl class="definition-grid">

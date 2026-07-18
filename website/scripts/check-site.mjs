@@ -105,6 +105,10 @@ for (const file of htmlFiles) {
     failures.push(`${label}: contains stale pre-0.2.4 publication wording`);
   }
 
+  if (/Maqam 0\.3\.0 candidate|v0\.3\.0 release candidate|0\.3\.0 source candidate|0\.3\.0 candidate API line|0\.3\.0 candidate install gate/i.test(source)) {
+    failures.push(`${label}: contains stale pre-publication 0.3.0 wording`);
+  }
+
   const tableCount = (source.match(/<table\b/gi) || []).length;
   const captionCount = (source.match(/<caption\b/gi) || []).length;
   if (tableCount !== captionCount) {
@@ -123,9 +127,10 @@ for (const file of htmlFiles) {
   }
 
   if (label === "index.html") {
-    requireMatch(/v0\.3\.0 release candidate/i, "homepage must identify 0.3.0 as a release candidate");
-    requireMatch(/npm artifact, provenance, and tag verification are still required/i, "homepage must name the remaining release verification gate");
-    requireMatch(/Run only after npm, provenance, and tag verification[\s\S]{0,120}maqam@0\.3\.0/i, "homepage install command must be gated by registry verification");
+    requireMatch(/v0\.3\.0 public release/i, "homepage must identify 0.3.0 as a public release");
+    requireMatch(/npm Trusted Publishing and the matching GitHub release are verified/i, "homepage must identify the completed release verification");
+    requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.0/i, "homepage install command must retain a live-record verification reminder");
+    requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
     requireMatch(/Maqam is a security turnstile for agent actions/i, "homepage must include the plain-English Maqam definition");
   }
 
@@ -146,12 +151,13 @@ for (const file of htmlFiles) {
   if (label === path.join("releases", "v0.3.0", "index.html")) {
     requireMatch(/Maqam 0\.3\.0/, "0.3.0 release page must identify the release");
     requireMatch(/does not claim equivalent channel coverage/i, "0.3.0 release must keep the Agent Reach comparison narrow");
-    requireMatch(/does not invent an integrity digest or source commit/i, "0.3.0 release must not fabricate unpublished artifact identity");
+    requireMatch(/98c2d97dc31495ec30a0b44c5016fd76316c2074/i, "0.3.0 release must identify the verified registry gitHead");
+    requireMatch(/sha512-0fV354AKT6JtVMYzWcMCfjUQpJHIjaNF\+bGjxq8TzcuElNVQsx3Cp5Yc062RgNJ5zSDVgUJSn1hzn04hT3jWuQ==/i, "0.3.0 release must identify the verified npm integrity");
   }
 
   if (label === path.join("docs", "productloop", "index.html")) {
     requireMatch(/productloop-os@0\.2\.1/, "ProductLoop install command must pin productloop-os@0.2.1");
-    requireMatch(/records intended package versions, not a blanket live-registry guarantee/i, "ProductLoop atlas must avoid a blanket npm publication claim");
+    requireMatch(/records release versions, not a permanent live-registry guarantee/i, "ProductLoop atlas must avoid a blanket npm publication claim");
     for (const [packageName, version] of [
       ["productloop-os", "0.2.1"],
       ["ajnas-runtime", "0.2.1"],
@@ -168,7 +174,8 @@ for (const file of htmlFiles) {
         `${packageName} must show public version ${version}`
       );
     }
-    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.0 candidate<\/td>/, "ProductLoop atlas must show Maqam 0.3.0 as a candidate");
+    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.0<\/td>/, "ProductLoop atlas must show public Maqam 0.3.0");
+    requireMatch(/historical 0\.2\.4 proof video/i, "ProductLoop atlas must label its 0.2.4 video as historical");
   }
 
   if (label === path.join("articles", "exact-agent-approvals", "index.html")) {
