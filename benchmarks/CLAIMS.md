@@ -27,21 +27,21 @@ Every conformance claim must include:
 
 ## Approved compact performance wording
 
-> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 124.303 microseconds median per governed call (95% bootstrap interval for the sample median: 123.712-125.695; 30 fresh-process observations; governed CV 2.010%; required project checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. [Raw JSON](results/2026-07-18-mges-performance-windows-node24.json).
+> Provisional result: MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 146.842 microseconds median per governed call (95% bootstrap interval for the sample median: 145.085-153.521; 30 fresh-process observations; governed CV 9.430%; required project checks PASS). Implementation-PR candidate that requires a post-squash main rerun. Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. [Raw JSON](results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json).
 
-The current raw artifact records clean source commit `bceaebfa2a4059bc63acd23eccf4fafee794a295`. Prefix a future result with **“Provisional result:”** whenever its artifact reports `workingTreeDirty: true` or it has not passed the declared required project checks.
+The current candidate raw artifact records clean source commit `280e43cde71cdd6128a5c94202dd32abf6e6cdb8`. Prefix a result with **“Provisional result:”** whenever its artifact reports `workingTreeDirty: true`, has not passed the declared required project checks, or does not measure an ancestor of the final release commit.
 
 ## Approved compact conformance wording
 
-> MGES v1.1.0 governance-boundary profile: 14/14 project-defined fixtures passed on the recorded source fingerprint. Regression evidence only—not a security score, penetration test, formal proof, compliance result or certification. [Raw JSON](results/2026-07-18-mges-conformance-windows-node24.json).
+> Provisional result: MGES v1.1.0 governance-boundary profile: 14/14 project-defined fixtures passed on the recorded source fingerprint. Implementation-PR candidate requiring a post-squash main rerun. Regression evidence only—not a security score, penetration test, formal proof, compliance result or certification. [Raw JSON](results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json).
 
 ## Video card
 
 Use no more than these three levels:
 
 ```text
-124.303 microseconds/call median
-123.712-125.695 microseconds · 95% bootstrap interval · 30 observations
+146.842 microseconds/call median
+145.085-153.521 microseconds · 95% bootstrap interval · 30 observations
 Local Node 24/Windows component fixture; no model/network/storage; not a competitor benchmark or SLA
 ```
 

@@ -102,26 +102,28 @@ The direct-path coefficient of variation remains a published diagnostic, but it 
 
 These thresholds are MGES stability rules. They are not universal acceptance criteria. A pass does not control CPU affinity, CPU frequency, virtualization, thermal state, or background load; each artifact discloses those uncontrolled conditions. Do not remove outliers or silently change thresholds to obtain a pass.
 
-### Current clean-source baseline
+### Current implementation-PR candidate
 
-[`2026-07-18-mges-performance-windows-node24.json`](results/2026-07-18-mges-performance-windows-node24.json) records a clean-source passing MGES v1.1.0 run:
+[`2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json`](results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json) records a clean-source passing MGES v1.1.0 implementation-PR run:
 
 | Field | Observed value |
 |---|---:|
 | Environment | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
-| Governed median | **124.303 microseconds/call** |
-| 95% bootstrap interval for the sample median | **123.712-125.695 microseconds/call** |
-| Sequential rate at the median | **8,044.843 calls/second** |
-| Paired added median | **124.245 microseconds/call** |
-| Governed coefficient of variation | **2.010%** |
-| Direct coefficient of variation (diagnostic) | **3.520%** |
-| MGES project publication checks | **PASS (4/4 required; direct diagnostic also passed)** |
+| Governed median | **146.842 microseconds/call** |
+| 95% bootstrap interval for the sample median | **145.085-153.521 microseconds/call** |
+| Sequential rate at the median | **6,810.042 calls/second** |
+| Paired added median | **146.767 microseconds/call** |
+| Governed coefficient of variation | **9.430%** |
+| Direct coefficient of variation (diagnostic) | **12.730%** |
+| MGES project publication checks | **PASS (4/4 required; optional direct diagnostic did not meet its 10% reference threshold)** |
 
-The artifact records clean source commit `bceaebfa2a4059bc63acd23eccf4fafee794a295` with `workingTreeDirty: false`. It includes SHA-256 fingerprints for every benchmark and implementation file in the measured path. The follow-up release commit may add results, documentation, and media, but any change to a fingerprinted source requires another run.
+The artifact records clean source commit `280e43cde71cdd6128a5c94202dd32abf6e6cdb8` with `workingTreeDirty: false`. It includes SHA-256 fingerprints for every benchmark and implementation file in the measured path. It is provisional because squash merging will rewrite the implementation commit; final release evidence must be rerun from the resulting main commit. Any change to a fingerprinted source requires another run.
 
 This repository squash-merges pull requests, so final release evidence uses two PR phases. First merge the implementation. Then measure that resulting clean `main` commit and submit only artifacts, claims, documentation, and the artifact-selection test in a second PR. The measured commit remains an ancestor of the final release commit; a candidate artifact created before the implementation squash is not final release evidence even when its file fingerprints match.
 
 The earlier [`2026-07-16-mges-performance-windows-node24.json`](results/2026-07-16-mges-performance-windows-node24.json) is retained as the 0.2.4 baseline, and [`2026-07-16-windows-node24.json`](results/2026-07-16-windows-node24.json) remains a legacy seven-sample result. Neither is relabeled as 0.3.0 evidence.
+
+Two clean runs from superseded source commit `c58cb850daeffa24f5f088a97689f5c75c2db69b` are retained as transparent `REVIEW` records: [attempt 1](results/2026-07-18-mges-performance-windows-node24-governed-public-research-c58cb850.json) observed `19.122%` governed CV, and [attempt 2](results/2026-07-18-mges-performance-windows-node24-governed-public-research-c58cb850-attempt2.json) observed `25.691%`. No observations or thresholds were removed. The subsequent source change omitted an unnecessary empty `networkOrigins` metadata field for local-only tools; because that changed a fingerprinted implementation file, both [performance](results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json) and [conformance](results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json) were rerun from the new clean commit.
 
 ### What the number excludes
 
@@ -137,7 +139,7 @@ Run:
 npm run benchmark:mges:conformance
 ```
 
-The current [`2026-07-18-mges-conformance-windows-node24.json`](results/2026-07-18-mges-conformance-windows-node24.json) records **14/14 passing project-defined fixtures**:
+The current candidate [`2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json`](results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json) records **14/14 passing project-defined fixtures**:
 
 | ID | Invariant exercised |
 |---|---|
@@ -174,11 +176,11 @@ This is a relevance crosswalk only. It does not establish OWASP compliance or en
 
 ### Compact, acceptable form
 
-> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 124.303 microseconds median per governed call (95% bootstrap interval for the sample median: 123.712-125.695; 30 fresh-process observations; governed CV 2.010%; required checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. Raw JSON: [artifact](results/2026-07-18-mges-performance-windows-node24.json).
+> Provisional result: MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 146.842 microseconds median per governed call (95% bootstrap interval for the sample median: 145.085-153.521; 30 fresh-process observations; governed CV 9.430%; required checks PASS). Implementation-PR candidate that requires a post-squash main rerun. Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. Raw JSON: [artifact](results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json).
 
 For conformance:
 
-> MGES v1.1.0 governance-boundary profile: 14/14 project-defined fixtures passed on the recorded source fingerprint. This is regression evidence, not a security score, penetration test or certification. Raw JSON: [artifact](results/2026-07-18-mges-conformance-windows-node24.json).
+> Provisional result: MGES v1.1.0 governance-boundary profile: 14/14 project-defined fixtures passed on the recorded source fingerprint. Implementation-PR candidate requiring a post-squash main rerun. This is regression evidence, not a security score, penetration test or certification. Raw JSON: [artifact](results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json).
 
 ### Do not publish
 

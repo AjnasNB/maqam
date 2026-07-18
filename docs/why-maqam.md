@@ -141,7 +141,7 @@ Neither result is a globally accepted benchmark, security certification, penetra
 
 ## What The 0.3.0 Candidate Evaluation Establishes
 
-MGES v1.1.0 reran from clean commit `bceaebfa2a4059bc63acd23eccf4fafee794a295`. Its Windows/Node 24 local-call profile records a `124.303 microseconds/call` governed median, a `123.712-125.695` 95% bootstrap interval for the sample median, and `2.010%` governed CV across 30 fresh-process observations. All four required criteria-version-2 stability checks passed; the published direct-path CV diagnostic also passed.
+MGES v1.1.0 reran from clean implementation-PR commit `280e43cde71cdd6128a5c94202dd32abf6e6cdb8`. Its Windows/Node 24 local-call profile records a `146.842 microseconds/call` governed median, a `145.085-153.521` 95% bootstrap interval for the sample median, and `9.430%` governed CV across 30 fresh-process observations. All four required criteria-version-2 stability checks passed; the optional direct-path CV diagnostic did not meet its 10% reference threshold and is not a publication requirement because the near-zero direct baseline is frequency-noise dominated.
 
 The conformance profile passes `14/14` named fixtures. The two new cases establish only that a source policy denial stops all registered backends before dispatch, and that ordinary unavailability can fall back in deterministic order while binding the normalized document to the selected adapter. They do not establish provider correctness, network isolation, factual accuracy, or universal security.
 
@@ -167,6 +167,6 @@ npm install maqam
 - Provider-reported usage and activity can be observed after execution; not every provider exposes a preventive hard limit for every measure.
 - Calls that bypass registered adapters are outside Maqam's control.
 - Passing tests is evidence for covered cases, not proof that the software has no defects.
-- The current MGES artifacts record clean source commit `bceaebfa2a4059bc63acd23eccf4fafee794a295`; rerun them if any fingerprinted implementation or benchmark source changes.
+- The current candidate MGES artifacts record clean source commit `280e43cde71cdd6128a5c94202dd32abf6e6cdb8`; rerun from the post-squash main commit before release and rerun again if any fingerprinted implementation or benchmark source changes.
 
 Those limits are part of the product boundary, not footnotes to hide. The [public roadmap](../ROADMAP.md) identifies which ones Maqam intends to address next.
