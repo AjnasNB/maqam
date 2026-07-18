@@ -1,6 +1,6 @@
 {
   "name": "maqam",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Provider-neutral agent governance with exact approvals, evidence, governed web search, YouTube metadata and captions, source routing, and secure research.",
   "license": "MIT",
   "author": "Ajnas NB",
@@ -46,6 +46,7 @@
     "docs/provenance-and-licenses.md",
     "docs/release-0.2.4-candidate.md",
     "docs/release-0.3.0.md",
+    "docs/release-0.3.1.md",
     "docs/release-checklist.md",
     "docs/usage.md",
     "examples/",

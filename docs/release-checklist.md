@@ -7,6 +7,12 @@ Use this checklist before publishing any Maqam release.
 - Package: `maqam`
 - Version: `0.3.0`
 - State: published on npm with matching `v0.3.0` GitHub release
+
+## Candidate Target
+
+- Package: `maqam`
+- Version: `0.3.1`
+- State: unpublished candidate; current public release remains 0.3.0
 - License: MIT
 - Registry target: npm public registry
 - Publish command: `npm publish --access public --ignore-scripts --provenance`
@@ -40,7 +46,7 @@ Expected result:
 - Only the console HTML, JavaScript, CSS, and SVG logo ship from `app/`; large brand/presentation PNGs remain repository-only.
 - `npm audit --omit=dev` reports no known production dependency vulnerabilities.
 - Governed-source allow/deny, fatal-no-fallback, availability-fallback, authenticated opt-in, doctor, normalized-document, RSS/Atom, feed-crawl, and crawler-CLI fixtures pass on Node.js 20, 22, and 24.
-- MGES was rerun because the lockfile and governance-path source fingerprints changed. Historical 0.2.4 results remain labeled as 0.2.4 evidence.
+- MGES is rerun because version, lockfile, and client metadata changed. Existing 0.3.0 and historical 0.2.4 results remain labeled as evidence for their own artifacts.
 - Because this repository squash-merges pull requests, implementation and final benchmark evidence use two PR phases. Merge implementation, measure the resulting clean main commit, then merge an evidence/docs/test-only PR without changing fingerprinted source. The measured commit must remain an ancestor of the final release commit.
 
 ## Manual Review
@@ -49,7 +55,7 @@ Confirm before release:
 
 - README explains install, CLI usage, SDK usage, safety principles, and publish gate.
 - `docs/usage.md` documents runtime, policy, evidence, skills, CLI workers, crawler, and console flows.
-- `docs/governed-sources.md`, `docs/migration-0.3.md`, and `docs/release-0.3.0.md` match the public exports and exact candidate boundary.
+- `docs/governed-sources.md`, `docs/migration-0.3.md`, and `docs/release-0.3.1.md` match the public exports and exact candidate boundary while `docs/release-0.3.0.md` remains the published 0.3.0 record.
 - `docs/provenance-and-licenses.md` documents inspiration boundaries and third-party license handling.
 - `CHANGELOG.md` contains the exact release notes for the version being published.
 - `SECURITY.md`, `RELEASE_CHECKLIST.md`, and `LICENSE_AUDIT.md` are present at the package root.
@@ -62,17 +68,17 @@ Confirm before release:
 
 ## Approval Gate
 
-Publishing requires explicit maintainer approval for the exact package, version, registry, command, artifact identity, and Git commit. Approval must name `maqam@0.3.0`, use the `publish:npm` action, and be enforced by the protected trusted-publishing environment.
+Publishing requires explicit maintainer approval for the exact package, version, registry, command, artifact identity, and Git commit. Approval must name `maqam@0.3.1`, use the `publish:npm` action, and be enforced by the protected trusted-publishing environment.
 
 When represented as an `ApprovalQueue` record, the subject must exactly match:
 
 ```js
 {
   packageName: "maqam",
-  version: "0.3.0",
+  version: "0.3.1",
   registry: "https://registry.npmjs.org/",
   publishCommand: "npm publish --access public --ignore-scripts --provenance",
-  artifactFilename: "maqam-0.3.0.tgz",
+  artifactFilename: "maqam-0.3.1.tgz",
   artifactSizeBytes: 123456,
   artifactSha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   artifactIntegrity: "sha512-...",
@@ -88,8 +94,8 @@ Do not dispatch the trusted publishing workflow from an unattended, scheduled, o
 
 ```bash
 npm publish --access public --ignore-scripts --provenance
-npm view maqam@0.3.0 version dist.integrity gitHead _resolved _from
-npx -y maqam@0.3.0 demo approval
+npm view maqam@0.3.1 version dist.integrity gitHead _resolved _from
+npx -y maqam@0.3.1 demo approval
 ```
 
-Run the publish command only inside the protected trusted-publishing job for the reviewed, clean, pushed commit and do not publish by passing a local `.tgz` path. After publishing, require registry `gitHead` to match the approved commit, verify version, integrity, and provenance, and confirm `_resolved` and `_from` expose no local filesystem path. Only then create annotated tag `v0.3.0` and the GitHub release with the npm package URL.
+Run the publish command only inside the protected trusted-publishing job for the reviewed, clean, pushed commit and do not publish by passing a local `.tgz` path. After publishing, require registry `gitHead` to match the approved commit, verify version, integrity, and provenance, and confirm `_resolved` and `_from` expose no local filesystem path. Only then create annotated tag `v0.3.1` and the GitHub release with the npm package URL.

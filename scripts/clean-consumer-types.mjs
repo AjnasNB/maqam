@@ -51,7 +51,7 @@ try {
   if (
     packed.length !== 1
     || packed[0]?.name !== "maqam"
-    || packed[0]?.version !== "0.3.0"
+    || packed[0]?.version !== "0.3.1"
     || !packed[0]?.filename
   ) {
     throw new Error("npm pack did not report exactly one Maqam artifact.");
@@ -143,7 +143,7 @@ try {
     join(consumerDirectory, "node_modules", "maqam", "package.json"),
     "utf8"
   ));
-  if (installed.version !== "0.3.0" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
+  if (installed.version !== "0.3.1" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
     throw new Error("The packed Maqam manifest does not expose the reviewed Node type dependency.");
   }
   run(process.execPath, [tscPath, "-p", join(consumerDirectory, "tsconfig.json")], {

@@ -1468,8 +1468,8 @@ import { ApprovalQueue, createReleaseGateReport } from "maqam";
 const approvals = new ApprovalQueue();
 const artifact = {
   packageName: "maqam",
-  version: "0.3.0",
-  filename: "maqam-0.3.0.tgz",
+  version: "0.3.1",
+  filename: "maqam-0.3.1.tgz",
   sizeBytes: 123456,
   sha256: "a".repeat(64),
   integrity: `sha512-${Buffer.alloc(64, 7).toString("base64")}`,
@@ -1480,7 +1480,7 @@ const approval = approvals.requestApproval({
   reason: "Release candidate is ready.",
   subject: {
     packageName: "maqam",
-    version: "0.3.0",
+    version: "0.3.1",
     registry: "https://registry.npmjs.org/",
     publishCommand: "npm publish --access public --ignore-scripts --provenance",
     artifactFilename: artifact.filename,
@@ -1493,7 +1493,7 @@ const approval = approvals.requestApproval({
 
 const report = createReleaseGateReport({
   packageName: "maqam",
-  version: "0.3.0",
+  version: "0.3.1",
   license: "MIT",
   publishCommand: "npm publish --access public --ignore-scripts --provenance",
   registry: "https://registry.npmjs.org/",
@@ -1783,7 +1783,7 @@ npm run benchmark:mges:performance
 git status --short
 ```
 
-Capture the exact tarball filename, positive byte size, npm integrity, independent SHA-256, and full Git commit, then obtain approval for that exact artifact. The GitHub environment must approve the matching artifact before OIDC publication. Do not put npm tokens or OTP values into repository files, workflow inputs, package metadata, logs, or release evidence. Follow [the release checklist](release-checklist.md) and [0.3.0 release record](release-0.3.0.md).
+Capture the exact tarball filename, positive byte size, npm integrity, independent SHA-256, and full Git commit, then obtain approval for that exact artifact. The GitHub environment must approve the matching artifact before OIDC publication. Do not put npm tokens or OTP values into repository files, workflow inputs, package metadata, logs, or release evidence. Follow [the release checklist](release-checklist.md) and [0.3.1 candidate release record](release-0.3.1.md).
 
 ## Troubleshooting
 

@@ -16,6 +16,8 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 > **Public release:** [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) was published through npm Trusted Publishing and is paired with the [`v0.3.0` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.0). Because npm dist-tags and the latest GitHub release can advance independently of a packaged README, verify the current release with `npm view maqam dist-tags.latest gitHead dist.integrity` and the repository's [latest release page](https://github.com/AjnasNB/maqam/releases/latest).
 
+> **0.3.1 candidate snapshot — 2026-07-19:** this source tree prepares a documentation and release-truth patch. Package metadata is not publication proof. Treat 0.3.1 as unpublished unless both the live npm record and matching GitHub release identify it; at snapshot time, the verified public release remains 0.3.0. See the [candidate release record](docs/release-0.3.1.md).
+
 > **0.3 release line:** governed source routing, hosted-anonymous Exa web search, public YouTube metadata and available captions through an explicitly configured `yt-dlp`, normalized research documents, offline RSS/Atom parsing, feed-aware crawling, and exact network-origin controls. See the [0.3.0 release record](docs/release-0.3.0.md) and [migration guide](docs/migration-0.3.md).
 
 [Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)

@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+const packageLockJson = JSON.parse(readFileSync(new URL("../package-lock.json", import.meta.url), "utf8"));
 const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
 const usageGuide = readFileSync(new URL("../docs/usage.md", import.meta.url), "utf8");
 const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
@@ -17,6 +18,8 @@ const governedSources = readFileSync(new URL("../docs/governed-sources.md", impo
 const anonymousPublicSources = readFileSync(new URL("../docs/anonymous-public-sources.md", import.meta.url), "utf8");
 const migration03 = readFileSync(new URL("../docs/migration-0.3.md", import.meta.url), "utf8");
 const release03 = readFileSync(new URL("../docs/release-0.3.0.md", import.meta.url), "utf8");
+const release031 = readFileSync(new URL("../docs/release-0.3.1.md", import.meta.url), "utf8");
+const rootReleaseGuide = readFileSync(new URL("../RELEASE_CHECKLIST.md", import.meta.url), "utf8");
 const roadmap = readFileSync(new URL("../ROADMAP.md", import.meta.url), "utf8");
 const technicalArticle = readFileSync(new URL("../docs/articles/exact-agent-approvals.md", import.meta.url), "utf8");
 const maqamBin = readFileSync(new URL("../bin/maqam.js", import.meta.url), "utf8");
@@ -28,7 +31,9 @@ const publishWorkflow = readFileSync(new URL("../.github/workflows/publish-npm.y
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.3.0");
+  assert.equal(packageJson.version, "0.3.1");
+  assert.equal(packageLockJson.version, "0.3.1");
+  assert.equal(packageLockJson.packages[""].version, "0.3.1");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.author, "Ajnas NB");
   assert.match(packageJson.description, /governed web search/i);
@@ -64,6 +69,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.files.includes("docs/governed-sources.md"));
   assert.ok(packageJson.files.includes("docs/anonymous-public-sources.md"));
   assert.ok(packageJson.files.includes("docs/release-0.3.0.md"));
+  assert.ok(packageJson.files.includes("docs/release-0.3.1.md"));
   assert.ok(packageJson.files.includes("examples/"));
   assert.ok(packageJson.files.includes("benchmarks/"));
   assert.ok(packageJson.files.includes("ROADMAP.md"));
@@ -138,7 +144,12 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(release03, /published and registry-verified/i);
   assert.match(release03, /98c2d97dc31495ec30a0b44c5016fd76316c2074/i);
   assert.match(release03, /sha512-0fV354AKT6JtVMYzWcMCfjUQpJHIjaNF\+bGjxq8TzcuElNVQsx3Cp5Yc062RgNJ5zSDVgUJSn1hzn04hT3jWuQ==/i);
+  assert.match(release031, /^# Maqam 0\.3\.1 Candidate Release Record/m);
+  assert.match(release031, /unpublished patch candidate/i);
+  assert.match(release031, /current public release remains 0\.3\.0/i);
   assert.match(readme, /Public release:[\s\S]{0,240}maqam@0\.3\.0/i);
+  assert.match(readme, /0\.3\.1 candidate snapshot/i);
+  assert.match(readme, /Treat 0\.3\.1 as unpublished unless both the live npm record and matching GitHub release identify it/i);
   assert.match(readme, /0\.3 release line/i);
   assert.match(readme, /hosted-anonymous Exa web search/i);
   assert.match(readme, /public YouTube metadata and available captions/i);
@@ -178,6 +189,7 @@ test("public docs and brand assets match Maqam identity", () => {
 
 test("release governance docs require approval before publishing", () => {
   assert.match(changelog, /^# Changelog/m);
+  assert.match(changelog, /## 0\.3\.1 - Unreleased/);
   assert.match(changelog, /## 0\.3\.0 - 2026-07-18/);
   assert.match(changelog, /## 0\.2\.4 - 2026-07-17/);
   assert.match(changelog, /## 0\.2\.1 - 2026-07-15/);
@@ -206,8 +218,13 @@ test("release governance docs require approval before publishing", () => {
   assert.match(releaseGuide, /artifactFilename/);
   assert.match(releaseGuide, /artifactSizeBytes/);
   assert.match(releaseGuide, /artifactIntegrity/);
-  assert.match(releaseGuide, /maqam@0\.3\.0/);
+  assert.match(releaseGuide, /Last Completed Release[\s\S]{0,180}0\.3\.0[\s\S]{0,120}published on npm/i);
+  assert.match(releaseGuide, /Candidate Target[\s\S]{0,180}0\.3\.1[\s\S]{0,120}unpublished candidate/i);
+  assert.match(releaseGuide, /maqam@0\.3\.1/);
   assert.match(releaseGuide, /trusted-publishing/i);
+  assert.match(rootReleaseGuide, /release gate for the unpublished `maqam@0\.3\.1` candidate/i);
+  assert.match(rootReleaseGuide, /current public release remains 0\.3\.0/i);
+  assert.match(rootReleaseGuide, /Version: `0\.3\.1`/i);
   assert.match(publishingGuide, /release-manifest\.json/);
   assert.match(publishingGuide, /full `gitCommit`/);
   assert.match(ciWorkflow, /Prepare exact npm candidate identity/);
@@ -218,6 +235,7 @@ test("release governance docs require approval before publishing", () => {
   assert.match(publishWorkflow, /GITHUB_SHA[^\n]+EXPECTED_GIT_COMMIT/);
   assert.match(publishWorkflow, /expected_sha256/);
   assert.match(publishWorkflow, /expected_integrity/);
+  assert.match(publishWorkflow, /default: 0\.3\.1/);
   assert.match(publishWorkflow, /npm audit signatures/);
   assert.match(security, /^# Security Policy/m);
   assert.match(security, /approval/i);

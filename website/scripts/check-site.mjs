@@ -129,6 +129,7 @@ for (const file of htmlFiles) {
   if (label === "index.html") {
     requireMatch(/v0\.3\.0 public release/i, "homepage must identify 0.3.0 as a public release");
     requireMatch(/npm Trusted Publishing and the matching GitHub release are verified/i, "homepage must identify the completed release verification");
+    requireMatch(/0\.3\.1 is an unpublished source candidate at the 2026-07-19 snapshot/i, "homepage must distinguish the 0.3.1 candidate from public 0.3.0");
     requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.0/i, "homepage install command must retain a live-record verification reminder");
     requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
     requireMatch(/Maqam is a security turnstile for agent actions/i, "homepage must include the plain-English Maqam definition");
