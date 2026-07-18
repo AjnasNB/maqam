@@ -124,12 +124,12 @@ test("MGES result schemas are versioned machine-readable JSON Schema documents",
   assert.equal(conformanceSchema.properties.schema.const, "maqam.benchmark.conformance/v1");
 });
 
-test("checked-in MGES release artifacts identify a clean source commit and unchanged measured files", () => {
+test("checked-in MGES candidate artifacts identify a clean source commit and unchanged measured files", () => {
   const performance = checkedResult(
-    "../benchmarks/results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json"
+    "../benchmarks/results/2026-07-19-mges-performance-windows-node24-candidate-adcda8b.json"
   );
   const conformance = checkedResult(
-    "../benchmarks/results/2026-07-18-mges-conformance-windows-node24-main-545fe8bb.json"
+    "../benchmarks/results/2026-07-19-mges-conformance-windows-node24-candidate-adcda8b.json"
   );
 
   assert.equal(performance.repository.workingTreeDirty, false);

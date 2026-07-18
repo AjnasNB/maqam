@@ -102,7 +102,7 @@ The direct-path coefficient of variation remains a published diagnostic, but it 
 
 These thresholds are MGES stability rules. They are not universal acceptance criteria. A pass does not control CPU affinity, CPU frequency, virtualization, thermal state, or background load; each artifact discloses those uncontrolled conditions. Do not remove outliers or silently change thresholds to obtain a pass.
 
-### Current clean-main release evidence
+### Current public 0.3.0 clean-main release evidence
 
 [`2026-07-18-mges-performance-windows-node24-main-545fe8bb.json`](results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json) records the clean post-squash `main` MGES v1.1.0 release run:
 
@@ -124,6 +124,26 @@ This repository squash-merges pull requests, so final release evidence uses two 
 The earlier [`2026-07-16-mges-performance-windows-node24.json`](results/2026-07-16-mges-performance-windows-node24.json) is retained as the 0.2.4 baseline, and [`2026-07-16-windows-node24.json`](results/2026-07-16-windows-node24.json) remains a legacy seven-sample result. Neither is relabeled as 0.3.0 evidence.
 
 Two clean runs from superseded source commit `c58cb850daeffa24f5f088a97689f5c75c2db69b` are retained as transparent `REVIEW` records: [attempt 1](results/2026-07-18-mges-performance-windows-node24-governed-public-research-c58cb850.json) observed `19.122%` governed CV, and [attempt 2](results/2026-07-18-mges-performance-windows-node24-governed-public-research-c58cb850-attempt2.json) observed `25.691%`. No observations or thresholds were removed. The later implementation candidate [performance](results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json) and [conformance](results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json) artifacts remain transparent pre-squash evidence; the `545fe8bb` artifacts are the release evidence.
+
+### Unpublished 0.3.1 candidate evidence
+
+The [candidate performance artifact](results/2026-07-19-mges-performance-windows-node24-candidate-adcda8b.json) and [candidate conformance artifact](results/2026-07-19-mges-conformance-windows-node24-candidate-adcda8b.json) record a clean run from source commit `adcda8b277c1ccb789cdcdfc48d7db5e927d2523`. This is evidence for an unpublished 0.3.1 patch candidate; the current verified public release remains 0.3.0 and its `545fe8bb` evidence remains unchanged above.
+
+| Field | Observed candidate value |
+|---|---:|
+| Environment | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
+| Governance-boundary conformance | **14/14 passed** |
+| Governed median | **137.951 microseconds/call** |
+| 95% bootstrap interval for the sample median | **134.061-144.882 microseconds/call** |
+| Sequential rate at the median | **7,248.935 calls/second** |
+| Paired added median | **137.880 microseconds/call** |
+| Governed coefficient of variation | **8.212%** |
+| Direct coefficient of variation (diagnostic) | **11.936%** |
+| MGES project publication checks | **PASS (4/4 required; optional direct diagnostic did not pass)** |
+
+The optional direct-path CV diagnostic is published without omission but is not a required gate; the governed path and every required stability check passed. The two raw files were generated outside the worktree and copied unchanged into this evidence-only commit. No fingerprinted implementation, benchmark, or lockfile source changed after measurement, so the measured commit remains an ancestor of the candidate evidence commit.
+
+These values describe a local in-process component benchmark. They exclude model, network, storage, human-review, startup, and concurrency costs; they are not a competitor benchmark, product-wide latency claim, security certification, or SLA.
 
 ### What the number excludes
 

@@ -28,7 +28,13 @@ npm run benchmark:mges:performance -- --output /outside/worktree/maqam-0.3.1-mge
 npm pack --json --ignore-scripts --pack-destination /outside/worktree/artifacts
 ```
 
-The MGES outputs and tarball must remain outside the repository. Record the exact full source commit, tarball filename, positive byte size, independent SHA-256, npm SHA-512 integrity, packed-file list, and clean-tree state. The version and lockfile metadata changed, so the candidate must not reuse a prior version's benchmark identity or artifact approval.
+Generate the MGES outputs and tarball outside the repository first. After a clean run, raw MGES JSON may be copied unchanged into a separate evidence-only commit that does not alter fingerprinted source; the tarball must remain outside the repository. Record the exact full source commit, tarball filename, positive byte size, independent SHA-256, npm SHA-512 integrity, packed-file list, and clean-tree state. The version and lockfile metadata changed, so the candidate must not reuse a prior version's benchmark identity or artifact approval.
+
+## Candidate Evidence Snapshot
+
+The clean candidate source commit `adcda8b277c1ccb789cdcdfc48d7db5e927d2523` produced [performance](../benchmarks/results/2026-07-19-mges-performance-windows-node24-candidate-adcda8b.json) and [conformance](../benchmarks/results/2026-07-19-mges-conformance-windows-node24-candidate-adcda8b.json) records on Node 24.15.0 / Windows x64 / AMD Ryzen 7 4800H. The conformance profile passed 14/14 fixtures. The performance profile recorded a 137.951 microseconds/call governed median, a 134.061-144.882 95% bootstrap interval, 7,248.935 calls/second at the median, an 8.212% governed coefficient of variation, and all four required project checks passing. The optional direct-path CV diagnostic did not pass and remains visible in the raw record; it is not a required gate.
+
+This is local component evidence for the unpublished candidate, not proof of publication, a competitor comparison, a security certification, or an SLA. The public 0.3.0 evidence remains unchanged.
 
 ## Publication Boundary
 
