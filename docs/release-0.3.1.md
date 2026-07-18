@@ -32,9 +32,7 @@ Generate the MGES outputs and tarball outside the repository first. After a clea
 
 ## Candidate Evidence Snapshot
 
-The clean candidate source commit `adcda8b277c1ccb789cdcdfc48d7db5e927d2523` produced [performance](../benchmarks/results/2026-07-19-mges-performance-windows-node24-candidate-adcda8b.json) and [conformance](../benchmarks/results/2026-07-19-mges-conformance-windows-node24-candidate-adcda8b.json) records on Node 24.15.0 / Windows x64 / AMD Ryzen 7 4800H. The conformance profile passed 14/14 fixtures. The performance profile recorded a 137.951 microseconds/call governed median, a 134.061-144.882 95% bootstrap interval, 7,248.935 calls/second at the median, an 8.212% governed coefficient of variation, and all four required project checks passing. The optional direct-path CV diagnostic did not pass and remains visible in the raw record; it is not a required gate.
-
-This is local component evidence for the 0.3.1 release candidate, not proof of publication, a competitor comparison, a security certification, or an SLA. The public 0.3.0 evidence remains unchanged.
+Pending the required two-phase sequence. Merge the implementation first, measure that exact clean main commit, and add the raw performance and conformance outputs in a separate evidence-only pull request without changing fingerprinted source. Branch-only measurements are diagnostic and are not release evidence because squash merging does not preserve their measured commit in main ancestry. The public 0.3.0 evidence remains unchanged until the clean-main follow-up lands.
 
 ## Publication Boundary
 
