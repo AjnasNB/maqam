@@ -144,12 +144,13 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(release03, /published and registry-verified/i);
   assert.match(release03, /98c2d97dc31495ec30a0b44c5016fd76316c2074/i);
   assert.match(release03, /sha512-0fV354AKT6JtVMYzWcMCfjUQpJHIjaNF\+bGjxq8TzcuElNVQsx3Cp5Yc062RgNJ5zSDVgUJSn1hzn04hT3jWuQ==/i);
-  assert.match(release031, /^# Maqam 0\.3\.1 Candidate Release Record/m);
-  assert.match(release031, /unpublished patch candidate/i);
-  assert.match(release031, /current public release remains 0\.3\.0/i);
-  assert.match(readme, /Public release:[\s\S]{0,240}maqam@0\.3\.0/i);
-  assert.match(readme, /0\.3\.1 candidate snapshot/i);
-  assert.match(readme, /Treat 0\.3\.1 as unpublished unless both the live npm record and matching GitHub release identify it/i);
+  assert.match(release031, /^# Maqam 0\.3\.1 Release Record/m);
+  assert.match(release031, /Lifecycle:\*\* registry-defined/i);
+  assert.match(release031, /live npm record[\s\S]{0,180}matching `v0\.3\.1` tag/i);
+  assert.match(readme, /Previous verified release:[\s\S]{0,240}maqam@0\.3\.0/i);
+  assert.match(readme, /0\.3\.1 release line/i);
+  assert.match(readme, /npm view maqam@0\.3\.1 version gitHead dist\.integrity/i);
+  assert.match(readme, /Until both records exist and identify the same reviewed commit, treat 0\.3\.1 as unavailable/i);
   assert.match(readme, /0\.3 release line/i);
   assert.match(readme, /hosted-anonymous Exa web search/i);
   assert.match(readme, /public YouTube metadata and available captions/i);
@@ -159,7 +160,7 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.doesNotMatch(readme, /0\.2\.4 is a candidate/i);
   assert.doesNotMatch(readme, /(?:Maqam |maqam@|v)?0\.3\.0 (?:release )?candidate/i);
   assert.doesNotMatch(readme, /`maqam@0\.3\.0` \(after exact registry verification\)/i);
-  assert.match(quickstart, /npx -y maqam@0\.3\.0 demo approval/);
+  assert.match(quickstart, /npx -y maqam@0\.3\.1 demo approval/);
   assert.doesNotMatch(quickstart, /maqam@0\.2\.4/);
   assert.match(comparison, /OpenAI Agents SDK/);
   assert.match(comparison, /LangGraph/);
@@ -189,7 +190,7 @@ test("public docs and brand assets match Maqam identity", () => {
 
 test("release governance docs require approval before publishing", () => {
   assert.match(changelog, /^# Changelog/m);
-  assert.match(changelog, /## 0\.3\.1 - Unreleased/);
+  assert.match(changelog, /## 0\.3\.1\n/);
   assert.match(changelog, /## 0\.3\.0 - 2026-07-18/);
   assert.match(changelog, /## 0\.2\.4 - 2026-07-17/);
   assert.match(changelog, /## 0\.2\.1 - 2026-07-15/);
@@ -218,12 +219,12 @@ test("release governance docs require approval before publishing", () => {
   assert.match(releaseGuide, /artifactFilename/);
   assert.match(releaseGuide, /artifactSizeBytes/);
   assert.match(releaseGuide, /artifactIntegrity/);
-  assert.match(releaseGuide, /Last Completed Release[\s\S]{0,180}0\.3\.0[\s\S]{0,120}published on npm/i);
-  assert.match(releaseGuide, /Candidate Target[\s\S]{0,180}0\.3\.1[\s\S]{0,120}unpublished candidate/i);
+  assert.match(releaseGuide, /Previous Completed Release At Candidate Preparation[\s\S]{0,180}0\.3\.0[\s\S]{0,120}published on npm/i);
+  assert.match(releaseGuide, /Release Target[\s\S]{0,180}0\.3\.1[\s\S]{0,160}candidate until protected publication completes/i);
   assert.match(releaseGuide, /maqam@0\.3\.1/);
   assert.match(releaseGuide, /trusted-publishing/i);
-  assert.match(rootReleaseGuide, /release gate for the unpublished `maqam@0\.3\.1` candidate/i);
-  assert.match(rootReleaseGuide, /current public release remains 0\.3\.0/i);
+  assert.match(rootReleaseGuide, /release gate for `maqam@0\.3\.1`/i);
+  assert.match(rootReleaseGuide, /live registry and matching GitHub release define its status/i);
   assert.match(rootReleaseGuide, /Version: `0\.3\.1`/i);
   assert.match(publishingGuide, /release-manifest\.json/);
   assert.match(publishingGuide, /full `gitCommit`/);

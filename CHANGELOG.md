@@ -2,18 +2,18 @@
 
 All notable Maqam changes are tracked here before release.
 
-## 0.3.1 - Unreleased
+## 0.3.1
 
-Documentation and release-truth patch candidate. This version is not public until the live npm registry, provenance, integrity, matching Git tag, and GitHub release all identify 0.3.1; the current verified public release remains 0.3.0.
+Documentation and release-truth patch. Availability is defined by the live npm registry, provenance, integrity, matching Git tag, and GitHub release—not by this packaged changelog. At candidate preparation time, 0.3.0 was the previous verified public release.
 
 ### Changed
 
 - Replaced stale pre-publication 0.3.0 wording in the packaged README, documentation, and website with verified public-release records and evergreen registry checks.
 - Kept the 0.2.4 videos and benchmark artifacts explicitly labeled as historical evidence for that artifact rather than relabeling them as 0.3 evidence.
-- Updated package, release-gate, trusted-publishing, and MCP client metadata to the 0.3.1 candidate identity without changing the public API or governance behavior.
-- Recorded clean-source 0.3.1 candidate MGES evidence in a separate evidence-only change while preserving the public 0.3.0 benchmark record.
+- Updated package, release-gate, trusted-publishing, and MCP client metadata to the 0.3.1 identity without changing the public API or governance behavior.
+- Recorded clean-source 0.3.1 release-candidate MGES evidence in a separate evidence-only change while preserving the public 0.3.0 benchmark record.
 
-See [docs/release-0.3.1.md](docs/release-0.3.1.md) for the candidate boundary and required verification.
+See [docs/release-0.3.1.md](docs/release-0.3.1.md) for the release boundary and required verification.
 
 ## 0.3.0 - 2026-07-18
 

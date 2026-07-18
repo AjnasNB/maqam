@@ -1,12 +1,12 @@
-# Maqam 0.3.1 Candidate Release Record
+# Maqam 0.3.1 Release Record
 
-**Status:** unpublished patch candidate. The current public release remains 0.3.0 and is verified on npm and GitHub. Package metadata, a local tarball, a branch, or this document is not proof that 0.3.1 is public.
+**Lifecycle:** registry-defined. Maqam 0.3.1 is public only when the live npm record, provenance, integrity, registry `gitHead`, matching `v0.3.1` tag, and GitHub release identify the same reviewed artifact. Package metadata, a local tarball, a branch, or this document alone is not publication proof. At candidate preparation time, 0.3.0 was the previous verified public release.
 
 ## Purpose
 
 The npm README packed into 0.3.0 is immutable and retained pre-publication wording after the release completed. Version 0.3.1 prepares a truthful replacement while keeping live-state claims conditional on the npm registry, provenance, integrity, Git tag, and GitHub release.
 
-## Candidate Scope
+## Release Scope
 
 - synchronize the packaged README, current documentation, and website with the verified public 0.3.0 release;
 - label all reused 0.2.4 proof media and benchmark artifacts as historical 0.2.4 evidence;
@@ -34,7 +34,7 @@ Generate the MGES outputs and tarball outside the repository first. After a clea
 
 The clean candidate source commit `adcda8b277c1ccb789cdcdfc48d7db5e927d2523` produced [performance](../benchmarks/results/2026-07-19-mges-performance-windows-node24-candidate-adcda8b.json) and [conformance](../benchmarks/results/2026-07-19-mges-conformance-windows-node24-candidate-adcda8b.json) records on Node 24.15.0 / Windows x64 / AMD Ryzen 7 4800H. The conformance profile passed 14/14 fixtures. The performance profile recorded a 137.951 microseconds/call governed median, a 134.061-144.882 95% bootstrap interval, 7,248.935 calls/second at the median, an 8.212% governed coefficient of variation, and all four required project checks passing. The optional direct-path CV diagnostic did not pass and remains visible in the raw record; it is not a required gate.
 
-This is local component evidence for the unpublished candidate, not proof of publication, a competitor comparison, a security certification, or an SLA. The public 0.3.0 evidence remains unchanged.
+This is local component evidence for the 0.3.1 release candidate, not proof of publication, a competitor comparison, a security certification, or an SLA. The public 0.3.0 evidence remains unchanged.
 
 ## Publication Boundary
 

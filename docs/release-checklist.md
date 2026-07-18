@@ -2,17 +2,17 @@
 
 Use this checklist before publishing any Maqam release.
 
-## Last Completed Release
+## Previous Completed Release At Candidate Preparation
 
 - Package: `maqam`
 - Version: `0.3.0`
 - State: published on npm with matching `v0.3.0` GitHub release
 
-## Candidate Target
+## Release Target
 
 - Package: `maqam`
 - Version: `0.3.1`
-- State: unpublished candidate; current public release remains 0.3.0
+- State: candidate until protected publication completes; verify the live registry and matching GitHub release afterward
 - License: MIT
 - Registry target: npm public registry
 - Publish command: `npm publish --access public --ignore-scripts --provenance`
@@ -55,7 +55,7 @@ Confirm before release:
 
 - README explains install, CLI usage, SDK usage, safety principles, and publish gate.
 - `docs/usage.md` documents runtime, policy, evidence, skills, CLI workers, crawler, and console flows.
-- `docs/governed-sources.md`, `docs/migration-0.3.md`, and `docs/release-0.3.1.md` match the public exports and exact candidate boundary while `docs/release-0.3.0.md` remains the published 0.3.0 record.
+- `docs/governed-sources.md`, `docs/migration-0.3.md`, and `docs/release-0.3.1.md` match the public exports and exact release boundary while `docs/release-0.3.0.md` remains the previous published release record.
 - `docs/provenance-and-licenses.md` documents inspiration boundaries and third-party license handling.
 - `CHANGELOG.md` contains the exact release notes for the version being published.
 - `SECURITY.md`, `RELEASE_CHECKLIST.md`, and `LICENSE_AUDIT.md` are present at the package root.

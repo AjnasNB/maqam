@@ -1,12 +1,12 @@
 # Maqam Release Checklist
 
-Use this root checklist as the release gate for the unpublished `maqam@0.3.1` candidate. The current public release remains 0.3.0, and historical artifacts remain evidence for their own versions only.
+Use this root checklist as the release gate for `maqam@0.3.1`. The artifact remains a candidate until the protected publication and post-publish verification gates complete; afterward, the live registry and matching GitHub release define its status. Maqam 0.3.0 was the previous verified public release when this candidate was prepared, and historical artifacts remain evidence for their own versions only.
 
 ## Package
 
 - Name: `maqam`
 - Version: `0.3.1`
-- State: unpublished candidate; package metadata is not publication proof
+- State: candidate until protected publication completes; package metadata is not publication proof
 - License: MIT
 - Registry: npm public registry
 - Publish command after approval: `npm publish --access public --ignore-scripts --provenance`
