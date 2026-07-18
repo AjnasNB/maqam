@@ -455,17 +455,25 @@ export class ToolGateway {
     const governanceRisk = normalizeRisk(governance.risk, "Handler governance");
     const metadataRisk = normalizeRisk(registrationMetadata.risk, "Registration metadata");
     const effectiveRisk = effectiveRegistrationRisk(governanceRisk, metadataRisk);
+    const effectiveNetworkOrigins = [...new Set([
+      ...governanceNetworkOrigins,
+      ...metadataNetworkOrigins
+    ])];
     const effectiveMetadata = {
       ...governance,
       ...registrationMetadata,
       // Registration metadata may declare additional authority boundaries, but
       // it cannot erase effects or network origins declared by the handler.
-      effects: [...new Set([...governanceEffects, ...metadataEffects])],
-      networkOrigins: [...new Set([
-        ...governanceNetworkOrigins,
-        ...metadataNetworkOrigins
-      ])]
+      effects: [...new Set([...governanceEffects, ...metadataEffects])]
     };
+    // Keep the common no-network path byte-for-byte as small as possible.
+    // Absent and empty origins authorize identically, while an empty array
+    // would otherwise add avoidable snapshot/parsing work to every tool call.
+    if (effectiveNetworkOrigins.length) {
+      effectiveMetadata.networkOrigins = effectiveNetworkOrigins;
+    } else {
+      delete effectiveMetadata.networkOrigins;
+    }
     if (effectiveRisk) effectiveMetadata.risk = effectiveRisk;
     else delete effectiveMetadata.risk;
     this.tools.set(name, {

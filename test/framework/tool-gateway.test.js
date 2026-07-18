@@ -191,6 +191,19 @@ test("registration unions immutable handler and registration network origins", a
   assert.deepEqual(authorizedMetadata, observed);
 });
 
+test("tools without declared network origins keep the common metadata path absent", async () => {
+  const gateway = new ToolGateway({ allowUngoverned: true });
+  let observedMetadata;
+  gateway.registerTool("local-only", async (_input, context) => {
+    observedMetadata = context.toolMetadata;
+    return "ok";
+  }, { networkOrigins: [] });
+
+  assert.equal(Object.hasOwn(gateway.tools.get("local-only").metadata, "networkOrigins"), false);
+  assert.equal(await gateway.call("local-only"), "ok");
+  assert.equal(Object.hasOwn(observedMetadata, "networkOrigins"), false);
+});
+
 test("declared network origins are authorized before handler dispatch", async () => {
   let calls = 0;
   const connector = async () => {
