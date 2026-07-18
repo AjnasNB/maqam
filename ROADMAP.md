@@ -1,6 +1,6 @@
 # Maqam Public Roadmap
 
-Last updated: 2026-07-16.
+Last updated: 2026-07-18.
 
 This roadmap communicates direction, not delivery dates. Items move only after their design, security boundary, compatibility impact, and maintenance cost are understood. Released behavior is documented in the README, changelog, and versioned package—not promised by this file.
 
@@ -28,9 +28,29 @@ Maqam will integrate with orchestration, model, browser, crawl, and observabilit
 - MGES v1 project-defined performance and governance-boundary profiles with raw observations, source fingerprints, uncertainty reporting, stability gates, and named conformance evidence.
 - A typed host-supplied adapter descriptor, explicit `ToolGateway` registration, and fixture conformance probe for function, SDK, HTTP, MCP-style, and custom transports.
 
+## Release Candidate: 0.3.0 Governed Sources
+
+- Ordered `ResearchSourceRegistry` backends with explicit preferences and a normalized, frozen `ResearchDocument` contract.
+- Governed routing through an adapter's registered `ToolGateway` name, with a deliberately separate `routeUngoverned()` escape hatch.
+- Fatal-error stop rules so policy, approval, authentication, authorization, crawler-security, robots, goal-scope, and call-limit failures cannot silently fall through.
+- Explicit opt-in for authenticated source adapters without bundling credential acquisition or browser-session import.
+- Offline source-doctor reports with bounded checks, timeouts, and isolated errors.
+- Offline bounded RSS 2.0/Atom parsing plus host-supplied reader factories; no implicit network request or login behavior.
+- Feed-aware HTTP crawling and safer CLI budgets, exact repeatable cross-origin permission, detailed failures, statistics, and fail-on-error behavior.
+
+Release exit criteria:
+
+- public exports and declarations compile in a clean consumer;
+- allow, deny-with-zero-dispatch, fatal-no-fallback, availability-fallback, authentication-opt-in, doctor, RSS/Atom, feed-crawl, and CLI fixtures pass on Node.js 20, 22, and 24;
+- package contents, provenance, license audit, migration notes, and source-boundary documentation match the shipped artifact;
+- a fresh MGES run is attached when fingerprinted inputs changed; and
+- the exact tarball receives maintainer approval and registry verification before `v0.3.0` is tagged.
+
 ## Now: Make Adoption Verifiable
 
 - Publish a five-minute quickstart and a reproducible 60-second demonstration of policy, approval mismatch, one-use consumption, trace, and evidence.
+- Add independently maintained source adapters only when their authentication, license, rate-limit, fallback, and bypass boundaries have offline contract tests.
+- Gather real-world governed-source fixtures for public web, RSS/Atom, licensed search, and internal-index use without bundling credentials or provider packages into the core runtime.
 - Extend adapter conformance beyond the shipped single-invocation fixture to cover cancellation, retry/idempotency, protocol errors, durable correlation, and bypass audits.
 - Add focused examples for an MCP tool, OpenAI Agents SDK, LangGraph, and a generic HTTP service without making those systems runtime dependencies.
 - Solicit independent MGES reruns on Linux, macOS, Windows, multiple Node releases, and multiple processor families; publish compatible artifacts without treating one machine as a universal baseline.
@@ -66,13 +86,14 @@ Exit criteria:
 - LangGraph adapter/example for using its persistence and pause/resume around Maqam-governed tool boundaries.
 - Microsoft Agent Framework example where its Python/.NET workflow runtime calls a separately deployed Node connector governed by Maqam.
 - Optional Firecrawl, Crawl4AI, Crawlee, and Browser Use connectors that remain separately installed and preserve their license and deployment boundaries.
+- Optional source-channel adapters inspired by the explicit provider routing documented by Agent Reach, implemented independently and only after provider terms, authentication, and security behavior are reviewed.
 
 Exit criteria:
 
 - adapters do not silently bypass policy or inflate declared guarantees;
 - dependencies are optional and license-reviewed;
 - credential and environment behavior is documented; and
-- each adapter has success, denial, cancellation, malformed-output, and approval-mismatch tests.
+- each adapter has success, zero-dispatch denial, fatal-no-fallback, cancellation, malformed-output, and approval-mismatch tests.
 
 ## Later: Operations And Team Review
 

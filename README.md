@@ -16,6 +16,8 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 > **Release status — 2026-07-17:** [`maqam@0.2.4`](https://www.npmjs.com/package/maqam) is live on npm with trusted-publishing provenance. The matching [`v0.2.4` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) includes the reviewed tarball, checksums, benchmark artifacts, videos, transcripts, and product-specific 3D release art.
 
+> **0.3.0 release line — 2026-07-18:** this line adds governed source routing, normalized research documents, offline RSS/Atom parsing, feed-aware crawling, and exact cross-origin CLI controls. Verify public availability from the exact [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) registry record, provenance, integrity, matching Git tag, and GitHub release; source metadata alone is not publication proof. See the [release record](docs/release-0.3.0.md) and [migration guide](docs/migration-0.3.md).
+
 [Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
 
 ## Maqam and ProductLoop OS
@@ -28,7 +30,7 @@ They are one ecosystem with explicit boundaries, not one silently merged runtime
 
 | Choose | When you need |
 |---|---|
-| `maqam@0.2.4` | One compact boundary around tool calls, exact approvals, worker adapters, traces, evidence, or bounded HTTP research |
+| `maqam@0.3.0` (after exact registry verification) | One compact boundary around tool calls, exact approvals, worker adapters, traces, evidence, governed source routing, or bounded HTTP/feed research |
 | `productloop-os@0.2.1` | The wider modular package family for runtime, policy, approvals, provenance, skills, connectors, evaluations, and research |
 | Both beneath an orchestrator | Google ADK, OpenAI Agents SDK, LangGraph, or another agent loop already plans work and Maqam should govern selected side effects |
 
@@ -54,6 +56,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 | [Why Maqam](https://maqamagent.com/why/) and [detailed comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md) | Product fit, alternatives, differences, limitations, sources, and licenses |
 | [ProductLoop package atlas](https://maqamagent.com/docs/productloop/) | Package-by-package roles, versions, examples, and Maqam relationship |
 | [Integration guide](https://maqamagent.com/docs/integrations/) and [Google ADK / Microsoft Agent 365 boundary](https://github.com/AjnasNB/maqam/blob/main/docs/integrations-google-adk-agent365.md) | Host adapters, prerequisites, copy-paste templates, and bypass warnings |
+| [Governed Sources](https://github.com/AjnasNB/maqam/blob/main/docs/governed-sources.md) | Ordered source adapters, `ToolGateway` routing, normalized documents, source doctor, RSS/Atom, fallback, and security boundaries |
 | [MGES benchmark guide](https://maqamagent.com/docs/benchmark/) and [raw methodology](https://github.com/AjnasNB/maqam/blob/main/benchmarks/README.md) | Reproducible local-call and conformance evidence with claim limits |
 | [Security guide](https://maqamagent.com/docs/security/) and [security policy](https://github.com/AjnasNB/maqam/blob/main/SECURITY.md) | Threat boundaries, reporting, crawler safety, and required host controls |
 | [Coding-agent guide](https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md) | Codex, Claude Code, generic CLI workers, approvals, and outcome checks |
@@ -61,6 +64,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 | [Public roadmap](https://maqamagent.com/roadmap/) and [source roadmap](https://github.com/AjnasNB/maqam/blob/main/ROADMAP.md) | Shipped baseline, next work, exit criteria, and explicit non-goals |
 | [Community hub](https://maqamagent.com/community/), [contributing](https://github.com/AjnasNB/maqam/blob/main/CONTRIBUTING.md), and [governance](https://github.com/AjnasNB/maqam/blob/main/GOVERNANCE.md) | Questions, examples, issues, forks, reviewed pull requests, and maintenance policy |
 | [0.2.4 release note](https://maqamagent.com/releases/v0.2.4/), [source release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md), [Release checklist](https://github.com/AjnasNB/maqam/blob/main/docs/release-checklist.md), and [Provenance and license notes](https://github.com/AjnasNB/maqam/blob/main/docs/provenance-and-licenses.md) | Exact package map, verification evidence, MGES caveats, provenance, licenses, and approval history |
+| [0.3.0 release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.3.0.md) and [0.3 migration guide](https://github.com/AjnasNB/maqam/blob/main/docs/migration-0.3.md) | New source-routing surface, breaking CLI change, required verification, exact-artifact approval, and historical-evidence rules |
 
 Articles: [Your Agent Approval May Not Authorize the Input That Actually Executes](https://maqamagent.com/articles/exact-agent-approvals/) · [Benchmarking an Agent-Governance Boundary Without Fooling Yourself](https://maqamagent.com/articles/benchmarking-governance/)
 
@@ -129,6 +133,9 @@ See the [detailed, dated comparison](https://github.com/AjnasNB/maqam/blob/main/
 - `ApprovalQueue`: in-memory, serializable human approval records for release gates, external writes, and high-risk actions.
 - `createReleaseGateReport`: release-evidence and exact publish-approval reporting; it reports readiness but does not execute publishing.
 - `SkillRegistry`: private, snapshot-based skill metadata registration and selection.
+- `ResearchSourceRegistry`: deterministic source-backend selection with explicit preferences, fatal-error stop rules, governed `ToolCaller` routing, normalized documents, and bounded attempt records.
+- `createWebCrawlerSourceAdapter`: connects a host-supplied `crawl()` or `createCrawlerTool()` function to the governed source registry under one fixed `research.web-crawler.direct` tool identity; the factory has no separate fetch, login, or credential fallback.
+- `parseRssAtom` and RSS/Atom adapter factories: offline bounded feed parsing around a host-supplied reader, with no implicit network or login behavior.
 - `createResearchWorkflow`: crawler-backed source collection, bounded result validation, synthesis, and quality checks.
 - `maqam`: local web console for running governed research workflows.
 - `maqam-crawl`: bounded crawler CLI with per-origin delay, robots.txt enforcement, redirect validation, DNS pinning, and public-network-only defaults.
@@ -152,7 +159,8 @@ Agent systems fail in production when tools run outside policy, outputs cannot b
 Maqam requires Node.js 20.18.1 or later.
 
 ```bash
-npm install -g maqam
+npm view maqam@0.3.0 version dist.integrity gitHead
+npm install -g maqam@0.3.0
 ```
 
 Run the exact-approval proof without a model key or hosted account:
@@ -176,7 +184,7 @@ Then open `http://127.0.0.1:8787`.
 Use inside a project:
 
 ```bash
-npm install maqam
+npm install maqam@0.3.0
 ```
 
 ## Crawler CLI
@@ -190,16 +198,46 @@ Legacy aliases `ajnas-crawl` and `ajnas-agent-crawler` are kept for compatibilit
 Options:
 
 - `--max-pages <n>`: maximum pages to return. Default: `50`
+- `--max-requests <n>`: maximum network requests
+- `--max-depth <n>`: maximum link depth. Default: `20`
+- `--max-bytes <n>`: maximum bytes per response. Default: `3145728`
+- `--max-duration <ms>`: maximum total crawl duration. Default: `600000`
+- `--max-retries <n>`: retries per request. Default: `2`
 - `--concurrency <n>`: concurrent workers. Default: `4`
 - `--delay <ms>`: minimum delay per origin. Default: `250`
 - `--timeout <ms>`: request timeout. Default: `15000`
 - `--sitemaps`: discover URLs from robots.txt sitemaps and `/sitemap.xml`
-- `--all-origins`: allow crawling across discovered origins
+- `--feeds`: discover and parse linked RSS/Atom feeds
+- `--max-feed-links <n>` / `--max-feed-items <n>`: bound feed discovery and parsing
+- `--allowed-origin <url>`: permit one additional origin; repeat for every origin
+- `--detailed`: emit `{ pages, failures, stats }`
+- `--stats`: write crawl statistics to stderr
+- `--fail-on-error`: exit with status 2 when non-fatal failures are present
 - `--jsonl`: output JSON Lines instead of a JSON array
 - `--output <file>`: write output to a file
 - `--user-agent <ua>`: custom user agent
 
-The CLI accepts public HTTP(S) targets only. It validates every DNS result and redirect, rejects embedded credentials and special-purpose address ranges, obeys robots.txt by default, and caps each response. `--all-origins` removes the same-origin link restriction, so use it only when that wider public-network scope is intended.
+The CLI accepts public HTTP(S) targets only. It validates every DNS result and redirect, rejects embedded credentials and special-purpose address ranges, obeys robots.txt by default, and caps each response. The old unbounded `--all-origins` switch is intentionally rejected; name every additional public origin with a repeatable `--allowed-origin` flag. `--detailed` and `--jsonl` cannot be combined.
+
+## Governed Sources
+
+Use `ResearchSourceRegistry` when one research channel has multiple possible backends but every selected operation must remain visible at `ToolGateway`:
+
+```js
+const sources = new ResearchSourceRegistry({
+  adapters: [rssSource, internalSearch],
+  toolCaller: defineResearchToolCaller({
+    call: gateway.call.bind(gateway)
+  })
+});
+
+const result = await sources.route({
+  channel: "research",
+  input: { query: "exact approvals" }
+}, { runId: "research_1" });
+```
+
+Register every adapter handler at its declared `toolName` first. `route()` fails closed without a bound caller. `routeUngoverned()` is an explicit direct bypass and does not apply policy, approvals, call ceilings, or trace capture. Read the [complete guide](docs/governed-sources.md) before connecting credentials or remote providers.
 
 ## Framework SDK
 
@@ -380,19 +418,19 @@ npm audit --omit=dev
 npm pack --dry-run
 ```
 
-The project-defined [Maqam Governance Evaluation Suite (MGES) v1](benchmarks/README.md) keeps performance and conformance separate. Its clean-source 30-observation Windows/Node 24 local-call result is `127.498 microseconds/call` median, with a `126.334-128.942 microseconds/call` 95% bootstrap interval for the sample median and `5.572%` coefficient of variation. The separate governance profile passes `12/12` named fixtures.
+The project-defined [Maqam Governance Evaluation Suite (MGES) v1.1.0](benchmarks/README.md) keeps performance and conformance separate. Its clean-source 30-observation Windows/Node 24 local-call result is `124.303 microseconds/call` median, with a `123.712-125.695 microseconds/call` 95% bootstrap interval for the sample median and `2.010%` governed coefficient of variation. The separate governance profile passes `14/14` named fixtures, including two governed-source routing cases.
 
-Those figures are local regression evidence, not a globally standardized benchmark, cross-product speed comparison, security score, certification, network benchmark, or production SLA. Read the [raw artifacts, complete methodology and publication wording](benchmarks/README.md) or the detailed article, [Benchmarking an agent-governance boundary without fooling yourself](docs/articles/benchmarking-agent-governance.md), before quoting them. The artifacts record clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d`; later release commits may change files outside the measured path, but any change to a fingerprinted source requires another run.
+Those figures are local regression evidence, not a globally standardized benchmark, cross-product speed comparison, security score, certification, network benchmark, or production SLA. Read the [raw artifacts, complete methodology and publication wording](benchmarks/README.md) or the detailed article, [Benchmarking an agent-governance boundary without fooling yourself](docs/articles/benchmarking-agent-governance.md), before quoting them. The artifacts record clean source commit `bceaebfa2a4059bc63acd23eccf4fafee794a295`; later release commits may change files outside the measured path, but any change to a fingerprinted source requires another run.
 
 The npm tarball intentionally excludes the large brand-board and presentation PNG files; those remain in the source repository. Only the logo and files required by the local console ship as runtime app assets.
 
 ## Publish
 
-The latest public package is `maqam@0.2.4`. Do not republish an existing version. Future releases use the maintainer-approved [trusted npm publishing workflow](https://github.com/AjnasNB/maqam/actions/workflows/publish-npm.yml), which rebuilds and verifies the exact approved artifact before npm's OIDC publisher accepts it.
+Package metadata targets `maqam@0.3.0`. Source metadata is not proof of publication: verify the exact npm version record, integrity, provenance, registry `gitHead`, matching Git tag, and GitHub release before describing the artifact as public. Do not republish an existing version. Releases use the maintainer-approved [trusted npm publishing workflow](https://github.com/AjnasNB/maqam/actions/workflows/publish-npm.yml), which rebuilds and verifies the exact approved artifact before npm's OIDC publisher accepts it.
 
 Before a new version is approved, the final clean commit must pass the complete release checklist, a fresh tarball must be inspected and installed in a clean consumer, and the package owner must approve that artifact's filename, byte size, integrity, SHA-256, version, registry, command, and Git commit. After publication, verify the registry integrity, provenance, and `gitHead`, then create the matching annotated tag and GitHub release.
 
-See the [0.2.4 source release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md) and the [public GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) for the package map and published evidence.
+See the [0.3.0 release record](docs/release-0.3.0.md) for required evidence. The [0.2.4 source release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md) and [public GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) remain historical evidence for that artifact.
 
 ## License
 

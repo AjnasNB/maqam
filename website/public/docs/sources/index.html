@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Governed research sources | Maqam documentation</title>
+  <meta name="description" content="Route normalized research documents through ordered source adapters, explicit Maqam policy, host-defined health checks, and a feed-aware bounded crawler.">
+  <meta name="theme-color" content="#0b0e0d">
+  <link rel="canonical" href="https://maqamagent.com/docs/sources/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/" aria-current="page">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/" aria-current="page">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+  </header>
+
+  <main id="main" class="shell docs-layout">
+    <aside class="docs-sidebar" aria-label="Governed sources documentation">
+      <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Sources menu <span aria-hidden="true">+</span></button>
+      <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
+        <nav aria-label="Governed source sections"><p class="docs-nav-title">Source routing</p><a href="#model">Model</a><a href="#quickstart">Quickstart</a><a href="#fallback">Fallback</a><a href="#doctor">Doctor</a><a href="#feeds">RSS and Atom</a><a href="#agent-reach">Agent Reach</a><a href="#boundary">Boundary</a></nav>
+        <nav aria-label="Related documentation"><p class="docs-nav-title">Related</p><a href="/docs/">Maqam quickstart</a><a href="/docs/security/">Security</a><a href="/docs/integrations/">Tool adapters</a></nav>
+      </div>
+    </aside>
+
+    <article class="docs-content">
+      <h1>Governed research sources</h1>
+      <p class="lede">The Maqam 0.3.0 candidate adds a provider-neutral source registry: applications can normalize research records, choose ordered backends, run bounded host-defined checks, and route reads through an existing governed tool boundary.</p>
+      <figure class="media-frame media-frame--art">
+        <picture><source srcset="/assets/integration-dock-3d.webp" type="image/webp"><img src="/assets/integration-dock-3d.png" width="1586" height="992" alt="Three-dimensional source dock routing reviewed research adapters through one Maqam policy gate" loading="lazy"></picture>
+        <figcaption>Each backend keeps a static adapter identity and tool name. Governed routing calls that tool name through the host-supplied ToolCaller.</figcaption>
+      </figure>
+
+      <h2 id="model">The model</h2>
+      <dl class="definition-grid">
+        <dt>ResearchDocument</dt><dd>A frozen versioned record with HTTP or HTTPS URI, text or Markdown, source adapter identity, channel, retrieval time, authors, metadata, and citations.</dd>
+        <dt>Source adapter</dt><dd>A static id, channel, tool name, priority, declared capabilities, optional direct reader, and optional host-defined check.</dd>
+        <dt>Registry</dt><dd>Deterministic ordering, explicit backend preferences, normalized output, attempt records, and strict error classification.</dd>
+        <dt>ToolCaller</dt><dd>The host-owned call function used by <code>route()</code>. Bind it to a configured <code>ToolGateway</code> to enforce Maqam policy.</dd>
+      </dl>
+      <div class="callout callout-warning">
+        <strong>The registry is not the enforcement boundary</strong>
+        <code>ResearchSourceRegistry.route()</code> is governed only when its ToolCaller invokes a real configured gateway or equivalent host control. <code>routeUngoverned()</code> bypasses that gateway, deliberately calls adapter code directly, and is labelled ungoverned in its result.
+      </div>
+
+      <h2 id="quickstart">Register and route one local source</h2>
+      <p>This fixture has no network or model call. It shows where an application connects the registry to Maqam's gateway.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#source-route-code">Copy</button><pre><code id="source-route-code">import {
+  PolicyEngine,
+  ResearchSourceRegistry,
+  ToolGateway,
+  defineResearchSourceAdapter
+} from "maqam";
+
+const adapter = defineResearchSourceAdapter({
+  id: "docs.local",
+  channel: "docs",
+  toolName: "research.docs.local",
+  priority: 10,
+  authentication: "none",
+  capabilities: ["read"],
+  read: async ({ uri }) => [{
+    uri,
+    title: "Reviewed local fixture",
+    text: "A deterministic source record."
+  }],
+  check: async () => ({
+    status: "ready",
+    message: "Local fixture is available."
+  })
+});
+
+const gateway = new ToolGateway({
+  policyEngine: new PolicyEngine({
+    allowedTools: [adapter.toolName]
+  })
+});
+gateway.registerTool(adapter.toolName, adapter.read, {
+  effects: []
+});
+
+const registry = new ResearchSourceRegistry({
+  adapters: [adapter],
+  toolCaller: { call: gateway.call.bind(gateway) }
+});
+
+const result = await registry.route({
+  channel: "docs",
+  input: { uri: "https://example.com/reviewed" }
+}, {
+  runId: "research_1"
+});
+
+console.log(result.governance.mode);
+console.log(result.documents[0]);</code></pre></div>
+
+      <h2 id="fallback">Fallback is narrow and fail closed</h2>
+      <p>Adapters are ordered by explicit backend preference, then priority and registration order. The registry can try the next backend only after an explicit <code>ResearchSourceUnavailableError</code>. Unknown exceptions, malformed output, HTTP authorization or server failures, policy denial, approval requirements, security errors, and authentication requirements stop the route.</p>
+      <ul>
+        <li>Authenticated adapters require <code>allowAuthenticated: true</code>; the host still owns credentials and session policy.</li>
+        <li>Adapter output is fully validated before any normalized document collection is returned.</li>
+        <li>Direct shell commands, cookie extraction, package installation, and implicit login are not adapter configuration fields.</li>
+        <li>A backend preference changes ordering only. It cannot add an adapter or weaken its tool policy.</li>
+      </ul>
+
+      <h2 id="doctor">Source doctor</h2>
+      <p><code>registry.doctor()</code> runs each registered in-process check independently with a timeout and returns ready, degraded, unavailable, blocked, or error status. One broken check cannot hide the others. The timeout aborts the supplied signal, but host code must cooperate with cancellation.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#source-doctor-code">Copy</button><pre><code id="source-doctor-code">const report = await registry.doctor({
+  channel: "docs",
+  timeoutMs: 2_000
+});
+
+console.log(report.status);
+console.table(report.checks.map((check) => ({
+  adapter: check.adapter.id,
+  status: check.status,
+  message: check.message
+})));</code></pre></div>
+      <div class="callout">
+        <strong>What doctor proves</strong>
+        Only the adapter's registered host-defined check. Built-in checks are local, but Maqam cannot prove a custom check is offline or side-effect free. Doctor does not prove live credentials, provider availability, content truth, or production capacity unless a separately reviewed check explicitly tests those things.
+      </div>
+
+      <h2 id="feeds">RSS, Atom, and feed-aware crawling</h2>
+      <p><code>createWebCrawlerSourceAdapter(createCrawlerTool({...}))</code> exposes Maqam's bounded crawler under the fixed <code>research.web-crawler.direct</code> source identity. The adapter adds normalized documents and routing metadata; it does not create an alternate fetch, login, cookie, or credential path. DNS, redirect, robots, origin, byte, request, depth, and duration controls still belong to the supplied crawler and gateway context.</p>
+      <p>The offline <code>parseRssAtom()</code> parser accepts already-retrieved RSS 2.0 or Atom XML. It bounds input and output, rejects DTD and entity declarations, resolves only credential-free HTTP or HTTPS links, sanitizes content, deduplicates entries, and records SHA-256 content hashes.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#feed-code">Copy</button><pre><code id="feed-code">import { parseRssAtom } from "maqam";
+
+const feed = parseRssAtom(xmlFromGovernedReader, feedUrl, {
+  maxItems: 100,
+  maxInputBytes: 2 * 1024 * 1024,
+  maxTextChars: 20_000
+});
+
+console.log(feed.items);
+console.log(feed.contentHash);</code></pre></div>
+      <p>The parser performs no network access. <code>createRssAtomResearchAdapter()</code> and <code>createRssAtomSourceAdapter()</code> require a host-supplied reader. The built-in crawler can discover linked feeds with <code>includeFeeds: true</code> while preserving its existing DNS, redirect, robots, byte, duration, origin, and request limits.</p>
+      <div class="callout callout-warning">
+        <strong>Feed support is not browser automation</strong>
+        Maqam does not execute page JavaScript, extract browser cookies, bypass login or anti-bot controls, rotate proxies, or provide a distributed crawl fleet.
+      </div>
+
+      <h2 id="agent-reach">How this relates to Agent Reach</h2>
+      <p><a href="https://github.com/Panniantong/Agent-Reach">Agent Reach</a> is an MIT-licensed Python capability layer with broader platform-specific channel coverage. It installs, checks, and routes upstream platform tools, and can use local command-line tools, authenticated sessions, or browser cookies where a platform requires them.</p>
+      <p>Maqam 0.3.0 adopts the useful architectural ideas of ordered backends, explicit health status, and real checks, but applies them to a narrower TypeScript governance contract. It does not copy Agent Reach's auto-installation, cookie extraction, login reuse, platform-specific command wrappers, or channel coverage.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Maqam and Agent Reach comparison"><table><caption class="sr-only">Different primary jobs and boundaries of Maqam governed sources and Agent Reach</caption><thead><tr><th scope="col">Area</th><th scope="col">Maqam 0.3.0</th><th scope="col">Agent Reach</th></tr></thead><tbody>
+        <tr><th scope="row">Primary job</th><td>Application-side policy routing and normalized source evidence</td><td>Capability installation, diagnostics, and routing across upstream tools</td></tr>
+        <tr><th scope="row">Runtime</th><td>TypeScript and Node.js</td><td>Python plus external command-line tools and services</td></tr>
+        <tr><th scope="row">Coverage</th><td>Provider-neutral adapters plus built-in HTTP, RSS, and Atom primitives</td><td>Broader platform-specific channel catalog</td></tr>
+        <tr><th scope="row">Authentication</th><td>Explicit host responsibility; authenticated routing must be opted into</td><td>Can reuse configured local sessions or browser cookies for supported channels</td></tr>
+        <tr><th scope="row">Safe composition</th><td colspan="2">Wrap a selected upstream capability in one reviewed adapter, give it one static tool identity, and route the real call through Maqam policy.</td></tr>
+      </tbody></table></div>
+
+      <h2 id="boundary">Production boundary checklist</h2>
+      <ol>
+        <li>Register each backend under one static adapter id, channel, and tool name.</li>
+        <li>Bind <code>route()</code> to a reviewed ToolCaller; do not describe direct reads as governed.</li>
+        <li>Keep provider credentials, cookie stores, command paths, and client construction in trusted host code.</li>
+        <li>Classify unavailable backends separately from policy, approval, authentication, and security denials.</li>
+        <li>Validate normalized documents before storing them or making claims from their content.</li>
+        <li>Use network egress controls, authorization, terms compliance, rate limits, retention, and redaction outside the registry.</li>
+      </ol>
+    </article>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-grid"><div><h2>Governed sources</h2><p>Ordered adapters with explicit enforcement boundaries.</p></div><div><h3>Start</h3><a href="/docs/">Quickstart</a><a href="/docs/sources/">Source routing</a></div><div><h3>Review</h3><a href="/docs/security/">Security</a><a href="/why/">Comparison</a></div><div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam">GitHub</a><a href="https://www.npmjs.com/package/maqam">npm</a></div></div></footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

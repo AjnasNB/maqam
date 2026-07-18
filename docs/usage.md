@@ -10,6 +10,7 @@ This guide covers installation, CLI usage, SDK usage, the local console, crawler
 - [Quick Start](#quick-start)
 - [Local Console](#local-console)
 - [Crawler CLI](#crawler-cli)
+- [Governed Sources](#governed-sources)
 - [Framework SDK](#framework-sdk)
 - [Architecture](#architecture)
 - [API Reference](#api-reference)
@@ -174,16 +175,29 @@ ajnas-agent-crawler https://example.com
 | Option | Description | Default |
 | --- | --- | --- |
 | `--max-pages <n>` | Maximum pages to return. | `50` |
+| `--max-requests <n>` | Maximum network requests. | budget-derived |
+| `--max-depth <n>` | Maximum link depth. | `20` |
+| `--max-bytes <n>` | Maximum bytes per response. | `3145728` |
+| `--max-duration <ms>` | Maximum total crawl duration. | `600000` |
+| `--max-retries <n>` | Retries per request. | `2` |
 | `--concurrency <n>` | Concurrent workers. | `4` |
 | `--delay <ms>` | Minimum delay per origin. | `250` |
 | `--timeout <ms>` | Request timeout. | `15000` |
 | `--sitemaps` | Discover URLs from `robots.txt` sitemaps and `/sitemap.xml`. | off |
-| `--all-origins` | Allow crawling across discovered origins. | off |
+| `--feeds` | Discover and parse linked RSS and Atom feeds. | off |
+| `--max-feed-links <n>` | Maximum feed links discovered per HTML page. | `20` |
+| `--max-feed-items <n>` | Maximum entries parsed from one feed. | `100` |
+| `--allowed-origin <url>` | Permit one additional HTTP(S) origin; repeat for each origin. | none |
+| `--detailed` | Emit `{ pages, failures, stats }`. | off |
+| `--stats` | Write crawl statistics as JSON to stderr. | off |
+| `--fail-on-error` | Exit with status 2 when non-fatal failures are present. | off |
 | `--jsonl` | Output JSON Lines instead of a JSON array. | off |
 | `--output <file>` | Write output to a file. | stdout |
 | `--user-agent <ua>` | Use a custom user agent. | Maqam default |
 | `--version`, `-v` | Print the installed Maqam version. | off |
 | `--help` | Show CLI help. | off |
+
+The removed `--all-origins` option is rejected. Name every additional public origin explicitly with repeatable `--allowed-origin` flags. `--detailed` and `--jsonl` cannot be combined.
 
 ### Crawler Output
 
@@ -191,6 +205,7 @@ Each crawled page has this shape:
 
 ```json
 {
+  "sourceType": "web",
   "url": "https://example.com/",
   "canonical": "https://example.com/",
   "title": "Example",
@@ -200,6 +215,7 @@ Each crawled page has this shape:
   "text": "Readable text...",
   "markdown": "# Example\n\nReadable markdown...",
   "links": ["https://example.com/about"],
+  "feedLinks": ["https://example.com/feed.xml"],
   "fetchedAt": "2026-06-30T00:00:00.000Z",
   "status": 200,
   "contentType": "text/html; charset=utf-8",
@@ -213,6 +229,8 @@ Each crawled page has this shape:
   "robotsAllowed": true
 }
 ```
+
+When a response is RSS/Atom and feed handling is enabled, `sourceType` is `"feed"` and the page also contains a bounded `feed` record with normalized items and parser provenance.
 
 ### Crawler Safety Defaults
 
@@ -228,6 +246,55 @@ The crawler:
 - Does not bypass login walls, paywalls, CAPTCHA, anti-bot systems, or authorization boundaries.
 
 `allowPrivateNetworks: true` is a trusted local opt-in for supported private ranges. It does not permit link-local metadata endpoints or otherwise unsafe ranges. Robots retrieval fails closed except when the origin definitively returns `404` or `410`.
+
+## Governed Sources
+
+Maqam 0.3 can route one logical research channel across ordered source backends while keeping the selected call at `ToolGateway`:
+
+```js
+import {
+  PolicyEngine,
+  ResearchSourceRegistry,
+  ToolGateway,
+  createRssAtomSourceAdapter,
+  defineResearchToolCaller
+} from "maqam";
+
+const source = createRssAtomSourceAdapter(readDocument);
+const gateway = new ToolGateway({
+  policyEngine: new PolicyEngine({
+    allowedTools: [source.toolName],
+    allowedOrigins: ["https://feeds.example.com"]
+  })
+});
+
+gateway.registerTool(source.toolName, source.read, {
+  effects: ["network:read"],
+  risk: "low"
+});
+
+const sources = new ResearchSourceRegistry({
+  adapters: [source],
+  toolCaller: defineResearchToolCaller({
+    call: gateway.call.bind(gateway)
+  })
+});
+
+const routed = await sources.route({
+  channel: "rss-atom",
+  input: { url: "https://feeds.example.com/engineering.xml" }
+}, { runId: "source_1" });
+```
+
+`route()` requires a bound caller. It selects by explicit backend preference, priority, and registration order; invokes `adapter.toolName`; normalizes the result; and records attempts. Policy, approval, authentication/authorization, crawler-security, robots, goal-scope, and call-limit failures are fatal and do not fall through. Ordinary source unavailability may try the next backend.
+
+Authenticated adapters require `allowAuthenticated: true` on the route request. The flag does not acquire or validate credentials. The host owns provider clients, tokens, rate limits, network controls, and permissions.
+
+Use `createWebCrawlerSourceAdapter(createCrawlerTool({...}))` to expose the bounded Maqam crawler as the fixed `research.web-crawler.direct` source tool. The adapter factory adds normalization and source identity only; it has no alternate fetch, login, cookie, or credential path. Register `source.read` at `source.toolName`, declare `network:read`, and keep the crawler's exact origin and budget ceilings in policy and context.
+
+`routeUngoverned()` performs an explicit direct read and normalization without gateway policy, approvals, call ceilings, or trace. Do not call it a governed route.
+
+Run bounded host-defined health checks with `await sources.doctor({ timeoutMs: 2000 })`. Checks report readiness only; timeout cancellation is cooperative, and Maqam cannot prove that arbitrary host code is offline or side-effect free. See [Governed Sources](governed-sources.md) for the full adapter, document, fallback, doctor, RSS/Atom, and security contracts.
 
 ## Framework SDK
 
@@ -853,6 +920,9 @@ const pages = await crawl({
   sameOrigin: true,
   allowedOrigins: ["https://example.com"],
   includeSitemaps: false,
+  includeFeeds: true,
+  maxFeedLinks: 10,
+  maxFeedItems: 50,
   obeyRobots: true,
   userAgent: "MyCrawler/1.0 (+https://example.com)",
   delayMs: 250,
@@ -886,6 +956,9 @@ Input fields:
 | `includeSitemaps` | `boolean` | Discover URLs from sitemaps. |
 | `maxSitemaps` | `number` | Maximum sitemap documents. |
 | `maxUrlsPerSitemap` | `number` | Maximum URL and nested-sitemap entries accepted per document. |
+| `includeFeeds` | `boolean` | Discover linked feeds and parse RSS/Atom responses. |
+| `maxFeedLinks` | `number` | Maximum feed links accepted from one HTML page. |
+| `maxFeedItems` | `number` | Maximum entries parsed from one feed. |
 | `obeyRobots` | `boolean` | Respect `robots.txt`. |
 | `allowPrivateNetworks` | `boolean` | Trusted opt-in for supported private ranges. Link-local and unsafe special ranges remain blocked. |
 | `userAgent` | `string` | Custom user agent. |
@@ -1394,7 +1467,7 @@ import { ApprovalQueue, createReleaseGateReport } from "maqam";
 
 const approvals = new ApprovalQueue();
 const artifact = {
-  filename: "maqam-0.2.4.tgz",
+  filename: "maqam-0.3.0.tgz",
   sizeBytes: 123456,
   integrity: `sha256:${"a".repeat(64)}`,
   gitCommit: "0123456789abcdef0123456789abcdef01234567"
@@ -1404,9 +1477,9 @@ const approval = approvals.requestApproval({
   reason: "Release candidate is ready.",
   subject: {
     packageName: "maqam",
-    version: "0.2.4",
+    version: "0.3.0",
     registry: "https://registry.npmjs.org/",
-    publishCommand: "npm publish --access public",
+    publishCommand: "npm publish --access public --ignore-scripts --provenance",
     artifactFilename: artifact.filename,
     artifactSizeBytes: artifact.sizeBytes,
     artifactIntegrity: artifact.integrity,
@@ -1416,9 +1489,9 @@ const approval = approvals.requestApproval({
 
 const report = createReleaseGateReport({
   packageName: "maqam",
-  version: "0.2.4",
+  version: "0.3.0",
   license: "MIT",
-  publishCommand: "npm publish --access public",
+  publishCommand: "npm publish --access public --ignore-scripts --provenance",
   registry: "https://registry.npmjs.org/",
   artifact,
   requiredFiles: {
@@ -1671,10 +1744,10 @@ npm test -- test/framework/policy.test.js
 
 ## Publishing
 
-Package maintainers can publish with:
+Package maintainers release through the protected trusted-publishing workflow after exact-artifact approval. The approved command is:
 
 ```bash
-npm publish --access public
+npm publish --access public --ignore-scripts --provenance
 ```
 
 Before publishing:
@@ -1688,7 +1761,7 @@ npm audit --omit=dev
 git status --short
 ```
 
-Capture the exact tarball filename, positive byte size, SHA integrity, and full Git commit, then obtain approval for that exact artifact. Publish from the reviewed repository directory, not by passing a local tarball path, so npm records the release commit without leaking a local `_resolved` path. Use an authenticated npm session or short-lived release token without storing credentials in repository files, package metadata, logs, or release evidence. Follow [the release checklist](release-checklist.md).
+Capture the exact tarball filename, positive byte size, npm integrity, independent SHA-256, and full Git commit, then obtain approval for that exact artifact. The GitHub environment must approve the matching artifact before OIDC publication. Do not put npm tokens or OTP values into repository files, workflow inputs, package metadata, logs, or release evidence. Follow [the release checklist](release-checklist.md) and [0.3.0 candidate record](release-0.3.0.md).
 
 ## Troubleshooting
 
@@ -1739,17 +1812,13 @@ Common causes:
 
 ### `npm publish` asks for OTP
 
-If the npm account or organization requires a one-time password, re-run with a current OTP from the configured authenticator:
+The current Maqam release path uses npm Trusted Publishing from the protected GitHub environment and should not use a reusable npm token or OTP. Stop rather than trying to bypass registry authentication. Verify that the npm trusted-publisher configuration matches this repository/workflow/environment and that the job has `id-token: write`.
 
-```bash
-npm publish --access public --otp=123456
-```
-
-Do not paste authentication tokens or OTP values into source files, package metadata, issue comments, or release evidence. Follow the current npm account policy; Maqam cannot bypass registry authentication requirements.
+Do not paste authentication tokens, bypass tokens, or OTP values into source files, workflow inputs, package metadata, issue comments, logs, or release evidence. Maqam cannot and must not bypass registry authentication requirements.
 
 ## Current Limitations
 
-Maqam `0.2.x` is still a local framework core:
+Maqam `0.3.0` remains a local framework core:
 
 - Evidence and approval queues are serializable but not backed by a durable database.
 - Workflow execution is sequential.
@@ -1759,6 +1828,9 @@ Maqam `0.2.x` is still a local framework core:
 - Provider-internal actions are bounded by provider sandboxes and permissions, not intercepted individually by Maqam.
 - No container, virtual machine, hosted control plane, tenant RBAC, or policy administration service is bundled.
 - The skill registry is metadata-only and a general evaluation harness is not yet included.
+- Governed Sources does not install provider tools, import browser cookies or sessions, log into platforms, synchronize provider approvals, or supply built-in social-channel backends.
+- The source doctor times out and validates checks but cannot sandbox arbitrary host JavaScript or prove that a custom check is offline.
+- The RSS/Atom parser has no network access. Its host-supplied reader still requires network policy, egress control, and credential isolation.
 
 ## Next Extensions
 

@@ -18,6 +18,26 @@ import {
   runToolAdapterConformance,
   createReleaseGateReport,
   createResearchWorkflow,
+  ResearchSourceRegistry,
+  ResearchSourceAuthenticationRequiredError,
+  ResearchSourceToolCallerRequiredError,
+  ResearchSourceUnavailableError,
+  RESEARCH_SOURCE_AUTHENTICATION_MODES,
+  RESEARCH_SOURCE_CHECK_STATUSES,
+  checkResearchSourceAdapter,
+  classifyResearchSourceError,
+  describeResearchSourceAdapter,
+  defineResearchSourceAdapter,
+  defineResearchToolCaller,
+  isFatalResearchSourceError,
+  isResearchSourceAdapter,
+  normalizeResearchDocument,
+  normalizeResearchDocuments,
+  runResearchSourceDoctor,
+  parseRssAtom,
+  createRssAtomResearchAdapter,
+  createRssAtomSourceAdapter,
+  createWebCrawlerSourceAdapter,
   crawl
 } from "../../src/index.js";
 
@@ -40,4 +60,27 @@ test("framework primitives are exported without removing crawler exports", () =>
   assert.equal(typeof createResearchWorkflow, "function");
   assert.equal(typeof createCrawlerTool, "function");
   assert.equal(typeof createReleaseGateReport, "function");
+  assert.equal(typeof ResearchSourceRegistry, "function");
+  assert.equal(typeof ResearchSourceAuthenticationRequiredError, "function");
+  assert.equal(typeof ResearchSourceToolCallerRequiredError, "function");
+  assert.equal(typeof ResearchSourceUnavailableError, "function");
+  assert.deepEqual([...RESEARCH_SOURCE_AUTHENTICATION_MODES], ["none", "required"]);
+  assert.deepEqual(
+    [...RESEARCH_SOURCE_CHECK_STATUSES],
+    ["ready", "degraded", "unavailable", "blocked", "error"]
+  );
+  assert.equal(typeof checkResearchSourceAdapter, "function");
+  assert.equal(typeof classifyResearchSourceError, "function");
+  assert.equal(typeof describeResearchSourceAdapter, "function");
+  assert.equal(typeof defineResearchSourceAdapter, "function");
+  assert.equal(typeof defineResearchToolCaller, "function");
+  assert.equal(typeof isFatalResearchSourceError, "function");
+  assert.equal(typeof isResearchSourceAdapter, "function");
+  assert.equal(typeof normalizeResearchDocument, "function");
+  assert.equal(typeof normalizeResearchDocuments, "function");
+  assert.equal(typeof runResearchSourceDoctor, "function");
+  assert.equal(typeof parseRssAtom, "function");
+  assert.equal(typeof createRssAtomResearchAdapter, "function");
+  assert.equal(typeof createRssAtomSourceAdapter, "function");
+  assert.equal(typeof createWebCrawlerSourceAdapter, "function");
 });

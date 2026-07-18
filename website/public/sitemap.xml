@@ -2,12 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://maqamagent.com/</loc></url>
   <url><loc>https://maqamagent.com/docs/</loc></url>
+  <url><loc>https://maqamagent.com/docs/sources/</loc></url>
   <url><loc>https://maqamagent.com/docs/productloop/</loc></url>
   <url><loc>https://maqamagent.com/docs/integrations/</loc></url>
   <url><loc>https://maqamagent.com/docs/benchmark/</loc></url>
   <url><loc>https://maqamagent.com/docs/security/</loc></url>
   <url><loc>https://maqamagent.com/why/</loc></url>
   <url><loc>https://maqamagent.com/roadmap/</loc></url>
+  <url><loc>https://maqamagent.com/releases/v0.3.0/</loc></url>
   <url><loc>https://maqamagent.com/releases/v0.2.4/</loc></url>
   <url><loc>https://maqamagent.com/community/</loc></url>
   <url><loc>https://maqamagent.com/articles/exact-agent-approvals/</loc></url>

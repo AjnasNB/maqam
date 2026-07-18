@@ -19,7 +19,8 @@ const REQUIRED_VERIFICATION_COMMANDS = ["npm test", "npm pack --dry-run"];
 const NPM_REGISTRY = "https://registry.npmjs.org/";
 const ALLOWED_PUBLISH_COMMANDS = new Set([
   "npm publish --access public",
-  "npm publish --access public --provenance"
+  "npm publish --access public --provenance",
+  "npm publish --access public --ignore-scripts --provenance"
 ]);
 const RELEASE_INPUT_KEYS = new Set([
   "packageName", "version", "license", "publishCommand", "registry", "artifact",

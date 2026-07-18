@@ -13,6 +13,9 @@ const integrations = readFileSync(new URL("../docs/integrations.md", import.meta
 const comparison = readFileSync(new URL("../docs/comparison.md", import.meta.url), "utf8");
 const benchmarking = readFileSync(new URL("../docs/benchmarking.md", import.meta.url), "utf8");
 const quickstart = readFileSync(new URL("../docs/quickstart.md", import.meta.url), "utf8");
+const governedSources = readFileSync(new URL("../docs/governed-sources.md", import.meta.url), "utf8");
+const migration03 = readFileSync(new URL("../docs/migration-0.3.md", import.meta.url), "utf8");
+const release03 = readFileSync(new URL("../docs/release-0.3.0.md", import.meta.url), "utf8");
 const roadmap = readFileSync(new URL("../ROADMAP.md", import.meta.url), "utf8");
 const technicalArticle = readFileSync(new URL("../docs/articles/exact-agent-approvals.md", import.meta.url), "utf8");
 const maqamBin = readFileSync(new URL("../bin/maqam.js", import.meta.url), "utf8");
@@ -20,7 +23,7 @@ const security = readFileSync(new URL("../SECURITY.md", import.meta.url), "utf8"
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.2.4");
+  assert.equal(packageJson.version, "0.3.0");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.author, "Ajnas NB");
   assert.equal(packageJson.type, "module");
@@ -50,6 +53,9 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.files.includes("docs/articles/exact-agent-approvals.md"));
   assert.ok(packageJson.files.includes("docs/articles/benchmarking-agent-governance.md"));
   assert.ok(packageJson.files.includes("docs/migration-0.2.md"));
+  assert.ok(packageJson.files.includes("docs/migration-0.3.md"));
+  assert.ok(packageJson.files.includes("docs/governed-sources.md"));
+  assert.ok(packageJson.files.includes("docs/release-0.3.0.md"));
   assert.ok(packageJson.files.includes("examples/"));
   assert.ok(packageJson.files.includes("benchmarks/"));
   assert.ok(packageJson.files.includes("ROADMAP.md"));
@@ -60,6 +66,8 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.keywords.includes("agent-framework"));
   assert.ok(packageJson.keywords.includes("governance"));
   assert.ok(packageJson.keywords.includes("release-gate"));
+  assert.ok(packageJson.keywords.includes("source-router"));
+  assert.ok(packageJson.keywords.includes("rss"));
   assert.equal(packageJson.dependencies["ipaddr.js"], "^2.4.0");
   assert.equal(packageJson.dependencies["@types/node"], "^20.19.43");
   assert.equal(packageJson.devDependencies.typescript, "^5.9.3");
@@ -101,6 +109,19 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(quickstart, /npm uninstall -g maqam/);
   assert.match(integrations, /runToolAdapterConformance/);
   assert.match(integrations, /does not bundle provider SDKs/);
+  assert.match(integrations, /Governed source adapters/);
+  assert.match(governedSources, /^# Governed Sources/m);
+  assert.match(governedSources, /routeUngoverned\(\)/);
+  assert.match(governedSources, /1494c2ab239e7355a77e7cceaf3271453a1f34b5/);
+  assert.match(governedSources, /No Agent Reach source code/);
+  assert.match(migration03, /^# Migrating To Maqam 0\.3/m);
+  assert.match(migration03, /--allowed-origin/);
+  assert.match(release03, /^# Maqam 0\.3\.0 Release Record/m);
+  assert.match(release03, /exact-artifact release record/i);
+  assert.match(readme, /0\.3\.0 release line/i);
+  assert.match(readme, /source metadata alone is not publication proof/i);
+  assert.match(quickstart, /npx -y maqam@0\.3\.0 demo approval/);
+  assert.doesNotMatch(quickstart, /maqam@0\.2\.4/);
   assert.match(comparison, /OpenAI Agents SDK/);
   assert.match(comparison, /LangGraph/);
   assert.match(roadmap, /^# Maqam Public Roadmap/m);
@@ -118,6 +139,7 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.ok(existsSync(new URL("../examples/govern-coding-agent.mjs", import.meta.url)));
   assert.ok(existsSync(new URL("../examples/govern-approved-write.mjs", import.meta.url)));
   assert.ok(existsSync(new URL("../examples/tool-adapter-ecosystem.mjs", import.meta.url)));
+  assert.ok(existsSync(new URL("../examples/governed-sources.mjs", import.meta.url)));
   assert.ok(existsSync(new URL("../docs/external-agents.md", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-logo.svg", import.meta.url)));
   assert.ok(existsSync(new URL("../app/assets/maqam-brand-board.png", import.meta.url)));
@@ -128,13 +150,15 @@ test("public docs and brand assets match Maqam identity", () => {
 
 test("release governance docs require approval before publishing", () => {
   assert.match(changelog, /^# Changelog/m);
+  assert.match(changelog, /## 0\.3\.0 - 2026-07-18/);
+  assert.match(changelog, /## 0\.2\.4 - 2026-07-17/);
   assert.match(changelog, /## 0\.2\.1 - 2026-07-15/);
   assert.match(changelog, /Fail-closed governance/);
   assert.match(releaseGuide, /^# Maqam Release Checklist/m);
   assert.match(releaseGuide, /npm test/);
   assert.match(releaseGuide, /npm pack --dry-run/);
-  assert.match(releaseGuide, /npm publish --access public/);
-  assert.match(releaseGuide, /explicit user approval/);
+  assert.match(releaseGuide, /npm publish --access public --ignore-scripts --provenance/);
+  assert.match(releaseGuide, /explicit maintainer approval/);
   assert.match(provenanceGuide, /^# Provenance and License Notes/m);
   assert.match(provenanceGuide, /original Ajnas NB implementation/i);
   assert.match(provenanceGuide, /No source code[\s\S]*was copied into Maqam/i);
@@ -142,10 +166,14 @@ test("release governance docs require approval before publishing", () => {
   assert.match(provenanceGuide, /undici/);
   assert.match(provenanceGuide, /Qwen-Agent/);
   assert.match(provenanceGuide, /PageAgent/);
+  assert.match(provenanceGuide, /Agent Reach/);
+  assert.match(provenanceGuide, /1494c2ab239e7355a77e7cceaf3271453a1f34b5/);
   assert.match(provenanceGuide, /MIT/);
   assert.match(releaseGuide, /artifactFilename/);
   assert.match(releaseGuide, /artifactSizeBytes/);
   assert.match(releaseGuide, /artifactIntegrity/);
+  assert.match(releaseGuide, /maqam@0\.3\.0/);
+  assert.match(releaseGuide, /trusted-publishing/i);
   assert.match(security, /^# Security Policy/m);
   assert.match(security, /approval/i);
   assert.match(security, /integrity-protected trusted state/i);

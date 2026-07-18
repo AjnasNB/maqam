@@ -64,18 +64,19 @@ Maqam evidence records contain source metadata, excerpts, hashes, and claim link
 
 | Project | Officially documented center | Meaningful overlap | Where it is broader or stronger today | Relationship to Maqam |
 | --- | --- | --- | --- | --- |
+| [Agent Reach](https://github.com/Panniantong/Agent-Reach) | A setup and diagnostics layer that helps agents reach multiple web and social information channels through installed tools and authenticated local capabilities. | Explicit source channels, ordered routing concepts, diagnostics, and agent-facing research access. | Broad platform coverage, automatic setup guidance, external-tool installation, and cookie/session-oriented access patterns. | Maqam 0.3 adopts only the general idea of explicit source descriptors and health reports. Maqam independently implements governed routing through `ToolGateway`, normalized documents, fatal-error stop rules, and no automatic login/cookie behavior. It does not claim equivalent channel coverage. |
 | [Crawl4AI](https://github.com/unclecode/crawl4ai) | Browser-backed crawling, sessions, hooks, deep traversal, Markdown generation, and structured or model-assisted extraction; see [deep crawling](https://docs.crawl4ai.com/core/deep-crawling/) and [extraction](https://docs.crawl4ai.com/extraction/no-llm-strategies/). | Collecting web material for agent workflows, URL filtering, robots configuration, and source-oriented Markdown. | JavaScript rendering, browser sessions, extraction strategies, deep crawl options, and deployment depth. | A future separately installed adapter can route Crawl4AI through Maqam policy and evidence. The built-in Maqam crawler is intentionally smaller and HTTP-only. |
 | [Firecrawl](https://github.com/firecrawl/firecrawl) | Search, scrape, crawl, map, interact, structured extraction, document parsing, APIs, SDKs, CLI, and MCP. | Web collection and structured context for agents. | Full hosted/self-hosted web-context platform, browser-backed capabilities, search/map APIs, document processing, and operational scale. | Prefer an API adapter over incorporating the core. Firecrawl is a much broader crawl product; it does not replace Maqam's general approval/evidence boundary. |
 | [Crawlee](https://github.com/apify/crawlee) | Production crawling with HTTP and Playwright/Puppeteer, request queues, storage, sessions, proxies, retries, hooks, and autoscaling. | Crawl limits, request lifecycle, and browser/HTTP collection. | Mature crawler operations, persistent queues and storage, browser engines, sessions, proxies, and autoscaling. | Crawlee is a strong optional engine beneath a governed adapter. Maqam is not attempting to reproduce Crawlee's operational feature set. |
 | [Browser Use](https://github.com/browser-use/browser-use) | Model-driven browser navigation, interaction, extraction, custom tools, and persistent profiles. | Agent-driven browser tools, allowed domains, and sensitive-data controls. | Interactive browser automation and model-driven navigation. | A browser worker can be governed at its adapter boundary, but Maqam cannot see or prevent every internal browser action unless the adapter exposes and enforces it. |
 
-License boundaries deserve special attention. Firecrawl states that its core is [AGPL-3.0](https://github.com/firecrawl/firecrawl#license), with some SDK/UI components under different terms. Crawlee publishes [Apache-2.0](https://github.com/apify/crawlee/blob/master/LICENSE.md). Browser Use publishes [MIT](https://github.com/browser-use/browser-use/blob/main/LICENSE). The reviewed [Crawl4AI license](https://github.com/unclecode/crawl4ai/blob/main/LICENSE) contains Apache-2.0 text plus an additional prominent-attribution condition; obtain legal review before incorporating or redistributing code.
+License boundaries deserve special attention. Agent Reach was inspected at commit `1494c2ab239e7355a77e7cceaf3271453a1f34b5` and its repository license is MIT. Firecrawl states that its core is [AGPL-3.0](https://github.com/firecrawl/firecrawl#license), with some SDK/UI components under different terms. Crawlee publishes [Apache-2.0](https://github.com/apify/crawlee/blob/master/LICENSE.md). Browser Use publishes [MIT](https://github.com/browser-use/browser-use/blob/main/LICENSE). The reviewed [Crawl4AI license](https://github.com/unclecode/crawl4ai/blob/main/LICENSE) contains Apache-2.0 text plus an additional prominent-attribution condition; obtain legal review before incorporating or redistributing code. No Agent Reach source or other compared-project source was copied into Maqam.
 
 ## Capability Summary
 
 The table below describes product emphasis, not exhaustive feature support. "Application-supplied" means the surrounding application can build the capability, not that the project ships Maqam-equivalent semantics.
 
-| Capability | Maqam 0.2.x | Microsoft AGT | HumanLayer legacy repo | LangGraph | OpenAI Agents SDK | OPA | Firecrawl/Crawl4AI |
+| Capability | Maqam 0.3.0 candidate | Microsoft AGT | HumanLayer legacy repo | LangGraph | OpenAI Agents SDK | OPA | Firecrawl/Crawl4AI |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Primary product center | Tool governance boundary | Broad agent governance | Historical human review; now deprecated | Durable orchestration | Agent runtime | General policy engine | Web acquisition |
 | Exact run/tool/input approval binding | Built in at `ToolGateway` | Review its current approval contract for the deployment | Deprecated repository | First-class interrupts; the application defines its review payload and exact receipt contract | First-class tool approval; verify its approval item/run-state contract against the required binding | Application-supplied | Not product center |
@@ -83,6 +84,7 @@ The table below describes product emphasis, not exhaustive feature support. "App
 | Durable restart-safe state | Not yet | Broader platform scope; verify selected components | Deprecated repository | Core strength | Sessions are supported; verify required durability | Policy data/bundles, not workflow state | Crawl-job dependent |
 | Claim-to-source records | Built in, in process | Audit-focused; verify claim-level requirements | Deprecated repository | Application-supplied | Application-supplied | Not product center | Source content/citations vary by product |
 | Browser or advanced crawling | Basic HTTP crawler | Integration-oriented | Deprecated repository | Via tools | Via tools | Not product center | Core strength |
+| Ordered governed source routing | Built in for registered host adapters; normalized documents and fatal-error stop rules | Verify current connector/router surface | Deprecated repository | Application-supplied | Application-supplied | Not product center | Source selection varies by product |
 | Hard host sandbox | No | Sandbox integrations are in scope | Deprecated repository | No universal host sandbox | No universal host sandbox | No | Deployment dependent |
 
 Do not infer absence from an empty cell in any marketing matrix. Verify the current version, deployment, and exact guarantee needed for the use case.
@@ -107,6 +109,8 @@ Choose **OPA** or **Invariant** when an expressive, independently managed policy
 
 Choose **Langfuse** or **Phoenix** when observability, evaluation, experiments, and operations are the main need.
 
+Choose **Agent Reach** when the main goal is broad agent access to many installed web/social channels and its setup, authentication, and platform terms fit the deployment.
+
 Choose **Firecrawl**, **Crawl4AI**, **Crawlee**, or **Browser Use** when web acquisition or browser automation is the product center.
 
 ## Maqam, ProductLoop OS, And Cockroach Crawler
@@ -126,6 +130,8 @@ A user who wants the governance boundary should start with `npm install maqam`. 
 - Evidence content hashes and claim links record provenance. They do not establish source trustworthiness or semantic truth.
 - Only calls routed through registered adapters are governed. Provider-internal or unregistered actions remain bounded by provider and host controls.
 - The built-in crawler does not render JavaScript, drive a browser, rotate proxies, parse office documents, or operate a distributed persistent queue.
+- Governed Sources does not install provider tools, import browser cookies/sessions, log into social platforms, or bundle ready-made provider channel adapters.
+- `routeUngoverned()` is an explicit direct path and has no `ToolGateway` policy, approval, call ceiling, or trace guarantee.
 - SSRF defenses reduce risk for the covered network paths; they do not replace deployment egress controls, authentication, Host/origin allowlists, and isolation.
 - Successful tests are evidence for the cases executed, not proof that the software has no defects.
 

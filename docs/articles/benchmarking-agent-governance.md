@@ -105,31 +105,31 @@ It is not a concurrency or capacity measurement.
 
 MGES also pairs the direct and governed estimates from each round and reports the median absolute addition. It intentionally does not promote the governed/direct ratio. When the baseline intentionally does almost no work, a ratio can be numerically large while conveying little useful engineering information.
 
-## The first passing MGES v1 result
+## The current MGES v1.1 result
 
-The current clean-source artifact is [`2026-07-16-mges-performance-windows-node24.json`](../../benchmarks/results/2026-07-16-mges-performance-windows-node24.json).
+The current clean-source artifact is [`2026-07-18-mges-performance-windows-node24.json`](../../benchmarks/results/2026-07-18-mges-performance-windows-node24.json).
 
 | Field | Result |
 |---|---:|
 | Runtime and host | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
 | Observations | 30 fresh processes per variant |
-| Governed median | **127.498 microseconds/call** |
-| 95% bootstrap interval for the sample median | **126.334-128.942 microseconds/call** |
-| Sequential rate at the median | **7,843.288 calls/second** |
-| Paired added median | **127.422 microseconds/call** |
-| Governed coefficient of variation | **5.572%** |
-| Direct coefficient of variation | **8.890%** |
-| Project publication checks | **PASS (5/5)** |
+| Governed median | **124.303 microseconds/call** |
+| 95% bootstrap interval for the sample median | **123.712-125.695 microseconds/call** |
+| Sequential rate at the median | **8,044.843 calls/second** |
+| Paired added median | **124.245 microseconds/call** |
+| Governed coefficient of variation | **2.010%** |
+| Direct coefficient of variation (diagnostic) | **3.520%** |
+| Project publication checks | **PASS (4/4 required; direct diagnostic also passed)** |
 
-The suite's project-defined publication checks require 30 observations, coefficient of variation no greater than 10% for both variants, and median timed batches of at least 100 ms. These are stability gates chosen for this suite, not an industry acceptance rule.
+MGES v1.1 criteria version 2 requires 30 observations, governed coefficient of variation no greater than 10%, and median timed batches of at least 100 ms for both variants. Direct-path CV remains a reported diagnostic because the near-zero baseline is dominated by cross-process CPU-frequency noise; no direct observation is removed. These are stability gates chosen for this suite, not an industry acceptance rule.
 
-An earlier calibrated run failed the stability gate because several large outliers drove the governed coefficient of variation to 85.33%. That result was withheld from headline use. The timed batches were lengthened before the passing run so allocation and garbage-collection behavior would be represented more consistently. No observations were deleted and the declared thresholds were not weakened.
+Earlier review runs showed why raw stability gates matter: uncontrolled background load can move cross-process CV above the declared ceiling even when the fixture is unchanged. No observations were deleted. Criteria version 2 keeps the product-path 10% ceiling, both minimum batch-duration gates, and all raw direct diagnostics while no longer treating the near-zero direct baseline as a product stability gate.
 
-The passing artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It records clean source commit `44c198f9eab1ea3a2dedb1f784413a2733b7745d` and `workingTreeDirty: false`. Later release commits may change files outside the measured path; any change to a fingerprinted source requires another run.
+The passing artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It records clean source commit `bceaebfa2a4059bc63acd23eccf4fafee794a295` and `workingTreeDirty: false`. Later release commits may change files outside the measured path; any change to a fingerprinted source requires another run.
 
 ## Conformance is not another latency metric
 
-The MGES governance-boundary profile executes 12 deterministic cases:
+The MGES governance-boundary profile executes 14 deterministic cases:
 
 - deny-by-default gateway construction;
 - denial before handler dispatch;
@@ -142,9 +142,11 @@ The MGES governance-boundary profile executes 12 deterministic cases:
 - cross-run evidence rejection for claim support;
 - atomic multi-approval consumption;
 - run/task/tool-bound evidence attribution;
-- coded, redacted denial traces.
+- coded, redacted denial traces;
+- fatal source-policy denial with zero backend dispatch; and
+- ordered fallback after ordinary source unavailability with normalized provenance.
 
-The current machine-readable artifact, [`2026-07-16-mges-conformance-windows-node24.json`](../../benchmarks/results/2026-07-16-mges-conformance-windows-node24.json), records 12/12 passing fixtures.
+The current machine-readable artifact, [`2026-07-18-mges-conformance-windows-node24.json`](../../benchmarks/results/2026-07-18-mges-conformance-windows-node24.json), records 14/14 passing fixtures.
 
 The suite does not collapse those cases into a percentage security score. Equal weighting would imply that the cases have equal risk and coverage, which has not been established. Case durations are diagnostic only.
 
@@ -212,10 +214,10 @@ Artifacts could be signed and indexed by suite version, source fingerprint, clea
 
 A defensible compact statement is:
 
-> MGES v1 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 127.498 microseconds median per governed call (95% bootstrap interval for the sample median: 126.334-128.942; 30 fresh-process observations; CV 5.572%). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
+> MGES v1.1.0 local-call profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 124.303 microseconds median per governed call (95% bootstrap interval for the sample median: 123.712-125.695; 30 fresh-process observations; governed CV 2.010%; required checks PASS). Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
 
 For conformance:
 
-> MGES v1 governance-boundary profile: 12/12 project-defined fixtures passed on the recorded source fingerprint. This is regression evidence, not a security score, penetration test or certification.
+> MGES v1.1.0 governance-boundary profile: 14/14 project-defined fixtures passed on the recorded source fingerprint. This is regression evidence, not a security score, penetration test or certification.
 
 The raw JSON should accompany either statement. A number without its objective, fixture, environment, uncertainty, limitations and artifact is not a benchmark report; it is an anecdote.

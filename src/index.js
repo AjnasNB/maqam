@@ -3,19 +3,21 @@ import * as cheerio from "cheerio";
 import robotsParser from "robots-parser";
 import TurndownService from "turndown";
 import { createCrawlerSecurityError, withPinnedFetch } from "./crawler/security.js";
+import { parseRssAtom } from "./research/adapters/rss.js";
 import {
   snapshotJsonValue,
   snapshotOwnDataArray,
   snapshotOwnDataRecord
 } from "./framework/boundary.js";
 
-const DEFAULT_USER_AGENT = "Maqam/0.2 (+https://github.com/AjnasNB/maqam)";
+const DEFAULT_USER_AGENT = "Maqam/0.3 (+https://github.com/AjnasNB/maqam)";
 const DEFAULT_MAX_BYTES = 3 * 1024 * 1024;
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const CRAWL_OPTION_KEYS = [
   "seeds", "urls", "maxPages", "maxSeeds", "maxRequests", "maxQueue",
   "maxLinksPerPage", "maxDepth", "concurrency", "sameOrigin", "allowedOrigins",
   "includeSitemaps", "maxSitemaps", "maxUrlsPerSitemap", "obeyRobots",
+  "includeFeeds", "maxFeedLinks", "maxFeedItems",
   "allowPrivateNetworks", "userAgent", "delayMs", "timeoutMs", "maxDurationMs",
   "maxBytes", "maxRedirects", "maxRetries", "retryDelayMs", "signal", "dnsLookup",
   "onPage", "onError"
@@ -27,7 +29,7 @@ const CRAWLER_CONTEXT_KEYS = [
   "outputs", "trace"
 ];
 const CRAWL_BOOLEAN_KEYS = [
-  "sameOrigin", "includeSitemaps", "obeyRobots", "allowPrivateNetworks"
+  "sameOrigin", "includeSitemaps", "includeFeeds", "obeyRobots", "allowPrivateNetworks"
 ];
 
 function snapshotStringArray(value, label) {
@@ -51,6 +53,19 @@ function snapshotCrawlerOptions(value = {}, label = "Crawler options") {
   for (const key of CRAWL_BOOLEAN_KEYS) {
     if (snapshot[key] !== undefined && typeof snapshot[key] !== "boolean") {
       throw new TypeError(`${label}.${key} must be a boolean.`);
+    }
+  }
+  for (const [key, minimum, maximum] of [
+    ["maxFeedLinks", 1, 200],
+    ["maxFeedItems", 1, 1_000]
+  ]) {
+    if (snapshot[key] !== undefined
+      && (!Number.isSafeInteger(snapshot[key])
+        || snapshot[key] < minimum
+        || snapshot[key] > maximum)) {
+      throw new TypeError(
+        `${label}.${key} must be a safe integer between ${minimum} and ${maximum}.`
+      );
     }
   }
   if (snapshot.userAgent !== undefined && typeof snapshot.userAgent !== "string") {
@@ -223,19 +238,28 @@ function normalizeOptions(input, seedCount) {
     throw new TypeError("userAgent must be 1-256 characters without line breaks.");
   }
 
+  const sameOriginOnly = input.sameOrigin !== false;
+  const allowedOrigins = normalizeAllowedOrigins(input.allowedOrigins || []);
+  if (!sameOriginOnly && allowedOrigins.length === 0) {
+    throw new TypeError("sameOrigin=false requires a non-empty allowedOrigins list.");
+  }
+
   return {
     maxPages,
     maxSeeds,
     maxRequests: integerOption(input.maxRequests, "maxRequests", Math.min(50_000, Math.max(50, maxPages * 8)), 1, 50_000),
     maxQueue: integerOption(input.maxQueue, "maxQueue", Math.min(100_000, Math.max(100, maxPages * 20)), 1, 100_000),
-    maxLinksPerPage: integerOption(input.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 20_000),
+    maxLinksPerPage: integerOption(input.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 10_000),
     maxDepth: integerOption(input.maxDepth, "maxDepth", 20, 0, 100),
     concurrency: integerOption(input.concurrency, "concurrency", 4, 1, 64),
-    sameOrigin: input.sameOrigin !== false,
-    allowedOrigins: normalizeAllowedOrigins(input.allowedOrigins || []),
+    sameOrigin: sameOriginOnly,
+    allowedOrigins,
     includeSitemaps: input.includeSitemaps === true,
     maxSitemaps: integerOption(input.maxSitemaps, "maxSitemaps", 20, 0, 1_000),
     maxUrlsPerSitemap: integerOption(input.maxUrlsPerSitemap, "maxUrlsPerSitemap", 5_000, 1, 50_000),
+    includeFeeds: input.includeFeeds === true,
+    maxFeedLinks: integerOption(input.maxFeedLinks, "maxFeedLinks", 20, 1, 200),
+    maxFeedItems: integerOption(input.maxFeedItems, "maxFeedItems", 100, 1, 1_000),
     obeyRobots: input.obeyRobots !== false,
     allowPrivateNetworks: input.allowPrivateNetworks === true,
     userAgent,
@@ -469,25 +493,68 @@ function extractLinks($, baseUrl, maxLinks) {
   return [...links];
 }
 
+function extractFeedLinks($, baseUrl, maxLinks) {
+  const links = new Set();
+  $("link[href]").each((_, element) => {
+    if (links.size >= maxLinks) return false;
+    const rel = ($(element).attr("rel") || "").toLowerCase().split(/\s+/).filter(Boolean);
+    const type = ($(element).attr("type") || "").toLowerCase().split(";", 1)[0].trim();
+    if (!rel.includes("alternate") || !["application/rss+xml", "application/atom+xml"].includes(type)) {
+      return undefined;
+    }
+    const resolved = toUrl($(element).attr("href"), baseUrl);
+    if (resolved && isHttpUrl(resolved)) links.add(normalizeUrl(resolved));
+    return undefined;
+  });
+  return [...links];
+}
+
 function cleanForExtraction($) {
   $("script, style, noscript, template, svg, canvas, iframe, object, embed").remove();
   $("[hidden], [aria-hidden='true']").remove();
 }
 
+function sanitizeMarkdownUrls($, baseUrl) {
+  $("a[href]").each((_, element) => {
+    const resolved = toUrl($(element).attr("href"), baseUrl);
+    if (!resolved || !isHttpUrl(resolved)) {
+      $(element).replaceWith($(element).contents());
+      return;
+    }
+    $(element).attr("href", normalizeUrl(resolved));
+  });
+  $("img[src]").each((_, element) => {
+    const resolved = toUrl($(element).attr("src"), baseUrl);
+    if (!resolved || !isHttpUrl(resolved)) {
+      $(element).remove();
+      return;
+    }
+    $(element).attr("src", normalizeUrl(resolved));
+  });
+}
+
 export function extractPage(html, url, options = {}) {
   options = snapshotOwnDataRecord(options, {
     label: "extractPage options",
-    recognizedKeys: ["maxLinksPerPage"]
+    recognizedKeys: ["maxLinksPerPage", "maxFeedLinks"]
   });
+  if (!isHttpUrl(url)) throw new TypeError("extractPage url must be an HTTP(S) URL.");
+  url = normalizeUrl(url);
   const $ = cheerio.load(html);
   cleanForExtraction($);
+  sanitizeMarkdownUrls($, url);
 
   const title = ($("title").first().text() || $("h1").first().text() || "").trim().replace(/\s+/g, " ");
   const description = ($("meta[name='description']").attr("content") || "").trim();
   const h1 = $("h1").first().text().trim().replace(/\s+/g, " ");
-  const canonical = toUrl($("link[rel='canonical']").attr("href") || url, url);
-  const maxLinks = integerOption(options.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 20_000);
+  const canonicalCandidate = toUrl($("link[rel='canonical']").attr("href") || url, url);
+  const canonical = canonicalCandidate && isHttpUrl(canonicalCandidate)
+    ? normalizeUrl(canonicalCandidate)
+    : url;
+  const maxLinks = integerOption(options.maxLinksPerPage, "maxLinksPerPage", 2_000, 1, 10_000);
   const links = extractLinks($, url, maxLinks);
+  const maxFeedLinks = integerOption(options.maxFeedLinks, "maxFeedLinks", 20, 1, 200);
+  const feedLinks = extractFeedLinks($, url, maxFeedLinks);
   const language = ($("html").attr("lang") || "").trim() || null;
 
   const main = $("main, article, [role='main']").first();
@@ -503,6 +570,7 @@ export function extractPage(html, url, options = {}) {
   const markdown = turndown.turndown(htmlFragment).replace(/\n{3,}/g, "\n\n").trim();
 
   return {
+    sourceType: "web",
     url,
     canonical,
     title,
@@ -512,7 +580,82 @@ export function extractPage(html, url, options = {}) {
     text,
     markdown,
     links,
+    feedLinks,
     fetchedAt: new Date().toISOString()
+  };
+}
+
+function isXmlWhitespaceCode(code) {
+  return code === 0x09 || code === 0x0a || code === 0x0d || code === 0x20 || code === 0xfeff;
+}
+
+function skipXmlWhitespace(value, start) {
+  let offset = start;
+  while (offset < value.length && isXmlWhitespaceCode(value.charCodeAt(offset))) offset += 1;
+  return offset;
+}
+
+function leadingFeedElementOffset(value) {
+  let offset = skipXmlWhitespace(value, 0);
+  if (value.slice(offset, offset + 5).toLowerCase() === "<?xml") {
+    const declarationEnd = value.indexOf("?>", offset + 5);
+    if (declarationEnd === -1) return -1;
+    offset = skipXmlWhitespace(value, declarationEnd + 2);
+  }
+  while (value.startsWith("<!--", offset)) {
+    const commentEnd = value.indexOf("-->", offset + 4);
+    if (commentEnd === -1) return -1;
+    offset = skipXmlWhitespace(value, commentEnd + 3);
+  }
+  return offset;
+}
+
+function startsWithFeedElement(value, offset, name) {
+  const prefix = `<${name}`;
+  if (value.slice(offset, offset + prefix.length).toLowerCase() !== prefix) return false;
+  const boundary = value.charCodeAt(offset + prefix.length);
+  return boundary === 0x3e || isXmlWhitespaceCode(boundary);
+}
+
+function looksLikeRssAtom(text, contentType) {
+  if (/application\/(?:rss|atom)\+xml/i.test(contentType || "")) return true;
+  const sample = String(text).slice(0, 4_096);
+  const offset = leadingFeedElementOffset(sample);
+  return offset !== -1
+    && (startsWithFeedElement(sample, offset, "rss") || startsWithFeedElement(sample, offset, "feed"));
+}
+
+function feedToPage(feed, fetchedAt) {
+  const textSections = [];
+  const markdownSections = [];
+  if (feed.title) {
+    textSections.push(feed.title);
+    markdownSections.push(`# ${feed.title}`);
+  }
+  if (feed.description) {
+    textSections.push(feed.description);
+    markdownSections.push(feed.description);
+  }
+  for (const item of feed.items) {
+    const itemText = item.text || item.title || item.url;
+    textSections.push([item.title, itemText].filter(Boolean).join("\n"));
+    const body = item.markdown || item.text || "";
+    markdownSections.push(`## [${item.title || item.url}](${item.url})${body ? `\n\n${body}` : ""}`);
+  }
+  return {
+    sourceType: "feed",
+    url: feed.sourceUrl,
+    canonical: feed.sourceUrl,
+    title: feed.title || "",
+    description: feed.description || "",
+    h1: feed.title || "",
+    language: feed.language || null,
+    text: textSections.join("\n\n").trim(),
+    markdown: markdownSections.join("\n\n").trim(),
+    links: feed.items.map((item) => item.url),
+    feedLinks: [],
+    feed,
+    fetchedAt
   };
 }
 
@@ -754,9 +897,16 @@ export async function crawlDetailed(input = {}) {
         if (seenFinal.has(result.finalUrl)) return null;
         seenFinal.add(result.finalUrl);
 
-        const page = extractPage(result.text, result.finalUrl, {
-          maxLinksPerPage: options.maxLinksPerPage
-        });
+        const fetchedAt = new Date().toISOString();
+        const page = looksLikeRssAtom(result.text, result.contentType)
+          ? feedToPage(parseRssAtom(result.text, result.finalUrl, {
+            maxItems: options.maxFeedItems,
+            maxInputBytes: Math.min(10 * 1024 * 1024, Math.max(1_024, options.maxBytes))
+          }), fetchedAt)
+          : extractPage(result.text, result.finalUrl, {
+            maxLinksPerPage: options.maxLinksPerPage,
+            maxFeedLinks: options.maxFeedLinks
+          });
         page.status = result.status;
         page.contentType = result.contentType;
         page.bytes = result.bytes;
@@ -766,7 +916,7 @@ export async function crawlDetailed(input = {}) {
         page.redirectChain = result.redirectChain;
         page.etag = result.etag;
         page.lastModified = result.lastModified;
-        page.robotsAllowed = true;
+        if (options.obeyRobots) page.robotsAllowed = true;
         return page;
       } catch (error) {
         if (options.signal?.aborted) throw abortError(options.signal);
@@ -803,6 +953,9 @@ export async function crawlDetailed(input = {}) {
       }
       if (page.depth < options.maxDepth) {
         for (const link of page.links) enqueue(link, page.depth + 1, page.url);
+        if (options.includeFeeds) {
+          for (const feedLink of page.feedLinks) enqueue(feedLink, page.depth + 1, page.url);
+        }
       }
     }
   }
@@ -825,7 +978,13 @@ export async function crawlDetailed(input = {}) {
 }
 
 export async function crawl(input = {}) {
-  return (await crawlDetailed(input)).pages;
+  const result = await crawlDetailed(input);
+  if (result.pages.length === 0 && result.stats.skippedByRobots > 0) {
+    const error = new Error("robots.txt denied every usable crawl result.");
+    error.code = "ROBOTS_DENIED";
+    throw error;
+  }
+  return result.pages;
 }
 
 export { discoverSitemapUrls, normalizeUrl };
@@ -854,6 +1013,30 @@ export {
 export { createReleaseGateReport } from "./framework/release-gate.js";
 export { createResearchWorkflow } from "./framework/research-workflow.js";
 export { classifyIpAddress, isPublicIpAddress, resolveUrlTarget } from "./crawler/security.js";
+export {
+  normalizeResearchDocument,
+  normalizeResearchDocuments,
+  defineResearchSourceAdapter,
+  describeResearchSourceAdapter,
+  isResearchSourceAdapter,
+  RESEARCH_SOURCE_AUTHENTICATION_MODES,
+  classifyResearchSourceError,
+  isFatalResearchSourceError,
+  ResearchSourceAuthenticationRequiredError,
+  ResearchSourceToolCallerRequiredError,
+  ResearchSourceUnavailableError,
+  checkResearchSourceAdapter,
+  runResearchSourceDoctor,
+  RESEARCH_SOURCE_CHECK_STATUSES,
+  defineResearchToolCaller,
+  ResearchSourceRegistry,
+  createWebCrawlerSourceAdapter
+} from "./research/index.js";
+export {
+  parseRssAtom,
+  createRssAtomResearchAdapter,
+  createRssAtomSourceAdapter
+} from "./research/adapters/rss.js";
 
 function boundedNumber(requested, configured, fallback, mode = "max") {
   const boundary = configured ?? fallback;
@@ -926,6 +1109,8 @@ export function createCrawlerTool(defaultOptions = {}) {
       maxRetries: boundedNumber(input.maxRetries, configured.maxRetries, 2),
       maxSitemaps: boundedNumber(input.maxSitemaps, configured.maxSitemaps, 20),
       maxUrlsPerSitemap: boundedNumber(input.maxUrlsPerSitemap, configured.maxUrlsPerSitemap, 5_000),
+      maxFeedLinks: boundedNumber(input.maxFeedLinks, configured.maxFeedLinks, 20),
+      maxFeedItems: boundedNumber(input.maxFeedItems, configured.maxFeedItems, 100),
       retryDelayMs: boundedNumber(input.retryDelayMs, configured.retryDelayMs, 250, "min"),
       sameOrigin,
       obeyRobots: configured.obeyRobots === false ? input.obeyRobots === true : true,
@@ -933,6 +1118,7 @@ export function createCrawlerTool(defaultOptions = {}) {
       allowedOrigins,
       userAgent: configured.userAgent || input.userAgent,
       includeSitemaps: input.includeSitemaps === true && configured.includeSitemaps !== false,
+      includeFeeds: input.includeFeeds === true && configured.includeFeeds !== false,
       signal: signals.length > 1 ? AbortSignal.any(signals) : signals[0] || null,
       dnsLookup: configured.dnsLookup || null,
       onPage: configured.onPage || null,

@@ -51,7 +51,7 @@ try {
   if (
     packed.length !== 1
     || packed[0]?.name !== "maqam"
-    || packed[0]?.version !== "0.2.4"
+    || packed[0]?.version !== "0.3.0"
     || !packed[0]?.filename
   ) {
     throw new Error("npm pack did not report exactly one Maqam artifact.");
@@ -65,7 +65,8 @@ try {
     type: "module"
   }, null, 2));
   await writeFile(join(consumerDirectory, "consumer.ts"), [
-    "import { AgentRuntime, PolicyEngine, ToolGateway, crawl, defineToolAdapter, registerToolAdapter, runToolAdapterConformance } from \"maqam\";",
+    "import { AgentRuntime, PolicyEngine, ResearchSourceRegistry, ToolGateway, crawl, createCrawlerTool, createRssAtomResearchAdapter, createRssAtomSourceAdapter, createWebCrawlerSourceAdapter, defineResearchSourceAdapter, defineResearchToolCaller, parseRssAtom, registerToolAdapter, defineToolAdapter, runToolAdapterConformance } from \"maqam\";",
+    "import type { ResearchSourceCheckInput, ResearchSourceCheckOutput, ResearchSourceErrorClassification, ResearchSourceReadHandler } from \"maqam\";",
     "import { createMaqamServer } from \"maqam/server\";",
     "void AgentRuntime;",
     "void crawl;",
@@ -73,6 +74,49 @@ try {
     "const adapter = defineToolAdapter({ name: \"fixture.echo\", transport: \"function\", description: \"Echo a typed fixture.\", effects: [], risk: \"low\", invoke: async (input: { value: string }) => ({ value: input.value }) });",
     "registerToolAdapter(gateway, adapter);",
     "void runToolAdapterConformance(adapter, { input: { value: \"ok\" }, verifyOutput: (output) => output.value === \"ok\" });",
+    "const sourceAdapter = defineResearchSourceAdapter({ id: \"fixture.web\", channel: \"web\", toolName: \"source.web.fixture\", capabilities: [\"read\"], read: async () => [{ uri: \"https://example.com/\", text: \"fixture\" }] });",
+    "const sourceRead: ResearchSourceReadHandler | null = sourceAdapter.read;",
+    "void sourceRead;",
+    "void defineResearchSourceAdapter(sourceAdapter);",
+    "// @ts-expect-error A host check message must be a string when it is provided.",
+    "const invalidCheckMessage: ResearchSourceCheckOutput = { status: \"ready\", message: null };",
+    "void invalidCheckMessage;",
+    "const sourceCaller = defineResearchToolCaller({ call: async () => [{ uri: \"https://example.com/\", text: \"fixture\" }] });",
+    "const sources = new ResearchSourceRegistry({ adapters: [sourceAdapter], toolCaller: sourceCaller });",
+    "void sources.route({ channel: \"web\", input: { url: \"https://example.com/\" } });",
+    "const parsedFeed = parseRssAtom('<rss version=\"2.0\"><channel><title>x</title></channel></rss>', \"https://example.com/feed.xml\");",
+    "const parserHasNoNetwork: false = parsedFeed.provenance.networkAccess;",
+    "void parserHasNoNetwork;",
+    "// @ts-expect-error Parsed feed items are immutable output.",
+    "parsedFeed.items.push(parsedFeed.items[0]);",
+    "// @ts-expect-error Parsed provenance is immutable output.",
+    "parsedFeed.provenance.networkAccess = false;",
+    "const readFeed = createRssAtomResearchAdapter(async () => '<rss version=\"2.0\"><channel><title>x</title></channel></rss>');",
+    "void readFeed({ url: \"https://example.com/feed.xml\" }).then((feed) => {",
+    "  const parserNetworkAccess: false = feed.provenance.parserNetworkAccess;",
+    "  const retrieval: \"host-supplied-reader\" = feed.provenance.retrieval;",
+    "  const retrievalNetworkAccess: \"host-defined\" = feed.provenance.retrievalNetworkAccess;",
+    "  void parserNetworkAccess; void retrieval; void retrievalNetworkAccess;",
+    "  // @ts-expect-error Reader provenance deliberately does not claim retrieval was offline.",
+    "  void feed.provenance.networkAccess;",
+    "  // @ts-expect-error Reader feed provenance is immutable output.",
+    "  feed.provenance.retrieval = \"host-supplied-reader\";",
+    "});",
+    "const inspectCheckInput = (input: ResearchSourceCheckInput) => {",
+    "  void input.signal.aborted;",
+    "  // @ts-expect-error Source check input is a frozen host boundary.",
+    "  input.signal = null;",
+    "};",
+    "void inspectCheckInput;",
+    "const inspectSourceError = (classification: ResearchSourceErrorClassification) => {",
+    "  // @ts-expect-error Classified error details are immutable output.",
+    "  classification.error.details.reason = \"mutated\";",
+    "};",
+    "void inspectSourceError;",
+    "void createRssAtomSourceAdapter(async () => '<rss version=\"2.0\"><channel><title>x</title></channel></rss>');",
+    "void createWebCrawlerSourceAdapter(async () => [{ url: \"https://example.com/\", text: \"minimal host page\" }]);",
+    "void createWebCrawlerSourceAdapter(crawl);",
+    "void createWebCrawlerSourceAdapter(createCrawlerTool());",
     "const server = createMaqamServer();",
     "server.close();",
     ""
@@ -97,7 +141,7 @@ try {
     join(consumerDirectory, "node_modules", "maqam", "package.json"),
     "utf8"
   ));
-  if (installed.version !== "0.2.4" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
+  if (installed.version !== "0.3.0" || installed.dependencies?.["@types/node"] !== "^20.19.43") {
     throw new Error("The packed Maqam manifest does not expose the reviewed Node type dependency.");
   }
   run(process.execPath, [tscPath, "-p", join(consumerDirectory, "tsconfig.json")], {

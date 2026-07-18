@@ -17,12 +17,12 @@
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
       <nav class="desktop-nav" aria-label="Primary navigation">
-        <a href="/docs/" aria-current="page">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a>
+        <a href="/docs/" aria-current="page">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a>
       </nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
     <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden>
-      <a href="/docs/" aria-current="page">Docs</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a>
+      <a href="/docs/" aria-current="page">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a>
     </nav>
   </header>
 
@@ -32,18 +32,18 @@
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
         <nav aria-label="Maqam guide">
           <p class="docs-nav-title">Maqam</p>
-          <a href="#start-here">Start here</a><a href="#install">Public 0.2.4 install</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#adapter-apis">0.2.4 adapter APIs</a><a href="#boundary">Boundary</a>
+          <a href="#start-here">Start here</a><a href="#install">0.3.0 candidate install gate</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#source-routing">Source routing</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#adapter-apis">0.3.0 APIs</a><a href="#boundary">Boundary</a>
         </nav>
         <nav aria-label="Other documentation">
           <p class="docs-nav-title">More</p>
-          <a href="/docs/productloop/">ProductLoop packages</a><a href="/docs/integrations/">Integration patterns</a><a href="/docs/benchmark/">MGES benchmark</a><a href="/docs/security/">Security model</a>
+          <a href="/docs/sources/">Governed sources</a><a href="/docs/productloop/">ProductLoop packages</a><a href="/docs/integrations/">Integration patterns</a><a href="/docs/benchmark/">MGES benchmark</a><a href="/docs/security/">Security model</a>
         </nav>
       </div>
     </aside>
 
     <article class="docs-content">
-      <h1>Maqam 0.2.4 quickstart</h1>
-      <p class="lede">Run the public npm package, exact-approval proof, and adapter APIs released in 0.2.4.</p>
+      <h1>Maqam 0.3.0 candidate quickstart</h1>
+      <p class="lede">Run the exact-approval proof, register a governed tool, route normalized research sources, and use the feed-aware bounded crawler.</p>
       <h2 id="start-here">Start here: the product in plain English</h2>
       <dl class="definition-grid">
         <dt>Maqam</dt><dd>A security turnstile for actions performed by software agents. It checks policy, binds approval to the exact input that will run, permits that approved call once, and records the decision and result.</dd>
@@ -61,27 +61,29 @@
         Node.js 20.18.1 or newer. The built-in proof needs no model key, hosted account, browser, database, or external side effect.
       </div>
       <div class="callout">
-        <strong>Current package state</strong>
-        Latest public npm: 0.2.4. Every install command in this quickstart pins the verified public release.
+        <strong>Candidate package state</strong>
+        Version 0.3.0 is a source candidate. Do not run the install commands below until the public npm version, provenance, integrity, and matching GitHub tag and release are verified.
       </div>
 
-      <h2 id="install">Install public npm 0.2.4</h2>
-      <p>Use the pinned command-line proof without modifying a project, or pin the public package in your dependency manifest.</p>
+      <h2 id="install">Install after 0.3.0 registry verification</h2>
+      <p>After the registry and tagged source match, use the pinned command-line proof without modifying a project or pin the package in your dependency manifest.</p>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#install-code">Copy</button>
-        <pre><code id="install-code"># One-off proof from the public release
-npx -y maqam@0.2.4 demo approval
+        <pre><code id="install-code"># Run only after npm, provenance, integrity, and tag verification
+# One-off proof from the verified release
+npx -y maqam@0.3.0 demo approval
 
 # Pinned project dependency
-npm install maqam@0.2.4</code></pre>
+npm install maqam@0.3.0</code></pre>
       </div>
 
       <h2 id="proof">Run the exact-approval proof</h2>
       <p>The demo creates an isolated temporary workspace, performs one exact approved write, verifies the file, and removes the workspace.</p>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#proof-code">Copy</button>
-        <pre><code id="proof-code">npx -y maqam@0.2.4 demo approval
-npx -y maqam@0.2.4 demo approval --json</code></pre>
+        <pre><code id="proof-code"># Run only after registry verification
+npx -y maqam@0.3.0 demo approval
+npx -y maqam@0.3.0 demo approval --json</code></pre>
       </div>
       <p>Expected checkpoints:</p>
       <div class="code-shell">
@@ -202,8 +204,12 @@ console.log(result.output);</code></pre>
       <p>The provider CLI must already be installed and authenticated. Keep provider permissions narrower than Maqam policy. Use a container, virtual machine, or restricted operating-system account when you need a hard host boundary.</p>
       <p><a href="https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md">Read the complete coding-agent guide on GitHub</a>.</p>
 
+      <h2 id="source-routing">Route governed research sources</h2>
+      <p><code>ResearchSourceRegistry</code> orders static source adapters and normalizes their output into immutable <code>ResearchDocument</code> records. Its governed <code>route()</code> method requires a host-supplied ToolCaller; bind that caller to a configured Maqam gateway. The explicit <code>routeUngoverned()</code> alternative bypasses that gateway and reports the bypass in its result.</p>
+      <div class="button-row"><a class="button button-primary" href="/docs/sources/">Open the source-routing guide</a><a class="button" href="/docs/security/#sources">Review source boundaries</a></div>
+
       <h2 id="crawler">Use the bounded crawler</h2>
-      <p>The built-in crawler is HTTP-only. It blocks special-purpose destinations by default, checks robots.txt, validates each redirect, pins connections to validated DNS results, and enforces response limits.</p>
+      <p>The built-in crawler is HTTP-only. It blocks special-purpose destinations by default, checks robots.txt, validates each redirect, pins connections to validated DNS results, enforces response limits, and can opt into linked RSS and Atom feeds.</p>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#crawler-code">Copy</button>
         <pre><code id="crawler-code">import { crawlDetailed } from "maqam";
@@ -213,7 +219,10 @@ const result = await crawlDetailed({
   allowedOrigins: ["https://example.com"],
   maxPages: 10,
   maxRequests: 80,
-  maxDepth: 5
+  maxDepth: 5,
+  includeFeeds: true,
+  maxFeedLinks: 20,
+  maxFeedItems: 100
 });
 
 console.log(result.pages);
@@ -222,11 +231,14 @@ console.log(result.stats);</code></pre>
       </div>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#crawler-cli">Copy</button>
-        <pre><code id="crawler-cli">npx --yes --package=maqam@0.2.4 maqam-crawl https://example.com \
+        <pre><code id="crawler-cli">npx --yes --package=maqam@0.3.0 maqam-crawl https://example.com \
   --max-pages 25 \
+  --max-requests 100 \
+  --feeds \
   --delay 250 \
-  --jsonl \
-  --output crawl.jsonl</code></pre>
+  --detailed \
+  --stats \
+  --output crawl.json</code></pre>
       </div>
       <div class="callout callout-warning">
         <strong>Crawler limit</strong>
@@ -251,17 +263,18 @@ console.log(result.stats);</code></pre>
       <h2 id="console">Run the local console</h2>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#console-code">Copy</button>
-        <pre><code id="console-code">npx -y maqam@0.2.4
+        <pre><code id="console-code"># Run only after registry verification
+npx -y maqam@0.3.0
 # Open http://127.0.0.1:8787</code></pre>
       </div>
       <p>The console binds to loopback by default. Remote binding requires authentication, an explicit Host allowlist, trusted UI origins, and deployment-level egress controls.</p>
 
-      <h2 id="adapter-apis">0.2.4 adapter APIs</h2>
+      <h2 id="adapter-apis">0.3.0 integration APIs</h2>
       <div class="callout">
-        <strong>Available from public npm</strong>
-        <code>defineToolAdapter()</code>, <code>registerToolAdapter()</code>, and <code>runToolAdapterConformance()</code> are public exports of <code>maqam@0.2.4</code>. Pin the version so installs remain reproducible.
+        <strong>Prepared in the 0.3.0 source candidate</strong>
+        The 0.2 tool-adapter APIs remain available. The 0.3.0 candidate adds <code>ResearchSourceRegistry</code>, <code>defineResearchSourceAdapter()</code>, normalized research documents, bounded host-defined source checks, and RSS or Atom helpers.
       </div>
-      <p>Use the <a href="/docs/integrations/">integration guide</a> for static adapter examples and explicit provider boundaries. Production projects should pin <code>maqam@0.2.4</code>.</p>
+      <p>Use the <a href="/docs/integrations/">integration guide</a> for tool adapters and the <a href="/docs/sources/">source guide</a> for research backends. Production projects may pin <code>maqam@0.3.0</code> only after the registry artifact and matching source release are verified.</p>
 
       <h2 id="boundary">Know the boundary</h2>
       <dl class="definition-grid">

@@ -25,7 +25,7 @@
       "properties": {
         "shortName": { "const": "MGES" },
         "profile": { "const": "local-call-performance" },
-        "version": { "const": "1.0.0" },
+        "version": { "enum": ["1.0.0", "1.1.0"] },
         "externallyStandardized": { "const": false }
       }
     },

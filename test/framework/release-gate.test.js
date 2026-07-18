@@ -15,7 +15,7 @@ const completeInput = {
   version: "0.2.0",
   license: "MIT",
   registry: "https://registry.npmjs.org/",
-  publishCommand: "npm publish --access public",
+  publishCommand: "npm publish --access public --ignore-scripts --provenance",
   artifact,
   requiredFiles: {
     readme: true,

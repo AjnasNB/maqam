@@ -41,7 +41,7 @@ Configure these GitHub Actions values in the `AjnasNB/maqam` repository:
 - Repository variable `CLOUDFLARE_ACCOUNT_ID`: the Cloudflare account that owns `maqamagent-site`.
 - Repository secret `CLOUDFLARE_API_TOKEN`: a scoped token with permission to deploy this Worker, its custom domains, and the declared R2 binding.
 
-The workflow intentionally succeeds with a warning when either value is missing, so pull and push verification remain useful without leaking or inventing credentials. Once both values exist, every verified website change on `main` is deployed automatically. Local Wrangler OAuth credentials are never copied into GitHub.
+The verification job remains credential-free. The deployment job fails closed when either value is missing, so a green workflow always means the verified artifact reached Cloudflare. Once both values exist, every verified website change on `main` is deployed automatically. Local Wrangler OAuth credentials are never copied into GitHub.
 
 ## Content boundaries
 

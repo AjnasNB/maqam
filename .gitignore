@@ -2,6 +2,11 @@ node_modules/
 coverage/
 *.tgz
 npm-debug.log*
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
 .DS_Store
 Thumbs.db
 .impeccable/

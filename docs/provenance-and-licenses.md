@@ -1,6 +1,6 @@
 # Provenance and License Notes
 
-Last reviewed: 2026-07-15.
+Last reviewed: 2026-07-18.
 
 Maqam is an original Ajnas NB implementation distributed under the MIT license. The package implementation, API names, documentation, examples, tests, command-line behavior, product identity, and visual assets are maintained as Maqam work.
 
@@ -30,6 +30,7 @@ The following entries record reference inspection only. None is a Maqam runtime 
 
 | Project | Upstream license observed | What was inspected |
 | --- | --- | --- |
+| [Agent Reach](https://github.com/Panniantong/Agent-Reach) at commit `1494c2ab239e7355a77e7cceaf3271453a1f34b5` | MIT, from the repository `LICENSE` at the inspected commit. | Explicit source-channel configuration, ordered routing, diagnostics, platform-tool setup, and authentication/session assumptions. Maqam independently implements only the registry/doctor ideas within its existing `ToolGateway` boundary; no Agent Reach source, documentation, examples, tests, assets, logos, or branding was copied. |
 | [Crawl4AI](https://github.com/unclecode/crawl4ai) | Its [license file](https://github.com/unclecode/crawl4ai/blob/main/LICENSE) contains Apache-2.0 text plus an additional prominent-attribution requirement. | Browser crawling, deep-crawl strategies, extraction, deployment, robots configuration, and the security boundary described in its [v0.9.0 release notes](https://github.com/unclecode/crawl4ai/blob/main/docs/blog/release-v0.9.0.md). |
 | [Firecrawl](https://github.com/firecrawl/firecrawl) | Primarily AGPL-3.0; SDKs and some UI components are MIT, as stated in its [license notice](https://github.com/firecrawl/firecrawl#license). | Search/scrape/interact/crawl/map product surface, self-hosting, webhook integrity, robots behavior, and cloud-versus-self-host boundaries. |
 | [Crawlee](https://github.com/apify/crawlee) | [Apache-2.0](https://github.com/apify/crawlee/blob/master/LICENSE.md). | HTTP/browser crawler architecture, queues, storage, sessions, retries, proxy rotation, and deployment patterns. |
@@ -45,7 +46,7 @@ See [comparison.md](comparison.md) for the evidence-linked product comparison de
 
 - Respect robots.txt by default.
 - Do not bypass login walls, paywalls, anti-bot systems, CAPTCHA, private content, or authorization boundaries.
-- Do not publish from automation without explicit approval for the exact release.
+- Do not let automation publish without explicit maintainer approval for the exact artifact and protected trusted-publishing environment gate.
 - Keep release evidence for tests, package contents, dependency audit, provenance, and the publish decision.
 - Keep Maqam under MIT unless the package owner explicitly approves a change after compatibility review.
 - Do not describe inspection as a license to copy. Ideas and documented behavior may inform an original implementation; copied expression or code carries its own obligations.

@@ -276,9 +276,36 @@ Provider activity checks are observed controls. Artifact inspection and tests ar
 
 Provider event streams may contain repository paths, command text, source fragments, or model output. Store them according to the repository's data classification and retention policy. Set `includeEvents: false` when only normalized usage and the final output are needed.
 
+## Give An Agent Governed Research Sources
+
+Do not hand a coding agent raw provider credentials or let it select arbitrary SDK methods. Register reviewed research operations as static gateway tools, then let `ResearchSourceRegistry` select among descriptors for one channel:
+
+```js
+const sources = new ResearchSourceRegistry({
+  adapters: [publicWeb, rss, internalSearch],
+  toolCaller: defineResearchToolCaller({
+    call: gateway.call.bind(gateway)
+  })
+});
+
+const research = await sources.route({
+  channel: "research",
+  input: { query: task.query },
+  allowAuthenticated: task.allowInternalSearch === true
+}, {
+  runId,
+  goal,
+  signal
+});
+```
+
+The agent may propose the channel input, but trusted host code must decide which adapters exist, their `toolName`, policy, effects, risk, origins, credentials, priority and whether authenticated routing is allowed. A denied, approval-required, authentication/authorization, crawler-security, robots, goal-scope or tool-call-limit failure stops routing rather than silently trying another provider.
+
+`routeUngoverned()` is not appropriate for an agent-facing source because it bypasses gateway policy, approvals, call ceilings and trace capture. See [Governed Sources](governed-sources.md).
+
 ## Security Boundary
 
-Maqam provides an orchestration and governance boundary, not a universal host-security boundary.
+Maqam provides a governed execution boundary, not a universal host-security boundary or full agent orchestrator.
 
 - An unregistered process is outside Maqam control.
 - A provider can perform internal actions that Maqam sees only in the provider event stream.
@@ -300,3 +327,4 @@ Maqam provides an orchestration and governance boundary, not a universal host-se
 8. Keep prompts out of command arguments and shells.
 9. Inspect the trace, provider activity, repository diff, tests, and evidence before the next side effect.
 10. Use external host isolation for untrusted tasks.
+11. For research sources, test one allowed dispatch, a denied zero-dispatch path and fatal-error no-fallback behavior.

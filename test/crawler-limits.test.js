@@ -121,6 +121,28 @@ test("crawler validates numeric limits instead of silently coercing unsafe value
       TypeError
     );
   }
+
+  await assert.rejects(
+    () => crawl({
+      seeds: ["https://example.com"],
+      sameOrigin: false,
+      allowedOrigins: []
+    }),
+    /sameOrigin=false requires a non-empty allowedOrigins list/
+  );
+});
+
+test("crawler does not claim robots approval when robots enforcement is disabled", async () => {
+  const baseUrl = await listen((request, response) => {
+    response.setHeader("content-type", "text/html");
+    response.end(fixturePageHtml);
+  });
+  const [page] = await crawl({
+    ...localOptions,
+    seeds: [baseUrl],
+    maxPages: 1
+  });
+  assert.equal(Object.hasOwn(page, "robotsAllowed"), false);
 });
 
 test("crawler enforces seed and extracted-link collection limits", async () => {
@@ -163,6 +185,17 @@ test("robots retrieval failures fail closed", async () => {
   assert.deepEqual(result.pages, []);
   assert.equal(pageHits, 0);
   assert.equal(result.stats.skippedByRobots, 1);
+
+  await assert.rejects(
+    () => crawl({
+      seeds: [`${baseUrl}/page`],
+      allowPrivateNetworks: true,
+      delayMs: 0,
+      maxRetries: 0
+    }),
+    (error) => error.code === "ROBOTS_DENIED"
+  );
+  assert.equal(pageHits, 0);
 });
 
 test("response bytes are capped and reported without returning partial content", async () => {

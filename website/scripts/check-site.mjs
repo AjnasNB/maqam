@@ -17,14 +17,22 @@ const approvedProductVisuals = new Set([
   "/assets/maqam-exact-gate-3d.png",
   "/assets/productloop-modular-hub-3d.png"
 ]);
+const productVisualDimensions = new Map([
+  ["/assets/evidence-metrology-3d.png", [1586, 992]],
+  ["/assets/integration-dock-3d.png", [1586, 992]],
+  ["/assets/maqam-exact-gate-3d.png", [1586, 992]],
+  ["/assets/productloop-modular-hub-3d.png", [1568, 1003]]
+]);
 const requiredProductVisuals = new Map([
   ["index.html", ["/assets/maqam-exact-gate-3d.png", "/assets/productloop-modular-hub-3d.png", "/assets/evidence-metrology-3d.png"]],
   [path.join("why", "index.html"), ["/assets/maqam-exact-gate-3d.png"]],
   [path.join("community", "index.html"), ["/assets/community-workbench-v2.png"]],
   [path.join("roadmap", "index.html"), ["/assets/evidence-metrology-3d.png"]],
+  [path.join("releases", "v0.3.0", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("releases", "v0.2.4", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("docs", "benchmark", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("docs", "integrations", "index.html"), ["/assets/integration-dock-3d.png"]],
+  [path.join("docs", "sources", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("docs", "productloop", "index.html"), ["/assets/productloop-modular-hub-3d.png"]],
   [path.join("docs", "security", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("articles", "benchmarking-governance", "index.html"), ["/assets/approval-gate-art.png"]],
@@ -89,6 +97,10 @@ for (const file of htmlFiles) {
   requireMatch(/<a\s+class="skip-link"\s+href="#main">/i, "missing skip link");
   requireMatch(/<main\b[^>]*\bid="main"/i, "missing main landmark id");
 
+  if (source.includes('class="site-header"') && !source.includes('href="/releases/v0.3.0/"')) {
+    failures.push(`${label}: primary navigation must link the 0.3.0 release record`);
+  }
+
   if (/0\.2\.3|candidate pending exact release approval/i.test(source)) {
     failures.push(`${label}: contains stale pre-0.2.4 publication wording`);
   }
@@ -111,8 +123,9 @@ for (const file of htmlFiles) {
   }
 
   if (label === "index.html") {
-    requireMatch(/v0\.2\.4 is live/i, "homepage must identify the live 0.2.4 release");
-    requireMatch(/maqam@0\.2\.4/i, "homepage install command must pin maqam@0.2.4");
+    requireMatch(/v0\.3\.0 release candidate/i, "homepage must identify 0.3.0 as a release candidate");
+    requireMatch(/npm artifact, provenance, and tag verification are still required/i, "homepage must name the remaining release verification gate");
+    requireMatch(/Run only after npm, provenance, and tag verification[\s\S]{0,120}maqam@0\.3\.0/i, "homepage install command must be gated by registry verification");
     requireMatch(/Maqam is a security turnstile for agent actions/i, "homepage must include the plain-English Maqam definition");
   }
 
@@ -120,10 +133,25 @@ for (const file of htmlFiles) {
     requireMatch(/security turnstile for actions performed by software agents/i, "docs must define Maqam in plain English");
     requireMatch(/The modular toolbox around Maqam/i, "docs must define ProductLoop OS in plain English");
     requireMatch(/Calls that bypass the gateway remain outside Maqam's control/i, "docs must state the gateway bypass boundary");
+    requireMatch(/ResearchSourceRegistry/, "docs must introduce governed research-source routing");
+  }
+
+  if (label === path.join("docs", "sources", "index.html")) {
+    requireMatch(/Governed research sources/i, "sources guide must define the new product surface");
+    requireMatch(/routeUngoverned\(\).*bypasses that gateway/i, "sources guide must label direct routing as ungoverned");
+    requireMatch(/Agent Reach[\s\S]{0,500}broader platform-specific/i, "sources guide must describe Agent Reach coverage accurately");
+    requireMatch(/does not copy Agent Reach's auto-installation/i, "sources guide must reject equivalent-coverage claims");
+  }
+
+  if (label === path.join("releases", "v0.3.0", "index.html")) {
+    requireMatch(/Maqam 0\.3\.0/, "0.3.0 release page must identify the release");
+    requireMatch(/does not claim equivalent channel coverage/i, "0.3.0 release must keep the Agent Reach comparison narrow");
+    requireMatch(/does not invent an integrity digest or source commit/i, "0.3.0 release must not fabricate unpublished artifact identity");
   }
 
   if (label === path.join("docs", "productloop", "index.html")) {
     requireMatch(/productloop-os@0\.2\.1/, "ProductLoop install command must pin productloop-os@0.2.1");
+    requireMatch(/records intended package versions, not a blanket live-registry guarantee/i, "ProductLoop atlas must avoid a blanket npm publication claim");
     for (const [packageName, version] of [
       ["productloop-os", "0.2.1"],
       ["ajnas-runtime", "0.2.1"],
@@ -140,6 +168,7 @@ for (const file of htmlFiles) {
         `${packageName} must show public version ${version}`
       );
     }
+    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.0 candidate<\/td>/, "ProductLoop atlas must show Maqam 0.3.0 as a candidate");
   }
 
   if (label === path.join("articles", "exact-agent-approvals", "index.html")) {
@@ -164,6 +193,15 @@ for (const file of htmlFiles) {
     const src = match[1].match(/\bsrc="([^"]+)"/i)?.[1];
     if (src?.startsWith("/assets/") && !src.endsWith(".svg") && !approvedProductVisuals.has(src)) {
       failures.push(label + ": unreviewed conceptual image " + src + "; use a product-specific 3D visual or real product proof");
+    }
+
+    const expectedDimensions = productVisualDimensions.get(src);
+    if (expectedDimensions) {
+      const width = Number(match[1].match(/\bwidth="(\d+)"/i)?.[1]);
+      const height = Number(match[1].match(/\bheight="(\d+)"/i)?.[1]);
+      if (width !== expectedDimensions[0] || height !== expectedDimensions[1]) {
+        failures.push(`${label}: ${src} must declare its intrinsic ${expectedDimensions[0]}x${expectedDimensions[1]} dimensions`);
+      }
     }
   }
 

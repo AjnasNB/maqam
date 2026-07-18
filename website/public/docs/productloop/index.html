@@ -16,10 +16,10 @@
   <header class="site-header">
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
-      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
-    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.2.4/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
   </header>
 
   <main id="main" class="shell docs-layout">
@@ -30,7 +30,7 @@
           <p class="docs-nav-title">Package atlas</p>
           <a href="#overview-video">Video overview</a><a href="#umbrella">productloop-os</a><a href="#maqam">maqam</a><a href="#runtime">ajnas-runtime</a><a href="#policy">ajnas-policy</a><a href="#approvals">ajnas-approvals</a><a href="#provenance">ajnas-provenance</a><a href="#skills">ajnas-skills-registry</a><a href="#connectors">ajnas-connectors</a><a href="#evals">ajnas-evals</a><a href="#browser">ajnas-browser-research</a>
         </nav>
-        <nav aria-label="Related documentation"><p class="docs-nav-title">Related</p><a href="/docs/">Maqam quickstart</a><a href="/docs/integrations/">Adapter patterns</a><a href="/docs/security/">Security model</a></nav>
+        <nav aria-label="Related documentation"><p class="docs-nav-title">Related</p><a href="/docs/">Maqam quickstart</a><a href="/docs/sources/">Governed sources</a><a href="/docs/integrations/">Adapter patterns</a><a href="/docs/security/">Security model</a></nav>
       </div>
     </aside>
 
@@ -42,7 +42,7 @@
         Maqam is the guarded execution door. ProductLoop OS is the toolbox around it. Start with Maqam when you need the focused boundary; add <code>productloop-os</code> when one application needs the broader package family and tested composition helpers.
       </div>
       <figure class="media-frame media-frame--art">
-        <picture><source srcset="/assets/productloop-modular-hub-3d.webp" type="image/webp"><img src="/assets/productloop-modular-hub-3d.png" width="1536" height="1024" alt="Modular ProductLoop hub connecting Maqam with eight named package boundaries" loading="lazy"></picture>
+        <picture><source srcset="/assets/productloop-modular-hub-3d.webp" type="image/webp"><img src="/assets/productloop-modular-hub-3d.png" width="1568" height="1003" alt="Modular ProductLoop hub connecting Maqam with eight named package boundaries" loading="lazy"></picture>
         <figcaption>ProductLoop OS composes focused packages around Maqam while preserving a named responsibility boundary for each module.</figcaption>
       </figure>
 
@@ -68,17 +68,17 @@ npx productloop-os@0.2.1 demo</code></pre></div>
       <p><code>doctor</code> checks Node.js and packaged imports. It does not probe credentials, live browsers, model providers, networks, or external connector services.</p>
 
       <div class="callout">
-        <strong>Public registry status</strong>
-        All nine ProductLoop packages below are public on npm at the exact versions shown. The <a href="https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.1">v0.2.1 GitHub release</a> includes exact tarballs, the canonical manifest, checksums, the narrated overview, and the 3D package map. Maqam 0.2.4 is also public and listed separately.
+        <strong>Verify every registry artifact</strong>
+        The table records intended package versions, not a blanket live-registry guarantee. Verify each npm version, provenance, integrity, and matching source release before installation. The <a href="https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.1">ProductLoop OS v0.2.1 GitHub release</a> is the source-side record for its exact artifacts. Maqam 0.3.0 remains a separate candidate until its npm artifact and matching tag are verified.
       </div>
 
-      <div class="table-wrap" tabindex="0" role="region" aria-label="Public ProductLoop package versions and responsibilities">
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Recorded ProductLoop package versions and responsibilities">
         <table>
-          <caption class="sr-only">Public ProductLoop package versions, npm links, responsibilities, and boundaries</caption>
-          <thead><tr><th scope="col">Package / namespace</th><th scope="col">Public version</th><th scope="col">npm</th><th scope="col">Primary job</th><th scope="col">Important boundary</th></tr></thead>
+          <caption class="sr-only">Recorded ProductLoop package versions, npm verification links, responsibilities, and boundaries</caption>
+          <thead><tr><th scope="col">Package / namespace</th><th scope="col">Version / status</th><th scope="col">Verify on npm</th><th scope="col">Primary job</th><th scope="col">Important boundary</th></tr></thead>
           <tbody>
             <tr><th scope="row"><code>productloop-os</code></th><td>0.2.1</td><td><a href="https://www.npmjs.com/package/productloop-os">npm</a></td><td>Umbrella composition and named namespaces</td><td>Not a hosted control plane</td></tr>
-            <tr><th scope="row"><code>maqam</code></th><td>0.2.4</td><td><a href="https://www.npmjs.com/package/maqam">npm</a></td><td>Exact gateway approvals, workflows, evidence, worker adapters, HTTP crawling</td><td>Only registered gateway calls are governed</td></tr>
+            <tr><th scope="row"><code>maqam</code></th><td>0.3.0 candidate</td><td><a href="https://www.npmjs.com/package/maqam/v/0.3.0">npm</a></td><td>Exact approvals, evidence, worker adapters, governed source routing, RSS or Atom parsing, and bounded HTTP crawling</td><td>Only calls routed through a configured gateway or ToolCaller are governed</td></tr>
             <tr><th scope="row"><code>ajnas-runtime</code> / <code>runtime</code></th><td>0.2.1</td><td><a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></td><td>Ordered policy-gated tool execution</td><td>Fail-closed without an explicit policy</td></tr>
             <tr><th scope="row"><code>ajnas-policy</code> / <code>policy</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-policy">npm</a></td><td>Declarative decisions and audit receipts</td><td>Does not execute tools</td></tr>
             <tr><th scope="row"><code>ajnas-approvals</code> / <code>approvals</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></td><td>Human review state machine</td><td>Transport and identity remain host concerns</td></tr>
@@ -136,9 +136,9 @@ console.log(result.status, os.trace.events.length);</code></pre></div>
         </section>
 
         <section class="package-entry" id="maqam">
-          <header><h2>maqam</h2><span class="package-version">public 0.2.4 · <a href="https://www.npmjs.com/package/maqam">npm</a></span></header>
+          <header><h2>maqam</h2><span class="package-version">candidate 0.3.0 · <a href="https://www.npmjs.com/package/maqam/v/0.3.0">verify npm</a></span></header>
           <div class="package-body">
-            <p>Provides the higher-level exact approval gateway, workflow runtime, evidence ledger, worker adapters, local console, and bounded HTTP crawler.</p>
+            <p>Provides the higher-level exact approval gateway, workflow runtime, evidence ledger, worker adapters, ordered research-source routing, bounded host-defined source checks, local console, offline feed parsing, and bounded HTTP crawler.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#maqam-code">Copy</button><pre><code id="maqam-code">import { PolicyEngine, ToolGateway } from "maqam";
 
 const gateway = new ToolGateway({

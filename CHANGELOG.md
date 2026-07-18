@@ -2,11 +2,39 @@
 
 All notable Maqam changes are tracked here before release.
 
-## 0.2.4 (candidate) - 2026-07-16
+## 0.3.0 - 2026-07-18
+
+Governed source routing, normalized research documents, RSS/Atom support, and safer crawler controls.
+
+**Release verification:** use the npm version record, provenance, integrity, Git tag, and GitHub release to verify public availability. Source metadata alone is not proof that a version was published. See [docs/release-0.3.0.md](docs/release-0.3.0.md).
+
+### Added
+
+- `ResearchSourceRegistry`, source-adapter descriptors, a bound `ToolCaller` contract, deterministic backend preferences, bounded attempt records, and normalized `ResearchDocument` output.
+- Source error classification that allows ordinary availability fallback while stopping policy, approval, authentication, authorization, crawler-security, robots, goal-scope, and tool-call-limit failures.
+- Bounded host-defined source-doctor checks with cooperative timeout cancellation, error isolation, and readiness summaries.
+- Offline RSS 2.0/Atom parsing with bounded, sanitized output, content hashes, and host-reader/source-adapter factories that perform no implicit network access.
+- Feed discovery and parsing for the bounded crawler, plus a governed source example, complete guide, and 0.3 migration notes.
+- Crawler CLI budgets for requests, depth, bytes, duration, retries, feed links/items, detailed failures, statistics, and fail-on-error behavior.
+
+### Changed
+
+- Governed source routes require a bound caller and execute through the adapter's registered `ToolGateway` tool name. Direct `routeUngoverned()` use is explicit and reported as a bypass.
+- Authenticated adapters require per-route `allowAuthenticated: true`; this opt-in does not obtain or synchronize credentials.
+- The crawler CLI rejects the old unbounded `--all-origins` option. Every additional origin must be named with a repeatable `--allowed-origin` flag.
+- RSS/Atom feed results expose normalized content and parser provenance while keeping network retrieval under host/crawler policy.
+
+### Boundaries and provenance
+
+- This release does not add automatic installers, browser-cookie/session import, provider login, anti-bot bypass, browser automation, built-in social-platform adapters, provider approval synchronization, or a hosted crawler fleet.
+- The architecture was informed by Agent Reach at commit `1494c2ab239e7355a77e7cceaf3271453a1f34b5` (MIT). Maqam's implementation is independent; no Agent Reach source, documentation, examples, tests, assets, logos, or branding was copied.
+- Historical 0.2.4 release media and benchmark artifacts remain evidence for 0.2.4. Fresh 0.3.0 release and MGES evidence is required wherever fingerprints changed.
+
+## 0.2.4 - 2026-07-17
 
 Evaluation, ecosystem-adapter, documentation-site, and proof-video candidate.
 
-**Release status:** `maqam@0.2.3` remains the latest public npm and GitHub release. `0.2.4` has not been published or tagged and remains blocked on final clean-commit checks, a newly packed and inspected npm artifact, clean-consumer installation, and explicit owner approval of that exact artifact identity. Versioned website media paths identify the candidate media set; they do not establish npm publication. See the [unified 0.2.4 candidate release note](docs/release-0.2.4-candidate.md).
+**Release status:** `maqam@0.2.4` was published to npm through trusted OIDC publishing and released as GitHub tag `v0.2.4`. The original candidate preparation record remains in [docs/release-0.2.4-candidate.md](docs/release-0.2.4-candidate.md); its pre-publication wording is historical and must not be treated as the current registry state.
 
 ### Added
 
@@ -32,11 +60,11 @@ Evaluation, ecosystem-adapter, documentation-site, and proof-video candidate.
 - Added open-source contribution, governance, support, code-of-conduct, issue/PR template, and community entry points.
 - Replaced future `v0.2.4` GitHub tag/release links with live website media or `main` documentation links while retaining the candidate-versus-public-package distinction.
 
-### Candidate verification
+### Release verification
 
-- Local Maqam test suite: 202/202 passed.
-- Clean-consumer TypeScript compilation and production dependency audit passed; the audit reported zero known production vulnerabilities.
-- The previous source CI run passed on Node.js 20, 22, and 24 at `eeb0de484b6f49cfd8989fad5da61a3722e91d6d`. Final documentation/source commit CI and final packed-artifact verification remain required before release.
+- Candidate preparation recorded a 202/202 local Maqam test pass.
+- Candidate clean-consumer TypeScript compilation and production dependency audit passed; the audit reported zero known production vulnerabilities.
+- The candidate record preserves the source-CI and exact-artifact evidence used before trusted publication. Consult the `v0.2.4` GitHub release and npm provenance for the published artifact rather than treating these preparation counts as 0.3.0 evidence.
 - ProductLoop OS `0.2.0` remains a separately published companion release. Its nine-package workspace verification covered 124 tests, builds, typechecks, integration, dependency doctor, clean-consumer declarations, and package previews.
 
 ## 0.2.3 - 2026-07-16

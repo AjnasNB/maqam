@@ -9,11 +9,15 @@ import {
   ApprovalQueue,
   EvidenceLedger,
   PolicyEngine,
-  ToolGateway
+  ResearchSourceRegistry,
+  ResearchSourceUnavailableError,
+  ToolGateway,
+  defineResearchSourceAdapter,
+  defineResearchToolCaller
 } from "../src/index.js";
 
 const SCHEMA = "maqam.benchmark.conformance/v1";
-const SUITE_VERSION = "1.0.0";
+const SUITE_VERSION = "1.1.0";
 const REPOSITORY_ROOT = fileURLToPath(new URL("../", import.meta.url));
 const SOURCE_FILES = Object.freeze([
   "benchmarks/governance-conformance.mjs",
@@ -25,7 +29,11 @@ const SOURCE_FILES = Object.freeze([
   "src/framework/evidence-scope.js",
   "src/framework/audit.js",
   "src/framework/boundary.js",
-  "src/framework/errors.js"
+  "src/framework/errors.js",
+  "src/research/research-document.js",
+  "src/research/source-adapter.js",
+  "src/research/source-error.js",
+  "src/research/source-registry.js"
 ]);
 
 function parseOptions(argv) {
@@ -437,6 +445,109 @@ const CASES = Object.freeze([
         traceErrorCode: trace.error.code,
         redactedToken: trace.input.apiToken,
         handlerExecutions: executions
+      };
+    }
+  },
+  {
+    id: "MGES-C13",
+    property: "source-policy-denial-stops-all-backends",
+    threat: "A denied research source silently falls through to a second backend.",
+    async run() {
+      const dispatches = { primary: 0, fallback: 0 };
+      const adapters = [
+        defineResearchSourceAdapter({
+          id: "conformance.primary",
+          channel: "web",
+          toolName: "research.conformance.primary",
+          read: async () => { dispatches.primary += 1; return []; }
+        }),
+        defineResearchSourceAdapter({
+          id: "conformance.fallback",
+          channel: "web",
+          toolName: "research.conformance.fallback",
+          read: async () => { dispatches.fallback += 1; return []; }
+        })
+      ];
+      const gateway = new ToolGateway({ policyEngine: new PolicyEngine() });
+      for (const adapter of adapters) gateway.registerTool(adapter.toolName, adapter.read);
+      const sources = new ResearchSourceRegistry({
+        adapters,
+        toolCaller: defineResearchToolCaller({ call: gateway.call.bind(gateway) })
+      });
+      const error = await captureRejection(() => sources.route({
+        channel: "web",
+        input: { seeds: ["https://example.com/"] }
+      }, { runId: "source_denial" }));
+      requireCondition(error.code === "POLICY_DENIED", `Expected POLICY_DENIED; got ${error.code}.`);
+      requireCondition(dispatches.primary === 0, `Primary source executed ${dispatches.primary} times.`);
+      requireCondition(dispatches.fallback === 0, `Fallback source executed ${dispatches.fallback} times.`);
+      return {
+        rejectionCode: error.code,
+        primaryExecutions: dispatches.primary,
+        fallbackExecutions: dispatches.fallback
+      };
+    }
+  },
+  {
+    id: "MGES-C14",
+    property: "source-unavailability-falls-back-and-normalizes",
+    threat: "An ordinary backend outage prevents an ordered source fallback or returns an unbound record.",
+    async run() {
+      const dispatches = { primary: 0, fallback: 0 };
+      const primary = defineResearchSourceAdapter({
+        id: "conformance.unavailable",
+        channel: "web",
+        toolName: "research.conformance.unavailable",
+        priority: 10,
+        read: async () => {
+          dispatches.primary += 1;
+          throw new ResearchSourceUnavailableError("fixture unavailable");
+        }
+      });
+      const fallback = defineResearchSourceAdapter({
+        id: "conformance.ready",
+        channel: "web",
+        toolName: "research.conformance.ready",
+        priority: 20,
+        read: async () => {
+          dispatches.fallback += 1;
+          return [{
+            uri: "https://example.com/evidence",
+            title: "Bound evidence",
+            text: "The fallback record is normalized after a governed dispatch."
+          }];
+        }
+      });
+      const policyEngine = new PolicyEngine({
+        allowedTools: [primary.toolName, fallback.toolName],
+        maxToolCalls: 2
+      });
+      const gateway = new ToolGateway({ policyEngine });
+      gateway.registerTool(primary.toolName, primary.read);
+      gateway.registerTool(fallback.toolName, fallback.read);
+      const sources = new ResearchSourceRegistry({
+        adapters: [fallback, primary],
+        toolCaller: defineResearchToolCaller({ call: gateway.call.bind(gateway) }),
+        clock: () => new Date("2026-07-18T00:00:00.000Z")
+      });
+      const result = await sources.route({ channel: "web", input: {} }, {
+        runId: "source_fallback"
+      });
+      requireCondition(result.adapter.id === fallback.id, `Unexpected adapter ${result.adapter.id}.`);
+      requireCondition(dispatches.primary === 1, `Primary source executed ${dispatches.primary} times.`);
+      requireCondition(dispatches.fallback === 1, `Fallback source executed ${dispatches.fallback} times.`);
+      requireCondition(result.attempts.length === 2, `Expected two attempts; got ${result.attempts.length}.`);
+      requireCondition(result.documents.length === 1, `Expected one document; got ${result.documents.length}.`);
+      requireCondition(
+        result.documents[0].source.adapterId === fallback.id,
+        "Normalized document is not bound to the selected adapter."
+      );
+      return {
+        selectedAdapter: result.adapter.id,
+        attempts: result.attempts.map((attempt) => attempt.status),
+        primaryExecutions: dispatches.primary,
+        fallbackExecutions: dispatches.fallback,
+        documentSource: result.documents[0].source
       };
     }
   }

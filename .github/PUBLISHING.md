@@ -32,14 +32,14 @@ Revoke any npm token that has appeared in chat, logs, screenshots, or shell hist
 1. Confirm the candidate commit is on `main` and CI plus CodeQL are green.
 2. Open **Actions > Publish npm (trusted) > Run workflow**.
 3. Select the `main` branch.
-4. Enter the exact package version and approved SHA-256/integrity values.
+4. Enter the exact package version and approved tarball byte size, SHA-256, and integrity values.
 5. Enter the confirmation `publish maqam@VERSION`.
 6. Wait for **Verify approved artifact** to pass.
 7. Review the verification summary, then approve the `npm-publish` environment deployment.
-8. Wait for the publish job to verify npm version, `gitHead`, integrity, downloaded tarball SHA-256, signatures, and provenance.
+8. Wait for the publish job to verify npm version, `gitHead`, byte size, integrity, downloaded tarball SHA-256, signatures, and provenance.
 9. Only after that job succeeds, create the matching Git tag and GitHub Release.
 
-The workflow deliberately refuses non-`main` dispatches, malformed confirmation values, an already-published version, package identity changes, tarball checksum changes, registry integrity changes, and `gitHead` mismatches.
+The workflow deliberately refuses non-`main` dispatches, malformed confirmation values, a non-positive byte size, an already-published version, package identity changes, tarball size or checksum changes, registry integrity changes, and `gitHead` mismatches.
 
 ## Emergency local fallback
 

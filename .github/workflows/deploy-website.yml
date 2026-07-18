@@ -59,16 +59,19 @@ jobs:
       - name: Checkout verified commit
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: Explain missing deployment credential
+      - name: Reject missing deployment credential
         if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' }}
         shell: bash
         run: |
-          echo "::warning::Website verification passed, but Cloudflare deployment was skipped because CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not configured."
+          echo "::error::Cloudflare deployment requires both CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID."
           {
-            echo "## Website verified; deployment not configured"
+            echo "## Website deployment blocked"
             echo
-            echo "Add the repository secret \`CLOUDFLARE_API_TOKEN\` and repository variable \`CLOUDFLARE_ACCOUNT_ID\`, then rerun this workflow."
+            echo "The verified artifact was not deployed because the required Cloudflare credential or account variable is missing."
+            echo
+            echo "Add the environment secret \`CLOUDFLARE_API_TOKEN\` and environment or repository variable \`CLOUDFLARE_ACCOUNT_ID\`, then rerun this workflow."
           } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
 
       - name: Deploy to Cloudflare Workers
         if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}

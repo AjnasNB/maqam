@@ -51,6 +51,7 @@ test("MGES performance profile emits isolated raw observations and uncertainty m
   assert.equal(result.schema, "maqam.benchmark.performance/v1");
   assert.equal(result.suite.shortName, "MGES");
   assert.equal(result.suite.profile, "local-call-performance");
+  assert.equal(result.suite.version, "1.1.0");
   assert.equal(result.suite.externallyStandardized, false);
   assert.equal(result.environment.timer.api, "process.hrtime.bigint");
   assert.equal(result.environment.isolation.freshProcessPerObservation, true);
@@ -95,10 +96,12 @@ test("MGES conformance profile publishes named project invariants without a secu
   assert.equal(result.suite.profile, "governance-boundary-conformance");
   assert.equal(result.suite.externallyStandardized, false);
   assert.equal(result.suite.externallyCertified, false);
-  assert.deepEqual(result.summary, { total: 12, passed: 12, failed: 0, allPassed: true });
+  assert.equal(result.suite.version, "1.1.0");
+  assert.deepEqual(result.summary, { total: 14, passed: 14, failed: 0, allPassed: true });
   assert.deepEqual(result.cases.map((item) => item.id), [
     "MGES-C01", "MGES-C02", "MGES-C03", "MGES-C04", "MGES-C05", "MGES-C06",
-    "MGES-C07", "MGES-C08", "MGES-C09", "MGES-C10", "MGES-C11", "MGES-C12"
+    "MGES-C07", "MGES-C08", "MGES-C09", "MGES-C10", "MGES-C11", "MGES-C12",
+    "MGES-C13", "MGES-C14"
   ]);
   assert.ok(result.cases.every((item) => item.status === "pass"));
   assert.match(result.interpretation, /not a penetration test/i);
@@ -123,10 +126,10 @@ test("MGES result schemas are versioned machine-readable JSON Schema documents",
 
 test("checked-in MGES release artifacts identify a clean source commit and unchanged measured files", () => {
   const performance = checkedResult(
-    "../benchmarks/results/2026-07-16-mges-performance-windows-node24.json"
+    "../benchmarks/results/2026-07-18-mges-performance-windows-node24.json"
   );
   const conformance = checkedResult(
-    "../benchmarks/results/2026-07-16-mges-conformance-windows-node24.json"
+    "../benchmarks/results/2026-07-18-mges-conformance-windows-node24.json"
   );
 
   assert.equal(performance.repository.workingTreeDirty, false);

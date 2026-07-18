@@ -1,6 +1,6 @@
 # License Audit
 
-Audit date: 2026-07-16.
+Audit date: 2026-07-18.
 
 ## Package License
 
@@ -40,6 +40,7 @@ No source code, documentation text, examples, tests, prompts, assets, logos, or 
 
 | Project | License observed from upstream | Incorporation status |
 | --- | --- | --- |
+| [Agent Reach](https://github.com/Panniantong/Agent-Reach), commit `1494c2ab239e7355a77e7cceaf3271453a1f34b5` | MIT in the inspected repository `LICENSE`. | Reference inspection only. Its explicit source-channel registry and doctor concepts informed an independent JavaScript implementation for Maqam's existing `ToolGateway`; no source, documentation, examples, tests, assets, logos, or branding was copied. |
 | [Crawl4AI](https://github.com/unclecode/crawl4ai) | [Apache-2.0 text plus an additional prominent-attribution requirement](https://github.com/unclecode/crawl4ai/blob/main/LICENSE). | Reference inspection only; no code incorporated. |
 | [Firecrawl](https://github.com/firecrawl/firecrawl) | Primarily AGPL-3.0; SDKs and some UI components are MIT. See its [license notice](https://github.com/firecrawl/firecrawl#license). | Reference inspection only; no code incorporated. An optional external-service adapter is preferable to copying AGPL core into this MIT package. |
 | [Crawlee](https://github.com/apify/crawlee) | [Apache-2.0](https://github.com/apify/crawlee/blob/master/LICENSE.md). | Reference inspection only; no code incorporated. |
@@ -64,6 +65,7 @@ No source code, documentation text, examples, tests, prompts, assets, logos, or 
 - Any future dependency, vendored file, port, patch, generated derivative, or copied documentation requires a new audit of the exact upstream version and obligations.
 - Firecrawl's AGPL core must not be copied into the MIT package without an explicit architecture and license decision.
 - Crawl4AI's additional attribution language must be evaluated before any incorporation or derivative use.
+- Agent Reach's permissive license does not make copied code part of Maqam automatically. Any future incorporation would still require exact-file provenance, copyright/license notice handling, modification records, and a new audit.
 - Permissive licenses still require preservation of applicable copyright and license notices.
 
 ## Result
