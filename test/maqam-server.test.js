@@ -46,6 +46,46 @@ function rawRequest(url, options = {}) {
   });
 }
 
+function fakeSourceAdapter({
+  id = "web-search.fake",
+  channel = "web-search",
+  toolName = "research.web-search.fake",
+  authentication = "none",
+  networkOrigins = ["https://source.example"],
+  read = async () => [{
+    uri: "https://source.example/result",
+    title: "Fake result",
+    text: "Bounded fake source content."
+  }],
+  check = async () => ({
+    status: "ready",
+    message: "Fake adapter is ready.",
+    details: { offline: true }
+  })
+} = {}) {
+  Object.defineProperty(read, "governance", {
+    value: {
+      effects: ["network:read"],
+      networkOrigins,
+      risk: "low"
+    },
+    enumerable: false,
+    configurable: true,
+    writable: true
+  });
+  return {
+    id,
+    channel,
+    toolName,
+    label: `Fake source ${id}`,
+    authentication,
+    capabilities: ["read"],
+    metadata: { fake: true },
+    read,
+    check
+  };
+}
+
 test("Maqam server exposes health and console shell", async () => {
   const server = createMaqamServer({
     crawlerTool: async () => []
@@ -59,6 +99,10 @@ test("Maqam server exposes health and console shell", async () => {
     assert.equal(health.product.name, "Maqam");
     assert.match(html, /Maqam/);
     assert.match(html, /Compose governed agents/);
+    assert.match(html, /Search the public web/);
+    assert.match(html, /Read a public YouTube video \+ captions/);
+    assert.match(html, /Hosted anonymous access/);
+    assert.match(html, /API authentication/);
     assert.match(html, /Governance path/);
     assert.match(html, /Adapter coverage/);
     assert.ok(capabilities.capabilities.adapters.some((adapter) => adapter.id === "codex"));
@@ -67,6 +111,27 @@ test("Maqam server exposes health and console shell", async () => {
   } finally {
     await close(server);
   }
+});
+
+test("default server does not discover a local YouTube executable implicitly", async () => {
+  const server = createMaqamServer({ crawlerTool: async () => [] });
+  const baseUrl = await listen(server);
+  try {
+    const response = await fetch(
+      `${baseUrl}/api/sources/status?channel=youtube&adapterId=youtube.yt-dlp`
+    );
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).error, /not registered/i);
+  } finally {
+    await close(server);
+  }
+});
+
+test("YouTube console enablement requires an explicit absolute executable path", () => {
+  assert.throws(
+    () => createMaqamServer({ ytDlpCommand: "yt-dlp" }),
+    /absolute executable path/i
+  );
 });
 
 test("Maqam server runs a governed research workflow", async () => {
@@ -271,6 +336,23 @@ test("UI origin configuration accepts only exact serialized HTTP(S) origins", ()
   }
 });
 
+test("crawler and source allowlists accept only exact canonical HTTP(S) origins", () => {
+  for (const key of ["allowedOrigins", "sourceAllowedOrigins"]) {
+    for (const value of [
+      "*",
+      "https://allowed.example/",
+      "https://allowed.example/path",
+      "https://user@allowed.example",
+      "HTTPS://ALLOWED.EXAMPLE"
+    ]) {
+      assert.throws(
+        () => createMaqamServer({ [key]: [value] }),
+        new RegExp(`${key} server option accepts only exact canonical HTTP\\(S\\) origins`)
+      );
+    }
+  }
+});
+
 test("research requests cannot broaden server network policy", async () => {
   let crawlerCalls = 0;
   const server = createMaqamServer({ crawlerTool: async () => { crawlerCalls += 1; return []; } });
@@ -356,9 +438,11 @@ test("server authority options must be explicit own data properties", () => {
     ["publicDir", process.cwd()],
     ["crawlerTool", async () => []],
     ["allowedOrigins", ["https://example.com"]],
+    ["sourceAllowedOrigins", ["https://example.com"]],
     ["allowedUiOrigins", ["https://example.com"]],
     ["allowPrivateNetworks", true],
     ["allowCrossOriginCrawls", true],
+    ["sourceAdapters", []],
     ["host", "0.0.0.0"]
   ];
   for (const [key, value] of authorityFields) {
@@ -570,6 +654,368 @@ test("raw embedded servers permit protected non-loopback binding", async () => {
       }
     });
     assert.equal(authenticated.status, 200);
+  } finally {
+    await close(server);
+  }
+});
+
+test("public source runs use registry routing and gateway-authorized handler context", async () => {
+  let observedInput;
+  let observedContext;
+  const adapter = fakeSourceAdapter({
+    read: async (input, context) => {
+      observedInput = input;
+      observedContext = context;
+      return [{
+        uri: "https://source.example/result-1",
+        title: "Governed result",
+        text: "Evidence returned by a fake public source."
+      }];
+    }
+  });
+  const server = createMaqamServer({ sourceAdapters: [adapter] });
+  const baseUrl = await listen(server);
+  try {
+    const response = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        channel: "web-search",
+        input: { query: "governed source" },
+        backendPreference: ["web-search.fake"]
+      })
+    });
+    const payload = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(observedInput.query, "governed source");
+    assert.ok(observedContext.signal instanceof AbortSignal);
+    assert.equal(observedContext.toolName, "research.web-search.fake");
+    assert.deepEqual(Array.from(observedContext.toolMetadata.networkOrigins), ["https://source.example"]);
+    assert.deepEqual(Array.from(observedContext.authorizedOrigins), ["https://source.example"]);
+    assert.equal(observedContext.authorizationScope.originsExplicit, true);
+    assert.equal(payload.source.adapter.id, "web-search.fake");
+    assert.equal(payload.source.documents[0].title, "Governed result");
+    assert.equal(payload.source.governance.mode, "tool-caller");
+    assert.equal(payload.toolTrace[0].status, "completed");
+  } finally {
+    await close(server);
+  }
+});
+
+test("declared source origins are denied before adapter dispatch", async () => {
+  let calls = 0;
+  const server = createMaqamServer({
+    sourceAdapters: [fakeSourceAdapter({
+      networkOrigins: ["https://blocked.example"],
+      read: async () => {
+        calls += 1;
+        return [];
+      }
+    })],
+    sourceAllowedOrigins: ["https://allowed.example"]
+  });
+  const baseUrl = await listen(server);
+  try {
+    const response = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ channel: "web-search", input: { query: "blocked" } })
+    });
+    assert.equal(response.status, 403);
+    assert.match((await response.json()).error, /not allowed/i);
+    assert.equal(calls, 0);
+  } finally {
+    await close(server);
+  }
+});
+
+test("source API derives a restrictive default origin scope from handler declarations", async () => {
+  let calls = 0;
+  const server = createMaqamServer({
+    sourceAdapters: [fakeSourceAdapter({
+      networkOrigins: ["https://source.example"],
+      read: async () => {
+        calls += 1;
+        return [];
+      }
+    })]
+  });
+  const baseUrl = await listen(server);
+  try {
+    const response = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        channel: "web-search",
+        input: { url: "https://outside.example/result" }
+      })
+    });
+    assert.equal(response.status, 403);
+    assert.match((await response.json()).error, /not allowed/i);
+    assert.equal(calls, 0);
+  } finally {
+    await close(server);
+  }
+});
+
+test("crawler and public-source origin allowlists remain independent", async () => {
+  let calls = 0;
+  const server = createMaqamServer({
+    allowedOrigins: ["https://crawl-only.example"],
+    sourceAdapters: [fakeSourceAdapter({
+      networkOrigins: ["https://source.example"],
+      read: async () => {
+        calls += 1;
+        return [{ uri: "https://source.example/result", text: "independent" }];
+      }
+    })]
+  });
+  const baseUrl = await listen(server);
+  try {
+    const response = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ channel: "web-search", input: { query: "independent" } })
+    });
+    assert.equal(response.status, 200);
+    assert.equal(calls, 1);
+  } finally {
+    await close(server);
+  }
+});
+
+test("public source route cannot opt into authenticated adapters", async () => {
+  let calls = 0;
+  const server = createMaqamServer({
+    sourceAdapters: [fakeSourceAdapter({
+      authentication: "required",
+      read: async () => {
+        calls += 1;
+        return [];
+      }
+    })]
+  });
+  const baseUrl = await listen(server);
+  try {
+    const denied = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ channel: "web-search", input: { query: "private" } })
+    });
+    assert.equal(denied.status, 403);
+    assert.equal(calls, 0);
+
+    const override = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        channel: "web-search",
+        input: { query: "private" },
+        allowAuthenticated: true
+      })
+    });
+    assert.equal(override.status, 400);
+    assert.equal(calls, 0);
+  } finally {
+    await close(server);
+  }
+});
+
+test("source status runs bounded selected checks without invoking reads", async () => {
+  let checks = 0;
+  let reads = 0;
+  const adapter = fakeSourceAdapter({
+    read: async () => {
+      reads += 1;
+      return [];
+    },
+    check: async ({ signal }) => {
+      checks += 1;
+      assert.ok(signal instanceof AbortSignal);
+      return {
+        status: "ready",
+        message: "Offline fake check passed.",
+        details: { offline: true }
+      };
+    }
+  });
+  const server = createMaqamServer({ sourceAdapters: [adapter] });
+  const baseUrl = await listen(server);
+  try {
+    const response = await fetch(
+      `${baseUrl}/api/sources/status?channel=web-search&adapterId=web-search.fake&timeoutMs=1000`
+    );
+    const payload = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(payload.doctor.status, "ready");
+    assert.equal(payload.doctor.checks[0].adapter.id, "web-search.fake");
+    assert.equal(payload.doctor.checks[0].details.offline, true);
+    assert.equal(checks, 1);
+    assert.equal(reads, 0);
+
+    for (const suffix of ["?unknown=true", "?timeoutMs=1&timeoutMs=2", "?timeoutMs=10001"]) {
+      const invalid = await fetch(`${baseUrl}/api/sources/status${suffix}`);
+      assert.equal(invalid.status, 400);
+    }
+    assert.equal(checks, 1);
+  } finally {
+    await close(server);
+  }
+});
+
+test("source API enforces token and exact CORS controls", async () => {
+  let calls = 0;
+  const origin = "https://console.example";
+  const server = createMaqamServer({
+    apiToken: "source-token",
+    allowedUiOrigins: [origin],
+    sourceAdapters: [fakeSourceAdapter({
+      read: async () => {
+        calls += 1;
+        return [{ uri: "https://source.example/result", text: "ok" }];
+      }
+    })]
+  });
+  const baseUrl = await listen(server);
+  try {
+    const anonymous = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ channel: "web-search", input: { query: "auth" } })
+    });
+    assert.equal(anonymous.status, 401);
+    assert.equal(calls, 0);
+
+    const authorized = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: {
+        authorization: "Bearer source-token",
+        "content-type": "application/json",
+        origin,
+        "sec-fetch-site": "cross-site"
+      },
+      body: JSON.stringify({ channel: "web-search", input: { query: "auth" } })
+    });
+    assert.equal(authorized.status, 200);
+    assert.equal(authorized.headers.get("access-control-allow-origin"), origin);
+    assert.equal(calls, 1);
+  } finally {
+    await close(server);
+  }
+});
+
+test("source request, result count, and serialized output stay bounded", async () => {
+  let calls = 0;
+  const adapter = fakeSourceAdapter({
+    read: async (input) => {
+      calls += 1;
+      if (input.mode === "many") {
+        return Array.from({ length: 26 }, (_, index) => ({
+          uri: `https://source.example/${index}`,
+          text: `result ${index}`
+        }));
+      }
+      return [{
+        uri: "https://source.example/large",
+        text: "x".repeat(200_000)
+      }];
+    }
+  });
+  const server = createMaqamServer({ sourceAdapters: [adapter] });
+  const baseUrl = await listen(server);
+  const post = (body) => fetch(`${baseUrl}/api/runs/source`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  try {
+    const oversizedInput = await post({
+      channel: "web-search",
+      input: { query: "q".repeat(10_001) }
+    });
+    assert.equal(oversizedInput.status, 400);
+    assert.equal(calls, 0);
+
+    const tooMany = await post({ channel: "web-search", input: { mode: "many" } });
+    assert.equal(tooMany.status, 502);
+    assert.equal(calls, 1);
+
+    const compacted = await post({ channel: "web-search", input: { mode: "large" } });
+    const payload = await compacted.json();
+    assert.equal(compacted.status, 200);
+    assert.equal(payload.source.documents[0].text.length, 50_000);
+    assert.ok(Buffer.byteLength(JSON.stringify(payload)) < 4 * 1024 * 1024);
+
+    const oversizedBody = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ channel: "web-search", padding: "x".repeat(130 * 1024) })
+    });
+    assert.equal(oversizedBody.status, 413);
+  } finally {
+    await close(server);
+  }
+});
+
+test("source adapter options are validated and snapshotted without invoking accessors", async () => {
+  assert.throws(
+    () => createMaqamServer({ sourceAdapters: {} }),
+    /sourceAdapters must be an array/
+  );
+  assert.throws(
+    () => createMaqamServer({
+      sourceAdapters: [{ id: "missing.read", channel: "web", toolName: "missing.read" }]
+    }),
+    /requires a read handler/
+  );
+  assert.throws(
+    () => createMaqamServer({ sourceAdapters: [fakeSourceAdapter(), fakeSourceAdapter()] }),
+    /already registered/
+  );
+  assert.throws(
+    () => createMaqamServer({
+      sourceAdapters: [fakeSourceAdapter({ networkOrigins: ["https://source.example/"] })]
+    }),
+    /exact HTTP\(S\) origins/
+  );
+
+  let getterCalls = 0;
+  const accessorOptions = {};
+  Object.defineProperty(accessorOptions, "sourceAdapters", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return [];
+    }
+  });
+  assert.throws(() => createMaqamServer(accessorOptions), /own enumerable data property/);
+  assert.equal(getterCalls, 0);
+
+  let calls = 0;
+  const origins = ["https://blocked.example"];
+  const adapters = [fakeSourceAdapter({
+    networkOrigins: origins,
+    read: async () => {
+      calls += 1;
+      return [];
+    }
+  })];
+  const server = createMaqamServer({
+    sourceAdapters: adapters,
+    sourceAllowedOrigins: ["https://allowed.example"]
+  });
+  adapters.length = 0;
+  origins[0] = "https://allowed.example";
+  const baseUrl = await listen(server);
+  try {
+    const response = await fetch(`${baseUrl}/api/runs/source`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ channel: "web-search", input: { query: "mutation" } })
+    });
+    assert.equal(response.status, 403);
+    assert.equal(calls, 0);
   } finally {
     await close(server);
   }

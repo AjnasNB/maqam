@@ -118,13 +118,29 @@ Do not use a doctor check to authenticate, mutate provider state, import browser
 
 `parseRssAtom()` has no network access. `createRssAtomResearchAdapter()` and `createRssAtomSourceAdapter()` require a host-supplied reader and have no implicit `fetch` fallback. Supply a bounded, policy-reviewed reader and register the resulting handler through `ToolGateway` for governed use.
 
+## Rebuild Release-Gate Evidence
+
+Maqam 0.3 makes `createReleaseGateReport()` intentionally stricter. A 0.2 release report is not reusable. Rebuild it with:
+
+- artifact `packageName` and `version` values that exactly match the release;
+- the tarball's independent lowercase `sha256` hex digest and its separate canonical npm `sha512-...` `integrity` value;
+- the exact tarball filename, positive byte size, and full lowercase 40-character Git commit;
+- passing entries for `npm test`, `npm run test:consumer-types`, `npm run test:website`, `npm audit --omit=dev`, `npm pack --json --ignore-scripts`, and both MGES profiles, with every entry naming the artifact commit in `gitCommit`;
+- at least one `inspectedProjects` record with a name, HTTPS URL, exact full Git revision, observed license, and inspection use; and
+- a `publish:npm` approval that also binds `artifactSha256` in addition to the existing package, version, registry, command, filename, size, integrity, and commit fields.
+
+The old practice of putting either a SHA-256 or an npm integrity value into one `artifact.integrity` field is no longer accepted. The gate validates the supplied record; the trusted release workflow must still run the checks and independently recompute both digests.
+
 ## Verify The Upgrade
 
 ```bash
 npm test
 npm run test:consumer-types
-npm pack --dry-run
+npm run test:website
 npm audit --omit=dev
+npm pack --json --ignore-scripts
+npm run benchmark:mges:conformance
+npm run benchmark:mges:performance
 ```
 
 Also add application tests proving:

@@ -140,6 +140,172 @@ test("registration metadata can add but cannot erase handler-declared effects", 
   assert.equal(metadataGetterCalls, 0);
 });
 
+test("registration unions immutable handler and registration network origins", async () => {
+  const handlerOrigins = ["https://handler.example", "https://shared.example"];
+  const registrationOrigins = ["https://registration.example", "https://shared.example"];
+  const authorizedMetadata = [];
+  const observed = [];
+  const connector = async (_input, context) => {
+    observed.push([...context.toolMetadata.networkOrigins]);
+    context.toolMetadata.networkOrigins.length = 0;
+    return { connected: true };
+  };
+  Object.defineProperty(connector, "governance", {
+    value: { networkOrigins: handlerOrigins }
+  });
+
+  const policy = new PolicyEngine({
+    allowedTools: ["connector"],
+    allowedOrigins: [
+      "https://handler.example",
+      "https://shared.example",
+      "https://registration.example"
+    ]
+  });
+  const gateway = new ToolGateway({
+    policyEngine: {
+      authorizeToolCall(request) {
+        authorizedMetadata.push([...request.metadata.networkOrigins]);
+        return policy.authorizeToolCall(request);
+      }
+    }
+  });
+  gateway.registerTool("connector", connector, { networkOrigins: registrationOrigins });
+
+  handlerOrigins[0] = "https://mutated-handler.example";
+  registrationOrigins[0] = "https://mutated-registration.example";
+  const stored = gateway.tools.get("connector").metadata;
+  assert.deepEqual([...stored.networkOrigins], [
+    "https://handler.example",
+    "https://shared.example",
+    "https://registration.example"
+  ]);
+  assert.equal(Object.isFrozen(stored.networkOrigins), true);
+
+  assert.deepEqual(await gateway.call("connector"), { connected: true });
+  assert.deepEqual(await gateway.call("connector"), { connected: true });
+  assert.deepEqual(observed, [
+    ["https://handler.example", "https://shared.example", "https://registration.example"],
+    ["https://handler.example", "https://shared.example", "https://registration.example"]
+  ]);
+  assert.deepEqual(authorizedMetadata, observed);
+});
+
+test("tools without declared network origins keep the common metadata path absent", async () => {
+  const gateway = new ToolGateway({ allowUngoverned: true });
+  let observedMetadata;
+  gateway.registerTool("local-only", async (_input, context) => {
+    observedMetadata = context.toolMetadata;
+    return "ok";
+  }, { networkOrigins: [] });
+
+  assert.equal(Object.hasOwn(gateway.tools.get("local-only").metadata, "networkOrigins"), false);
+  assert.equal(await gateway.call("local-only"), "ok");
+  assert.equal(Object.hasOwn(observedMetadata, "networkOrigins"), false);
+});
+
+test("declared network origins are authorized before handler dispatch", async () => {
+  let calls = 0;
+  const connector = async () => {
+    calls += 1;
+    return { connected: true };
+  };
+  Object.defineProperty(connector, "governance", {
+    value: Object.freeze({ networkOrigins: Object.freeze(["https://blocked.example"]) })
+  });
+  const gateway = new ToolGateway({
+    policyEngine: new PolicyEngine({
+      allowedTools: ["connector"],
+      allowedOrigins: ["https://allowed.example"]
+    })
+  });
+  gateway.registerTool("connector", connector, { networkOrigins: [] });
+
+  await assert.rejects(
+    () => gateway.call("connector", { query: "contains no URL" }),
+    (error) => error instanceof PolicyDeniedError && /blocked\.example/.test(error.message)
+  );
+  assert.equal(calls, 0);
+  assert.equal(gateway.trace[0].status, "denied");
+});
+
+test("network origin registration rejects non-origin and hostile metadata", () => {
+  const gateway = new ToolGateway({ allowUngoverned: true });
+  const invalid = [
+    "not-an-origin",
+    "ftp://example.com",
+    "https://user@example.com",
+    "https://example.com/",
+    "https://example.com/path",
+    "https://example.com?query=1",
+    "https://example.com#fragment",
+    "https://example.com:443",
+    "HTTPS://example.com"
+  ];
+  for (const [index, origin] of invalid.entries()) {
+    assert.throws(
+      () => gateway.registerTool(`invalid-origin-${index}`, async () => {}, {
+        networkOrigins: [origin]
+      }),
+      /exact HTTP\(S\) origins/
+    );
+  }
+
+  let getterCalls = 0;
+  const accessorMetadata = {};
+  Object.defineProperty(accessorMetadata, "networkOrigins", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return ["https://example.com"];
+    }
+  });
+  assert.throws(
+    () => gateway.registerTool("accessor-network-origins", async () => {}, accessorMetadata),
+    /data property/i
+  );
+
+  const accessorOrigins = [];
+  Object.defineProperty(accessorOrigins, "0", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "https://example.com";
+    }
+  });
+  assert.throws(
+    () => gateway.registerTool("accessor-network-origin-item", async () => {}, {
+      networkOrigins: accessorOrigins
+    }),
+    /data properties/i
+  );
+  assert.equal(getterCalls, 0);
+
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, "networkOrigins");
+  try {
+    Object.defineProperty(Object.prototype, "networkOrigins", {
+      value: ["https://polluted.example"],
+      configurable: true
+    });
+    const pollutedGovernance = async () => {};
+    Object.defineProperty(pollutedGovernance, "governance", { value: {} });
+    assert.throws(
+      () => gateway.registerTool("polluted-handler-origin", pollutedGovernance),
+      /Inherited Handler governance field 'networkOrigins'/
+    );
+
+    const pollutedRegistration = async () => {};
+    Object.defineProperty(pollutedRegistration, "governance", { value: Object.create(null) });
+    assert.throws(
+      () => gateway.registerTool("polluted-registration-origin", pollutedRegistration, {}),
+      /Inherited Registration metadata field 'networkOrigins'/
+    );
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, "networkOrigins", previous);
+    else delete Object.prototype.networkOrigins;
+  }
+});
+
 test("descriptor prototype pollution cannot forge tool metadata", () => {
   const gateway = new ToolGateway({ allowUngoverned: true });
   let getterCalls = 0;

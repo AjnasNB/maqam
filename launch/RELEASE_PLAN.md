@@ -75,10 +75,10 @@ Release order:
 1. Freeze the candidate commit and record the full SHA.
 2. Run the complete local release gate from a clean install.
 3. Push `main` and wait for every required CI job to pass at that SHA.
-4. Create and push the annotated version tag at the exact green commit.
-5. Publish npm from the reviewed repository directory using short-lived authentication or trusted publishing.
-6. Verify npm version, integrity, `gitHead`, package files, registry signatures, and absence of local-path metadata.
-7. Install from the public registry into a fresh directory and rerun imports, CLI, example, and strict TypeScript checks.
+4. Publish npm from the protected trusted-publishing workflow after exact-artifact environment approval.
+5. Verify npm version, integrity, `gitHead`, package files, provenance, registry signatures, and absence of local-path metadata.
+6. Install from the public registry into a fresh directory and rerun imports, CLI, example, and strict TypeScript checks.
+7. Create and push the annotated version tag at the exact verified published commit.
 8. Create the GitHub Release and upload the video, poster, captions, transcript, benchmark report/raw output, launch kit, and checksums.
 9. Verify versioned README and release-asset links.
 10. Only then mark the release as ready for external distribution and deprecate superseded vulnerable versions where appropriate.

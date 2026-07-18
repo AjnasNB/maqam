@@ -16,7 +16,7 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 > **Release status — 2026-07-17:** [`maqam@0.2.4`](https://www.npmjs.com/package/maqam) is live on npm with trusted-publishing provenance. The matching [`v0.2.4` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) includes the reviewed tarball, checksums, benchmark artifacts, videos, transcripts, and product-specific 3D release art.
 
-> **0.3.0 release line — 2026-07-18:** this line adds governed source routing, normalized research documents, offline RSS/Atom parsing, feed-aware crawling, and exact cross-origin CLI controls. Verify public availability from the exact [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) registry record, provenance, integrity, matching Git tag, and GitHub release; source metadata alone is not publication proof. See the [release record](docs/release-0.3.0.md) and [migration guide](docs/migration-0.3.md).
+> **0.3.0 release line — 2026-07-18:** this line adds governed source routing, hosted-anonymous Exa web search, public YouTube metadata and available captions through an explicitly configured `yt-dlp`, normalized research documents, offline RSS/Atom parsing, feed-aware crawling, and exact network-origin controls. Verify public availability from the exact [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) registry record, provenance, integrity, matching Git tag, and GitHub release; source metadata alone is not publication proof. See the [release record](docs/release-0.3.0.md) and [migration guide](docs/migration-0.3.md).
 
 [Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
 
@@ -30,7 +30,7 @@ They are one ecosystem with explicit boundaries, not one silently merged runtime
 
 | Choose | When you need |
 |---|---|
-| `maqam@0.3.0` (after exact registry verification) | One compact boundary around tool calls, exact approvals, worker adapters, traces, evidence, governed source routing, or bounded HTTP/feed research |
+| `maqam@0.3.0` (after exact registry verification) | One compact boundary around tool calls, exact approvals, worker adapters, traces, evidence, governed source routing, anonymous web search, public YouTube metadata/captions, or bounded HTTP/feed research |
 | `productloop-os@0.2.1` | The wider modular package family for runtime, policy, approvals, provenance, skills, connectors, evaluations, and research |
 | Both beneath an orchestrator | Google ADK, OpenAI Agents SDK, LangGraph, or another agent loop already plans work and Maqam should govern selected side effects |
 
@@ -57,6 +57,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 | [ProductLoop package atlas](https://maqamagent.com/docs/productloop/) | Package-by-package roles, versions, examples, and Maqam relationship |
 | [Integration guide](https://maqamagent.com/docs/integrations/) and [Google ADK / Microsoft Agent 365 boundary](https://github.com/AjnasNB/maqam/blob/main/docs/integrations-google-adk-agent365.md) | Host adapters, prerequisites, copy-paste templates, and bypass warnings |
 | [Governed Sources](https://github.com/AjnasNB/maqam/blob/main/docs/governed-sources.md) | Ordered source adapters, `ToolGateway` routing, normalized documents, source doctor, RSS/Atom, fallback, and security boundaries |
+| [Anonymous-public source pack](https://github.com/AjnasNB/maqam/blob/main/docs/anonymous-public-sources.md) | No-developer-key Exa MCP search and separately installed `yt-dlp` YouTube metadata/captions, with credential classes, limits, terms, privacy, and safe registration |
 | [MGES benchmark guide](https://maqamagent.com/docs/benchmark/) and [raw methodology](https://github.com/AjnasNB/maqam/blob/main/benchmarks/README.md) | Reproducible local-call and conformance evidence with claim limits |
 | [Security guide](https://maqamagent.com/docs/security/) and [security policy](https://github.com/AjnasNB/maqam/blob/main/SECURITY.md) | Threat boundaries, reporting, crawler safety, and required host controls |
 | [Coding-agent guide](https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md) | Codex, Claude Code, generic CLI workers, approvals, and outcome checks |
@@ -239,6 +240,10 @@ const result = await sources.route({
 
 Register every adapter handler at its declared `toolName` first. `route()` fails closed without a bound caller. `routeUngoverned()` is an explicit direct bypass and does not apply policy, approvals, call ceilings, or trace capture. Read the [complete guide](docs/governed-sources.md) before connecting credentials or remote providers.
 
+The [anonymous-public source-pack guide](docs/anonymous-public-sources.md) documents the opt-in no-developer-key Exa web-search and `yt-dlp`-backed public YouTube metadata/caption factories. "No developer key" does not mean offline, private, unlimited, authenticated, or permitted for every use. Verify the exact installed artifact before relying on either factory in a deployment.
+
+The local console enables hosted anonymous web search directly. YouTube process execution is fail-closed until the server operator supplies a reviewed absolute executable path with `maqam --yt-dlp-command /absolute/path/to/yt-dlp` or `MAQAM_YT_DLP_COMMAND`; Maqam never imports browser cookies or downloads media through that route.
+
 ## Framework SDK
 
 ```js
@@ -418,9 +423,9 @@ npm audit --omit=dev
 npm pack --dry-run
 ```
 
-The project-defined [Maqam Governance Evaluation Suite (MGES) v1.1.0](benchmarks/README.md) keeps performance and conformance separate. Its clean-source 30-observation Windows/Node 24 local-call result is `124.303 microseconds/call` median, with a `123.712-125.695 microseconds/call` 95% bootstrap interval for the sample median and `2.010%` governed coefficient of variation. The separate governance profile passes `14/14` named fixtures, including two governed-source routing cases.
+The project-defined [Maqam Governance Evaluation Suite (MGES) v1.1.0](benchmarks/README.md) keeps performance and conformance separate. The current implementation-PR candidate's clean-source 30-observation Windows/Node 24 local-call result is `146.842 microseconds/call` median, with a `145.085-153.521 microseconds/call` 95% bootstrap interval for the sample median and `9.430%` governed coefficient of variation. The separate governance profile passes `14/14` named fixtures, including two governed-source routing cases.
 
-Those figures are local regression evidence, not a globally standardized benchmark, cross-product speed comparison, security score, certification, network benchmark, or production SLA. Read the [raw artifacts, complete methodology and publication wording](benchmarks/README.md) or the detailed article, [Benchmarking an agent-governance boundary without fooling yourself](docs/articles/benchmarking-agent-governance.md), before quoting them. The artifacts record clean source commit `bceaebfa2a4059bc63acd23eccf4fafee794a295`; later release commits may change files outside the measured path, but any change to a fingerprinted source requires another run.
+Those figures are provisional local regression evidence, not final release evidence, a globally standardized benchmark, cross-product speed comparison, security score, certification, network benchmark, or production SLA. Read the [raw artifacts, complete methodology and publication wording](benchmarks/README.md) or the detailed article, [Benchmarking an agent-governance boundary without fooling yourself](docs/articles/benchmarking-agent-governance.md), before quoting them. The artifacts record clean source commit `280e43cde71cdd6128a5c94202dd32abf6e6cdb8`; the required post-squash `main` rerun must replace the candidate links before release, and any change to a fingerprinted source requires another run.
 
 The npm tarball intentionally excludes the large brand-board and presentation PNG files; those remain in the source repository. Only the logo and files required by the local console ship as runtime app assets.
 

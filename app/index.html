@@ -35,18 +35,43 @@
           </div>
           <div class="run-panel" id="run">
             <div class="panel-header">
-              <span>Research connector example</span>
-              <strong id="run-status">Ready</strong>
+              <span>Governed public research</span>
+              <strong id="run-status" role="status" aria-live="polite">Ready</strong>
             </div>
             <form id="research-form">
-              <label for="seed-url">Seed URL</label>
-              <input id="seed-url" name="seed" type="url" value="https://github.com/apify/crawlee" autocomplete="url" required>
-              <div class="form-grid">
-                <label>
+              <label for="source-mode">Research mode</label>
+              <select id="source-mode" name="mode">
+                <option value="web-search" selected>Search the public web</option>
+                <option value="youtube-search">Search public YouTube metadata</option>
+                <option value="youtube-url">Read a public YouTube video + captions</option>
+                <option value="crawl-url">Crawl a public webpage</option>
+              </select>
+
+              <label for="source-input" id="source-input-label">Search query</label>
+              <input id="source-input" name="sourceInput" type="search" value="governed agent approvals" maxlength="2000" autocomplete="off" required>
+
+              <div class="form-grid" id="source-options">
+                <label id="result-count-field">
+                  Max results
+                  <input name="maxResults" type="number" min="1" max="10" value="5" autocomplete="off">
+                </label>
+                <label id="language-field">
+                  Caption languages
+                  <input name="languages" type="text" value="en" maxlength="100" autocomplete="off" aria-describedby="language-help">
+                  <small id="language-help">Comma-separated preference order.</small>
+                </label>
+                <label id="transcript-field" hidden>
+                  Include captions
+                  <select name="includeTranscript">
+                    <option value="true" selected>Yes, when available</option>
+                    <option value="false">No, metadata only</option>
+                  </select>
+                </label>
+                <label id="page-count-field" hidden>
                   Max pages
                   <input name="maxPages" type="number" min="1" max="10" value="2" autocomplete="off">
                 </label>
-                <label>
+                <label id="same-origin-field" hidden>
                   Same origin
                   <select name="sameOrigin">
                     <option value="true" selected>On</option>
@@ -54,8 +79,25 @@
                   </select>
                 </label>
               </div>
-              <button type="submit">Run research workflow</button>
-              <p class="hint">This public-network research example is capped at 10 pages. External coding-agent execution is available through the package API and is not exposed by this local HTTP console.</p>
+
+              <aside class="access-disclosure" id="access-disclosure" aria-live="polite">
+                <strong id="access-title">Hosted anonymous access</strong>
+                <p id="access-detail">Your query and IP address are sent to Exa's hosted MCP service. No developer API key is required; shared limits and service availability still apply.</p>
+              </aside>
+
+              <details class="auth-panel">
+                <summary>API authentication</summary>
+                <label for="api-token">Bearer token</label>
+                <input id="api-token" name="apiToken" type="password" autocomplete="off" spellcheck="false" aria-describedby="api-token-help">
+                <small id="api-token-help">Needed only when this Maqam server was started with <code>MAQAM_API_TOKEN</code>. The console keeps it in memory for this page and never stores it.</small>
+              </details>
+
+              <div class="button-row">
+                <button type="submit" id="run-button">Search with governance</button>
+                <button type="button" class="secondary-button" id="check-source">Check source</button>
+              </div>
+              <p class="hint" id="run-hint">Results are bounded, traced, and treated as untrusted source material. Public access is not a guarantee of availability or permission to reuse content.</p>
+              <p class="form-message" id="form-message" role="alert" hidden></p>
             </form>
           </div>
         </section>
@@ -131,17 +173,17 @@
         <section class="workspace">
           <div class="column">
             <div class="section-heading">
-              <h2>Candidates</h2>
-              <p>What the workflow produced from governed source collection.</p>
+              <h2 id="results-title">Results</h2>
+              <p id="results-description">Documents returned through governed source routing.</p>
             </div>
-            <div id="candidates" class="stack empty">Run a workflow to inspect candidates.</div>
+            <div id="candidates" class="stack empty" aria-live="polite">Run a source to inspect results.</div>
           </div>
           <div class="column">
             <div class="section-heading" id="evidence">
-              <h2>Evidence ledger</h2>
-              <p>Source-backed records linked to claims.</p>
+              <h2>Evidence and route</h2>
+              <p>Adapter identity, access boundary, attempts, and source-backed records.</p>
             </div>
-            <div id="evidence-list" class="stack empty">Evidence records will appear here.</div>
+            <div id="evidence-list" class="stack empty" aria-live="polite">Governance evidence will appear here.</div>
           </div>
         </section>
 

@@ -65,7 +65,7 @@ try {
     type: "module"
   }, null, 2));
   await writeFile(join(consumerDirectory, "consumer.ts"), [
-    "import { AgentRuntime, PolicyEngine, ResearchSourceRegistry, ToolGateway, crawl, createCrawlerTool, createRssAtomResearchAdapter, createRssAtomSourceAdapter, createWebCrawlerSourceAdapter, defineResearchSourceAdapter, defineResearchToolCaller, parseRssAtom, registerToolAdapter, defineToolAdapter, runToolAdapterConformance } from \"maqam\";",
+    "import { AgentRuntime, PolicyEngine, ResearchSourceRegistry, ToolGateway, crawl, createCrawlerTool, createExaSearchSourceAdapter, createRssAtomResearchAdapter, createRssAtomSourceAdapter, createWebCrawlerSourceAdapter, createYtDlpYouTubeSourceAdapter, defineResearchSourceAdapter, defineResearchToolCaller, parseRssAtom, registerToolAdapter, defineToolAdapter, runToolAdapterConformance } from \"maqam\";",
     "import type { ResearchSourceCheckInput, ResearchSourceCheckOutput, ResearchSourceErrorClassification, ResearchSourceReadHandler } from \"maqam\";",
     "import { createMaqamServer } from \"maqam/server\";",
     "void AgentRuntime;",
@@ -117,6 +117,8 @@ try {
     "void createWebCrawlerSourceAdapter(async () => [{ url: \"https://example.com/\", text: \"minimal host page\" }]);",
     "void createWebCrawlerSourceAdapter(crawl);",
     "void createWebCrawlerSourceAdapter(createCrawlerTool());",
+    "void createExaSearchSourceAdapter({ maxResults: 5 });",
+    "void createYtDlpYouTubeSourceAdapter({ command: \"yt-dlp\", languages: [\"en\"] });",
     "const server = createMaqamServer();",
     "server.close();",
     ""

@@ -16,6 +16,11 @@ Governed source routing, normalized research documents, RSS/Atom support, and sa
 - Offline RSS 2.0/Atom parsing with bounded, sanitized output, content hashes, and host-reader/source-adapter factories that perform no implicit network access.
 - Feed discovery and parsing for the bounded crawler, plus a governed source example, complete guide, and 0.3 migration notes.
 - Crawler CLI budgets for requests, depth, bytes, duration, retries, feed links/items, detailed failures, statistics, and fail-on-error behavior.
+- Anonymous hosted Exa MCP web search with exact-origin policy metadata, DNS-pinned public-network transport, bounded Streamable HTTP parsing, normalized results, and explicit authentication/rate-limit failures.
+- Public YouTube search, metadata, and timestamped available captions through an explicitly configured absolute `yt-dlp` executable path, with no shell, browser cookies, remote components, plugins, or media download.
+- Immutable handler-declared `networkOrigins` enforced by `ToolGateway` and `PolicyEngine` before dispatch.
+- Local console routes and source checks for hosted public search and explicitly enabled YouTube research, including access-mode and third-party data-flow disclosures.
+- Anonymous-public source documentation covering credential classes, terms, limits, subprocess isolation, and honest capability wording.
 
 ### Changed
 
@@ -23,10 +28,12 @@ Governed source routing, normalized research documents, RSS/Atom support, and sa
 - Authenticated adapters require per-route `allowAuthenticated: true`; this opt-in does not obtain or synchronize credentials.
 - The crawler CLI rejects the old unbounded `--all-origins` option. Every additional origin must be named with a repeatable `--allowed-origin` flag.
 - RSS/Atom feed results expose normalized content and parser provenance while keeping network retrieval under host/crawler policy.
+- The console keeps local process execution disabled until the operator supplies an absolute `--yt-dlp-command` or `MAQAM_YT_DLP_COMMAND` path.
 
 ### Boundaries and provenance
 
 - This release does not add automatic installers, browser-cookie/session import, provider login, anti-bot bypass, browser automation, built-in social-platform adapters, provider approval synchronization, or a hosted crawler fleet.
+- Hosted anonymous services remain remote and rate-limited; `yt-dlp` remains unofficial, best-effort, separately installed, and subject to upstream behavior and terms.
 - The architecture was informed by Agent Reach at commit `1494c2ab239e7355a77e7cceaf3271453a1f34b5` (MIT). Maqam's implementation is independent; no Agent Reach source, documentation, examples, tests, assets, logos, or branding was copied.
 - Historical 0.2.4 release media and benchmark artifacts remain evidence for 0.2.4. Fresh 0.3.0 release and MGES evidence is required wherever fingerprints changed.
 

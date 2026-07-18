@@ -1467,9 +1467,12 @@ import { ApprovalQueue, createReleaseGateReport } from "maqam";
 
 const approvals = new ApprovalQueue();
 const artifact = {
+  packageName: "maqam",
+  version: "0.3.0",
   filename: "maqam-0.3.0.tgz",
   sizeBytes: 123456,
-  integrity: `sha256:${"a".repeat(64)}`,
+  sha256: "a".repeat(64),
+  integrity: `sha512-${Buffer.alloc(64, 7).toString("base64")}`,
   gitCommit: "0123456789abcdef0123456789abcdef01234567"
 };
 const approval = approvals.requestApproval({
@@ -1482,6 +1485,7 @@ const approval = approvals.requestApproval({
     publishCommand: "npm publish --access public --ignore-scripts --provenance",
     artifactFilename: artifact.filename,
     artifactSizeBytes: artifact.sizeBytes,
+    artifactSha256: artifact.sha256,
     artifactIntegrity: artifact.integrity,
     gitCommit: artifact.gitCommit
   }
@@ -1505,11 +1509,26 @@ const report = createReleaseGateReport({
     examples: true
   },
   verification: [
-    { command: "npm test", status: "pass" },
-    { command: "npm pack --dry-run", status: "pass" }
-  ],
+    "npm test",
+    "npm run test:consumer-types",
+    "npm run test:website",
+    "npm audit --omit=dev",
+    "npm pack --json --ignore-scripts",
+    "npm run benchmark:mges:conformance",
+    "npm run benchmark:mges:performance"
+  ].map((command) => ({
+    command,
+    status: "pass",
+    gitCommit: artifact.gitCommit
+  })),
   provenance: {
-    inspectedProjects: [],
+    inspectedProjects: [{
+      name: "Panniantong/agent-reach",
+      url: "https://github.com/Panniantong/agent-reach",
+      revision: "1494c2ab239e7355a77e7cceaf3271453a1f34b5",
+      license: "MIT",
+      use: "reference inspection only"
+    }],
     copiedThirdPartyCode: false
   },
   approval
@@ -1518,7 +1537,7 @@ const report = createReleaseGateReport({
 console.log(report.status); // "waiting_for_approval"
 ```
 
-The artifact values above are illustrative; use the exact packed tarball and full current commit. After an authorized reviewer approves the matching record, rebuild the report and require `readyToPublish === true`. The report validates supplied release evidence; it does not execute or cryptographically enforce the publish command.
+The artifact values above are illustrative; use the exact packed tarball, independent lowercase SHA-256, canonical npm SHA-512 integrity, and full current commit. Every check must name that same commit, and `inspectedProjects` must contain at least one complete project identity (HTTPS URL, exact revision, observed license, and inspection use). After an authorized reviewer approves the matching record, rebuild the report and require `readyToPublish === true`. The report validates supplied release evidence; it does not run the commands, recompute the digests, authenticate the reviewer, or publish the package.
 
 ## Use Evidence And Claims
 
@@ -1756,8 +1775,11 @@ Before publishing:
 npm ci
 npm test
 npm run test:consumer-types
-npm pack --dry-run
+npm run test:website
 npm audit --omit=dev
+npm pack --json --ignore-scripts
+npm run benchmark:mges:conformance
+npm run benchmark:mges:performance
 git status --short
 ```
 

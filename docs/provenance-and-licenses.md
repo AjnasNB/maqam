@@ -24,6 +24,15 @@ Maqam's direct runtime dependencies are declared in `package.json` and resolved 
 
 The installed package manifests and lockfile must be re-audited for every release. Transitive dependencies are not covered merely by listing the direct packages here.
 
+## Optional External Integrations
+
+The anonymous-public source pack uses two explicit external boundaries, neither of which is included in the Maqam tarball:
+
+- [Exa hosted MCP](https://exa.ai/docs/reference/exa-mcp) is a third-party remote service. Maqam sends bounded requests only to its configured exact origin and does not include an Exa SDK, API key, server implementation, or account session. Operators must review the service's current privacy, terms, availability, and rate-limit conditions.
+- [`yt-dlp`](https://github.com/yt-dlp/yt-dlp/releases/tag/2026.07.04) is an optional, separately installed executable. Maqam does not download, update, vendor, or redistribute it. The upstream core uses a public-domain dedication, while official standalone builds include components under additional licenses identified by upstream. Operators must verify the exact executable and preserve the notices applicable to that build.
+
+The `2026.07.04` Windows standalone used for the 2026-07-18 manual compatibility check remained outside the repository and package. Its SHA-256 was `52FE3C26DCF71FBDC85B528589020BB0B8E383155CFA81B64DD447BBE35E24B8`, matching the upstream release checksum file. This compatibility check does not pin, install, endorse, or redistribute that executable for package consumers.
+
 ## Upstream Inspection Log
 
 The following entries record reference inspection only. None is a Maqam runtime dependency, and no code from them was copied into this package.

@@ -40,6 +40,86 @@ test("authorizeToolCall denies disallowed tools and origins", () => {
   assert.match(originDecision.reason, /origin/i);
 });
 
+test("authorizeToolCall enforces declared network origins with input URLs", () => {
+  const policy = new PolicyEngine({
+    allowedTools: ["search"],
+    allowedOrigins: ["https://input.example", "https://provider.example"]
+  });
+  assert.equal(policy.authorizeToolCall({
+    toolName: "search",
+    input: { url: "https://input.example/path" },
+    metadata: { networkOrigins: ["https://provider.example"] }
+  }).status, "allow");
+
+  const tenantDenied = policy.authorizeToolCall({
+    toolName: "search",
+    input: { query: "no visible URL" },
+    metadata: { networkOrigins: ["https://blocked.example"] }
+  });
+  assert.equal(tenantDenied.status, "deny");
+  assert.match(tenantDenied.reason, /blocked\.example/);
+
+  const goalDenied = policy.authorizeToolCall({
+    goal: { allowedOrigins: ["https://input.example"] },
+    toolName: "search",
+    input: { url: "https://input.example/path" },
+    metadata: { networkOrigins: ["https://provider.example"] }
+  });
+  assert.equal(goalDenied.status, "deny");
+  assert.match(goalDenied.reason, /goal/i);
+});
+
+test("PolicyEngine rejects malformed and polluted network origin metadata", () => {
+  const policy = new PolicyEngine({ allowedTools: ["reader"], allowAllOrigins: true });
+  for (const origin of [
+    "https://example.com/",
+    "https://example.com/path",
+    "https://user@example.com",
+    "file:///tmp/source"
+  ]) {
+    assert.throws(
+      () => policy.authorizeToolCall({
+        toolName: "reader",
+        metadata: { networkOrigins: [origin] }
+      }),
+      /exact HTTP\(S\) origins/
+    );
+  }
+
+  let getterCalls = 0;
+  const origins = [];
+  Object.defineProperty(origins, "0", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "https://example.com";
+    }
+  });
+  assert.throws(
+    () => policy.authorizeToolCall({
+      toolName: "reader",
+      metadata: { networkOrigins: origins }
+    }),
+    /own enumerable data property/
+  );
+  assert.equal(getterCalls, 0);
+
+  const previous = Object.getOwnPropertyDescriptor(Object.prototype, "networkOrigins");
+  try {
+    Object.defineProperty(Object.prototype, "networkOrigins", {
+      value: ["https://polluted.example"],
+      configurable: true
+    });
+    assert.throws(
+      () => policy.authorizeToolCall({ toolName: "reader", metadata: {} }),
+      /Inherited Tool authorization metadata field 'networkOrigins'/
+    );
+  } finally {
+    if (previous) Object.defineProperty(Object.prototype, "networkOrigins", previous);
+    else delete Object.prototype.networkOrigins;
+  }
+});
+
 test("authorizeToolCall requests approval for configured approval tools", () => {
   const policy = new PolicyEngine({
     allowedTools: ["github"],

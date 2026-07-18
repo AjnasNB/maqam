@@ -1,0 +1,1538 @@
+{
+  "schema": "maqam.benchmark.performance/v1",
+  "suite": {
+    "name": "Maqam Governance Evaluation Suite",
+    "shortName": "MGES",
+    "profile": "local-call-performance",
+    "version": "1.1.0",
+    "authority": "Maqam project-defined microbenchmark",
+    "externallyStandardized": false
+  },
+  "measuredAt": "2026-07-18T15:48:24.062Z",
+  "executionDurationMs": 59498.443,
+  "repository": {
+    "available": true,
+    "commit": "c58cb850daeffa24f5f088a97689f5c75c2db69b",
+    "workingTreeDirty": false
+  },
+  "sourceFingerprint": {
+    "algorithm": "sha256",
+    "combined": "1b7d71c8910f7e1e3db446e28a095a630d66049fd45eeace8d38c264b7e8601e",
+    "files": [
+      {
+        "path": "benchmarks/governance-suite.mjs",
+        "sha256": "d1f0f47b1d7704a35a95c20ba7dd352e0fb2986f94c030a1b0b0ecdd7f8126dd"
+      },
+      {
+        "path": "benchmarks/_governance-worker.mjs",
+        "sha256": "ed84a1d82d0cc143229c6bd78e2eff23bf1ac33d66437df93714716cd899e386"
+      },
+      {
+        "path": "src/framework/tool-gateway.js",
+        "sha256": "2b2c39f00f7f823485c7831066eedcea1a2a4d9d74964cb4f94d1784485c7aaa"
+      },
+      {
+        "path": "src/framework/policy.js",
+        "sha256": "b4cffbf6a6d61a64b955f8640fca254f89c62394163a18ab8d5ba1290a2c246f"
+      },
+      {
+        "path": "src/framework/audit.js",
+        "sha256": "a001ec6d455f583865739751c66e22929551ea7f2362bce1f510092cc1df2b9b"
+      },
+      {
+        "path": "src/framework/boundary.js",
+        "sha256": "21dc9d5762cdf06ebf4700e059d70d19111cd81f7a7bbd18437877a78e448801"
+      },
+      {
+        "path": "src/framework/evidence-scope.js",
+        "sha256": "bee057f58dbdc491da7b37b981b09ebfc6c3b1b65c84d921d19d6c2d65f5ed8f"
+      },
+      {
+        "path": "src/framework/errors.js",
+        "sha256": "7b28d86f3050ba7f1bba2c0fa239ca334b60c470a9f05c4e7ebd90d79e5266cb"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "ebb967b2a48ee6ac6b6ea637888cd09bf153a90e568e7a97432b208a26dfb6d1"
+      }
+    ]
+  },
+  "environment": {
+    "runtime": {
+      "node": "v24.15.0",
+      "v8": "13.6.233.17-node.48",
+      "uv": "1.51.0"
+    },
+    "operatingSystem": {
+      "type": "Windows_NT",
+      "release": "10.0.26200",
+      "platform": "win32",
+      "architecture": "x64"
+    },
+    "processor": {
+      "model": "AMD Ryzen 7 4800H with Radeon Graphics",
+      "logicalCpuCount": 16,
+      "reportedSpeedMHz": {
+        "minimum": 2895,
+        "maximum": 2895
+      }
+    },
+    "totalMemoryBytes": 16557887488,
+    "timer": {
+      "api": "process.hrtime.bigint",
+      "unit": "nanoseconds",
+      "monotonic": true
+    },
+    "isolation": {
+      "freshProcessPerObservation": true,
+      "cpuAffinityControlled": false,
+      "cpuFrequencyGovernorControlled": false,
+      "backgroundLoadControlled": false
+    }
+  },
+  "methodology": {
+    "samplesPerVariant": 30,
+    "order": "Alternating direct/governed then governed/direct paired rounds",
+    "processIsolation": "Each observation runs in a fresh child process; process startup is outside the timed interval.",
+    "timing": "One timed sequential batch measured with process.hrtime.bigint().",
+    "warmup": "Each child warms an independent fixture before creating the measured fixture.",
+    "interval": "Deterministic percentile bootstrap interval for the sample median; it describes run-to-run sampling uncertainty on this machine, not other machines.",
+    "directIterationsPerObservation": 5000000,
+    "governedIterationsPerObservation": 5000,
+    "directWarmupIterations": 250000,
+    "governedWarmupIterations": 500,
+    "bootstrapResamples": 10000
+  },
+  "fixture": {
+    "operation": "Sequential async in-process handler returning input.value + 1",
+    "input": {
+      "value": 41,
+      "nested": {
+        "release": "0.3.x"
+      }
+    },
+    "directPath": "Call the same handler directly.",
+    "governedPath": "Call a registered tool through ToolGateway and an allowlist PolicyEngine with tracing enabled.",
+    "excluded": [
+      "model inference",
+      "network I/O",
+      "filesystem I/O",
+      "durable storage",
+      "human review time",
+      "process startup",
+      "concurrent load"
+    ]
+  },
+  "results": {
+    "direct": {
+      "sampleCount": 30,
+      "medianNsPerOperation": 93.562,
+      "medianMicrosecondsPerOperation": 0.094,
+      "meanNsPerOperation": 99.833,
+      "standardDeviationNsPerOperation": 24.454,
+      "coefficientOfVariation": 0.244948,
+      "medianAbsoluteDeviationNsPerOperation": 12.549,
+      "minimumNsPerOperation": 72.96,
+      "p05SampleMeanNsPerOperation": 77.407,
+      "p95SampleMeanNsPerOperation": 132.969,
+      "maximumNsPerOperation": 195.009,
+      "operationsPerSecondAtMedian": 10688099.87,
+      "medianTimedBatchMs": 467.81,
+      "bootstrapMedian95Interval": {
+        "method": "deterministic-percentile-bootstrap",
+        "confidenceLevel": 0.95,
+        "resamples": 10000,
+        "seed": "0x4d415141",
+        "lowNsPerOperation": 86.105,
+        "highNsPerOperation": 104.448,
+        "lowMicrosecondsPerOperation": 0.086,
+        "highMicrosecondsPerOperation": 0.104
+      }
+    },
+    "governed": {
+      "sampleCount": 30,
+      "medianNsPerOperation": 198289,
+      "medianMicrosecondsPerOperation": 198.289,
+      "meanNsPerOperation": 207943.913,
+      "standardDeviationNsPerOperation": 53422.679,
+      "coefficientOfVariation": 0.256909,
+      "medianAbsoluteDeviationNsPerOperation": 28384.33,
+      "minimumNsPerOperation": 148741.88,
+      "p05SampleMeanNsPerOperation": 151656.095,
+      "p95SampleMeanNsPerOperation": 322127.682,
+      "maximumNsPerOperation": 372146.46,
+      "operationsPerSecondAtMedian": 5043.144,
+      "medianTimedBatchMs": 991.445,
+      "bootstrapMedian95Interval": {
+        "method": "deterministic-percentile-bootstrap",
+        "confidenceLevel": 0.95,
+        "resamples": 10000,
+        "seed": "0x4d415142",
+        "lowNsPerOperation": 175796.9,
+        "highNsPerOperation": 218111.74,
+        "lowMicrosecondsPerOperation": 175.797,
+        "highMicrosecondsPerOperation": 218.112
+      }
+    },
+    "pairedAdded": {
+      "sampleCount": 30,
+      "medianNsPerOperation": 198197.046,
+      "medianMicrosecondsPerOperation": 198.197,
+      "meanNsPerOperation": 207844.081,
+      "standardDeviationNsPerOperation": 53409.18,
+      "coefficientOfVariation": 0.256968,
+      "medianAbsoluteDeviationNsPerOperation": 28370.981,
+      "minimumNsPerOperation": 148665.552,
+      "p05SampleMeanNsPerOperation": 151574.764,
+      "p95SampleMeanNsPerOperation": 321975.202,
+      "maximumNsPerOperation": 372040.3,
+      "bootstrapMedian95Interval": {
+        "method": "deterministic-percentile-bootstrap",
+        "confidenceLevel": 0.95,
+        "resamples": 10000,
+        "seed": "0x4d415143",
+        "lowNsPerOperation": 175709.144,
+        "highNsPerOperation": 218007.967,
+        "lowMicrosecondsPerOperation": 175.709,
+        "highMicrosecondsPerOperation": 218.008
+      }
+    }
+  },
+  "raw": {
+    "rounds": [
+      {
+        "round": 1,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 1,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 596541000,
+            "nsPerOperation": 119.308,
+            "operationsPerSecond": 8381653.566,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 1,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1091910800,
+            "nsPerOperation": 218382.16,
+            "operationsPerSecond": 4579.129,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 2,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1227057600,
+            "nsPerOperation": 245411.52,
+            "operationsPerSecond": 4074.788,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 2,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 590205500,
+            "nsPerOperation": 118.041,
+            "operationsPerSecond": 8471625.561,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 3,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 530797800,
+            "nsPerOperation": 106.16,
+            "operationsPerSecond": 9419782.825,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 3,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1860732300,
+            "nsPerOperation": 372146.46,
+            "operationsPerSecond": 2687.114,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 4,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 4,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1163365100,
+            "nsPerOperation": 232673.02,
+            "operationsPerSecond": 4297.877,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 4,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 464800500,
+            "nsPerOperation": 92.96,
+            "operationsPerSecond": 10757303.402,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 5,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 5,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 588412800,
+            "nsPerOperation": 117.683,
+            "operationsPerSecond": 8497435.814,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 5,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1675745400,
+            "nsPerOperation": 335149.08,
+            "operationsPerSecond": 2983.747,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 6,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 6,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1258099000,
+            "nsPerOperation": 251619.8,
+            "operationsPerSecond": 3974.25,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 6,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 548784700,
+            "nsPerOperation": 109.757,
+            "operationsPerSecond": 9111041.179,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 7,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 7,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 545439900,
+            "nsPerOperation": 109.088,
+            "operationsPerSecond": 9166912.798,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 7,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1131240200,
+            "nsPerOperation": 226248.04,
+            "operationsPerSecond": 4419.928,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 8,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 8,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1159278100,
+            "nsPerOperation": 231855.62,
+            "operationsPerSecond": 4313.029,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 8,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 490485800,
+            "nsPerOperation": 98.097,
+            "operationsPerSecond": 10193975.035,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 9,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 9,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 441190700,
+            "nsPerOperation": 88.238,
+            "operationsPerSecond": 11332967.807,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 9,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1089206600,
+            "nsPerOperation": 217841.32,
+            "operationsPerSecond": 4590.497,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 10,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 10,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 853481700,
+            "nsPerOperation": 170696.34,
+            "operationsPerSecond": 5858.356,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 10,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 564532200,
+            "nsPerOperation": 112.906,
+            "operationsPerSecond": 8856890.714,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 11,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 11,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 714391100,
+            "nsPerOperation": 142.878,
+            "operationsPerSecond": 6998967.372,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 11,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1119703600,
+            "nsPerOperation": 223940.72,
+            "operationsPerSecond": 4465.467,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 12,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 12,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1531063200,
+            "nsPerOperation": 306212.64,
+            "operationsPerSecond": 3265.705,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 12,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 975042600,
+            "nsPerOperation": 195.009,
+            "operationsPerSecond": 5127981.075,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 13,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 13,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 604286200,
+            "nsPerOperation": 120.857,
+            "operationsPerSecond": 8274225.028,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 13,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 822352200,
+            "nsPerOperation": 164470.44,
+            "operationsPerSecond": 6080.12,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 14,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 14,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 743709400,
+            "nsPerOperation": 148741.88,
+            "operationsPerSecond": 6723.056,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 14,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 381637600,
+            "nsPerOperation": 76.328,
+            "operationsPerSecond": 13101434.45,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 15,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 15,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 412533100,
+            "nsPerOperation": 82.507,
+            "operationsPerSecond": 12120239.564,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 15,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 766948200,
+            "nsPerOperation": 153389.64,
+            "operationsPerSecond": 6519.345,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 16,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 16,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 778638900,
+            "nsPerOperation": 155727.78,
+            "operationsPerSecond": 6421.462,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 16,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 425567600,
+            "nsPerOperation": 85.114,
+            "operationsPerSecond": 11749014.728,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 17,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 17,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 482618700,
+            "nsPerOperation": 96.524,
+            "operationsPerSecond": 10360145.597,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 17,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1043011400,
+            "nsPerOperation": 208602.28,
+            "operationsPerSecond": 4793.811,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 18,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 18,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 989344900,
+            "nsPerOperation": 197868.98,
+            "operationsPerSecond": 5053.849,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 18,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 448722900,
+            "nsPerOperation": 89.745,
+            "operationsPerSecond": 11142734.191,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 19,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 19,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 512765600,
+            "nsPerOperation": 102.553,
+            "operationsPerSecond": 9751044.142,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 19,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 863206300,
+            "nsPerOperation": 172641.26,
+            "operationsPerSecond": 5792.358,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 20,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 20,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 894762700,
+            "nsPerOperation": 178952.54,
+            "operationsPerSecond": 5588.074,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 20,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 364799000,
+            "nsPerOperation": 72.96,
+            "operationsPerSecond": 13706177.923,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 21,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 21,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 404854300,
+            "nsPerOperation": 80.971,
+            "operationsPerSecond": 12350122.007,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 21,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 838579500,
+            "nsPerOperation": 167715.9,
+            "operationsPerSecond": 5962.464,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 22,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 22,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 931193600,
+            "nsPerOperation": 186238.72,
+            "operationsPerSecond": 5369.453,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 22,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 435477400,
+            "nsPerOperation": 87.095,
+            "operationsPerSecond": 11481652.09,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 23,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 23,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 415861100,
+            "nsPerOperation": 83.172,
+            "operationsPerSecond": 12023245.261,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 23,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 808228300,
+            "nsPerOperation": 161645.66,
+            "operationsPerSecond": 6186.371,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 24,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 24,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 751188700,
+            "nsPerOperation": 150237.74,
+            "operationsPerSecond": 6656.117,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 24,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 401846000,
+            "nsPerOperation": 80.369,
+            "operationsPerSecond": 12442577.505,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 25,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 25,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 437925300,
+            "nsPerOperation": 87.585,
+            "operationsPerSecond": 11417472.341,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 25,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 921362700,
+            "nsPerOperation": 184272.54,
+            "operationsPerSecond": 5426.745,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 26,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 26,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 847396900,
+            "nsPerOperation": 169479.38,
+            "operationsPerSecond": 5900.423,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 26,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 411944600,
+            "nsPerOperation": 82.389,
+            "operationsPerSecond": 12137554.419,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 27,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 27,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 405273400,
+            "nsPerOperation": 81.055,
+            "operationsPerSecond": 12337350.539,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 27,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1000802900,
+            "nsPerOperation": 200160.58,
+            "operationsPerSecond": 4995.989,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 28,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 28,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 966579700,
+            "nsPerOperation": 193315.94,
+            "operationsPerSecond": 5172.879,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 28,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 513684500,
+            "nsPerOperation": 102.737,
+            "operationsPerSecond": 9733601.072,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      },
+      {
+        "round": 29,
+        "order": [
+          "direct",
+          "governed"
+        ],
+        "observations": [
+          {
+            "round": 29,
+            "orderPosition": 1,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 393630100,
+            "nsPerOperation": 78.726,
+            "operationsPerSecond": 12702280.644,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          },
+          {
+            "round": 29,
+            "orderPosition": 2,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 1069852000,
+            "nsPerOperation": 213970.4,
+            "operationsPerSecond": 4673.544,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          }
+        ]
+      },
+      {
+        "round": 30,
+        "order": [
+          "governed",
+          "direct"
+        ],
+        "observations": [
+          {
+            "round": 30,
+            "orderPosition": 1,
+            "variant": "governed",
+            "iterations": 5000,
+            "warmupIterations": 500,
+            "elapsedNs": 993545100,
+            "nsPerOperation": 198709.02,
+            "operationsPerSecond": 5032.484,
+            "checksum": 210000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": 5000,
+              "governedCallCount": 5000,
+              "iterations": 5000
+            }
+          },
+          {
+            "round": 30,
+            "orderPosition": 2,
+            "variant": "direct",
+            "iterations": 5000000,
+            "warmupIterations": 250000,
+            "elapsedNs": 470820400,
+            "nsPerOperation": 94.164,
+            "operationsPerSecond": 10619760.741,
+            "checksum": 210000000,
+            "verification": {
+              "expectedResult": 42,
+              "governedTraceEntries": null,
+              "governedCallCount": null,
+              "iterations": 5000000
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "quality": {
+    "projectCriteriaVersion": "2",
+    "publicationCandidate": false,
+    "checks": [
+      {
+        "id": "sample-count-at-least-30",
+        "required": true,
+        "passed": true,
+        "observed": 30,
+        "threshold": 30
+      },
+      {
+        "id": "direct-cv-at-most-10-percent",
+        "required": false,
+        "passed": false,
+        "observed": 0.244948,
+        "threshold": 0.1
+      },
+      {
+        "id": "governed-cv-at-most-10-percent",
+        "required": true,
+        "passed": false,
+        "observed": 0.256909,
+        "threshold": 0.1
+      },
+      {
+        "id": "direct-median-timed-batch-at-least-100ms",
+        "required": true,
+        "passed": true,
+        "observed": 467.81,
+        "threshold": 100
+      },
+      {
+        "id": "governed-median-timed-batch-at-least-100ms",
+        "required": true,
+        "passed": true,
+        "observed": 991.445,
+        "threshold": 100
+      }
+    ],
+    "note": "The direct-path CV is diagnostic because the near-zero baseline is dominated by cross-process CPU-frequency noise. Required checks still enforce 30 samples, governed CV <= 10%, and >= 100 ms median batches for both variants. These are project stability rules, not an external certification or universal benchmark acceptance rule."
+  },
+  "interpretation": "This is a local component microbenchmark for regression tracking. It is not a competitor benchmark, security score, production SLA, globally accepted standard, or evidence of end-to-end agent performance."
+}

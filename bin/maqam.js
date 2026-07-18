@@ -31,6 +31,11 @@ function readArgs(argv) {
     else if (argument === "--allowed-origin") options.allowedOrigins.push(argv[++index]);
     else if (argument === "--allowed-ui-origin") options.allowedUiOrigins.push(argv[++index]);
     else if (argument === "--allowed-host") options.allowedHosts.push(argv[++index]);
+    else if (argument === "--yt-dlp-command") {
+      const command = argv[++index];
+      if (!command) throw new TypeError("--yt-dlp-command requires an absolute executable path.");
+      options.ytDlpCommand = command;
+    }
     else if (argument === "--allow-private-networks") options.allowPrivateNetworks = true;
     else if (argument === "--allow-cross-origin-crawls") options.allowCrossOriginCrawls = true;
     else throw new TypeError(`Unknown option: ${argument}`);
@@ -58,6 +63,7 @@ Options:
   --allowed-origin <origin>       Server-side crawl origin allowlist; repeatable
   --allowed-ui-origin <origin>    Browser API CORS allowlist; repeatable, exact origins only
   --allowed-host <host>           HTTP Host allowlist for non-loopback binding; repeatable
+  --yt-dlp-command <absolute>     Enable public YouTube research with this reviewed executable
   --allow-private-networks        Trusted startup opt-in for loopback/private crawl targets
   --allow-cross-origin-crawls     Permit cross-origin links within --allowed-origin entries
   --version                       Print the installed Maqam version
@@ -67,6 +73,7 @@ Demo options:
   --json                          Emit deterministic machine-readable output
 
 Non-loopback binding also requires MAQAM_API_TOKEN. The token is never accepted as a command-line argument.
+MAQAM_YT_DLP_COMMAND may provide the same reviewed absolute executable path as --yt-dlp-command.
 `);
 }
 

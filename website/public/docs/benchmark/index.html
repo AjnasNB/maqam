@@ -63,18 +63,18 @@
       </div>
       <p><strong>Recommended presentation:</strong> report MGES beside its environment and raw artifacts, map relevant failure modes to OWASP, follow emerging NIST work, and use capability benchmarks separately when evaluating the model or agent as a whole.</p>
 
-      <h2 id="result">Measured result</h2>
+      <h2 id="result">Measured implementation-PR candidate</h2>
       <dl class="definition-grid">
-        <dt>Governed median</dt><dd>124.303 microseconds per sequential in-process call.</dd>
-        <dt>95% interval</dt><dd>123.712 to 125.695 microseconds for the sample median using deterministic percentile bootstrap.</dd>
-        <dt>Variability</dt><dd>2.010% governed coefficient of variation across 30 observations.</dd>
-        <dt>Derived rate</dt><dd>8,044.843 sequential calls per second at the measured median. This is not a concurrent-load capacity claim.</dd>
-        <dt>Paired added median</dt><dd>124.245 microseconds compared with the direct fixture path.</dd>
+        <dt>Governed median</dt><dd>146.842 microseconds per sequential in-process call.</dd>
+        <dt>95% interval</dt><dd>145.085 to 153.521 microseconds for the sample median using deterministic percentile bootstrap.</dd>
+        <dt>Variability</dt><dd>9.430% governed coefficient of variation across 30 observations.</dd>
+        <dt>Derived rate</dt><dd>6,810.042 sequential calls per second at the measured median. This is not a concurrent-load capacity claim.</dd>
+        <dt>Paired added median</dt><dd>146.767 microseconds compared with the direct fixture path.</dd>
         <dt>Conformance</dt><dd>14 of 14 named deterministic fixtures passed.</dd>
       </dl>
       <figure class="media-frame">
         <img src="/media/04-benchmark-method.png" width="1920" height="1080" alt="MGES benchmark frame showing local method, median result, interval, and conformance count">
-        <figcaption>Method illustration from the 0.2.4 video; the current clean-source JSON was measured on 18 July 2026.</figcaption>
+        <figcaption>Method illustration from the 0.2.4 video; the current clean-source implementation candidate was measured on 18 July 2026 and requires a post-squash main rerun.</figcaption>
       </figure>
 
       <h2 id="method">Local-call performance method</h2>
@@ -98,7 +98,7 @@
       <p>CPU affinity, processor frequency, and background load were not controlled. Re-run on your deployment class before setting operational thresholds.</p>
 
       <h3>Project publication checks</h3>
-      <p>MGES v1.1 criteria version 2 passed all four required checks: at least 30 observations, governed variation at or below 10%, and median timed batches of at least 100 milliseconds for both paths. Direct-path variation remains a published diagnostic because the near-zero baseline is dominated by CPU-frequency noise; it also passed in this run. These are Maqam stability criteria, not external acceptance rules.</p>
+      <p>MGES v1.1 criteria version 2 passed all four required checks: at least 30 observations, governed variation at or below 10%, and median timed batches of at least 100 milliseconds for both paths. Direct-path variation remains a published optional diagnostic because the near-zero baseline is dominated by CPU-frequency noise; its 12.730% value did not meet the 10% reference threshold and did not determine publication-candidate status. These are Maqam stability criteria, not external acceptance rules.</p>
 
       <h2 id="conformance">Governance conformance profile</h2>
       <p>Each named fixture tests one failure or integrity property on the recorded source fingerprint.</p>
@@ -144,20 +144,21 @@ cd maqam
 npm ci
 npm run benchmark:mges:conformance
 npm run benchmark:mges:performance</code></pre></div>
-      <p>The clean-source artifacts record source commit <code>bceaebfa2a4059bc63acd23eccf4fafee794a295</code>. Later release commits can change documentation and media without changing the measured path. Any change to a fingerprinted implementation or benchmark source requires another run.</p>
+      <p>The clean-source candidate artifacts record source commit <code>280e43cde71cdd6128a5c94202dd32abf6e6cdb8</code>. Squash merging will rewrite the implementation commit, so final release evidence must be rerun from the resulting main commit. Any change to a fingerprinted implementation or benchmark source requires another run.</p>
       <ul>
-        <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-performance-windows-node24.json">Raw performance JSON</a></li>
-        <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-conformance-windows-node24.json">Raw conformance JSON</a></li>
+        <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json">Raw candidate performance JSON</a></li>
+        <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json">Raw candidate conformance JSON</a></li>
         <li><a href="/releases/v0.2.4/">Historical 0.2.4 benchmark and media</a></li>
         <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/README.md">Repository methodology</a></li>
         <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/CLAIMS.md">Claims policy</a></li>
       </ul>
 
       <h2 id="publish">Safe publication wording</h2>
-      <div class="code-shell"><button class="copy-button" type="button" data-copy="#claim-code">Copy</button><pre><code id="claim-code">MGES v1.1.0 local-call profile on Node 24.15.0, Windows x64,
-and Ryzen 7 4800H: 124.303 microseconds median per governed
-call, with a 123.712 to 125.695 microsecond 95% bootstrap
-interval, 30 fresh-process observations, and 2.010% governed CV.
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#claim-code">Copy</button><pre><code id="claim-code">Provisional result: MGES v1.1.0 local-call profile on Node 24.15.0, Windows x64,
+and Ryzen 7 4800H: 146.842 microseconds median per governed
+call, with a 145.085 to 153.521 microsecond 95% bootstrap
+interval, 30 fresh-process observations, and 9.430% governed CV.
+Implementation-PR candidate requiring a post-squash main rerun.
 The separate boundary profile passed 14 of 14 deterministic
 fixtures. Project-defined local regression evidence, not a
 standard, certification, security score, capacity result,

@@ -43,3 +43,77 @@ jobs:
 
       - name: Package dry run
         run: npm pack --dry-run
+
+  release-artifact:
+    name: Prepare exact npm candidate identity
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.15.0
+          package-manager-cache: false
+
+      - name: Setup release npm CLI
+        run: npm install --global npm@12.0.1 --ignore-scripts
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Pack candidate and record identity
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_dir="${RUNNER_TEMP}/maqam-npm-candidate"
+          mkdir -p "${candidate_dir}"
+          npm pack --ignore-scripts --pack-destination "${candidate_dir}" --json > "${candidate_dir}/npm-pack.json"
+          version="$(node -p "require('./package.json').version")"
+          tarball="${candidate_dir}/maqam-${version}.tgz"
+          test -f "${tarball}"
+          size_bytes="$(wc -c < "${tarball}" | tr -d '[:space:]')"
+          sha256="$(sha256sum "${tarball}" | awk '{print $1}')"
+          integrity="sha512-$(openssl dgst -sha512 -binary "${tarball}" | openssl base64 -A)"
+          node --input-type=module - "${candidate_dir}/release-manifest.json" "${version}" "${size_bytes}" "${sha256}" "${integrity}" "${GITHUB_SHA}" <<'NODE'
+          import fs from "node:fs";
+          const [output, version, sizeBytes, sha256, integrity, gitCommit] = process.argv.slice(2);
+          fs.writeFileSync(output, `${JSON.stringify({
+            packageName: "maqam",
+            version,
+            artifactFilename: `maqam-${version}.tgz`,
+            artifactSizeBytes: Number(sizeBytes),
+            artifactSha256: sha256,
+            artifactIntegrity: integrity,
+            gitCommit,
+            nodeVersion: process.version,
+            npmVersion: "12.0.1"
+          }, null, 2)}\n`);
+          NODE
+          {
+            echo "## Exact npm candidate identity"
+            echo
+            echo "- Package: \`maqam@${version}\`"
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Size: \`${size_bytes}\` bytes"
+            echo "- SHA-256: \`${sha256}\`"
+            echo "- Integrity: \`${integrity}\`"
+            echo "- Toolchain: Node \`24.15.0\`, npm \`12.0.1\`"
+            echo "- This job did not publish or request publish approval."
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload one-day candidate kit
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: maqam-npm-candidate-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/maqam-npm-candidate/maqam-*.tgz
+            ${{ runner.temp }}/maqam-npm-candidate/release-manifest.json
+            ${{ runner.temp }}/maqam-npm-candidate/npm-pack.json
+          if-no-files-found: error
+          retention-days: 1
