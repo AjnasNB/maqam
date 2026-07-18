@@ -473,6 +473,89 @@ export function createWebCrawlerSourceAdapter(
   hostCrawler: WebCrawlerSourceHost
 ): ResearchSourceAdapter;
 
+export interface ExaSearchSourceAdapterOptions {
+  /** Streamable HTTP endpoint. Defaults to Exa's anonymous hosted MCP endpoint. */
+  endpoint?: string;
+  /** Injectable transport for tests or a host-governed HTTP client. */
+  fetch?: typeof globalThis.fetch;
+  timeoutMs?: number;
+  maxResponseBytes?: number;
+  maxResults?: number;
+}
+
+export interface ExaSearchSourceInput extends JsonObject {
+  query: string;
+  numResults?: number;
+}
+
+export const EXA_HOSTED_MCP_ENDPOINT: string;
+export function createExaSearchSourceAdapter(
+  options?: ExaSearchSourceAdapterOptions
+): ResearchSourceAdapter;
+
+export interface YtDlpRunnerRequest {
+  readonly command: string;
+  readonly args: readonly string[];
+  readonly timeoutMs: number;
+  readonly maxOutputBytes: number;
+  readonly signal: AbortSignal | null;
+}
+
+export interface YtDlpRunnerResult {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}
+
+export type YtDlpRunner = (
+  request: Readonly<YtDlpRunnerRequest>
+) => YtDlpRunnerResult | Promise<YtDlpRunnerResult>;
+
+export interface YouTubeCaptionReaderRequest {
+  readonly url: string;
+  readonly timeoutMs: number;
+  readonly maxBytes: number;
+  readonly signal: AbortSignal | null;
+}
+
+export interface YouTubeCaptionReaderResponse {
+  body: string;
+  contentType?: string;
+}
+
+export type YouTubeCaptionReader = (
+  request: Readonly<YouTubeCaptionReaderRequest>
+) => string | YouTubeCaptionReaderResponse | Promise<string | YouTubeCaptionReaderResponse>;
+
+export interface YtDlpYouTubeSourceAdapterOptions {
+  /** Exact executable path or command name; arguments are never evaluated by a shell. */
+  command?: string;
+  runner?: YtDlpRunner;
+  captionReader?: YouTubeCaptionReader;
+  timeoutMs?: number;
+  captionTimeoutMs?: number;
+  maxOutputBytes?: number;
+  maxCaptionBytes?: number;
+  maxTranscriptChars?: number;
+  maxResults?: number;
+  languages?: readonly string[];
+}
+
+export interface YtDlpYouTubeSourceInput extends JsonObject {
+  /** Canonical HTTPS URL on `www.youtube.com`; alias origins are rejected before dispatch. */
+  url?: string;
+  query?: string;
+  maxResults?: number;
+  languages?: readonly string[];
+  /** URL reads request captions by default; set false for metadata only. Ignored by search reads. */
+  includeTranscript?: boolean;
+}
+
+export const YOUTUBE_PUBLIC_ORIGIN: "https://www.youtube.com";
+export function createYtDlpYouTubeSourceAdapter(
+  options?: YtDlpYouTubeSourceAdapterOptions
+): ResearchSourceAdapter;
+
 export interface ClassifiedIpAddress {
   address: string;
   family: 0 | 4 | 6;
@@ -553,8 +636,16 @@ export interface WorkflowGoal extends JsonObject {
 
 export interface ToolMetadata extends JsonObject {
   effects?: string[];
+  /** Exact canonical HTTP(S) origins contacted internally by the registered handler. */
+  networkOrigins?: readonly string[];
   /** Standard ordered levels are monotonic; non-empty domain-specific labels remain supported. */
   risk?: string;
+}
+
+export interface HandlerGovernance extends JsonObject {
+  readonly effects?: readonly string[];
+  readonly networkOrigins?: readonly string[];
+  readonly risk?: string;
 }
 
 export interface PolicyEngineConfig {
@@ -778,14 +869,14 @@ export type AgentTool<TInput = unknown, TOutput = unknown> = ((
   input?: TInput,
   context?: AgentToolInvocationContext
 ) => Promise<TOutput>) & {
-  governance?: Readonly<JsonObject>;
+  governance?: Readonly<HandlerGovernance>;
 };
 
 export type AgentHandler<TInput = unknown, TOutput = unknown> = ((
   input: TInput,
   context: AgentExecutionContext
 ) => TOutput | Promise<TOutput>) & {
-  governance?: Readonly<JsonObject>;
+  governance?: Readonly<HandlerGovernance>;
 };
 
 /** A descriptive transport label. Maqam does not bundle clients for these transports. */
@@ -1047,14 +1138,36 @@ export interface ReleaseVerification {
   command?: string;
   status?: string;
   summary?: string;
+  /** Full Git commit on which this check ran; required to match the artifact commit. */
+  gitCommit?: string;
 }
 
 export interface ReleaseArtifact {
-  integrity: string;
-  gitCommit: string;
+  packageName: string;
+  version: string;
   filename: string;
   sizeBytes: number;
-  [key: string]: unknown;
+  /** Independent lowercase SHA-256 hex digest, without a `sha256:` prefix. */
+  sha256: string;
+  /** Canonical npm Subresource Integrity value in `sha512-<base64>` form. */
+  integrity: string;
+  /** Full lowercase 40-character Git commit used to build the artifact. */
+  gitCommit: string;
+}
+
+export interface ReleaseInspectedProject {
+  name: string;
+  /** Canonical HTTPS project or repository URL. */
+  url: string;
+  /** Full lowercase 40-character inspected Git revision. */
+  revision: string;
+  license: string;
+  use: string;
+}
+
+export interface ReleaseProvenance {
+  inspectedProjects: ReleaseInspectedProject[];
+  copiedThirdPartyCode: boolean;
 }
 
 export interface ReleaseGateReport {
@@ -1069,7 +1182,7 @@ export interface ReleaseGateReport {
   missing: string[];
   blockers: string[];
   verification: ReleaseVerification[];
-  provenance: JsonObject;
+  provenance: Partial<ReleaseProvenance>;
   approval: ApprovalRecord | null;
   summary: string;
 }
@@ -1083,10 +1196,7 @@ export interface ReleaseGateInput {
   artifact?: Partial<ReleaseArtifact>;
   requiredFiles?: Record<string, boolean>;
   verification?: ReleaseVerification[];
-  provenance?: JsonObject & {
-    inspectedProjects?: JsonObject[];
-    copiedThirdPartyCode?: boolean;
-  };
+  provenance?: Partial<ReleaseProvenance>;
   approval?: ApprovalRecord | null;
 }
 

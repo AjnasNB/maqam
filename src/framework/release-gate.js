@@ -15,7 +15,15 @@ const REQUIRED_FILE_KEYS = [
   "examples"
 ];
 
-const REQUIRED_VERIFICATION_COMMANDS = ["npm test", "npm pack --dry-run"];
+const REQUIRED_VERIFICATION_COMMANDS = [
+  "npm test",
+  "npm run test:consumer-types",
+  "npm run test:website",
+  "npm audit --omit=dev",
+  "npm pack --json --ignore-scripts",
+  "npm run benchmark:mges:conformance",
+  "npm run benchmark:mges:performance"
+];
 const NPM_REGISTRY = "https://registry.npmjs.org/";
 const ALLOWED_PUBLISH_COMMANDS = new Set([
   "npm publish --access public",
@@ -26,15 +34,19 @@ const RELEASE_INPUT_KEYS = new Set([
   "packageName", "version", "license", "publishCommand", "registry", "artifact",
   "requiredFiles", "verification", "provenance", "approval"
 ]);
-const ARTIFACT_KEYS = new Set(["integrity", "gitCommit", "filename", "sizeBytes"]);
-const VERIFICATION_KEYS = new Set(["command", "status", "summary"]);
+const ARTIFACT_KEYS = new Set([
+  "packageName", "version", "filename", "sizeBytes", "sha256", "integrity", "gitCommit"
+]);
+const VERIFICATION_KEYS = new Set(["command", "status", "summary", "gitCommit"]);
+const PROVENANCE_KEYS = new Set(["inspectedProjects", "copiedThirdPartyCode"]);
+const INSPECTED_PROJECT_KEYS = new Set(["name", "url", "revision", "license", "use"]);
 const APPROVAL_KEYS = new Set([
   "approvalId", "status", "action", "requestedBy", "reason", "risk", "subject",
   "evidence", "reusable", "consumptions", "requestedAt", "decision"
 ]);
 const RELEASE_SUBJECT_KEYS = new Set([
   "packageName", "version", "registry", "publishCommand", "artifactIntegrity",
-  "artifactFilename", "artifactSizeBytes", "gitCommit"
+  "artifactSha256", "artifactFilename", "artifactSizeBytes", "gitCommit"
 ]);
 
 function requireOptionalString(record, key, label) {
@@ -68,7 +80,9 @@ function snapshotReleaseInput(value) {
       label: "Release artifact",
       recognizedKeys: ARTIFACT_KEYS
     });
-    for (const key of ["integrity", "gitCommit", "filename"]) {
+    for (const key of [
+      "packageName", "version", "filename", "sha256", "integrity", "gitCommit"
+    ]) {
       requireOptionalString(input.artifact, key, "Release artifact");
     }
     if (input.artifact.sizeBytes !== undefined && typeof input.artifact.sizeBytes !== "number") {
@@ -84,7 +98,7 @@ function snapshotReleaseInput(value) {
         label: `Release verification[${index}]`,
         recognizedKeys: VERIFICATION_KEYS
       });
-      for (const key of ["command", "status", "summary"]) {
+      for (const key of ["command", "status", "summary", "gitCommit"]) {
         requireOptionalString(snapshot, key, `Release verification[${index}]`);
       }
       return snapshot;
@@ -97,21 +111,31 @@ function snapshotReleaseInput(value) {
   if (input.provenance !== undefined) {
     const provenance = snapshotOwnDataRecord(input.provenance, {
       label: "Release provenance",
-      recognizedKeys: new Set(["inspectedProjects", "copiedThirdPartyCode"]),
-      rejectUnknown: false
+      recognizedKeys: PROVENANCE_KEYS
     });
+    if (provenance.inspectedProjects !== undefined) {
+      const projects = snapshotOwnDataArray(provenance.inspectedProjects, {
+        label: "Release provenance.inspectedProjects"
+      });
+      provenance.inspectedProjects = projects.map((project, index) => {
+        const snapshot = snapshotOwnDataRecord(project, {
+          label: `Release provenance.inspectedProjects[${index}]`,
+          recognizedKeys: INSPECTED_PROJECT_KEYS
+        });
+        for (const key of INSPECTED_PROJECT_KEYS) {
+          requireOptionalString(snapshot, key, `Release provenance.inspectedProjects[${index}]`);
+        }
+        return snapshot;
+      });
+    }
+    if (provenance.copiedThirdPartyCode !== undefined
+      && typeof provenance.copiedThirdPartyCode !== "boolean") {
+      throw new TypeError("Release provenance.copiedThirdPartyCode must be a boolean.");
+    }
     input.provenance = snapshotJsonValue(provenance, {
       label: "Release provenance",
       allowNullPrototype: true
     });
-    if (input.provenance.inspectedProjects !== undefined
-      && !Array.isArray(input.provenance.inspectedProjects)) {
-      throw new TypeError("Release provenance.inspectedProjects must be an array.");
-    }
-    if (input.provenance.copiedThirdPartyCode !== undefined
-      && typeof input.provenance.copiedThirdPartyCode !== "boolean") {
-      throw new TypeError("Release provenance.copiedThirdPartyCode must be a boolean.");
-    }
   }
   if (input.approval !== undefined && input.approval !== null) {
     const approval = snapshotOwnDataRecord(input.approval, {
@@ -128,7 +152,7 @@ function snapshotReleaseInput(value) {
       });
       for (const key of [
         "packageName", "version", "registry", "publishCommand", "artifactIntegrity",
-        "artifactFilename", "gitCommit"
+        "artifactSha256", "artifactFilename", "gitCommit"
       ]) {
         requireOptionalString(approval.subject, key, "Release approval subject");
       }
@@ -170,6 +194,9 @@ function collectMissing(input) {
   if (!input.artifact?.integrity) {
     missing.push("artifact.integrity");
   }
+  if (!input.artifact?.sha256) {
+    missing.push("artifact.sha256");
+  }
   if (!input.artifact?.gitCommit) {
     missing.push("artifact.gitCommit");
   }
@@ -179,16 +206,41 @@ function collectMissing(input) {
   if (!input.artifact?.sizeBytes) {
     missing.push("artifact.sizeBytes");
   }
+  if (!input.artifact?.packageName) {
+    missing.push("artifact.packageName");
+  }
+  if (!input.artifact?.version) {
+    missing.push("artifact.version");
+  }
   return missing;
 }
 
-function hasValidIntegrity(value) {
-  if (/^sha256:[a-f0-9]{64}$/i.test(value || "")) return true;
+function hasValidSha512Integrity(value) {
   const match = /^sha512-([A-Za-z0-9+/]+={0,2})$/.exec(value || "");
   if (!match) return false;
   try {
     const decoded = Buffer.from(match[1], "base64");
     return decoded.byteLength === 64 && decoded.toString("base64") === match[1];
+  } catch {
+    return false;
+  }
+}
+
+function hasCompleteInspectedProject(project) {
+  if (!project || typeof project !== "object") return false;
+  if (!["name", "url", "revision", "license", "use"].every(
+    (key) => typeof project[key] === "string"
+      && project[key] !== ""
+      && project[key] === project[key].trim()
+  )) return false;
+  if (!/^[a-f0-9]{40}$/.test(project.revision)) return false;
+  try {
+    const url = new URL(project.url);
+    return url.protocol === "https:"
+      && url.username === ""
+      && url.password === ""
+      && url.search === ""
+      && url.hash === "";
   } catch {
     return false;
   }
@@ -201,13 +253,20 @@ function collectBlockers(input) {
     blockers.push("Release verification evidence is required.");
   }
   for (const command of REQUIRED_VERIFICATION_COMMANDS) {
-    if (!verification.some((check) => check?.command === command && check.status === "pass")) {
+    if (!verification.some((check) => check?.command === command
+      && check.status === "pass"
+      && check.gitCommit === input.artifact?.gitCommit)) {
       blockers.push(`Required verification has not passed: ${command}.`);
     }
   }
   for (const check of verification) {
     if (check.status !== "pass") {
       blockers.push(`Verification failed: ${check.command || "unknown command"}.`);
+    }
+    if (check.gitCommit !== input.artifact?.gitCommit) {
+      blockers.push(
+        `Verification is not bound to artifact gitCommit: ${check.command || "unknown command"}.`
+      );
     }
   }
 
@@ -217,11 +276,14 @@ function collectBlockers(input) {
   if (input.publishCommand && !ALLOWED_PUBLISH_COMMANDS.has(input.publishCommand)) {
     blockers.push("Publish command is not an approved npm public-release command.");
   }
-  if (!hasValidIntegrity(input.artifact?.integrity)) {
-    blockers.push("Artifact integrity must be sha256:<64 hex> or canonical sha512-<base64>.");
+  if (!/^[a-f0-9]{64}$/.test(input.artifact?.sha256 || "")) {
+    blockers.push("Artifact sha256 must be an independent lowercase 64-character SHA-256 hex digest.");
   }
-  if (!/^[a-f0-9]{40}$/i.test(input.artifact?.gitCommit || "")) {
-    blockers.push("Artifact gitCommit must be a full 40-character Git commit.");
+  if (!hasValidSha512Integrity(input.artifact?.integrity)) {
+    blockers.push("Artifact integrity must be a canonical npm sha512-<base64> integrity value.");
+  }
+  if (!/^[a-f0-9]{40}$/.test(input.artifact?.gitCommit || "")) {
+    blockers.push("Artifact gitCommit must be a full lowercase 40-character Git commit.");
   }
   if (input.artifact?.filename && !/^[A-Za-z0-9._-]+\.tgz$/.test(input.artifact.filename)) {
     blockers.push("Artifact filename must be a basename ending in .tgz.");
@@ -230,9 +292,26 @@ function collectBlockers(input) {
     && (!Number.isSafeInteger(input.artifact.sizeBytes) || input.artifact.sizeBytes <= 0)) {
     blockers.push("Artifact sizeBytes must be a positive safe integer.");
   }
+  if (input.artifact?.packageName !== input.packageName
+    || input.artifact?.version !== input.version) {
+    blockers.push("Artifact packageName and version must exactly match the release package and version.");
+  }
   if (input.provenance?.copiedThirdPartyCode !== false) {
     blockers.push("Provenance policy requires copiedThirdPartyCode to be explicitly false.");
   }
+  const inspectedProjects = Array.isArray(input.provenance?.inspectedProjects)
+    ? input.provenance.inspectedProjects
+    : [];
+  if (inspectedProjects.length === 0) {
+    blockers.push("Provenance requires at least one explicitly identified inspected project.");
+  }
+  inspectedProjects.forEach((project, index) => {
+    if (!hasCompleteInspectedProject(project)) {
+      blockers.push(
+        `Provenance inspectedProjects[${index}] requires a name, HTTPS URL, full lowercase Git revision, license, and use.`
+      );
+    }
+  });
 
   if (!input.approval) {
     blockers.push("Explicit release approval is required before publishing.");
@@ -246,6 +325,7 @@ function collectBlockers(input) {
     }
     if (subject.registry !== input.registry
       || subject.publishCommand !== input.publishCommand
+      || subject.artifactSha256 !== input.artifact?.sha256
       || subject.artifactIntegrity !== input.artifact?.integrity
       || subject.artifactFilename !== input.artifact?.filename
       || subject.artifactSizeBytes !== input.artifact?.sizeBytes

@@ -18,7 +18,7 @@ const GOAL_KEYS = new Set([
   "approvalIds", "requestedBy", "approvalEvidence"
 ]);
 const TOOL_AUTHORIZATION_KEYS = new Set(["goal", "toolName", "input", "context", "metadata"]);
-const TOOL_METADATA_KEYS = new Set(["effects", "risk"]);
+const TOOL_METADATA_KEYS = new Set(["effects", "networkOrigins", "risk"]);
 const LIMIT_KEYS = new Set(["maxToolCalls", "maxRuntimeMs", "maxPages", "maxNetworkRequests"]);
 
 function stringArray(value, label) {
@@ -123,6 +123,29 @@ function toOrigin(value) {
   }
 }
 
+function exactNetworkOrigins(value, label) {
+  const origins = stringArray(value, label);
+  return [...new Set(origins.map((origin) => {
+    let url;
+    try {
+      url = new URL(origin);
+    } catch {
+      throw new TypeError(
+        `${label} must contain exact HTTP(S) origins without credentials, paths, queries, or fragments.`
+      );
+    }
+    if ((url.protocol !== "http:" && url.protocol !== "https:")
+      || url.username
+      || url.password
+      || url.origin !== origin) {
+      throw new TypeError(
+        `${label} must contain exact HTTP(S) origins without credentials, paths, queries, or fragments.`
+      );
+    }
+    return url.origin;
+  }))];
+}
+
 export class PolicyEngine {
   constructor(config = {}) {
     config = snapshotOwnDataRecord(config, {
@@ -195,6 +218,12 @@ export class PolicyEngine {
     const effects = metadata.effects === undefined
       ? []
       : [...new Set(stringArray(metadata.effects, "Tool authorization metadata.effects"))];
+    const networkOrigins = metadata.networkOrigins === undefined
+      ? []
+      : exactNetworkOrigins(
+        metadata.networkOrigins,
+        "Tool authorization metadata.networkOrigins"
+      );
     if (!this.isToolAllowed(toolName)) {
       return this.decision("deny", `Tool '${toolName}' is not allowed.`);
     }
@@ -208,7 +237,10 @@ export class PolicyEngine {
       }
     }
 
-    const origins = [...new Set(collectUrls(input).map(toOrigin))];
+    const origins = [...new Set([
+      ...collectUrls(input).map(toOrigin),
+      ...networkOrigins
+    ])];
     const goalOrigins = new Set((goal.allowedOrigins || []).map(toOrigin));
     for (const origin of origins) {
       if (!this.isOriginAllowed(origin)) {

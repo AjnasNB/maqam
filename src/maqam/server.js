@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { randomUUID } from "node:crypto";
 import { readFile, realpath } from "node:fs/promises";
 import { extname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,11 +13,20 @@ import {
   createResearchWorkflow
 } from "../index.js";
 import { redactText } from "../framework/audit.js";
+import { PolicyDeniedError } from "../framework/errors.js";
 import {
   snapshotJsonValue,
   snapshotOwnDataArray,
   snapshotOwnDataRecord
 } from "../framework/boundary.js";
+import { createExaSearchSourceAdapter } from "../research/adapters/exa-search.js";
+import { createYtDlpYouTubeSourceAdapter } from "../research/adapters/youtube.js";
+import { defineResearchSourceAdapter } from "../research/source-adapter.js";
+import {
+  ResearchSourceAuthenticationRequiredError,
+  ResearchSourceUnavailableError
+} from "../research/source-error.js";
+import { ResearchSourceRegistry } from "../research/source-registry.js";
 
 const PRODUCT = {
   name: "Maqam",
@@ -88,8 +98,24 @@ const CAPABILITIES = {
 const DEFAULT_PUBLIC_DIR = fileURLToPath(new URL("../../app/", import.meta.url));
 const SERVER_OPTION_KEYS = [
   "publicDir", "crawlerTool", "allowedHosts", "allowedOrigins", "allowedUiOrigins",
-  "apiToken", "allowPrivateNetworks", "allowCrossOriginCrawls", "maxSeeds", "port", "host"
+  "apiToken", "allowPrivateNetworks", "allowCrossOriginCrawls", "maxSeeds", "port", "host",
+  "sourceAdapters", "sourceAllowedOrigins", "ytDlpCommand"
 ];
+
+const MAX_SOURCE_ADAPTERS = 32;
+const MAX_SOURCE_BODY_BYTES = 128 * 1024;
+const MAX_SOURCE_BACKEND_PREFERENCES = 32;
+const MAX_SOURCE_DOCUMENTS = 25;
+const MAX_SOURCE_INPUT_DEPTH = 12;
+const MAX_SOURCE_INPUT_NODES = 5_000;
+const MAX_SOURCE_INPUT_COLLECTION_SIZE = 100;
+const MAX_SOURCE_INPUT_STRING_LENGTH = 10_000;
+const MAX_SOURCE_OUTPUT_BYTES = 4 * 1024 * 1024;
+const MAX_SOURCE_OUTPUT_STRING_LENGTH = 50_000;
+const MAX_SOURCE_STATUS_QUERY_LENGTH = 4_096;
+const MAX_SOURCE_DOCTOR_TIMEOUT_MS = 10_000;
+const SOURCE_RUN_KEYS = new Set(["channel", "input", "backendPreference", "objective"]);
+const SOURCE_STATUS_QUERY_KEYS = new Set(["channel", "adapterId", "timeoutMs"]);
 
 function snapshotStringArray(value, label) {
   const snapshot = snapshotOwnDataArray(value, { label });
@@ -106,18 +132,28 @@ function snapshotServerOptions(value = {}) {
     label: "Maqam server options",
     recognizedKeys: SERVER_OPTION_KEYS
   });
-  for (const key of ["allowedHosts", "allowedOrigins", "allowedUiOrigins"]) {
+  for (const key of ["allowedHosts", "allowedOrigins", "allowedUiOrigins", "sourceAllowedOrigins"]) {
     if (snapshot[key] !== undefined) snapshot[key] = snapshotStringArray(snapshot[key], `Maqam server options.${key}`);
+  }
+  if (snapshot.sourceAdapters !== undefined) {
+    snapshot.sourceAdapters = Object.freeze(snapshotOwnDataArray(snapshot.sourceAdapters, {
+      label: "Maqam server options.sourceAdapters",
+      maximumLength: MAX_SOURCE_ADAPTERS
+    }));
   }
   for (const key of ["allowPrivateNetworks", "allowCrossOriginCrawls"]) {
     if (snapshot[key] !== undefined && typeof snapshot[key] !== "boolean") {
       throw new TypeError(`Maqam server options.${key} must be a boolean.`);
     }
   }
-  for (const key of ["publicDir", "host"]) {
+  for (const key of ["publicDir", "host", "ytDlpCommand"]) {
     if (snapshot[key] !== undefined && typeof snapshot[key] !== "string") {
       throw new TypeError(`Maqam server options.${key} must be a string.`);
     }
+  }
+  if (snapshot.ytDlpCommand !== undefined
+    && (snapshot.ytDlpCommand.trim() === "" || !isAbsolute(snapshot.ytDlpCommand))) {
+    throw new TypeError("Maqam server options.ytDlpCommand must be an absolute executable path.");
   }
   if (snapshot.crawlerTool !== undefined && typeof snapshot.crawlerTool !== "function") {
     throw new TypeError("Maqam server options.crawlerTool must be a function.");
@@ -256,14 +292,26 @@ function guardServerListen(server, { apiToken, hasExplicitAllowedHosts }) {
   return server;
 }
 
-function sendJson(response, statusCode, payload) {
+function sendJsonBody(response, statusCode, body) {
   response.writeHead(statusCode, {
     "content-type": CONTENT_TYPES[".json"],
     "cache-control": "no-store",
     "x-content-type-options": "nosniff",
     "x-frame-options": "DENY"
   });
-  response.end(JSON.stringify(payload, null, 2));
+  response.end(body);
+}
+
+function sendJson(response, statusCode, payload) {
+  sendJsonBody(response, statusCode, JSON.stringify(payload, null, 2));
+}
+
+function sendBoundedJson(response, statusCode, payload, maximumBytes) {
+  const body = JSON.stringify(payload, null, 2);
+  if (Buffer.byteLength(body) > maximumBytes) {
+    throw httpError(502, "Source response exceeded the server output limit.");
+  }
+  sendJsonBody(response, statusCode, body);
 }
 
 function httpError(statusCode, message) {
@@ -272,12 +320,19 @@ function httpError(statusCode, message) {
   return error;
 }
 
-async function readJsonBody(request) {
+function requireJsonContentType(request) {
+  const contentType = String(request.headers["content-type"] || "").toLowerCase();
+  if (!/^application\/(?:json|[a-z0-9!#$&^_.+-]+\+json)(?:\s*;|$)/i.test(contentType)) {
+    throw httpError(415, "Content-Type must be application/json.");
+  }
+}
+
+async function readJsonBody(request, maximumBytes = 1024 * 1024) {
   const chunks = [];
   let size = 0;
   for await (const chunk of request) {
     size += chunk.byteLength;
-    if (size > 1024 * 1024) throw httpError(413, "Request body is too large.");
+    if (size > maximumBytes) throw httpError(413, "Request body is too large.");
     chunks.push(chunk);
   }
   if (!chunks.length) return {};
@@ -319,12 +374,20 @@ function deriveOrigins(seeds) {
   return [...new Set(seeds.map((seed) => new URL(seed).origin))];
 }
 
-function normalizedConfiguredOrigins(values = []) {
-  if (!Array.isArray(values)) throw new TypeError("allowedOrigins server option must be an array.");
+function normalizedConfiguredOrigins(values = [], label = "allowedOrigins") {
+  if (!Array.isArray(values)) throw new TypeError(`${label} server option must be an array.`);
   return [...new Set(values.map((value) => {
-    const url = new URL(value);
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      throw new TypeError("allowedOrigins server option accepts only HTTP(S) origins.");
+    let url;
+    try {
+      url = new URL(value);
+    } catch {
+      throw new TypeError(`${label} server option accepts only exact canonical HTTP(S) origins.`);
+    }
+    if ((url.protocol !== "http:" && url.protocol !== "https:")
+      || url.username
+      || url.password
+      || url.origin !== value) {
+      throw new TypeError(`${label} server option accepts only exact canonical HTTP(S) origins.`);
     }
     return url.origin;
   }))];
@@ -404,6 +467,341 @@ function sendPreflight(response) {
     "x-frame-options": "DENY"
   });
   response.end();
+}
+
+function boundedSourceString(value, label, maximumLength = 200) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw httpError(400, `${label} must be a non-empty string.`);
+  }
+  if (value.length > maximumLength) {
+    throw httpError(400, `${label} cannot exceed ${maximumLength} characters.`);
+  }
+  return value;
+}
+
+function boundedSourceStrings(value, label, maximumLength) {
+  const values = snapshotOwnDataArray(value, { label, maximumLength });
+  const observed = new Set();
+  for (let index = 0; index < values.length; index += 1) {
+    values[index] = boundedSourceString(values[index], `${label}[${index}]`);
+    if (observed.has(values[index])) throw httpError(400, `${label} contains duplicates.`);
+    observed.add(values[index]);
+  }
+  return Object.freeze(values);
+}
+
+function normalizeSourceRunRequest(value) {
+  let request;
+  try {
+    request = snapshotOwnDataRecord(value, {
+      label: "Source request",
+      recognizedKeys: SOURCE_RUN_KEYS
+    });
+  } catch (error) {
+    throw httpError(400, error.message);
+  }
+  if (!Object.hasOwn(request, "channel")) {
+    throw httpError(400, "Source request requires channel.");
+  }
+  const channel = boundedSourceString(request.channel, "Source request channel");
+  const objective = request.objective === undefined
+    ? "Retrieve bounded public-source evidence through governed routing."
+    : boundedSourceString(request.objective, "Source request objective", 2_000);
+  let input;
+  try {
+    input = snapshotJsonValue(request.input === undefined ? {} : request.input, {
+      label: "Source request input",
+      maximumDepth: MAX_SOURCE_INPUT_DEPTH,
+      maximumNodes: MAX_SOURCE_INPUT_NODES,
+      maximumCollectionSize: MAX_SOURCE_INPUT_COLLECTION_SIZE,
+      maximumStringLength: MAX_SOURCE_INPUT_STRING_LENGTH,
+      allowNullPrototype: true,
+      freeze: true
+    });
+  } catch (error) {
+    throw httpError(400, error.message);
+  }
+  if (input === null || typeof input !== "object" || Array.isArray(input)) {
+    throw httpError(400, "Source request input must be a JSON object.");
+  }
+  return Object.freeze({
+    channel,
+    input,
+    objective,
+    backendPreference: request.backendPreference === undefined
+      ? null
+      : boundedSourceStrings(
+        request.backendPreference,
+        "Source request backendPreference",
+        MAX_SOURCE_BACKEND_PREFERENCES
+      )
+  });
+}
+
+function parseSourceStatusQuery(url) {
+  if (url.search.length > MAX_SOURCE_STATUS_QUERY_LENGTH) {
+    throw httpError(414, "Source status query is too large.");
+  }
+  for (const key of url.searchParams.keys()) {
+    if (!SOURCE_STATUS_QUERY_KEYS.has(key)) {
+      throw httpError(400, `Unknown source status query field '${key}'.`);
+    }
+  }
+  const channels = url.searchParams.getAll("channel");
+  if (channels.length > 1) throw httpError(400, "Source status channel may be specified once.");
+  const channel = channels.length
+    ? boundedSourceString(channels[0], "Source status channel")
+    : null;
+  const adapterIds = boundedSourceStrings(
+    url.searchParams.getAll("adapterId"),
+    "Source status adapterId",
+    MAX_SOURCE_ADAPTERS
+  );
+  const timeoutValues = url.searchParams.getAll("timeoutMs");
+  if (timeoutValues.length > 1) throw httpError(400, "Source status timeoutMs may be specified once.");
+  let timeoutMs = 2_000;
+  if (timeoutValues.length) {
+    if (!/^[1-9][0-9]*$/.test(timeoutValues[0])) {
+      throw httpError(400, "Source status timeoutMs must be a positive integer.");
+    }
+    timeoutMs = Number(timeoutValues[0]);
+    if (!Number.isSafeInteger(timeoutMs) || timeoutMs > MAX_SOURCE_DOCTOR_TIMEOUT_MS) {
+      throw httpError(
+        400,
+        `Source status timeoutMs cannot exceed ${MAX_SOURCE_DOCTOR_TIMEOUT_MS}.`
+      );
+    }
+  }
+  return Object.freeze({
+    channel,
+    adapterIds,
+    timeoutMs
+  });
+}
+
+function boundedSourceDocuments(value, adapterId) {
+  if (!Array.isArray(value)) {
+    throw httpError(502, `Source adapter '${adapterId}' returned a non-array result.`);
+  }
+  if (value.length > MAX_SOURCE_DOCUMENTS) {
+    throw httpError(
+      502,
+      `Source adapter '${adapterId}' returned more than ${MAX_SOURCE_DOCUMENTS} documents.`
+    );
+  }
+  try {
+    return snapshotOwnDataArray(value, {
+      label: `Source adapter '${adapterId}' result`,
+      maximumLength: MAX_SOURCE_DOCUMENTS
+    });
+  } catch {
+    throw httpError(502, `Source adapter '${adapterId}' returned an unsafe document collection.`);
+  }
+}
+
+function immutableSourceGovernance(metadata) {
+  const governance = {
+    effects: Object.freeze([...(metadata.effects || [])]),
+    networkOrigins: Object.freeze([...(metadata.networkOrigins || [])])
+  };
+  if (metadata.risk !== undefined) governance.risk = metadata.risk;
+  return Object.freeze(governance);
+}
+
+function prepareSourceConfiguration(sourceAdapters, ytDlpCommand) {
+  const values = sourceAdapters === undefined
+    ? [
+        createExaSearchSourceAdapter(),
+        ...(ytDlpCommand
+          ? [createYtDlpYouTubeSourceAdapter({ command: ytDlpCommand })]
+          : [])
+      ]
+    : sourceAdapters;
+  const adapters = values.map((value, index) => {
+    let adapter;
+    try {
+      adapter = defineResearchSourceAdapter(value);
+    } catch (error) {
+      throw new TypeError(`Maqam server sourceAdapters[${index}] is invalid: ${error.message}`);
+    }
+    if (adapter.read === null) {
+      throw new TypeError(`Maqam server source adapter '${adapter.id}' requires a read handler.`);
+    }
+    return adapter;
+  });
+
+  // The registry validates duplicate adapter identities and tool names. The
+  // gateway separately snapshots handler governance, including exact origins.
+  new ResearchSourceRegistry({ adapters });
+  const toolNames = adapters.map((adapter) => adapter.toolName);
+  const validationGateway = new ToolGateway({
+    policyEngine: new PolicyEngine({
+      allowedTools: toolNames,
+      maxToolCalls: Math.max(1, adapters.length)
+    })
+  });
+  for (const adapter of adapters) validationGateway.registerTool(adapter.toolName, adapter.read);
+
+  const registrations = adapters.map((adapter) => {
+    const metadata = validationGateway.tools.get(adapter.toolName).metadata;
+    const handler = async (input, context) => boundedSourceDocuments(
+      await adapter.read(input, context),
+      adapter.id
+    );
+    Object.defineProperty(handler, "governance", {
+      value: immutableSourceGovernance(metadata),
+      enumerable: false,
+      configurable: false,
+      writable: false
+    });
+    return Object.freeze({ adapter, handler });
+  });
+  const declaredOrigins = [...new Set(registrations.flatMap(({ handler }) => (
+    handler.governance.networkOrigins
+  )))];
+
+  return Object.freeze({
+    adapters: Object.freeze([...adapters]),
+    registrations: Object.freeze(registrations),
+    toolNames: Object.freeze([...toolNames]),
+    declaredOrigins: Object.freeze(declaredOrigins)
+  });
+}
+
+function createSourceRuntime(configuration, allowedOrigins) {
+  const maxToolCalls = Math.max(1, configuration.registrations.length);
+  const effectiveOrigins = allowedOrigins.length
+    ? allowedOrigins
+    : configuration.declaredOrigins;
+  const policyEngine = new PolicyEngine({
+    allowedTools: configuration.toolNames,
+    allowedOrigins: effectiveOrigins,
+    maxToolCalls
+  });
+  const toolGateway = new ToolGateway({ policyEngine });
+  for (const { adapter, handler } of configuration.registrations) {
+    toolGateway.registerTool(adapter.toolName, handler);
+  }
+  const registry = new ResearchSourceRegistry({
+    adapters: configuration.adapters,
+    toolCaller: { call: toolGateway.call.bind(toolGateway) }
+  });
+  return { registry, toolGateway, maxToolCalls, effectiveOrigins };
+}
+
+function compactSourceResult(source) {
+  return {
+    ...source,
+    documents: source.documents.map((document) => ({
+      ...document,
+      text: document.text.slice(0, MAX_SOURCE_OUTPUT_STRING_LENGTH),
+      markdown: typeof document.markdown === "string"
+        ? document.markdown.slice(0, MAX_SOURCE_OUTPUT_STRING_LENGTH)
+        : document.markdown,
+      authors: document.authors.slice(0, 100),
+      citations: document.citations.slice(0, 100)
+    }))
+  };
+}
+
+function requestDisconnect(request, response) {
+  const controller = new AbortController();
+  const abort = () => controller.abort(new Error("HTTP client disconnected."));
+  const close = () => {
+    if (!response.writableEnded) abort();
+  };
+  request.once("aborted", abort);
+  response.once("close", close);
+  if (request.aborted) abort();
+  return {
+    signal: controller.signal,
+    cleanup() {
+      request.removeListener("aborted", abort);
+      response.removeListener("close", close);
+    }
+  };
+}
+
+async function withDisconnectSignal(request, response, operation) {
+  const disconnect = requestDisconnect(request, response);
+  try {
+    return await operation(disconnect.signal);
+  } finally {
+    disconnect.cleanup();
+  }
+}
+
+function asSourceHttpError(error) {
+  if (Number.isInteger(error?.statusCode)) return error;
+  if (error instanceof PolicyDeniedError
+    || error instanceof ResearchSourceAuthenticationRequiredError) {
+    return httpError(403, error.message);
+  }
+  if (error instanceof ResearchSourceUnavailableError) {
+    return httpError(503, error.message);
+  }
+  if (error instanceof TypeError) return httpError(400, error.message);
+  return error;
+}
+
+async function sendSourceResponse(request, response, operation) {
+  try {
+    const payload = await withDisconnectSignal(request, response, operation);
+    sendBoundedJson(response, 200, payload, MAX_SOURCE_OUTPUT_BYTES);
+  } catch (error) {
+    throw asSourceHttpError(error);
+  }
+}
+
+async function runPublicSource(body, configuration, allowedOrigins, signal) {
+  const request = normalizeSourceRunRequest(body);
+  const { registry, toolGateway, maxToolCalls, effectiveOrigins } = createSourceRuntime(
+    configuration,
+    allowedOrigins
+  );
+  const runId = `source-${randomUUID()}`;
+  const goal = {
+    runId,
+    objective: request.objective,
+    allowedTools: configuration.toolNames,
+    allowedOrigins: effectiveOrigins,
+    budget: { maxToolCalls, maxRuntimeMs: 120_000 }
+  };
+  const routeRequest = {
+    channel: request.channel,
+    input: request.input,
+    allowAuthenticated: false
+  };
+  if (request.backendPreference !== null) {
+    routeRequest.backendPreference = request.backendPreference;
+  }
+  const source = await registry.route(routeRequest, {
+    runId,
+    goal,
+    limits: { maxToolCalls, maxRuntimeMs: 120_000 },
+    signal,
+    requestedBy: "maqam-public-source-api"
+  });
+  return {
+    product: PRODUCT,
+    source: compactSourceResult(source),
+    toolTrace: toolGateway.trace,
+    generatedAt: new Date().toISOString()
+  };
+}
+
+async function runSourceStatus(url, configuration, signal) {
+  const query = parseSourceStatusQuery(url);
+  const registry = new ResearchSourceRegistry({ adapters: configuration.adapters });
+  const doctorOptions = { timeoutMs: query.timeoutMs, signal };
+  if (query.channel !== null) doctorOptions.channel = query.channel;
+  if (query.adapterIds.length) doctorOptions.adapterIds = query.adapterIds;
+  const doctor = await registry.doctor(doctorOptions);
+  return {
+    product: PRODUCT,
+    doctor,
+    generatedAt: new Date().toISOString()
+  };
 }
 
 function compactPage(page) {
@@ -527,6 +925,17 @@ export function createMaqamServer(options = {}) {
   options = snapshotServerOptions(options);
   const publicDir = options.publicDir || DEFAULT_PUBLIC_DIR;
   const crawlerTool = options.crawlerTool || null;
+  // Validate trusted crawl authority at construction time instead of waiting
+  // for the first request to discover a malformed or over-broad origin.
+  normalizedConfiguredOrigins(options.allowedOrigins || [], "allowedOrigins");
+  const sourceConfiguration = prepareSourceConfiguration(
+    options.sourceAdapters,
+    options.ytDlpCommand
+  );
+  const sourceAllowedOrigins = normalizedConfiguredOrigins(
+    options.sourceAllowedOrigins || [],
+    "sourceAllowedOrigins"
+  );
   const hasExplicitAllowedHosts = Array.isArray(options.allowedHosts) && options.allowedHosts.length > 0;
   const allowedHostValues = hasExplicitAllowedHosts
     ? options.allowedHosts
@@ -572,19 +981,35 @@ export function createMaqamServer(options = {}) {
         return;
       }
 
+      if (request.method === "GET" && url.pathname === "/api/sources/status") {
+        await sendSourceResponse(
+          request,
+          response,
+          (signal) => runSourceStatus(url, sourceConfiguration, signal)
+        );
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/runs/source") {
+        if (url.search !== "") throw httpError(400, "Source run requests do not accept URL query parameters.");
+        requireJsonContentType(request);
+        const body = await readJsonBody(request, MAX_SOURCE_BODY_BYTES);
+        await sendSourceResponse(
+          request,
+          response,
+          (signal) => runPublicSource(body, sourceConfiguration, sourceAllowedOrigins, signal)
+        );
+        return;
+      }
+
       if (request.method === "POST" && url.pathname === "/api/runs/research") {
-        const contentType = String(request.headers["content-type"] || "").toLowerCase();
-        if (!/^application\/(?:json|[a-z0-9!#$&^_.+-]+\+json)(?:\s*;|$)/i.test(contentType)) {
-          throw httpError(415, "Content-Type must be application/json.");
-        }
+        requireJsonContentType(request);
         const body = await readJsonBody(request);
-        const disconnectController = new AbortController();
-        const onAborted = () => disconnectController.abort(new Error("HTTP client disconnected."));
-        request.once("aborted", onAborted);
-        response.once("close", () => {
-          if (!response.writableEnded) onAborted();
-        });
-        sendJson(response, 200, await runResearch(body, crawlerTool, options, disconnectController.signal));
+        sendJson(response, 200, await withDisconnectSignal(
+          request,
+          response,
+          (signal) => runResearch(body, crawlerTool, options, signal)
+        ));
         return;
       }
 
@@ -613,13 +1038,16 @@ export function startMaqamServer(options = {}) {
   }
   const host = options.host || process.env.HOST || "127.0.0.1";
   const apiToken = options.apiToken || process.env.MAQAM_API_TOKEN || null;
+  const ytDlpCommand = options.ytDlpCommand
+    || process.env.MAQAM_YT_DLP_COMMAND
+    || undefined;
   if (!isLoopbackBindHost(host) && !apiToken) {
     throw new Error("Binding Maqam beyond loopback requires MAQAM_API_TOKEN or options.apiToken.");
   }
   if (!isLoopbackBindHost(host) && !(options.allowedHosts || []).length) {
     throw new Error("Binding Maqam beyond loopback requires an explicit allowedHosts list.");
   }
-  const server = createMaqamServer({ ...options, apiToken });
+  const server = createMaqamServer({ ...options, apiToken, ytDlpCommand });
   server.listen(port, host, () => {
     const bound = server.address();
     const actualPort = typeof bound === "object" && bound ? bound.port : port;

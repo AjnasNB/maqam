@@ -79,6 +79,24 @@ Exit criteria:
 - schema migrations and recovery have adversarial tests; and
 - signatures, when enabled, authenticate a documented byte representation and identity source rather than implying semantic truth.
 
+## Current Implementation: Anonymous-Public Source Pack
+
+- Added an opt-in hosted-anonymous Exa MCP adapter for bounded web search without a developer key, with a fixed tool allowlist, explicit remote data boundary, and honest anonymous-rate-limit behavior.
+- Added an opt-in public YouTube adapter for metadata, search, and available captions through a separately installed `yt-dlp` executable; media download, cookies, account login, plugins, and remote components stay disabled.
+- Label anonymous public, hosted anonymous, browser session, developer credential, and local processing as distinct access modes in source metadata, documentation, doctor output, and operator review.
+- Keep browser-session and developer-credential routes separately named and explicitly selected. An availability failure must never upgrade authority or import credentials.
+- Maintain deterministic fault fixtures for `429`, missing captions, authentication-required content, protocol drift, subprocess timeout, unsafe caption origins, and policy-denied zero dispatch; keep any optional live smoke dated, bounded, and separate from hermetic CI.
+- Document provider terms, privacy/data flow, executable provenance and licensing, upstream update ownership, and the gap between gateway admission control and subprocess network isolation.
+
+Exit criteria:
+
+- a clean consumer can import only the adapters present in the exact verified package;
+- no-developer-key examples run without a model key, browser profile, provider token, or hidden credential lookup;
+- tools, origins, calls, bytes, results, transcript length, runtime, and local-process effects are bounded and tested;
+- denial, missing approval, authentication required, and security failures stop without fallback or subprocess dispatch;
+- doctor output distinguishes local/configuration readiness from a live provider check; and
+- release material says selected governed public research, not unlimited or universal internet access.
+
 ## Next: Ecosystem Adapters
 
 - MCP client/tool adapter with explicit server identity, capability allowlists, input/effect mapping, and cancellation.
@@ -86,7 +104,7 @@ Exit criteria:
 - LangGraph adapter/example for using its persistence and pause/resume around Maqam-governed tool boundaries.
 - Microsoft Agent Framework example where its Python/.NET workflow runtime calls a separately deployed Node connector governed by Maqam.
 - Optional Firecrawl, Crawl4AI, Crawlee, and Browser Use connectors that remain separately installed and preserve their license and deployment boundaries.
-- Optional source-channel adapters inspired by the explicit provider routing documented by Agent Reach, implemented independently and only after provider terms, authentication, and security behavior are reviewed.
+- Optional source-channel adapters with explicit provider routing, added only after provider terms, authentication, privacy, licensing, and security behavior are reviewed.
 
 Exit criteria:
 

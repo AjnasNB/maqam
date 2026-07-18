@@ -57,6 +57,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 | [ProductLoop package atlas](https://maqamagent.com/docs/productloop/) | Package-by-package roles, versions, examples, and Maqam relationship |
 | [Integration guide](https://maqamagent.com/docs/integrations/) and [Google ADK / Microsoft Agent 365 boundary](https://github.com/AjnasNB/maqam/blob/main/docs/integrations-google-adk-agent365.md) | Host adapters, prerequisites, copy-paste templates, and bypass warnings |
 | [Governed Sources](https://github.com/AjnasNB/maqam/blob/main/docs/governed-sources.md) | Ordered source adapters, `ToolGateway` routing, normalized documents, source doctor, RSS/Atom, fallback, and security boundaries |
+| [Anonymous-public source pack](https://github.com/AjnasNB/maqam/blob/main/docs/anonymous-public-sources.md) | No-developer-key Exa MCP search and separately installed `yt-dlp` YouTube metadata/captions, with credential classes, limits, terms, privacy, and safe registration |
 | [MGES benchmark guide](https://maqamagent.com/docs/benchmark/) and [raw methodology](https://github.com/AjnasNB/maqam/blob/main/benchmarks/README.md) | Reproducible local-call and conformance evidence with claim limits |
 | [Security guide](https://maqamagent.com/docs/security/) and [security policy](https://github.com/AjnasNB/maqam/blob/main/SECURITY.md) | Threat boundaries, reporting, crawler safety, and required host controls |
 | [Coding-agent guide](https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md) | Codex, Claude Code, generic CLI workers, approvals, and outcome checks |
@@ -238,6 +239,10 @@ const result = await sources.route({
 ```
 
 Register every adapter handler at its declared `toolName` first. `route()` fails closed without a bound caller. `routeUngoverned()` is an explicit direct bypass and does not apply policy, approvals, call ceilings, or trace capture. Read the [complete guide](docs/governed-sources.md) before connecting credentials or remote providers.
+
+The [anonymous-public source-pack guide](docs/anonymous-public-sources.md) documents the opt-in no-developer-key Exa web-search and `yt-dlp`-backed public YouTube metadata/caption factories. "No developer key" does not mean offline, private, unlimited, authenticated, or permitted for every use. Verify the exact installed artifact before relying on either factory in a deployment.
+
+The local console enables hosted anonymous web search directly. YouTube process execution is fail-closed until the server operator supplies a reviewed absolute executable path with `maqam --yt-dlp-command /absolute/path/to/yt-dlp` or `MAQAM_YT_DLP_COMMAND`; Maqam never imports browser cookies or downloads media through that route.
 
 ## Framework SDK
 

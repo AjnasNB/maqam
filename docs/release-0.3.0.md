@@ -13,6 +13,8 @@ Maqam 0.3.0 extends the governed execution boundary with ordered research-source
 - Offline RSS 2.0/Atom parsing plus host-reader and source-adapter factories with no implicit network access.
 - Crawler feed discovery and parsing with explicit item/link budgets.
 - Safer CLI controls for requests, depth, bytes, duration, retries, exact cross-origin permission, detailed failures, statistics, and fail-on-error behavior.
+- Bounded anonymous hosted Exa MCP web search plus explicitly enabled public YouTube metadata/caption research through a separately installed absolute `yt-dlp` path.
+- Exact handler-declared network origins enforced before dispatch, and local console routes that surface adapter identity, access mode, data boundary, attempts, and gateway trace.
 - A governed-source example, complete guide, and 0.3 migration notes.
 
 ### Security Boundaries
@@ -23,12 +25,19 @@ Maqam 0.3.0 extends the governed execution boundary with ordered research-source
 - Authenticated adapters require explicit per-route opt-in and never import or synchronize credentials.
 - RSS/Atom parsing rejects DTD/entity declarations, bounds input and output, sanitizes content, and performs no network request.
 - `--all-origins` is removed; cross-origin crawling requires repeatable exact `--allowed-origin` values.
+- The HTTP console never discovers a YouTube executable from `PATH`; the operator must supply `--yt-dlp-command` or `MAQAM_YT_DLP_COMMAND` with an absolute reviewed path.
 
 ### Honest Scope
 
-This release does not add browser automation, automatic dependency installation, cookie/session import, provider login, anti-bot bypass, provider-native approval synchronization, built-in social-platform adapters, or a hosted distributed crawler.
+This release does not add browser automation, automatic dependency installation, cookie/session import, provider login, anti-bot bypass, provider-native approval synchronization, built-in social-platform adapters, or a hosted distributed crawler. Anonymous public access is best-effort and does not mean universal, unlimited, private, or permitted access.
 
 The architecture was informed by Agent Reach's explicit channel-routing and health-check concepts. The implementation is independent and does not claim equivalent platform coverage. See [Provenance and License Notes](provenance-and-licenses.md).
+
+## Manual Public-Source Compatibility Check
+
+On 2026-07-18, the local console completed an anonymous hosted Exa search with five normalized documents and one gateway-authorized adapter call. It also completed a canonical public YouTube URL run with metadata and timestamped caption evidence through the official `yt-dlp` `2026.07.04` Windows standalone. That executable remained outside the repository; its SHA-256 was `52FE3C26DCF71FBDC85B528589020BB0B8E383155CFA81B64DD447BBE35E24B8`, matching the upstream release checksum.
+
+The console reported one adapter attempt and one gateway call for each route, and the browser console had no warnings or errors. No developer API key, browser cookie, account login, media download, plugin, or remote component was used. This is dated compatibility evidence only: hosted availability, anonymous allowance, public captions, and upstream extraction behavior can change, so deterministic transport/process fixtures and the exact release tests remain the acceptance gate.
 
 ## Required Verification
 
@@ -37,9 +46,12 @@ The release owner must attach results from the final clean commit for:
 ```bash
 npm test
 npm run test:consumer-types
+npm run test:website
 npm audit --omit=dev
 npm pack --dry-run
 npm pack --json --ignore-scripts
+npm run benchmark:mges:conformance
+npm run benchmark:mges:performance
 ```
 
 Required matrices and focused evidence:
@@ -58,6 +70,8 @@ Required matrices and focused evidence:
 - MGES performance and conformance rerun when fingerprinted files change.
 
 Do not copy the historical 0.2.4 benchmark result into this release as if it measured 0.3.0. Preserve 0.2.4 evidence for its own artifact.
+
+Because GitHub squash merging rewrites pull-request commits, final 0.3.0 benchmark evidence must be generated after the implementation PR lands on `main`. Submit the resulting raw artifacts and claim updates in a second evidence-only PR. Its measured `main` commit must remain an ancestor of the final release commit and the evidence PR must not change fingerprinted source.
 
 Fresh MGES v1.1.0 evidence was generated from clean source commit `bceaebfa2a4059bc63acd23eccf4fafee794a295`:
 

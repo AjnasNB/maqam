@@ -2,6 +2,8 @@
 
 Governed Sources is Maqam's small, provider-neutral routing layer for research backends. A host registers named source adapters, chooses a deterministic preference order, and routes each selected backend through the same `ToolGateway` boundary used for other governed tools.
 
+For the opt-in no-developer-key Exa web-search and separately installed `yt-dlp` YouTube routes, including credential classes, terms, privacy, rate limits, and a locked-down registration example, read [Anonymous-Public Source Pack](anonymous-public-sources.md).
+
 It solves a specific problem: an application may have several ways to obtain material—an HTTP crawler, RSS/Atom, a licensed database, an internal index, or a provider SDK—but still needs one normalized document contract and one visible place to enforce policy, approvals, call ceilings, and trace capture.
 
 It is not a social-platform collector, browser automation product, credential manager, or hosted crawling service.
@@ -284,12 +286,10 @@ Before enabling a source adapter:
 
 ## What Is Deliberately Not Included
 
-Maqam 0.3.0 does not include automatic installers, browser-cookie extraction or reuse, browser-session import, platform login, anti-bot or CAPTCHA bypass, a headless browser, built-in social-network/channel adapters, provider credential synchronization, or a distributed hosted crawler fleet.
+The Maqam 0.3.0 baseline does not include automatic installers, browser-cookie extraction or reuse, browser-session import, platform login, anti-bot or CAPTCHA bypass, a headless browser, provider credential synchronization, or a distributed hosted crawler fleet. Narrow anonymous-public source candidates do not change those exclusions.
 
 Those capabilities create separate identity, legal, operational, and security boundaries. Integrate them as independently installed host tools only when their licenses and controls have been reviewed, then expose the smallest required operation through a registered Maqam adapter.
 
-## Agent Reach Inspiration And License Boundary
+## Independent Connector Boundary
 
-The registry-and-doctor architecture was informed by inspection of [Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) at commit `1494c2ab239e7355a77e7cceaf3271453a1f34b5` (MIT license). Maqam's implementation is an independent JavaScript design for its existing `ToolGateway` and evidence contracts.
-
-No Agent Reach source code, documentation, examples, tests, assets, logos, or branding was copied into Maqam. Maqam does not claim Agent Reach's platform coverage or automatic setup behavior. See [Provenance and License Notes](provenance-and-licenses.md).
+Source adapters are implemented against their upstream public protocols and Maqam's existing `ToolGateway`, registry, document, and evidence contracts. A hosted endpoint, local executable, or optional provider client retains its own terms, license, release, trust, and deployment boundary; it does not become part of Maqam merely because a host registers it. Record dependency review and artifact provenance in [Provenance and License Notes](provenance-and-licenses.md).

@@ -16,15 +16,19 @@ Use this checklist before publishing any Maqam release.
 Run these commands from the repository root:
 
 ```bash
+npm install --global npm@12.0.1 --ignore-scripts
 npm ci
 npm test
 npm run test:consumer-types
-npm run benchmark:mges:conformance
-npm run benchmark:mges:performance
+npm run test:website
+npm run benchmark:mges:conformance -- --output "$MGES_OUT/maqam-mges-conformance.json"
+npm run benchmark:mges:performance -- --output "$MGES_OUT/maqam-mges-performance.json"
 npm pack --dry-run
 npm pack --json --ignore-scripts
 npm audit --omit=dev
 ```
+
+`MGES_OUT` must already exist outside the clean measured worktree. Both profiles must measure the same commit without either output dirtying the second run.
 
 Expected result:
 
@@ -36,6 +40,7 @@ Expected result:
 - `npm audit --omit=dev` reports no known production dependency vulnerabilities.
 - Governed-source allow/deny, fatal-no-fallback, availability-fallback, authenticated opt-in, doctor, normalized-document, RSS/Atom, feed-crawl, and crawler-CLI fixtures pass on Node.js 20, 22, and 24.
 - MGES was rerun because the lockfile and governance-path source fingerprints changed. Historical 0.2.4 results remain labeled as 0.2.4 evidence.
+- Because this repository squash-merges pull requests, implementation and final benchmark evidence use two PR phases. Merge implementation, measure the resulting clean main commit, then merge an evidence/docs/test-only PR without changing fingerprinted source. The measured commit must remain an ancestor of the final release commit.
 
 ## Manual Review
 
@@ -51,7 +56,8 @@ Confirm before release:
 - `examples/governed-sources.mjs` routes one deterministic offline source through a registered gateway tool.
 - No secrets, private credentials, generated tokens, or local-only files are included in the package tarball.
 - No third-party project branding, copied examples, copied docs, or pasted source code are included.
-- The exact tarball filename, positive size, integrity, and full Git commit have been captured, and the reviewed worktree is clean.
+- The exact package/version, tarball filename, positive size, independent SHA-256, npm SHA-512 integrity, and full Git commit have been captured, and the reviewed worktree is clean.
+- The approved byte size, SHA-256, integrity, npm CLI, and commit come from the successful main CI `maqam-npm-candidate-COMMIT` manifest.
 
 ## Approval Gate
 
@@ -67,6 +73,7 @@ When represented as an `ApprovalQueue` record, the subject must exactly match:
   publishCommand: "npm publish --access public --ignore-scripts --provenance",
   artifactFilename: "maqam-0.3.0.tgz",
   artifactSizeBytes: 123456,
+  artifactSha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   artifactIntegrity: "sha512-...",
   gitCommit: "0123456789abcdef0123456789abcdef01234567"
 }

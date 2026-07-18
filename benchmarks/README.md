@@ -119,6 +119,8 @@ These thresholds are MGES stability rules. They are not universal acceptance cri
 
 The artifact records clean source commit `bceaebfa2a4059bc63acd23eccf4fafee794a295` with `workingTreeDirty: false`. It includes SHA-256 fingerprints for every benchmark and implementation file in the measured path. The follow-up release commit may add results, documentation, and media, but any change to a fingerprinted source requires another run.
 
+This repository squash-merges pull requests, so final release evidence uses two PR phases. First merge the implementation. Then measure that resulting clean `main` commit and submit only artifacts, claims, documentation, and the artifact-selection test in a second PR. The measured commit remains an ancestor of the final release commit; a candidate artifact created before the implementation squash is not final release evidence even when its file fingerprints match.
+
 The earlier [`2026-07-16-mges-performance-windows-node24.json`](results/2026-07-16-mges-performance-windows-node24.json) is retained as the 0.2.4 baseline, and [`2026-07-16-windows-node24.json`](results/2026-07-16-windows-node24.json) remains a legacy seven-sample result. Neither is relabeled as 0.3.0 evidence.
 
 ### What the number excludes

@@ -109,7 +109,7 @@ If those conditions are absent, publish a capability comparison and keep perform
 - Confirm the raw artifacts are downloadable and their hashes are recorded in release checksums.
 - Confirm the displayed values exactly match the JSON.
 - Confirm all MGES project publication checks pass.
-- Confirm the artifact identifies a clean tagged commit, or label it provisional and cite the source fingerprint.
+- Confirm the artifact identifies the clean measured commit whose fingerprinted source matches the release and which remains an ancestor of the tagged evidence-only release commit; otherwise label it provisional and cite the source fingerprint.
 - Run the conformance profile again on the release artifact.
 - Keep the methodology, article and raw artifacts linked from the claim.
 - Archive any failed or REVIEW run used to change calibration; do not substitute a silent threshold change.

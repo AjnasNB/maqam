@@ -37,6 +37,10 @@ import {
   parseRssAtom,
   createRssAtomResearchAdapter,
   createRssAtomSourceAdapter,
+  createExaSearchSourceAdapter,
+  EXA_HOSTED_MCP_ENDPOINT,
+  createYtDlpYouTubeSourceAdapter,
+  YOUTUBE_PUBLIC_ORIGIN,
   createWebCrawlerSourceAdapter,
   crawl
 } from "../../src/index.js";
@@ -82,5 +86,9 @@ test("framework primitives are exported without removing crawler exports", () =>
   assert.equal(typeof parseRssAtom, "function");
   assert.equal(typeof createRssAtomResearchAdapter, "function");
   assert.equal(typeof createRssAtomSourceAdapter, "function");
+  assert.equal(typeof createExaSearchSourceAdapter, "function");
+  assert.equal(EXA_HOSTED_MCP_ENDPOINT, "https://mcp.exa.ai/mcp?tools=web_search_exa");
+  assert.equal(typeof createYtDlpYouTubeSourceAdapter, "function");
+  assert.equal(YOUTUBE_PUBLIC_ORIGIN, "https://www.youtube.com");
   assert.equal(typeof createWebCrawlerSourceAdapter, "function");
 });

@@ -158,6 +158,29 @@ function normalizeEffects(effects, source) {
   return [...new Set(normalizeStringArray(effects, `${source} effects`))];
 }
 
+function normalizeNetworkOrigins(origins, source) {
+  if (origins === undefined) return [];
+  return [...new Set(normalizeStringArray(origins, `${source} networkOrigins`).map((value) => {
+    let url;
+    try {
+      url = new URL(value);
+    } catch {
+      throw new TypeError(
+        `${source} networkOrigins must contain exact HTTP(S) origins without credentials, paths, queries, or fragments.`
+      );
+    }
+    if ((url.protocol !== "http:" && url.protocol !== "https:")
+      || url.username
+      || url.password
+      || url.origin !== value) {
+      throw new TypeError(
+        `${source} networkOrigins must contain exact HTTP(S) origins without credentials, paths, queries, or fragments.`
+      );
+    }
+    return url.origin;
+  }))];
+}
+
 function normalizeRisk(risk, source) {
   if (risk === undefined) return null;
   if (typeof risk !== "string" || risk.trim() === "" || risk.length > MAX_POLICY_STRING_LENGTH) {
@@ -225,7 +248,7 @@ function copyRegistrationRecord(value, name) {
     throw new TypeError(`${name} must be a plain object.`);
   }
   const result = Object.create(null);
-  for (const key of ["effects", "risk"]) {
+  for (const key of ["effects", "networkOrigins", "risk"]) {
     if (!Object.hasOwn(value, key) && key in value) {
       throw new TypeError(`Inherited ${name} field '${key}' is not allowed.`);
     }
@@ -421,15 +444,27 @@ export class ToolGateway {
     const registrationMetadata = copyRegistrationRecord(metadata, "Registration metadata");
     const governanceEffects = normalizeEffects(governance.effects, "Handler governance");
     const metadataEffects = normalizeEffects(registrationMetadata.effects, "Registration metadata");
+    const governanceNetworkOrigins = normalizeNetworkOrigins(
+      governance.networkOrigins,
+      "Handler governance"
+    );
+    const metadataNetworkOrigins = normalizeNetworkOrigins(
+      registrationMetadata.networkOrigins,
+      "Registration metadata"
+    );
     const governanceRisk = normalizeRisk(governance.risk, "Handler governance");
     const metadataRisk = normalizeRisk(registrationMetadata.risk, "Registration metadata");
     const effectiveRisk = effectiveRegistrationRisk(governanceRisk, metadataRisk);
     const effectiveMetadata = {
       ...governance,
       ...registrationMetadata,
-      // Registration metadata may declare additional risk, but it cannot
-      // erase effects that the handler itself declares.
-      effects: [...new Set([...governanceEffects, ...metadataEffects])]
+      // Registration metadata may declare additional authority boundaries, but
+      // it cannot erase effects or network origins declared by the handler.
+      effects: [...new Set([...governanceEffects, ...metadataEffects])],
+      networkOrigins: [...new Set([
+        ...governanceNetworkOrigins,
+        ...metadataNetworkOrigins
+      ])]
     };
     if (effectiveRisk) effectiveMetadata.risk = effectiveRisk;
     else delete effectiveMetadata.risk;

@@ -8,6 +8,10 @@ on:
         required: true
         default: 0.3.0
         type: string
+      expected_git_commit:
+        description: Approved full Git commit from the main CI release manifest
+        required: true
+        type: string
       expected_size_bytes:
         description: Approved npm tarball size in bytes
         required: true
@@ -42,6 +46,7 @@ jobs:
       size_bytes: ${{ steps.pack.outputs.size_bytes }}
     env:
       EXPECTED_VERSION: ${{ inputs.version }}
+      EXPECTED_GIT_COMMIT: ${{ inputs.expected_git_commit }}
       EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
       EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
       EXPECTED_INTEGRITY: ${{ inputs.expected_integrity }}
@@ -53,6 +58,14 @@ jobs:
           set -euo pipefail
           if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then
             echo "Trusted publishing must be dispatched from main." >&2
+            exit 1
+          fi
+          if [[ ! "${EXPECTED_GIT_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Expected Git commit must be a full lowercase SHA-1." >&2
+            exit 1
+          fi
+          if [[ "${GITHUB_SHA}" != "${EXPECTED_GIT_COMMIT}" ]]; then
+            echo "Dispatch commit ${GITHUB_SHA} does not match approved commit ${EXPECTED_GIT_COMMIT}." >&2
             exit 1
           fi
           if [[ ! "${EXPECTED_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
@@ -193,6 +206,7 @@ jobs:
       id-token: write
     env:
       EXPECTED_VERSION: ${{ inputs.version }}
+      EXPECTED_GIT_COMMIT: ${{ inputs.expected_git_commit }}
       EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
       EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
       EXPECTED_INTEGRITY: ${{ inputs.expected_integrity }}
@@ -214,6 +228,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [[ "${GITHUB_SHA}" != "${EXPECTED_GIT_COMMIT}" ]]; then
+            echo "Publish job commit does not match the approved commit." >&2
+            exit 1
+          fi
           pack_dir="${RUNNER_TEMP}/publish-pack"
           mkdir -p "${pack_dir}"
           npm pack --ignore-scripts --pack-destination "${pack_dir}" --json > "${RUNNER_TEMP}/publish-pack.json"

@@ -30,16 +30,16 @@ Revoke any npm token that has appeared in chat, logs, screenshots, or shell hist
 ## Publishing a reviewed version
 
 1. Confirm the candidate commit is on `main` and CI plus CodeQL are green.
-2. Open **Actions > Publish npm (trusted) > Run workflow**.
-3. Select the `main` branch.
-4. Enter the exact package version and approved tarball byte size, SHA-256, and integrity values.
+2. Open the successful main CI run's `maqam-npm-candidate-COMMIT` artifact. Review `release-manifest.json`; it was packed on Linux with Node `24.15.0` and npm `12.0.1` and expires after one day. This job does not publish.
+3. Open **Actions > Publish npm (trusted) > Run workflow** and select `main`.
+4. Enter the manifest's full `gitCommit`, exact version, tarball byte size, SHA-256, and integrity values.
 5. Enter the confirmation `publish maqam@VERSION`.
 6. Wait for **Verify approved artifact** to pass.
-7. Review the verification summary, then approve the `npm-publish` environment deployment.
+7. Review the verification summary and confirm it still names the approved commit and artifact, then approve the `npm-publish` environment deployment.
 8. Wait for the publish job to verify npm version, `gitHead`, byte size, integrity, downloaded tarball SHA-256, signatures, and provenance.
-9. Only after that job succeeds, create the matching Git tag and GitHub Release.
+9. Only after that job succeeds, create the matching annotated Git tag and GitHub Release.
 
-The workflow deliberately refuses non-`main` dispatches, malformed confirmation values, a non-positive byte size, an already-published version, package identity changes, tarball size or checksum changes, registry integrity changes, and `gitHead` mismatches.
+The workflow deliberately refuses non-`main` dispatches, a dispatch SHA different from the approved full commit, malformed confirmation values, a non-positive byte size, an already-published version, package identity changes, tarball size or checksum changes, registry integrity changes, and `gitHead` mismatches.
 
 ## Emergency local fallback
 

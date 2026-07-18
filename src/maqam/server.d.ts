@@ -1,5 +1,11 @@
 import type { Server } from "node:http";
-import type { AgentHandler, CrawlOptions, CrawlPage } from "../index.js";
+import type {
+  AgentHandler,
+  CrawlOptions,
+  CrawlPage,
+  ResearchSourceAdapter,
+  ResearchSourceAdapterSpec
+} from "../index.js";
 
 export interface MaqamProduct {
   name: string;
@@ -31,6 +37,10 @@ export interface MaqamServerOptions {
   apiToken?: string | null;
   allowPrivateNetworks?: boolean;
   allowCrossOriginCrawls?: boolean;
+  sourceAdapters?: readonly (ResearchSourceAdapter | ResearchSourceAdapterSpec)[];
+  sourceAllowedOrigins?: string[];
+  /** Exact executable path that explicitly enables the local yt-dlp source adapter. */
+  ytDlpCommand?: string;
   maxSeeds?: number;
   port?: number;
   host?: string;

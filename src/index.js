@@ -1030,7 +1030,11 @@ export {
   RESEARCH_SOURCE_CHECK_STATUSES,
   defineResearchToolCaller,
   ResearchSourceRegistry,
-  createWebCrawlerSourceAdapter
+  createWebCrawlerSourceAdapter,
+  createExaSearchSourceAdapter,
+  EXA_HOSTED_MCP_ENDPOINT,
+  createYtDlpYouTubeSourceAdapter,
+  YOUTUBE_PUBLIC_ORIGIN
 } from "./research/index.js";
 export {
   parseRssAtom,

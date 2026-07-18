@@ -19,6 +19,15 @@ Maqam is distributed under MIT. Market research and reference inspection do not 
 
 Versions are resolved by `package-lock.json`; installed package manifests reported the licenses above. Re-run the dependency and package-content audits whenever the lockfile changes. This table is not a substitute for reviewing transitive packages and included license files.
 
+## Optional External Source Boundaries
+
+These integrations are not npm dependencies and are not distributed in the Maqam tarball:
+
+| External system | Evidence reviewed | Distribution and responsibility boundary |
+| --- | --- | --- |
+| [Exa hosted MCP](https://exa.ai/docs/reference/exa-mcp) | Official hosted-MCP documentation reviewed 2026-07-18. | Maqam sends a bounded MCP request to an explicitly declared remote origin. No Exa SDK, server source, credentials, or branding is bundled. Operators remain responsible for Exa's current service terms, privacy policy, availability, and rate limits. |
+| [`yt-dlp`](https://github.com/yt-dlp/yt-dlp/releases/tag/2026.07.04), release `2026.07.04` | Upstream core `LICENSE` is a public-domain dedication. The release notes state that standalone executables also contain ISC-, MIT-, and other third-party-licensed components recorded in the release's `THIRD_PARTY_LICENSES.txt`. | Maqam never installs or redistributes `yt-dlp`. An operator must provide an absolute path to a separately reviewed executable and retain the notices applicable to the exact build they install. The live compatibility binary used during this audit stayed outside the repository and npm package. |
+
 ## Repository-Only Video Toolchain
 
 `demo/remotion/` is a separate private npm workspace used to render launch media. It is excluded from the public `maqam` npm tarball and adds no Maqam runtime dependency.
@@ -66,6 +75,7 @@ No source code, documentation text, examples, tests, prompts, assets, logos, or 
 - Firecrawl's AGPL core must not be copied into the MIT package without an explicit architecture and license decision.
 - Crawl4AI's additional attribution language must be evaluated before any incorporation or derivative use.
 - Agent Reach's permissive license does not make copied code part of Maqam automatically. Any future incorporation would still require exact-file provenance, copyright/license notice handling, modification records, and a new audit.
+- A network request to Exa or an operator-provided `yt-dlp` process is an external integration, not an incorporation claim. Bundling either implementation later would require a new exact-version audit.
 - Permissive licenses still require preservation of applicable copyright and license notices.
 
 ## Result

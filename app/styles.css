@@ -18,6 +18,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -183,6 +187,11 @@ select {
   font: inherit;
 }
 
+small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
 input:focus,
 select:focus,
 button:focus-visible,
@@ -225,6 +234,81 @@ button:disabled {
   margin: 0;
   font-size: .9rem;
   line-height: 1.5;
+}
+
+.access-disclosure {
+  padding: 14px;
+  border: 1px solid rgb(72 199 255 / .35);
+  border-radius: 6px;
+  background: rgb(72 199 255 / .06);
+}
+
+.access-disclosure strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--blue);
+}
+
+.access-disclosure p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+.auth-panel {
+  border-top: 1px solid var(--line);
+  padding-top: 13px;
+}
+
+.auth-panel summary {
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .9rem;
+}
+
+.auth-panel[open] {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-panel code {
+  color: var(--text);
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.secondary-button {
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+}
+
+.secondary-button:hover {
+  border-color: var(--blue);
+  background: rgb(72 199 255 / .08);
+}
+
+.form-message {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgb(255 122 115 / .42);
+  border-radius: 6px;
+  background: rgb(255 122 115 / .08);
+  color: var(--danger);
+  font-size: .9rem;
+  line-height: 1.45;
+}
+
+.form-message.is-info {
+  border-color: rgb(72 199 255 / .35);
+  background: rgb(72 199 255 / .06);
+  color: var(--blue);
 }
 
 .metrics {
@@ -544,7 +628,8 @@ tbody tr:last-child td {
   }
 
   .metrics,
-  .form-grid {
+  .form-grid,
+  .button-row {
     grid-template-columns: 1fr;
   }
 

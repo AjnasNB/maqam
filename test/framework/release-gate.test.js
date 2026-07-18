@@ -4,15 +4,28 @@ import { ApprovalQueue } from "../../src/framework/approval-queue.js";
 import { createReleaseGateReport } from "../../src/framework/release-gate.js";
 
 const artifact = {
+  packageName: "maqam",
+  version: "0.3.0",
+  sha256: "b".repeat(64),
   integrity: `sha512-${Buffer.alloc(64, 7).toString("base64")}`,
   gitCommit: "a".repeat(40),
-  filename: "maqam-0.2.0.tgz",
+  filename: "maqam-0.3.0.tgz",
   sizeBytes: 12_345
 };
 
+const requiredVerificationCommands = [
+  "npm test",
+  "npm run test:consumer-types",
+  "npm run test:website",
+  "npm audit --omit=dev",
+  "npm pack --json --ignore-scripts",
+  "npm run benchmark:mges:conformance",
+  "npm run benchmark:mges:performance"
+];
+
 const completeInput = {
   packageName: "maqam",
-  version: "0.2.0",
+  version: "0.3.0",
   license: "MIT",
   registry: "https://registry.npmjs.org/",
   publishCommand: "npm publish --access public --ignore-scripts --provenance",
@@ -27,14 +40,21 @@ const completeInput = {
     types: true,
     examples: true
   },
-  verification: [
-    { command: "npm test", status: "pass", summary: "all tests passed" },
-    { command: "npm pack --dry-run", status: "pass", summary: "package preview succeeded" }
-  ],
+  verification: requiredVerificationCommands.map((command) => ({
+    command,
+    status: "pass",
+    summary: `${command} passed for the release commit`,
+    gitCommit: artifact.gitCommit
+  })),
   provenance: {
     inspectedProjects: [
-      { name: "Crawl4AI", url: "https://github.com/unclecode/crawl4ai", license: "Apache-2.0 plus attribution term", use: "reference inspection" },
-      { name: "Firecrawl", url: "https://github.com/firecrawl/firecrawl", license: "AGPL-3.0 core", use: "reference inspection" }
+      {
+        name: "Panniantong/agent-reach",
+        url: "https://github.com/Panniantong/agent-reach",
+        revision: "1494c2ab239e7355a77e7cceaf3271453a1f34b5",
+        license: "MIT",
+        use: "reference inspection only"
+      }
     ],
     copiedThirdPartyCode: false
   }
@@ -43,12 +63,13 @@ const completeInput = {
 function requestReleaseApproval(queue, overrides = {}) {
   return queue.requestApproval({
     action: "publish:npm",
-    reason: "Maqam 0.2.0 is ready for owner approval.",
+    reason: "Maqam 0.3.0 is ready for owner approval.",
     subject: {
       packageName: completeInput.packageName,
       version: completeInput.version,
       registry: completeInput.registry,
       publishCommand: completeInput.publishCommand,
+      artifactSha256: artifact.sha256,
       artifactIntegrity: artifact.integrity,
       artifactFilename: artifact.filename,
       artifactSizeBytes: artifact.sizeBytes,
@@ -61,6 +82,7 @@ function requestReleaseApproval(queue, overrides = {}) {
       version: completeInput.version,
       registry: completeInput.registry,
       publishCommand: completeInput.publishCommand,
+      artifactSha256: artifact.sha256,
       artifactIntegrity: artifact.integrity,
       artifactFilename: artifact.filename,
       artifactSizeBytes: artifact.sizeBytes,
@@ -90,7 +112,7 @@ test("createReleaseGateReport marks an exact approved complete release publish-r
   assert.equal(report.status, "approved");
   assert.equal(report.readyToPublish, true);
   assert.deepEqual(report.blockers, []);
-  assert.match(report.summary, /maqam@0\.2\.0/);
+  assert.match(report.summary, /maqam@0\.3\.0/);
 });
 
 test("unrelated actions and mismatched release subjects cannot authorize publishing", () => {
@@ -99,6 +121,7 @@ test("unrelated actions and mismatched release subjects cannot authorize publish
     { subject: { version: "0.2.2" } },
     { subject: { registry: "https://registry.example/" } },
     { subject: { publishCommand: "npm publish" } },
+    { subject: { artifactSha256: "c".repeat(64) } },
     { subject: { artifactIntegrity: "sha512-different" } },
     { subject: { artifactFilename: "other.tgz" } },
     { subject: { artifactSizeBytes: 12_346 } },
@@ -115,31 +138,55 @@ test("unrelated actions and mismatched release subjects cannot authorize publish
   }
 });
 
-test("release gate requires both exact checks and rejects failed or empty verification", () => {
-  for (const verification of [
-    [],
-    [{ command: "npm test", status: "pass" }],
-    [
-      { command: "npm test", status: "pass" },
-      { command: "npm pack --dry-run", status: "fail" }
-    ]
-  ]) {
+test("release gate requires every promised check on the exact artifact commit", () => {
+  for (const command of requiredVerificationCommands) {
+    const verification = completeInput.verification.filter((check) => check.command !== command);
     const report = createReleaseGateReport({ ...completeInput, verification });
-    assert.equal(report.readyToPublish, false);
-    assert.ok(report.blockers.some((blocker) => /verification|approval/i.test(blocker)));
+    assert.equal(report.readyToPublish, false, command);
+    assert.ok(
+      report.blockers.includes(`Required verification has not passed: ${command}.`),
+      command
+    );
   }
+
+  const stale = structuredClone(completeInput.verification);
+  stale[0].gitCommit = "c".repeat(40);
+  const staleReport = createReleaseGateReport({ ...completeInput, verification: stale });
+  assert.equal(staleReport.readyToPublish, false);
+  assert.ok(staleReport.blockers.some((blocker) => /not bound to artifact gitCommit/i.test(blocker)));
+
+  const failed = structuredClone(completeInput.verification);
+  failed[1].status = "fail";
+  const failedReport = createReleaseGateReport({ ...completeInput, verification: failed });
+  assert.equal(failedReport.readyToPublish, false);
+  assert.ok(failedReport.blockers.includes(
+    `Verification failed: ${requiredVerificationCommands[1]}.`
+  ));
 });
 
 test("createReleaseGateReport explains missing and invalid production evidence", () => {
   const report = createReleaseGateReport({
     packageName: "maqam",
-    version: "0.2.0",
+    version: "0.3.0",
     license: "MIT",
     registry: "https://registry.example/",
     publishCommand: "npm publish",
-    artifact: { integrity: "not-a-digest", gitCommit: "short", filename: "../bad.tgz", sizeBytes: -1 },
+    artifact: {
+      packageName: "other-package",
+      version: "0.3.1",
+      sha256: "not-a-digest",
+      integrity: "sha256:wrong-algorithm",
+      gitCommit: "short",
+      filename: "../bad.tgz",
+      sizeBytes: -1
+    },
     requiredFiles: { readme: true, license: true },
-    verification: [{ command: "npm test", status: "fail", summary: "one failing test" }],
+    verification: [{
+      command: "npm test",
+      status: "fail",
+      summary: "one failing test",
+      gitCommit: "different"
+    }],
     provenance: { inspectedProjects: [], copiedThirdPartyCode: true }
   });
 
@@ -151,9 +198,56 @@ test("createReleaseGateReport explains missing and invalid production evidence",
   assert.ok(report.blockers.some((blocker) => /Registry must/i.test(blocker)));
   assert.ok(report.blockers.some((blocker) => /Publish command/i.test(blocker)));
   assert.ok(report.blockers.some((blocker) => /integrity/i.test(blocker)));
+  assert.ok(report.blockers.some((blocker) => /sha256/i.test(blocker)));
   assert.ok(report.blockers.some((blocker) => /gitCommit/i.test(blocker)));
   assert.ok(report.blockers.some((blocker) => /filename/i.test(blocker)));
   assert.ok(report.blockers.some((blocker) => /sizeBytes/i.test(blocker)));
+  assert.ok(report.blockers.some((blocker) => /packageName and version/i.test(blocker)));
+  assert.ok(report.blockers.some((blocker) => /inspected project/i.test(blocker)));
+});
+
+test("release gate requires complete inspected-project provenance", () => {
+  const cases = [
+    [],
+    [{
+      name: "Panniantong/agent-reach",
+      url: "https://github.com/Panniantong/agent-reach",
+      license: "MIT",
+      use: "reference inspection only"
+    }],
+    [{
+      name: "Panniantong/agent-reach",
+      url: "http://github.com/Panniantong/agent-reach",
+      revision: "1494c2ab239e7355a77e7cceaf3271453a1f34b5",
+      license: "MIT",
+      use: "reference inspection only"
+    }]
+  ];
+
+  for (const inspectedProjects of cases) {
+    const report = createReleaseGateReport({
+      ...completeInput,
+      provenance: { inspectedProjects, copiedThirdPartyCode: false }
+    });
+    assert.equal(report.readyToPublish, false);
+    assert.ok(report.blockers.some((blocker) => /inspected project|inspectedProjects/i.test(blocker)));
+  }
+});
+
+test("release gate keeps SHA-256 separate from canonical npm SHA-512 integrity", () => {
+  const sharedSha256 = `sha256:${"d".repeat(64)}`;
+  const report = createReleaseGateReport({
+    ...completeInput,
+    artifact: {
+      ...artifact,
+      sha256: sharedSha256,
+      integrity: sharedSha256
+    }
+  });
+
+  assert.equal(report.readyToPublish, false);
+  assert.ok(report.blockers.some((blocker) => /Artifact sha256/i.test(blocker)));
+  assert.ok(report.blockers.some((blocker) => /canonical npm sha512/i.test(blocker)));
 });
 
 test("release gate rejects inherited authority and snapshots release evidence before evaluation", () => {
@@ -201,6 +295,7 @@ test("release gate rejects inherited authority and snapshots release evidence be
     version: completeInput.version,
     registry: completeInput.registry,
     publishCommand: completeInput.publishCommand,
+    artifactSha256: artifact.sha256,
     artifactIntegrity: artifact.integrity,
     artifactFilename: artifact.filename,
     artifactSizeBytes: artifact.sizeBytes,
@@ -231,11 +326,16 @@ test("release gate rejects inherited authority and snapshots release evidence be
   mutable.artifact.filename = "changed.tgz";
   mutable.verification[0].status = "fail";
   mutable.provenance.copiedThirdPartyCode = true;
+  mutable.provenance.inspectedProjects[0].revision = "c".repeat(40);
 
   assert.equal(report.readyToPublish, true);
   assert.equal(report.artifact.filename, artifact.filename);
   assert.equal(report.verification[0].status, "pass");
   assert.equal(report.provenance.copiedThirdPartyCode, false);
+  assert.equal(
+    report.provenance.inspectedProjects[0].revision,
+    completeInput.provenance.inspectedProjects[0].revision
+  );
   assert.equal(Object.getPrototypeOf(report.artifact), null);
   assert.notEqual(Object.getPrototypeOf(report.verification), Array.prototype);
 });
