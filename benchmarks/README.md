@@ -125,9 +125,27 @@ The earlier [`2026-07-16-mges-performance-windows-node24.json`](results/2026-07-
 
 Two clean runs from superseded source commit `c58cb850daeffa24f5f088a97689f5c75c2db69b` are retained as transparent `REVIEW` records: [attempt 1](results/2026-07-18-mges-performance-windows-node24-governed-public-research-c58cb850.json) observed `19.122%` governed CV, and [attempt 2](results/2026-07-18-mges-performance-windows-node24-governed-public-research-c58cb850-attempt2.json) observed `25.691%`. No observations or thresholds were removed. The later implementation candidate [performance](results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json) and [conformance](results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json) artifacts remain transparent pre-squash evidence; the `545fe8bb` artifacts are the release evidence.
 
-### 0.3.1 evidence gate
+### 0.3.1 clean-main candidate evidence
 
-The 0.3.1 implementation must first land on `main`. MGES performance and conformance outputs must then be generated from that exact clean main commit and added in a separate evidence-only pull request that changes no fingerprinted implementation, benchmark, or lockfile source. Until that follow-up is merged, the `545fe8bb` artifacts above remain the latest public release evidence and must not be relabeled as 0.3.1 results.
+The 0.3.1 implementation landed first as clean `main` commit `513a7a0bf3711e26ca0e82b4ae1a1663553cc345`. The raw performance and conformance outputs were then copied unchanged into a separate evidence-only pull request. That follow-up changes no fingerprinted implementation, benchmark, or lockfile source, so the measured commit remains an ancestor of the candidate release commit.
+
+[`2026-07-19-mges-performance-windows-node24-main-513a7a0b.json`](results/2026-07-19-mges-performance-windows-node24-main-513a7a0b.json) records the passing clean-main candidate:
+
+| Field | Observed value |
+|---|---:|
+| Environment | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
+| Governed median | **139.173 microseconds/call** |
+| 95% bootstrap interval for the sample median | **137.898-142.079 microseconds/call** |
+| Sequential rate at the median | **7,185.295 calls/second** |
+| Paired added median | **139.098 microseconds/call** |
+| Governed coefficient of variation | **7.476%** |
+| MGES project publication checks | **PASS (4/4 required)** |
+
+The matching [conformance artifact](results/2026-07-19-mges-conformance-windows-node24-main-513a7a0b.json) records **14/14** passing project-defined fixtures from the same clean commit. The performance artifact SHA-256 is `2a6b0238b7385629677a7952d2d5e4506b8f063be36ca538f5d965caec65715a`; the conformance artifact SHA-256 is `3bd24204b519b82f3f52d40e609a33808e8667b4b1714a67464e4c5237a913df`.
+
+Three preceding clean-main performance attempts are retained rather than hidden: [attempt 1](results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt1.json) observed `14.223%` governed CV, [attempt 2](results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt2.json) observed `14.860%`, and [attempt 3](results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt3.json) observed `12.886%`. Each is labeled `REVIEW` because it exceeded the unchanged 10% stability threshold. No observations were removed.
+
+This is candidate evidence, not publication proof. Until the registry artifact, provenance, integrity, `gitHead`, tag, and GitHub release are verified, the `545fe8bb` artifacts above remain the latest **public release** evidence and must not be relabeled as 0.3.1 results.
 
 ### What the number excludes
 

@@ -138,7 +138,7 @@ test("MGES result schemas are versioned machine-readable JSON Schema documents",
   assert.equal(conformanceSchema.properties.schema.const, "maqam.benchmark.conformance/v1");
 });
 
-test("previous MGES release artifacts remain internally consistent while 0.3.1 clean-main evidence is pending", () => {
+test("previous public 0.3.0 MGES release artifacts remain internally consistent", () => {
   const performance = checkedResult(
     "../benchmarks/results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json"
   );
@@ -154,4 +154,38 @@ test("previous MGES release artifacts remain internally consistent while 0.3.1 c
   assert.equal(conformance.summary.allPassed, true);
   verifyRecordedFingerprint(performance);
   verifyRecordedFingerprint(conformance);
+});
+
+test("0.3.1 clean-main MGES candidate retains review attempts and matches current source", () => {
+  const expectedCommit = "513a7a0bf3711e26ca0e82b4ae1a1663553cc345";
+  const performance = checkedResult(
+    "../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b.json"
+  );
+  const conformance = checkedResult(
+    "../benchmarks/results/2026-07-19-mges-conformance-windows-node24-main-513a7a0b.json"
+  );
+  const reviewAttempts = [1, 2, 3].map((attempt) => checkedResult(
+    `../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt${attempt}.json`
+  ));
+
+  assert.equal(performance.repository.commit, expectedCommit);
+  assert.equal(conformance.repository.commit, expectedCommit);
+  assert.equal(performance.repository.workingTreeDirty, false);
+  assert.equal(conformance.repository.workingTreeDirty, false);
+  assert.equal(performance.quality.publicationCandidate, true);
+  assert.equal(performance.results.governed.sampleCount, 30);
+  assert.equal(performance.results.governed.medianMicrosecondsPerOperation, 139.173);
+  assert.equal(performance.results.governed.coefficientOfVariation, 0.074764);
+  assert.deepEqual(conformance.summary, { total: 14, passed: 14, failed: 0, allPassed: true });
+  verifySourceFingerprint(performance);
+  verifySourceFingerprint(conformance);
+
+  for (const attempt of reviewAttempts) {
+    assert.equal(attempt.repository.commit, expectedCommit);
+    assert.equal(attempt.repository.workingTreeDirty, false);
+    assert.equal(attempt.quality.publicationCandidate, false);
+    assert.ok(attempt.results.governed.coefficientOfVariation > 0.1);
+    assert.equal(attempt.sourceFingerprint.combined, performance.sourceFingerprint.combined);
+    verifyRecordedFingerprint(attempt);
+  }
 });
