@@ -31,6 +31,8 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.version, "0.3.0");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.author, "Ajnas NB");
+  assert.match(packageJson.description, /governed web search/i);
+  assert.match(packageJson.description, /YouTube metadata and captions/i);
   assert.equal(packageJson.type, "module");
   assert.equal(packageJson.sideEffects, false);
   assert.equal(packageJson.types, "src/index.d.ts");
@@ -73,6 +75,13 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.keywords.includes("governance"));
   assert.ok(packageJson.keywords.includes("release-gate"));
   assert.ok(packageJson.keywords.includes("source-router"));
+  assert.ok(packageJson.keywords.includes("agent-governance"));
+  assert.ok(packageJson.keywords.includes("research-agent"));
+  assert.ok(packageJson.keywords.includes("web-search"));
+  assert.ok(packageJson.keywords.includes("mcp"));
+  assert.ok(packageJson.keywords.includes("youtube"));
+  assert.ok(packageJson.keywords.includes("youtube-captions"));
+  assert.ok(packageJson.keywords.includes("yt-dlp"));
   assert.ok(packageJson.keywords.includes("rss"));
   assert.equal(packageJson.dependencies["ipaddr.js"], "^2.4.0");
   assert.equal(packageJson.dependencies["@types/node"], "^20.19.43");
@@ -128,7 +137,11 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(release03, /^# Maqam 0\.3\.0 Release Record/m);
   assert.match(release03, /exact-artifact release record/i);
   assert.match(readme, /0\.3\.0 release line/i);
+  assert.match(readme, /hosted-anonymous Exa web search/i);
+  assert.match(readme, /public YouTube metadata and available captions/i);
   assert.match(readme, /source metadata alone is not publication proof/i);
+  assert.doesNotMatch(readme, /maqam@0\.2\.3[^\n]*latest public npm package/i);
+  assert.doesNotMatch(readme, /0\.2\.4 is a candidate/i);
   assert.match(quickstart, /npx -y maqam@0\.3\.0 demo approval/);
   assert.doesNotMatch(quickstart, /maqam@0\.2\.4/);
   assert.match(comparison, /OpenAI Agents SDK/);
