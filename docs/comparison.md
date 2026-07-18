@@ -115,7 +115,7 @@ These are related Ajnas NB projects, not three names for the same package:
 
 - **Maqam** is the focused governance product and primary public brand.
 - [ProductLoop OS](https://github.com/AjnasNB/productloop-os) is a separate modular suite for runtime, skills, provenance, policy, evaluation, connectors, approvals, and browser research. It composes with Maqam.
-- [Cockroach Crawler](https://github.com/AjnasNB/cockroach-crawler) is a dedicated crawler package with a broader crawl/browser focus than Maqam's built-in research connector.
+- [Cockroach Crawler](https://cockroachcrawler.com/docs/) is a dedicated crawler package with a broader crawl/browser focus than Maqam's built-in research connector. Its [agent integration guide](https://cockroachcrawler.com/docs/agents/) keeps crawler network policy in the crawler and routes the registered tool call through Maqam.
 
 A user who wants the governance boundary should start with `npm install maqam`. A user who needs individually consumable ProductLoop modules or only a crawler can choose those packages directly.
 
