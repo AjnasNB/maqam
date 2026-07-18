@@ -48,7 +48,7 @@
 
       <section id="overview-video" class="docs-media" data-video-block>
         <h2>Watch the package map</h2>
-        <p>The 55-second overview follows ProductLoop OS from the umbrella package into runtime, policy, approvals, provenance, skills, connectors, evaluation, browser research, and Maqam.</p>
+        <p>This historical 0.2.4 proof video follows ProductLoop OS from the umbrella package into runtime, policy, approvals, provenance, skills, connectors, evaluation, browser research, and Maqam. It remains labeled with its original artifact identity.</p>
         <p id="productloop-doc-video-status" data-video-status>Loading video metadata.</p>
         <figure class="media-frame">
           <video data-proof-video controls preload="metadata" aria-describedby="productloop-doc-video-status" poster="/media/releases/maqam/v0.2.4/productloop-os-ecosystem-poster.png">
@@ -69,7 +69,7 @@ npx productloop-os@0.2.1 demo</code></pre></div>
 
       <div class="callout">
         <strong>Verify every registry artifact</strong>
-        The table records intended package versions, not a blanket live-registry guarantee. Verify each npm version, provenance, integrity, and matching source release before installation. The <a href="https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.1">ProductLoop OS v0.2.1 GitHub release</a> is the source-side record for its exact artifacts. Maqam 0.3.0 remains a separate candidate until its npm artifact and matching tag are verified.
+        The table records release versions, not a permanent live-registry guarantee. Verify each npm version, provenance, integrity, and matching source release before installation. The <a href="https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.1">ProductLoop OS v0.2.1 GitHub release</a> is the source-side record for its exact artifacts. Maqam 0.3.0 is independently public with its own matching npm and GitHub release records.
       </div>
 
       <div class="table-wrap" tabindex="0" role="region" aria-label="Recorded ProductLoop package versions and responsibilities">
@@ -78,7 +78,7 @@ npx productloop-os@0.2.1 demo</code></pre></div>
           <thead><tr><th scope="col">Package / namespace</th><th scope="col">Version / status</th><th scope="col">Verify on npm</th><th scope="col">Primary job</th><th scope="col">Important boundary</th></tr></thead>
           <tbody>
             <tr><th scope="row"><code>productloop-os</code></th><td>0.2.1</td><td><a href="https://www.npmjs.com/package/productloop-os">npm</a></td><td>Umbrella composition and named namespaces</td><td>Not a hosted control plane</td></tr>
-            <tr><th scope="row"><code>maqam</code></th><td>0.3.0 candidate</td><td><a href="https://www.npmjs.com/package/maqam/v/0.3.0">npm</a></td><td>Exact approvals, evidence, worker adapters, governed source routing, RSS or Atom parsing, and bounded HTTP crawling</td><td>Only calls routed through a configured gateway or ToolCaller are governed</td></tr>
+            <tr><th scope="row"><code>maqam</code></th><td>0.3.0</td><td><a href="https://www.npmjs.com/package/maqam/v/0.3.0">npm</a></td><td>Exact approvals, evidence, worker adapters, governed source routing, RSS or Atom parsing, and bounded HTTP crawling</td><td>Only calls routed through a configured gateway or ToolCaller are governed</td></tr>
             <tr><th scope="row"><code>ajnas-runtime</code> / <code>runtime</code></th><td>0.2.1</td><td><a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></td><td>Ordered policy-gated tool execution</td><td>Fail-closed without an explicit policy</td></tr>
             <tr><th scope="row"><code>ajnas-policy</code> / <code>policy</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-policy">npm</a></td><td>Declarative decisions and audit receipts</td><td>Does not execute tools</td></tr>
             <tr><th scope="row"><code>ajnas-approvals</code> / <code>approvals</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></td><td>Human review state machine</td><td>Transport and identity remain host concerns</td></tr>
@@ -136,7 +136,7 @@ console.log(result.status, os.trace.events.length);</code></pre></div>
         </section>
 
         <section class="package-entry" id="maqam">
-          <header><h2>maqam</h2><span class="package-version">candidate 0.3.0 · <a href="https://www.npmjs.com/package/maqam/v/0.3.0">verify npm</a></span></header>
+          <header><h2>maqam</h2><span class="package-version">public 0.3.0 · <a href="https://www.npmjs.com/package/maqam/v/0.3.0">verify npm</a></span></header>
           <div class="package-body">
             <p>Provides the higher-level exact approval gateway, workflow runtime, evidence ledger, worker adapters, ordered research-source routing, bounded host-defined source checks, local console, offline feed parsing, and bounded HTTP crawler.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#maqam-code">Copy</button><pre><code id="maqam-code">import { PolicyEngine, ToolGateway } from "maqam";

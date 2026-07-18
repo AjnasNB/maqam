@@ -102,7 +102,7 @@ The direct-path coefficient of variation remains a published diagnostic, but it 
 
 These thresholds are MGES stability rules. They are not universal acceptance criteria. A pass does not control CPU affinity, CPU frequency, virtualization, thermal state, or background load; each artifact discloses those uncontrolled conditions. Do not remove outliers or silently change thresholds to obtain a pass.
 
-### Current clean-main release evidence
+### Current public 0.3.0 clean-main release evidence
 
 [`2026-07-18-mges-performance-windows-node24-main-545fe8bb.json`](results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json) records the clean post-squash `main` MGES v1.1.0 release run:
 
@@ -124,6 +124,10 @@ This repository squash-merges pull requests, so final release evidence uses two 
 The earlier [`2026-07-16-mges-performance-windows-node24.json`](results/2026-07-16-mges-performance-windows-node24.json) is retained as the 0.2.4 baseline, and [`2026-07-16-windows-node24.json`](results/2026-07-16-windows-node24.json) remains a legacy seven-sample result. Neither is relabeled as 0.3.0 evidence.
 
 Two clean runs from superseded source commit `c58cb850daeffa24f5f088a97689f5c75c2db69b` are retained as transparent `REVIEW` records: [attempt 1](results/2026-07-18-mges-performance-windows-node24-governed-public-research-c58cb850.json) observed `19.122%` governed CV, and [attempt 2](results/2026-07-18-mges-performance-windows-node24-governed-public-research-c58cb850-attempt2.json) observed `25.691%`. No observations or thresholds were removed. The later implementation candidate [performance](results/2026-07-18-mges-performance-windows-node24-governed-public-research-280e43cd.json) and [conformance](results/2026-07-18-mges-conformance-windows-node24-governed-public-research-280e43cd.json) artifacts remain transparent pre-squash evidence; the `545fe8bb` artifacts are the release evidence.
+
+### 0.3.1 evidence gate
+
+The 0.3.1 implementation must first land on `main`. MGES performance and conformance outputs must then be generated from that exact clean main commit and added in a separate evidence-only pull request that changes no fingerprinted implementation, benchmark, or lockfile source. Until that follow-up is merged, the `545fe8bb` artifacts above remain the latest public release evidence and must not be relabeled as 0.3.1 results.
 
 ### What the number excludes
 

@@ -35,8 +35,8 @@
       <h1>Maqam 0.3.0 integrations</h1>
       <p class="lede">Use static tool adapters for side effects and static research-source adapters for normalized reads. In both cases, the host supplies the real client and keeps the enforcement path explicit.</p>
       <div class="callout" id="source-preview">
-        <strong>0.3.0 candidate API line</strong>
-        The 0.2 tool-adapter contract remains available. The 0.3.0 source candidate adds source adapters, ordered registry routing, normalized research documents, bounded host-defined source checks, and RSS or Atom helpers. After publication is verified, pin <code>maqam@0.3.0</code> so examples resolve to one reviewed API surface.
+        <strong>Published 0.3.0 API line</strong>
+        The 0.2 tool-adapter contract remains available. Version 0.3.0 adds source adapters, ordered registry routing, normalized research documents, bounded host-defined source checks, and RSS or Atom helpers. Pin <code>maqam@0.3.0</code> so examples resolve to one reviewed API surface.
       </div>
       <figure class="media-frame media-frame--art">
         <picture><source srcset="/assets/integration-dock-3d.webp" type="image/webp"><img src="/assets/integration-dock-3d.png" width="1586" height="992" alt="Integration dock routing host-supplied SDK, HTTP, MCP-shaped, and function operations through one Maqam gateway" loading="lazy"></picture>
@@ -50,7 +50,7 @@ git checkout &lt;npm-git-head&gt;
 npm ci
 npm run verify
 npm pack --dry-run</code></pre></div>
-      <p>Only after the registry version, provenance, integrity, and tagged source are verified, install the pinned package with <code>npm install maqam@0.3.0</code>.</p>
+      <p>Verify the public registry version, provenance, integrity, and tagged source, then install the pinned package with <code>npm install maqam@0.3.0</code>.</p>
       <div class="callout callout-warning">
         <strong>Boundary statement</strong>
         Maqam does not bundle provider SDKs, a native MCP client or server, provider discovery, protocol authentication, an HTTP service client, a connector marketplace, or secret storage.

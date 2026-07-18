@@ -24,6 +24,20 @@ function verifySourceFingerprint(result) {
   assert.equal(combined.digest("hex"), result.sourceFingerprint.combined);
 }
 
+function verifyRecordedFingerprint(result) {
+  assert.equal(result.sourceFingerprint.algorithm, "sha256");
+  const combined = createHash("sha256");
+  const paths = new Set();
+  for (const file of result.sourceFingerprint.files) {
+    assert.match(file.path, /^[A-Za-z0-9_./-]+$/);
+    assert.match(file.sha256, /^[a-f0-9]{64}$/);
+    assert.equal(paths.has(file.path), false, `duplicate recorded fingerprint path: ${file.path}`);
+    paths.add(file.path);
+    combined.update(`${file.path}\0${file.sha256}\n`);
+  }
+  assert.equal(combined.digest("hex"), result.sourceFingerprint.combined);
+}
+
 function run(script, ...args) {
   return spawnSync(process.execPath, [script, ...args], {
     cwd: repositoryRoot,
@@ -124,7 +138,7 @@ test("MGES result schemas are versioned machine-readable JSON Schema documents",
   assert.equal(conformanceSchema.properties.schema.const, "maqam.benchmark.conformance/v1");
 });
 
-test("checked-in MGES release artifacts identify a clean source commit and unchanged measured files", () => {
+test("previous MGES release artifacts remain internally consistent while 0.3.1 clean-main evidence is pending", () => {
   const performance = checkedResult(
     "../benchmarks/results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json"
   );
@@ -134,10 +148,10 @@ test("checked-in MGES release artifacts identify a clean source commit and uncha
 
   assert.equal(performance.repository.workingTreeDirty, false);
   assert.equal(conformance.repository.workingTreeDirty, false);
-  assert.match(performance.repository.commit, /^[a-f0-9]{40}$/);
+  assert.equal(performance.repository.commit, "545fe8bbc40f21cec0f9ec2ae3954f3e75783f22");
   assert.equal(conformance.repository.commit, performance.repository.commit);
   assert.equal(performance.quality.publicationCandidate, true);
   assert.equal(conformance.summary.allPassed, true);
-  verifySourceFingerprint(performance);
-  verifySourceFingerprint(conformance);
+  verifyRecordedFingerprint(performance);
+  verifyRecordedFingerprint(conformance);
 });

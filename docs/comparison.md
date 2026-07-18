@@ -76,7 +76,7 @@ License boundaries deserve special attention. Agent Reach was inspected at commi
 
 The table below describes product emphasis, not exhaustive feature support. "Application-supplied" means the surrounding application can build the capability, not that the project ships Maqam-equivalent semantics.
 
-| Capability | Maqam 0.3.0 candidate | Microsoft AGT | HumanLayer legacy repo | LangGraph | OpenAI Agents SDK | OPA | Firecrawl/Crawl4AI |
+| Capability | Maqam 0.3.0 | Microsoft AGT | HumanLayer legacy repo | LangGraph | OpenAI Agents SDK | OPA | Firecrawl/Crawl4AI |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Primary product center | Tool governance boundary | Broad agent governance | Historical human review; now deprecated | Durable orchestration | Agent runtime | General policy engine | Web acquisition |
 | Exact run/tool/input approval binding | Built in at `ToolGateway` | Review its current approval contract for the deployment | Deprecated repository | First-class interrupts; the application defines its review payload and exact receipt contract | First-class tool approval; verify its approval item/run-state contract against the required binding | Application-supplied | Not product center |
