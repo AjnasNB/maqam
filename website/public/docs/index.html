@@ -244,6 +244,7 @@ console.log(result.stats);</code></pre>
         <strong>Crawler limit</strong>
         The built-in crawler does not render JavaScript, drive a browser, rotate proxies, bypass access controls, or operate a distributed queue.
       </div>
+      <p>When crawling is the main workload, install the separate <a href="https://cockroachcrawler.com/docs/">Cockroach Crawler package</a>. Its <a href="https://cockroachcrawler.com/docs/agents/">Maqam integration guide</a> shows how to keep crawler network policy inside the crawler while routing the registered tool call through Maqam policy, traces, approvals, and evidence.</p>
       <section class="docs-media" data-video-block>
         <h3>Watch the governed research flow</h3>
         <p>The 55-second demo shows the bounded HTTP path, network limits, recorded source material, citations, and the handoff back through the governed application boundary.</p>
@@ -251,7 +252,7 @@ console.log(result.stats);</code></pre>
         <figure class="media-frame">
           <video data-proof-video controls preload="metadata" aria-describedby="crawler-doc-video-status" poster="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research-poster.png">
             <source src="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4" type="video/mp4">
-            <track src="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt" kind="captions" srclang="en" label="English" default>
+            <track src="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt" kind="captions" srclang="en" label="English">
             Your browser cannot play this video. <a href="/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4">Open the MP4 file</a>.
           </video>
           <figcaption>Governed crawling means bounded network work and explicit evidence, not browser automation or unrestricted fetching.</figcaption>
