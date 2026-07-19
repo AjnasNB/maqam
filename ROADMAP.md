@@ -24,7 +24,7 @@ Maqam will integrate with orchestration, model, browser, crawl, and observabilit
 - Transactional in-process evidence and claim records with scoped attribution.
 - Bounded HTTP crawler with robots handling, redirect authorization, DNS validation, DNS pinning, and private-network denial by default.
 - Local research console, typed `maqam/server` export, JSON/JSONL crawler output, examples, migration guidance, and security documentation.
-- Node.js 20, 22, and 24 continuous integration, clean external TypeScript consumption, production dependency audit, and package-content checks.
+- The then-current three-version Node.js CI matrix, clean external TypeScript consumption, production dependency audit, and package-content checks.
 - MGES v1 project-defined performance and governance-boundary profiles with raw observations, source fingerprints, uncertainty reporting, stability gates, and named conformance evidence.
 - A typed host-supplied adapter descriptor, explicit `ToolGateway` registration, and fixture conformance probe for function, SDK, HTTP, MCP-style, and custom transports.
 
@@ -41,7 +41,7 @@ Maqam will integrate with orchestration, model, browser, crawl, and observabilit
 The public [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) artifact and matching [`v0.3.0` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.0) completed these release gates:
 
 - public exports and declarations compile in a clean consumer;
-- allow, deny-with-zero-dispatch, fatal-no-fallback, availability-fallback, authentication-opt-in, doctor, RSS/Atom, feed-crawl, and CLI fixtures pass on Node.js 20, 22, and 24;
+- allow, deny-with-zero-dispatch, fatal-no-fallback, availability-fallback, authentication-opt-in, doctor, RSS/Atom, feed-crawl, and CLI fixtures passed on that release's recorded CI matrix;
 - package contents, provenance, license audit, migration notes, and source-boundary documentation match the shipped artifact;
 - a fresh MGES run is attached when fingerprinted inputs changed; and
 - the exact tarball received maintainer approval and registry verification before `v0.3.0` was tagged.

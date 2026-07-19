@@ -24,7 +24,7 @@ Do not open a pull request for a security vulnerability. Follow [SECURITY.md](SE
 
 ## Local setup
 
-Maqam requires Node.js 20.18.1 or newer.
+Maqam supports the maintained Node.js 22 LTS, 24 LTS, and 26 Current release lines.
 
 ```bash
 git clone https://github.com/YOUR-ACCOUNT/maqam.git
@@ -36,7 +36,7 @@ npm audit --omit=dev
 npm pack --dry-run
 ```
 
-The complete suite must pass on Node.js 20, 22, and 24 in CI.
+The complete suite must pass on Node.js 22, 24, and 26 in CI.
 
 ## What a pull request must include
 
