@@ -30,7 +30,7 @@ Revoke any npm token that has appeared in chat, logs, screenshots, or shell hist
 ## Publishing a reviewed version
 
 1. Confirm the candidate commit is on `main` and CI plus CodeQL are green.
-2. Open the successful main CI run's `maqam-npm-candidate-COMMIT` artifact. Review `release-manifest.json`; it was packed on Linux with Node `24.15.0` and npm `12.0.1` and expires after one day. This job does not publish.
+2. Open the successful main CI run's `maqam-npm-candidate-COMMIT` artifact. Review `release-manifest.json`; it was packed on Linux with Node `24.18.0` and npm `12.0.1` and expires after one day. This job does not publish.
 3. Open **Actions > Publish npm (trusted) > Run workflow** and select `main`.
 4. Enter the manifest's full `gitCommit`, exact version, tarball byte size, SHA-256, and integrity values.
 5. Enter the confirmation `publish maqam@VERSION`.

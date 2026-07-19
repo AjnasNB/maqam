@@ -30,7 +30,7 @@ This guide covers installation, CLI usage, SDK usage, the local console, crawler
 
 ## Install
 
-Maqam requires Node.js 20.18.1 or newer.
+Maqam supports the maintained Node.js 22 LTS, 24 LTS, and 26 Current release lines.
 
 Global install:
 

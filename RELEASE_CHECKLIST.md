@@ -37,7 +37,7 @@ Required result:
 - `npm test` has zero failures.
 - `npm run test:consumer-types` packs the candidate into a temporary clean project and strictly compiles both `maqam` and `maqam/server` without adding consumer type dependencies.
 - `npm run test:website` verifies release truth, internal links, accessibility structure, local assets, and Worker media semantics.
-- Governed-source allow/deny, fatal-no-fallback, availability-fallback, authentication opt-in, doctor, normalized-document, RSS/Atom, feed-crawl, and crawler-CLI fixtures pass on Node.js 20, 22, and 24.
+- Governed-source allow/deny, fatal-no-fallback, availability-fallback, authentication opt-in, doctor, normalized-document, RSS/Atom, feed-crawl, and crawler-CLI fixtures pass on Node.js 22, 24, and 26.
 - Guarded-dispatch and governed-browser fixtures prove exact input/context/registration authority, same-instance same-run plan tokens, exact request origins, exact phase approval, prohibited-effect attestation, structural limits, and post-action observation.
 - MGES conformance and performance are rerun because the guarded-tool/browser public source, version, lockfile, and client metadata changed; earlier metadata-only 0.3.1 results and the 0.3.0 or 0.2.4 figures are not relabeled as final 0.3.1 evidence.
 - With squash merging enabled, use two PR phases: merge implementation first, rerun MGES from that exact clean main commit, then merge an evidence/docs/test-only PR. The measured main commit must remain an ancestor of the final release commit and no fingerprinted source may change in the evidence PR.

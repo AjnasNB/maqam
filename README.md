@@ -164,7 +164,7 @@ Agent systems fail in production when tools run outside policy, outputs cannot b
 
 ## Install
 
-Maqam requires Node.js 20.18.1 or later.
+Maqam supports the maintained Node.js 22 LTS, 24 LTS, and 26 Current release lines.
 
 ```bash
 npm view maqam@0.3.1 version dist.integrity gitHead

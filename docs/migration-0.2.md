@@ -4,7 +4,7 @@ Maqam 0.2 hardens default policy, crawler networking, child-process isolation, a
 
 ## Runtime requirement
 
-Maqam now requires Node.js 20.18.1 or later.
+Current Maqam installs require a maintained Node.js 22, 24, or 26 release.
 
 ## Policy and gateway defaults
 

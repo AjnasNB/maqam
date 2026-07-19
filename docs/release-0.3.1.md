@@ -13,6 +13,7 @@ Version 0.3.1 prepares a guarded execution-verification API and a structural gov
 - bind write plans to the issuing adapter instance and run with an opaque preview token, exact phase approval, exact target revision, exact request origins, one dispatch, and post-action observation;
 - keep raw values, selectors, scripts, cookies, credentials, external protocols, downloads, filesystem reads or writes, file-picker actions, clipboard reads or writes, permission prompts, print dialogs, and modal dialogs outside the modeled browser operation surface;
 - require the host driver to block prohibited effects before dispatch and return an explicit all-false effects attestation that Maqam validates after dispatch;
+- move active runtime support and CI to the maintained Node.js 22 LTS, 24 LTS, and 26 Current release lines, excluding end-of-life odd majors through the package engine range;
 - synchronize the packaged README, security guidance, release checklist, consumer types, website, package metadata, and release records; and
 - preserve prior release media and benchmark records under their original historical identities.
 

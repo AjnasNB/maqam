@@ -17,6 +17,7 @@ Guarded adapter and release-truth update. Availability is defined by the live np
 - Replaced stale pre-publication 0.3.0 wording in the packaged README, documentation, and website with verified public-release records and evergreen registry checks.
 - Kept the 0.2.4 videos and benchmark artifacts explicitly labeled as historical evidence for that artifact rather than relabeling them as 0.3 evidence.
 - Updated package, release-gate, trusted-publishing, and MCP client metadata to the 0.3.1 identity.
+- Replaced the end-of-life Node 20 baseline with explicit support and CI coverage for the maintained Node 22 LTS, 24 LTS, and 26 Current release lines; release packing remains pinned to Node 24.18.0 LTS.
 - Retains the MGES records from metadata-only commit `513a7a0bf3711e26ca0e82b4ae1a1663553cc345` as explicitly superseded historical candidate evidence; they are not evidence for the guarded/browser source, which requires fresh clean-main fingerprints, an evidence-only follow-up, and exact-artifact approval.
 
 See [docs/release-0.3.1.md](docs/release-0.3.1.md) for the release boundary and required verification.
