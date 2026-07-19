@@ -21,10 +21,10 @@
   <header class="site-header">
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
-      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
-    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
   </header>
 
   <main id="main" class="shell article-shell">
@@ -80,7 +80,7 @@ round 3: direct   -> governed
 operations per second at median = 1,000,000,000 / median nanoseconds</code></pre></div>
       <p>The derived rate is a sequential local rate, not a concurrency or capacity measurement. MGES reports paired absolute added time and avoids promoting a governed/direct ratio because the direct baseline intentionally does almost no work.</p>
 
-      <h2>Unpublished 0.3.1 candidate evidence</h2>
+      <h2>Published 0.3.1 measured-source evidence</h2>
       <div class="table-wrap" tabindex="0" role="region" aria-label="Clean MGES v1.1 candidate result"><table><caption class="sr-only">Environment, observation count, timing result, and publication checks for the clean MGES v1.1 candidate run</caption><thead><tr><th scope="col">Field</th><th scope="col">Recorded result</th></tr></thead><tbody>
         <tr><th scope="row">Runtime and host</th><td>Node 24.18.0, Ubuntu 24.04 x64, AMD EPYC 7763</td></tr>
         <tr><th scope="row">Observations</th><td>30 fresh processes per variant</td></tr>
@@ -92,7 +92,7 @@ operations per second at median = 1,000,000,000 / median nanoseconds</code></pre
         <tr><th scope="row">Project publication checks</th><td>PASS, 4 of 4 required; optional direct-CV diagnostic was 2.129% and also passed</td></tr>
       </tbody></table></div>
       <p>Criteria version 2 requires 30 observations, governed variation no greater than 10%, and median timed batches of at least 100 ms for both variants. Direct variation remains visible as a diagnostic because the near-zero baseline is dominated by cross-process CPU-frequency noise. These are suite stability gates, not an industry acceptance rule.</p>
-      <p>The candidate artifact records clean-main commit <code>a96413c4da5f27dc31b9772996e70faab0b38382</code>, <code>workingTreeDirty: false</code>, and SHA-256 fingerprints for benchmark and implementation files. This evidence-only release change does not alter those files. A changed fingerprint requires another run. The candidate is not the public package; npm latest and install authority remain 0.3.0 until registry verification completes.</p>
+      <p>The measured-source artifact records clean-main commit <code>a96413c4da5f27dc31b9772996e70faab0b38382</code>, <code>workingTreeDirty: false</code>, and SHA-256 fingerprints for benchmark and implementation files. The evidence-only release delta does not alter those files. A changed fingerprint requires another run. The public package is <code>maqam@0.3.1</code> at registry <code>gitHead</code> <code>2f7231db912012e37e89ec962f6d57c54c6275a3</code>.</p>
       <div class="button-row"><a class="button button-primary" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json">Open candidate performance JSON</a><a class="button" href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-19-mges-conformance-ubuntu24-node24-main-a96413c4.json">Open candidate conformance JSON</a></div>
 
       <h3>Previous public 0.3.0 evidence</h3>
@@ -135,7 +135,7 @@ operations per second at median = 1,000,000,000 / median nanoseconds</code></pre
       <p>Signed artifacts indexed by suite version, source fingerprint, environment, and profile could separate one machine's observation from independently reproduced results.</p>
 
       <h2>How to quote the result responsibly</h2>
-      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-performance">Copy</button><pre><code id="quote-performance">Unpublished 0.3.1 candidate MGES v1.1.0 local-call profile on Node 24.18.0 /
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#quote-performance">Copy</button><pre><code id="quote-performance">Published 0.3.1 measured-source MGES v1.1.0 local-call profile on Node 24.18.0 /
       Ubuntu 24.04 x64 / AMD EPYC 7763: 129.849 microseconds median per governed
       call (95% bootstrap interval for the sample median: 129.539 to 130.648;
       30 fresh-process observations; governed CV 1.111%).

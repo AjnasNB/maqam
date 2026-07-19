@@ -16,10 +16,10 @@
   <header class="site-header">
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
-      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/" aria-current="page">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/" aria-current="page">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
-    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/" aria-current="page">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/" aria-current="page">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
   </header>
 
   <main id="main" class="shell docs-layout">
@@ -63,8 +63,8 @@
       </div>
       <p><strong>Recommended presentation:</strong> report MGES beside its environment and raw artifacts, map relevant failure modes to OWASP, follow emerging NIST work, and use capability benchmarks separately when evaluating the model or agent as a whole.</p>
 
-      <h2 id="result">Unpublished 0.3.1 candidate evidence</h2>
-      <p>This candidate record is bound to exact clean-main commit <code>a96413c4da5f27dc31b9772996e70faab0b38382</code>. It is release-candidate evidence, not a claim that 0.3.1 is public; npm latest and the install authority remain 0.3.0 until registry verification completes.</p>
+      <h2 id="result">Published 0.3.1 measured-source evidence</h2>
+      <p>This regression record is bound to exact clean-main commit <code>a96413c4da5f27dc31b9772996e70faab0b38382</code>. The public npm artifact and <code>v0.3.1</code> release are bound to commit <code>2f7231db912012e37e89ec962f6d57c54c6275a3</code>, whose release-only delta does not alter the fingerprinted implementation or benchmark source.</p>
       <dl class="definition-grid">
         <dt>Governed median</dt><dd>129.849 microseconds per sequential in-process call.</dd>
         <dt>95% interval</dt><dd>129.539 to 130.648 microseconds for the sample median using deterministic percentile bootstrap.</dd>
@@ -75,7 +75,7 @@
       </dl>
       <figure class="media-frame">
         <img src="/media/04-benchmark-method.png" width="1920" height="1080" alt="MGES benchmark frame showing local method, median result, interval, and conformance count">
-        <figcaption>Method illustration from the historical 0.2.4 video; the unpublished 0.3.1 candidate evidence was measured from exact clean-main commit a96413c4 on 19 July 2026.</figcaption>
+        <figcaption>Method illustration from the historical 0.2.4 video; the published 0.3.1 measured-source evidence was recorded at exact clean-main commit a96413c4 on 19 July 2026.</figcaption>
       </figure>
 
       <h3>Previous public 0.3.0 evidence</h3>
@@ -150,8 +150,8 @@ npm run benchmark:mges:conformance
 npm run benchmark:mges:performance</code></pre></div>
       <p>The candidate artifacts record exact clean-main source commit <code>a96413c4da5f27dc31b9772996e70faab0b38382</code>. The evidence-only release change does not alter fingerprinted implementation or benchmark source. Any later change to one of those files requires another run.</p>
       <ul>
-        <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json">Unpublished 0.3.1 candidate performance JSON</a></li>
-        <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-19-mges-conformance-ubuntu24-node24-main-a96413c4.json">Unpublished 0.3.1 candidate conformance JSON</a></li>
+        <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json">Published 0.3.1 measured-source performance JSON</a></li>
+        <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-19-mges-conformance-ubuntu24-node24-main-a96413c4.json">Published 0.3.1 measured-source conformance JSON</a></li>
         <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json">Previous public 0.3.0 performance JSON</a></li>
         <li><a href="https://github.com/AjnasNB/maqam/blob/main/benchmarks/results/2026-07-18-mges-conformance-windows-node24-main-545fe8bb.json">Previous public 0.3.0 conformance JSON</a></li>
         <li><a href="/releases/v0.2.4/">Historical 0.2.4 benchmark and media</a></li>
@@ -160,7 +160,7 @@ npm run benchmark:mges:performance</code></pre></div>
       </ul>
 
       <h2 id="publish">Safe publication wording</h2>
-      <div class="code-shell"><button class="copy-button" type="button" data-copy="#claim-code">Copy</button><pre><code id="claim-code">Unpublished 0.3.1 candidate MGES v1.1.0 local-call profile on Node 24.18.0,
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#claim-code">Copy</button><pre><code id="claim-code">Published 0.3.1 measured-source MGES v1.1.0 local-call profile on Node 24.18.0,
       Ubuntu 24.04 x64, and AMD EPYC 7763: 129.849 microseconds median
       per governed call, with a 129.539 to 130.648 microsecond 95%
       bootstrap interval, 30 fresh-process observations, and 1.111%

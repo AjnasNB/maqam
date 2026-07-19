@@ -16,10 +16,10 @@
   <header class="site-header">
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
-      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/" aria-current="page">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/" aria-current="page">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
-    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/" aria-current="page">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/" aria-current="page">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
   </header>
 
   <main id="main" class="shell docs-layout">
@@ -33,7 +33,7 @@
 
     <article class="docs-content">
       <h1>Governed research sources</h1>
-      <p class="lede">Maqam 0.3.0 adds a provider-neutral source registry: applications can normalize research records, choose ordered backends, run bounded host-defined checks, and route reads through an existing governed tool boundary.</p>
+      <p class="lede">Maqam 0.3.1 includes a provider-neutral source registry: applications can normalize research records, choose ordered backends, run bounded host-defined checks, and route reads through an existing governed tool boundary.</p>
       <figure class="media-frame media-frame--art">
         <picture><source srcset="/assets/integration-dock-3d.webp" type="image/webp"><img src="/assets/integration-dock-3d.png" width="1586" height="992" alt="Three-dimensional source dock routing reviewed research adapters through one Maqam policy gate" loading="lazy"></picture>
         <figcaption>Each backend keeps a static adapter identity and tool name. Governed routing calls that tool name through the host-supplied ToolCaller.</figcaption>
@@ -150,8 +150,8 @@ console.log(feed.contentHash);</code></pre></div>
 
       <h2 id="agent-reach">How this relates to Agent Reach</h2>
       <p><a href="https://github.com/Panniantong/Agent-Reach">Agent Reach</a> is an MIT-licensed Python capability layer with broader platform-specific channel coverage. It installs, checks, and routes upstream platform tools, and can use local command-line tools, authenticated sessions, or browser cookies where a platform requires them.</p>
-      <p>Maqam 0.3.0 adopts the useful architectural ideas of ordered backends, explicit health status, and real checks, but applies them to a narrower TypeScript governance contract. It does not copy Agent Reach's auto-installation, cookie extraction, login reuse, platform-specific command wrappers, or channel coverage.</p>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="Maqam and Agent Reach comparison"><table><caption class="sr-only">Different primary jobs and boundaries of Maqam governed sources and Agent Reach</caption><thead><tr><th scope="col">Area</th><th scope="col">Maqam 0.3.0</th><th scope="col">Agent Reach</th></tr></thead><tbody>
+      <p>Maqam 0.3.1 adopts the useful architectural ideas of ordered backends, explicit health status, and real checks, but applies them to a narrower TypeScript governance contract. It does not copy Agent Reach's auto-installation, cookie extraction, login reuse, platform-specific command wrappers, or channel coverage.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Maqam and Agent Reach comparison"><table><caption class="sr-only">Different primary jobs and boundaries of Maqam governed sources and Agent Reach</caption><thead><tr><th scope="col">Area</th><th scope="col">Maqam 0.3.1</th><th scope="col">Agent Reach</th></tr></thead><tbody>
         <tr><th scope="row">Primary job</th><td>Application-side policy routing and normalized source evidence</td><td>Capability installation, diagnostics, and routing across upstream tools</td></tr>
         <tr><th scope="row">Runtime</th><td>TypeScript and Node.js</td><td>Python plus external command-line tools and services</td></tr>
         <tr><th scope="row">Coverage</th><td>Provider-neutral adapters plus built-in HTTP, RSS, and Atom primitives</td><td>Broader platform-specific channel catalog</td></tr>

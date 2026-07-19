@@ -105,9 +105,9 @@ It is not a concurrency or capacity measurement.
 
 MGES also pairs the direct and governed estimates from each round and reports the median absolute addition. It intentionally does not promote the governed/direct ratio. When the baseline intentionally does almost no work, a ratio can be numerically large while conveying little useful engineering information.
 
-## The final 0.3.1 candidate and previous public 0.3.0 evidence
+## Published 0.3.1 measured-source and historical 0.3.0 evidence
 
-The final 0.3.1 pre-publication candidate artifact is [`2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json`](../../benchmarks/results/2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json), measured from exact clean `main` commit `a96413c4da5f27dc31b9772996e70faab0b38382`.
+The published 0.3.1 measured-source artifact is [`2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json`](../../benchmarks/results/2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json), measured from exact clean `main` commit `a96413c4da5f27dc31b9772996e70faab0b38382`. The public npm artifact is bound to `2f7231db912012e37e89ec962f6d57c54c6275a3`; its release-only delta does not alter the fingerprinted implementation or benchmark source.
 
 | Field | Result |
 |---|---:|
@@ -216,7 +216,7 @@ Artifacts could be signed and indexed by suite version, source fingerprint, clea
 
 A defensible compact statement is:
 
-> 0.3.1 pre-publication candidate evidence — MGES v1.1.0 local-call profile on Node 24.18.0 / Ubuntu 24.04 x64 / AMD EPYC 7763: 129.849 microseconds median per governed call (95% bootstrap interval for the sample median: 129.539-130.648; 30 fresh-process observations; governed CV 1.111%; required checks PASS). Measured from exact clean main commit `a96413c4da5f27dc31b9772996e70faab0b38382`. Local in-process component benchmark; excludes model, network, storage, browser and concurrency; not a competitor benchmark, release announcement or SLA.
+> Published 0.3.1 measured-source evidence — MGES v1.1.0 local-call profile on Node 24.18.0 / Ubuntu 24.04 x64 / AMD EPYC 7763: 129.849 microseconds median per governed call (95% bootstrap interval for the sample median: 129.539-130.648; 30 fresh-process observations; governed CV 1.111%; required checks PASS). Measured from exact clean main commit `a96413c4da5f27dc31b9772996e70faab0b38382`. Local in-process component benchmark; excludes model, network, storage, browser and concurrency; not a competitor benchmark, release announcement or SLA.
 
 For conformance:
 
