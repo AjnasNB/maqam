@@ -2,6 +2,20 @@
 
 All notable Maqam changes are tracked here before release.
 
+## 0.3.2
+
+Release-truth patch. Availability is defined by the live npm registry, provenance, integrity, matching Git tag, and GitHub release—not by this source changelog or a local tarball. Maqam 0.3.1 remains the verified public release until those records exist for 0.3.2.
+
+### Changed
+
+- Updated the package, lockfile, clean-consumer gate, CLI version checks, governed-release example, Exa MCP client identity, and trusted-publishing default to 0.3.2.
+- Updated the package README and active quickstart/release examples to carry the verified ProductLoop OS 0.2.2 companion map. The immutable 0.3.1 npm tarball retains its earlier 0.2.1 README snapshot.
+- Added a conditional, live-record-driven 0.3.2 release record and retained the 0.3.1 and 0.2.4 records as historical evidence for their exact artifacts.
+
+No runtime policy, approval, crawler, browser, or research behavior changes in this patch. The published 0.3.1 MGES results are not relabeled as 0.3.2 evidence; the 0.3.2 candidate must pass fresh conformance, performance, package, consumer, audit, and provenance gates for its exact source and artifact.
+
+See [docs/release-0.3.2.md](docs/release-0.3.2.md) for the release boundary and required verification.
+
 ## 0.3.1
 
 Guarded adapter and release-truth update. Availability is defined by the live npm registry, provenance, integrity, matching Git tag, and GitHub release - not by this packaged changelog. At candidate preparation time, 0.3.0 was the previous verified public release.

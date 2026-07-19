@@ -9,7 +9,7 @@ if (!filename || !rawSizeBytes || !sha256 || !integrity || !gitCommit) {
 
 const release = {
   packageName: "maqam",
-  version: "0.3.1",
+  version: "0.3.2",
   registry: "https://registry.npmjs.org/",
   publishCommand: "npm publish --access public --ignore-scripts --provenance"
 };

@@ -190,7 +190,7 @@ test("Exa adapter performs initialize, initialized, and tools/call over JSON and
   assert.deepEqual(initialize.body.params.capabilities, {});
   assert.deepEqual(initialize.body.params.clientInfo, {
     name: "maqam",
-    version: "0.3.1"
+    version: "0.3.2"
   });
   assert.equal(initialize.headers["mcp-session-id"], undefined);
   assert.equal(initialize.headers["mcp-protocol-version"], undefined);

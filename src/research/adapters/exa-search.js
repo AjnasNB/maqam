@@ -451,7 +451,7 @@ async function search(config, input, context) {
       params: {
         protocolVersion: MCP_PROTOCOL_VERSION,
         capabilities: {},
-        clientInfo: { name: "maqam", version: "0.3.1" }
+        clientInfo: { name: "maqam", version: "0.3.2" }
       }
     }, timeout.signal);
     sessionId = initialized.sessionId;
