@@ -1,0 +1,21 @@
+{
+  "schema": "maqam.mges.evidence-manifest/v1",
+  "gitCommit": "29c1b9ec0fb8af162d1b73f950851263d35a0527",
+  "cleanCheckout": true,
+  "conformance": {
+    "filename": "2026-07-19-mges-conformance-ubuntu24-node24-main-29c1b9ec.json",
+    "sha256": "0294028d7407facca7f9901eb9e2c9460f19d35048394b71ad68d4a778e4587c",
+    "passed": 14,
+    "total": 14,
+    "allPassed": true
+  },
+  "performance": {
+    "filename": "2026-07-19-mges-performance-ubuntu24-node24-main-29c1b9ec.json",
+    "sha256": "fb7d94b9b97c6aa6d7448e2e86f6ef49d854a6b4e5c568c2ac22a1f1b08663f5",
+    "publicationCandidate": true,
+    "governedMedianMicroseconds": 127.989,
+    "governedCoefficientOfVariation": 0.013931
+  },
+  "runtime": "v24.18.0",
+  "runner": "linux-x64"
+}

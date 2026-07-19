@@ -1,0 +1,289 @@
+{
+  "schema": "maqam.benchmark.conformance/v1",
+  "suite": {
+    "name": "Maqam Governance Evaluation Suite",
+    "shortName": "MGES",
+    "profile": "governance-boundary-conformance",
+    "version": "1.1.0",
+    "authority": "Maqam project-defined conformance fixtures",
+    "externallyStandardized": false,
+    "externallyCertified": false
+  },
+  "measuredAt": "2026-07-19T17:13:26.534Z",
+  "repository": {
+    "available": true,
+    "commit": "29c1b9ec0fb8af162d1b73f950851263d35a0527",
+    "workingTreeDirty": false
+  },
+  "environment": {
+    "node": "v24.18.0",
+    "v8": "13.6.233.17-node.50",
+    "operatingSystem": "Linux 6.17.0-1020-azure",
+    "platform": "linux",
+    "architecture": "x64"
+  },
+  "sourceFingerprint": {
+    "algorithm": "sha256",
+    "combined": "4f5f5c35454fbf09c34d1bbf43c1d5e91a7a3d0b319409c94f08e338369655f0",
+    "files": [
+      {
+        "path": "benchmarks/governance-conformance.mjs",
+        "sha256": "114e2c7dd515b569962c615d42449cc3bf960458bdd565f5e6b63b7090af0719"
+      },
+      {
+        "path": "src/index.js",
+        "sha256": "204375abdd79b23e1363e5576a781886a3e43baebc8361e87a8427af91df6cc4"
+      },
+      {
+        "path": "src/framework/tool-gateway.js",
+        "sha256": "6641e5d6ce87cc37bebf44f04cb935573cc5d51765d1452001dcfeaa1c5392ab"
+      },
+      {
+        "path": "src/framework/policy.js",
+        "sha256": "b4cffbf6a6d61a64b955f8640fca254f89c62394163a18ab8d5ba1290a2c246f"
+      },
+      {
+        "path": "src/framework/approval-queue.js",
+        "sha256": "71446026b248e4e997fc57d8f7f4c1df2428fcf292a5eb26d2c9f37013821c51"
+      },
+      {
+        "path": "src/framework/evidence-ledger.js",
+        "sha256": "ba74707affb223d33a9301842f0220a4415207fdeca9522ae433845f6961e80d"
+      },
+      {
+        "path": "src/framework/evidence-scope.js",
+        "sha256": "bee057f58dbdc491da7b37b981b09ebfc6c3b1b65c84d921d19d6c2d65f5ed8f"
+      },
+      {
+        "path": "src/framework/audit.js",
+        "sha256": "a001ec6d455f583865739751c66e22929551ea7f2362bce1f510092cc1df2b9b"
+      },
+      {
+        "path": "src/framework/boundary.js",
+        "sha256": "21dc9d5762cdf06ebf4700e059d70d19111cd81f7a7bbd18437877a78e448801"
+      },
+      {
+        "path": "src/framework/errors.js",
+        "sha256": "7b28d86f3050ba7f1bba2c0fa239ca334b60c470a9f05c4e7ebd90d79e5266cb"
+      },
+      {
+        "path": "src/research/research-document.js",
+        "sha256": "5186e3c6342b71f4f64dc48e400acf7208d641dbdb9d7a0aa79baf925d60f265"
+      },
+      {
+        "path": "src/research/source-adapter.js",
+        "sha256": "b02a4114d3d565e8ac2715d265497efde271ca12d7da42841ae30d35feb41e14"
+      },
+      {
+        "path": "src/research/source-error.js",
+        "sha256": "3860886c51993d3b744ddfc905930a156758ef5fad07639a4eab56bfae09e505"
+      },
+      {
+        "path": "src/research/source-registry.js",
+        "sha256": "da82baa6afa0999d2bb49993e1155c879a847a44043ade507827f059b7409963"
+      }
+    ]
+  },
+  "summary": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "allPassed": true
+  },
+  "cases": [
+    {
+      "id": "MGES-C01",
+      "property": "deny-by-default-construction",
+      "threat": "An execution gateway is created without an explicit policy boundary.",
+      "status": "pass",
+      "durationMs": 0.303,
+      "evidence": {
+        "constructorRejected": true,
+        "errorType": "TypeError"
+      }
+    },
+    {
+      "id": "MGES-C02",
+      "property": "policy-denial-blocks-dispatch",
+      "threat": "A registered tool is invoked even though policy denies it.",
+      "status": "pass",
+      "durationMs": 4.381,
+      "evidence": {
+        "rejectionCode": "POLICY_DENIED",
+        "handlerExecutions": 0
+      }
+    },
+    {
+      "id": "MGES-C03",
+      "property": "policy-evaluation-fails-closed",
+      "threat": "A policy backend exception falls through to tool execution.",
+      "status": "pass",
+      "durationMs": 0.45,
+      "evidence": {
+        "rejectionCode": "POLICY_EVALUATION_FAILED",
+        "handlerExecutions": 0
+      }
+    },
+    {
+      "id": "MGES-C04",
+      "property": "accessor-input-rejected-without-execution",
+      "threat": "Input accessors execute while authorization data is being canonicalized.",
+      "status": "pass",
+      "durationMs": 0.396,
+      "evidence": {
+        "rejectionCode": "APPROVAL_INPUT_INVALID",
+        "getterExecutions": 0,
+        "policyExecutions": 0,
+        "handlerExecutions": 0
+      }
+    },
+    {
+      "id": "MGES-C05",
+      "property": "approval-bound-to-run-tool-and-canonical-input",
+      "threat": "An approval for one exact call authorizes a changed run, tool, or payload.",
+      "status": "pass",
+      "durationMs": 6.032,
+      "evidence": {
+        "changedRunCode": "APPROVAL_SCOPE_MISMATCH",
+        "changedInputCode": "APPROVAL_SCOPE_MISMATCH",
+        "changedToolCode": "APPROVAL_SCOPE_MISMATCH",
+        "exactCallExecutions": 1,
+        "approvalConsumptions": 1,
+        "boundInputHash": "c095e1aa2977fe2d81390bd49b20912907849f8af6483f4fa3912030f21d5d30"
+      }
+    },
+    {
+      "id": "MGES-C06",
+      "property": "approval-single-use-by-default",
+      "threat": "A consumed approval can be replayed for a second execution.",
+      "status": "pass",
+      "durationMs": 2.807,
+      "evidence": {
+        "replayCode": "APPROVAL_INVALID",
+        "handlerExecutions": 1,
+        "approvalConsumptions": 1
+      }
+    },
+    {
+      "id": "MGES-C07",
+      "property": "per-run-call-limit-enforced",
+      "threat": "A caller raises a policy-owned call limit and executes again.",
+      "status": "pass",
+      "durationMs": 0.899,
+      "evidence": {
+        "rejectionCode": "TOOL_CALL_LIMIT_EXCEEDED",
+        "handlerExecutions": 1,
+        "effectiveLimit": 1
+      }
+    },
+    {
+      "id": "MGES-C08",
+      "property": "handler-input-is-detached-and-immutable",
+      "threat": "The handler receives a mutable caller-owned object that can change after authorization.",
+      "status": "pass",
+      "durationMs": 0.622,
+      "evidence": {
+        "detached": true,
+        "rootFrozen": true,
+        "nestedFrozen": true,
+        "nullPrototype": true,
+        "mutationRejected": true,
+        "value": "safe"
+      }
+    },
+    {
+      "id": "MGES-C09",
+      "property": "cross-run-evidence-does-not-support-a-claim",
+      "threat": "Evidence from another run is treated as support for a claim.",
+      "status": "pass",
+      "durationMs": 1.444,
+      "evidence": {
+        "evidenceId": "ev_1",
+        "mismatchedClaimId": "claim_1",
+        "supportedClaimId": "claim_2",
+        "unsupportedClaimIds": [
+          "claim_1"
+        ]
+      }
+    },
+    {
+      "id": "MGES-C10",
+      "property": "multi-approval-consumption-is-atomic",
+      "threat": "A failed multi-approval call partially consumes the still-valid approval.",
+      "status": "pass",
+      "durationMs": 4.825,
+      "evidence": {
+        "rejectionCode": "APPROVAL_INVALID",
+        "firstApprovalConsumptions": 0,
+        "secondApprovalConsumptions": 1,
+        "handlerExecutions": 0
+      }
+    },
+    {
+      "id": "MGES-C11",
+      "property": "gateway-evidence-attribution-is-run-task-and-tool-scoped",
+      "threat": "A handler forges the run, task, or tool attribution on evidence it records.",
+      "status": "pass",
+      "durationMs": 0.896,
+      "evidence": {
+        "attemptedAttribution": {
+          "runId": "forged_run",
+          "taskId": "forged_task",
+          "tool": "forged_tool"
+        },
+        "recordedAttribution": {
+          "runId": "real_run",
+          "taskId": "real_task",
+          "tool": "reader"
+        }
+      }
+    },
+    {
+      "id": "MGES-C12",
+      "property": "denial-trace-is-redacted-and-coded",
+      "threat": "A denied call omits an audit trace or writes caller secrets into it.",
+      "status": "pass",
+      "durationMs": 0.5,
+      "evidence": {
+        "rejectionCode": "POLICY_DENIED",
+        "traceStatus": "denied",
+        "traceErrorCode": "POLICY_DENIED",
+        "redactedToken": "[REDACTED]",
+        "handlerExecutions": 0
+      }
+    },
+    {
+      "id": "MGES-C13",
+      "property": "source-policy-denial-stops-all-backends",
+      "threat": "A denied research source silently falls through to a second backend.",
+      "status": "pass",
+      "durationMs": 2.33,
+      "evidence": {
+        "rejectionCode": "POLICY_DENIED",
+        "primaryExecutions": 0,
+        "fallbackExecutions": 0
+      }
+    },
+    {
+      "id": "MGES-C14",
+      "property": "source-unavailability-falls-back-and-normalizes",
+      "threat": "An ordinary backend outage prevents an ordered source fallback or returns an unbound record.",
+      "status": "pass",
+      "durationMs": 2.161,
+      "evidence": {
+        "selectedAdapter": "conformance.ready",
+        "attempts": [
+          "unavailable",
+          "completed"
+        ],
+        "primaryExecutions": 1,
+        "fallbackExecutions": 1,
+        "documentSource": {
+          "adapterId": "conformance.ready",
+          "channel": "web"
+        }
+      }
+    }
+  ],
+  "interpretation": "Passing confirms only these deterministic fixtures on this source fingerprint. It is not a penetration test, formal proof, compliance assessment, security certification, or universal security score."
+}

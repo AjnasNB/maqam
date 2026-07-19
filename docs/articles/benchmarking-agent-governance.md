@@ -105,27 +105,29 @@ It is not a concurrency or capacity measurement.
 
 MGES also pairs the direct and governed estimates from each round and reports the median absolute addition. It intentionally does not promote the governed/direct ratio. When the baseline intentionally does almost no work, a ratio can be numerically large while conveying little useful engineering information.
 
-## The current MGES v1.1 clean-main release evidence
+## The final 0.3.1 candidate and previous public 0.3.0 evidence
 
-The current release artifact is [`2026-07-18-mges-performance-windows-node24-main-545fe8bb.json`](../../benchmarks/results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json), measured from the exact clean post-squash `main` commit.
+The final 0.3.1 pre-publication candidate artifact is [`2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json`](../../benchmarks/results/2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json), measured from exact clean `main` commit `a96413c4da5f27dc31b9772996e70faab0b38382`.
 
 | Field | Result |
 |---|---:|
-| Runtime and host | Node 24.15.0, Windows x64, AMD Ryzen 7 4800H |
+| Runtime and host | Node 24.18.0, GitHub-hosted Ubuntu 24.04 x64, AMD EPYC 7763 |
 | Observations | 30 fresh processes per variant |
-| Governed median | **140.816 microseconds/call** |
-| 95% bootstrap interval for the sample median | **138.983-142.820 microseconds/call** |
-| Sequential rate at the median | **7,101.477 calls/second** |
-| Paired added median | **140.739 microseconds/call** |
-| Governed coefficient of variation | **5.020%** |
-| Direct coefficient of variation (diagnostic) | **9.888%** |
+| Governed median | **129.849 microseconds/call** |
+| 95% bootstrap interval for the sample median | **129.539-130.648 microseconds/call** |
+| Sequential rate at the median | **7,701.249 calls/second** |
+| Paired added median | **129.795 microseconds/call** |
+| Governed coefficient of variation | **1.111%** |
+| Direct coefficient of variation (diagnostic) | **2.129%** |
 | Project publication checks | **PASS (4/4 required; optional direct diagnostic also passed)** |
 
 MGES v1.1 criteria version 2 requires 30 observations, governed coefficient of variation no greater than 10%, and median timed batches of at least 100 ms for both variants. Direct-path CV remains a reported diagnostic because the near-zero baseline is dominated by cross-process CPU-frequency noise; no direct observation is removed. These are stability gates chosen for this suite, not an industry acceptance rule.
 
 Earlier review runs showed why raw stability gates matter: uncontrolled background load can move cross-process CV above the declared ceiling even when the fixture is unchanged. No observations were deleted. Criteria version 2 keeps the product-path 10% ceiling, both minimum batch-duration gates, and all raw direct diagnostics while no longer treating the near-zero direct baseline as a product stability gate.
 
-The passing release artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It records clean post-squash source commit `545fe8bbc40f21cec0f9ec2ae3954f3e75783f22` and `workingTreeDirty: false`. This evidence-only PR does not alter fingerprinted source. Any later change to a fingerprinted source requires another run.
+The passing candidate artifact identifies the benchmark and implementation files with individual and combined SHA-256 fingerprints. It records exact clean measured-source commit `a96413c4da5f27dc31b9772996e70faab0b38382` and `workingTreeDirty: false`. This evidence-only PR does not alter fingerprinted source, but it changes package bytes and therefore needs a new post-merge tarball manifest. Any later change to a fingerprinted source requires another MGES run.
+
+The previous public 0.3.0 [performance](../../benchmarks/results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json) and [conformance](../../benchmarks/results/2026-07-18-mges-conformance-windows-node24-main-545fe8bb.json) artifacts remain authoritative for 0.3.0: Node 24.15.0 on Windows x64, `140.816 microseconds/call` median, `138.983-142.820` interval, `5.020%` governed CV, and `14/14` fixtures at commit `545fe8bbc40f21cec0f9ec2ae3954f3e75783f22`.
 
 ## Conformance is not another latency metric
 
@@ -146,7 +148,7 @@ The MGES governance-boundary profile executes 14 deterministic cases:
 - fatal source-policy denial with zero backend dispatch; and
 - ordered fallback after ordinary source unavailability with normalized provenance.
 
-The current machine-readable release artifact, [`2026-07-18-mges-conformance-windows-node24-main-545fe8bb.json`](../../benchmarks/results/2026-07-18-mges-conformance-windows-node24-main-545fe8bb.json), records 14/14 passing fixtures.
+The final candidate machine-readable artifact, [`2026-07-19-mges-conformance-ubuntu24-node24-main-a96413c4.json`](../../benchmarks/results/2026-07-19-mges-conformance-ubuntu24-node24-main-a96413c4.json), records 14/14 passing fixtures. These cases do not exercise the governed-browser adapter; that boundary has separate tests.
 
 The suite does not collapse those cases into a percentage security score. Equal weighting would imply that the cases have equal risk and coverage, which has not been established. Case durations are diagnostic only.
 
@@ -156,7 +158,7 @@ The [OWASP Top 10 for Agentic Applications 2026](https://genai.owasp.org/resourc
 
 The MGES cases provide narrow evidence relevant to ASI02, Tool Misuse & Exploitation: Maqam denies unregistered or disallowed calls at its registered boundary, scopes approval to an exact call, enforces a call limit, and consumes approvals atomically. They do not test prompt injection, poisoned tool definitions, provider-internal tool paths, operating-system containment or network isolation.
 
-Approval scope and one-use consumption are also relevant to accidental authority reuse under ASI03, Identity & Privilege Abuse. But Maqam v0.2.x accepts reviewer identity as host-supplied data. Authentication, IAM, credentials, delegation and non-repudiation remain responsibilities of the host deployment.
+Approval scope and one-use consumption are also relevant to accidental authority reuse under ASI03, Identity & Privilege Abuse. Maqam accepts reviewer identity as host-supplied data. Authentication, IAM, credentials, delegation and non-repudiation remain responsibilities of the host deployment.
 
 An approval gate creates a review point relevant to ASI09, Human-Agent Trust Exploitation. MGES does not evaluate whether a review interface communicates risk, whether the reviewer is fatigued or socially engineered, or whether the host authenticated that reviewer.
 
@@ -214,7 +216,7 @@ Artifacts could be signed and indexed by suite version, source fingerprint, clea
 
 A defensible compact statement is:
 
-> MGES v1.1.0 local-call release profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 140.816 microseconds median per governed call (95% bootstrap interval for the sample median: 138.983-142.820; 30 fresh-process observations; governed CV 5.020%; required checks PASS). Measured from clean post-squash main commit `545fe8bbc40f21cec0f9ec2ae3954f3e75783f22`. Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA.
+> 0.3.1 pre-publication candidate evidence — MGES v1.1.0 local-call profile on Node 24.18.0 / Ubuntu 24.04 x64 / AMD EPYC 7763: 129.849 microseconds median per governed call (95% bootstrap interval for the sample median: 129.539-130.648; 30 fresh-process observations; governed CV 1.111%; required checks PASS). Measured from exact clean main commit `a96413c4da5f27dc31b9772996e70faab0b38382`. Local in-process component benchmark; excludes model, network, storage, browser and concurrency; not a competitor benchmark, release announcement or SLA.
 
 For conformance:
 
