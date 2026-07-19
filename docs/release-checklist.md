@@ -48,6 +48,7 @@ Expected result:
 - Governed-source allow/deny, fatal-no-fallback, availability-fallback, authenticated opt-in, doctor, normalized-document, RSS/Atom, feed-crawl, and crawler-CLI fixtures pass on Node.js 22, 24, and 26.
 - MGES is rerun after the guarded-tool and governed-browser implementation lands on clean `main`. The earlier metadata-only 0.3.1 candidate, public 0.3.0, and historical 0.2.4 results remain labeled for their own fingerprints.
 - Because this repository squash-merges pull requests, implementation and final benchmark evidence use two PR phases. Merge implementation, measure the resulting clean main commit, then merge an evidence/docs/test-only PR without changing fingerprinted source. The measured commit must remain an ancestor of the final release commit.
+- When a local machine is too noisy for the predeclared performance variance gate, dispatch `.github/workflows/mges-evidence.yml` from exact `main`. The job runs on a clean Ubuntu 24.04 checkout with Node 24.18.0, retains raw REVIEW attempts, emits a SHA-256 manifest, and succeeds only when conformance and every required publication criterion pass.
 
 ## Manual Review
 

@@ -1,0 +1,136 @@
+name: MGES evidence
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: mges-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  evidence:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact main commit
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup release Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Install exact dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Verify exact clean checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -z "$(git status --porcelain)"
+
+      - name: Generate raw MGES evidence
+        id: generate
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence_dir="${RUNNER_TEMP}/maqam-mges"
+          measured_date="$(date -u +%F)"
+          short_commit="${GITHUB_SHA:0:8}"
+          conformance="${evidence_dir}/${measured_date}-mges-conformance-ubuntu24-node24-main-${short_commit}.json"
+          performance="${evidence_dir}/${measured_date}-mges-performance-ubuntu24-node24-main-${short_commit}.json"
+          mkdir -p "${evidence_dir}"
+          {
+            echo "evidence_dir=${evidence_dir}"
+            echo "conformance=${conformance}"
+            echo "performance=${performance}"
+          } >> "${GITHUB_OUTPUT}"
+          node benchmarks/governance-conformance.mjs --output "${conformance}"
+          node benchmarks/governance-suite.mjs --output "${performance}"
+
+      - name: Classify and manifest exact evidence
+        id: classify
+        continue-on-error: true
+        env:
+          CONFORMANCE: ${{ steps.generate.outputs.conformance }}
+          PERFORMANCE: ${{ steps.generate.outputs.performance }}
+        shell: bash
+        run: |
+          node --input-type=module - "${CONFORMANCE}" "${PERFORMANCE}" "${GITHUB_SHA}" "${GITHUB_STEP_SUMMARY}" "${GITHUB_OUTPUT}" <<'NODE'
+          import { createHash } from "node:crypto";
+          import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
+          import { basename, dirname, join } from "node:path";
+
+          const [conformancePath, performancePath, expectedCommit, summaryPath, outputPath] = process.argv.slice(2);
+          const readResult = (path) => JSON.parse(readFileSync(path, "utf8"));
+          const digest = (path) => createHash("sha256").update(readFileSync(path)).digest("hex");
+          const conformance = readResult(conformancePath);
+          const performance = readResult(performancePath);
+
+          for (const result of [conformance, performance]) {
+            if (result.repository?.commit !== expectedCommit || result.repository?.workingTreeDirty !== false) {
+              throw new Error("MGES result is not bound to the exact clean workflow commit.");
+            }
+          }
+          if (conformance.summary?.allPassed !== true) {
+            throw new Error("MGES conformance did not pass every named fixture.");
+          }
+
+          const publicationCandidate = performance.quality?.publicationCandidate === true;
+          const manifest = {
+            schema: "maqam.mges.evidence-manifest/v1",
+            gitCommit: expectedCommit,
+            cleanCheckout: true,
+            conformance: {
+              filename: basename(conformancePath),
+              sha256: digest(conformancePath),
+              passed: conformance.summary.passed,
+              total: conformance.summary.total,
+              allPassed: true
+            },
+            performance: {
+              filename: basename(performancePath),
+              sha256: digest(performancePath),
+              publicationCandidate,
+              governedMedianMicroseconds: performance.results?.governed?.medianMicrosecondsPerOperation,
+              governedCoefficientOfVariation: performance.results?.governed?.coefficientOfVariation
+            },
+            runtime: process.version,
+            runner: `${process.platform}-${process.arch}`
+          };
+          writeFileSync(join(dirname(performancePath), "release-evidence-manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+          appendFileSync(summaryPath, [
+            "## MGES exact-clean-main evidence",
+            "",
+            `- Commit: \`${expectedCommit}\``,
+            `- Conformance: ${manifest.conformance.passed}/${manifest.conformance.total} passed`,
+            `- Governed median: ${manifest.performance.governedMedianMicroseconds} microseconds/call`,
+            `- Governed CV: ${(manifest.performance.governedCoefficientOfVariation * 100).toFixed(3)}%`,
+            `- Publication criteria: ${publicationCandidate ? "PASS" : "REVIEW"}`,
+            "- Scope: local component regression evidence, not a security certification, competitor benchmark, or SLA.",
+            ""
+          ].join("\n"));
+          appendFileSync(outputPath, `publication_candidate=${publicationCandidate}\n`);
+          NODE
+
+      - name: Upload raw evidence and manifest
+        if: always() && steps.generate.outputs.evidence_dir != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: maqam-mges-${{ github.sha }}
+          path: ${{ steps.generate.outputs.evidence_dir }}
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Enforce publication criteria
+        if: always()
+        shell: bash
+        run: |
+          test "${{ steps.classify.outcome }}" = "success"
+          test "${{ steps.classify.outputs.publication_candidate }}" = "true"
