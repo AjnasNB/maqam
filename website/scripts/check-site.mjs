@@ -201,26 +201,38 @@ for (const file of htmlFiles) {
   }
 
   if (label === path.join("docs", "productloop", "index.html")) {
-    requireMatch(/productloop-os@0\.2\.1/, "ProductLoop install command must pin productloop-os@0.2.1");
+    requireMatch(/productloop-os@0\.2\.2/, "ProductLoop install command must pin productloop-os@0.2.2");
+    requireMatch(/productloop-os\/releases\/tag\/v0\.2\.2/, "ProductLoop atlas must link the v0.2.2 source release");
+    requireMatch(/npmjs\.com\/package\/maqam\/v\/0\.3\.1/, "ProductLoop atlas must link the current Maqam npm release");
     requireMatch(/records release versions, not a permanent live-registry guarantee/i, "ProductLoop atlas must avoid a blanket npm publication claim");
     for (const [packageName, version] of [
-      ["productloop-os", "0.2.1"],
-      ["ajnas-runtime", "0.2.1"],
-      ["ajnas-skills-registry", "0.2.1"],
-      ["ajnas-provenance", "0.1.3"],
-      ["ajnas-policy", "0.1.2"],
-      ["ajnas-evals", "0.1.2"],
-      ["ajnas-connectors", "0.1.2"],
-      ["ajnas-approvals", "0.1.2"],
-      ["ajnas-browser-research", "0.1.3"]
+      ["productloop-os", "0.2.2"],
+      ["ajnas-runtime", "0.2.2"],
+      ["ajnas-skills-registry", "0.2.2"],
+      ["ajnas-provenance", "0.1.4"],
+      ["ajnas-policy", "0.1.3"],
+      ["ajnas-evals", "0.1.3"],
+      ["ajnas-connectors", "0.1.3"],
+      ["ajnas-approvals", "0.1.3"],
+      ["ajnas-browser-research", "0.1.4"]
     ]) {
       requireMatch(
         new RegExp(`<code>${packageName}<\\/code>[\\s\\S]{0,120}<td>${version}<\\/td>`),
         `${packageName} must show public version ${version}`
       );
     }
-    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.0<\/td>/, "ProductLoop atlas must show public Maqam 0.3.0");
+    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.1<\/td>/, "ProductLoop atlas must show public Maqam 0.3.1");
     requireMatch(/historical 0\.2\.4 proof video/i, "ProductLoop atlas must label its 0.2.4 video as historical");
+  }
+
+  if (label === path.join("docs", "integrations", "index.html")) {
+    requireMatch(/productloop-os@0\.2\.2/, "integration guide must name the current ProductLoop umbrella");
+    requireMatch(/productloop-os\/releases\/tag\/v0\.2\.2/, "integration guide must link the v0.2.2 source release");
+  }
+
+  if (label === path.join("roadmap", "index.html")) {
+    requireMatch(/ProductLoop OS 0\.2\.2 public/i, "roadmap must name the current ProductLoop release");
+    requireMatch(/productloop-os\/releases\/tag\/v0\.2\.2/, "roadmap must link the v0.2.2 source release");
   }
 
   if (label === path.join("articles", "exact-agent-approvals", "index.html")) {

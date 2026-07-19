@@ -62,14 +62,14 @@
       </section>
 
       <h2 id="install">Install the umbrella</h2>
-      <div class="code-shell"><button class="copy-button" type="button" data-copy="#productloop-install">Copy</button><pre><code id="productloop-install">npm install productloop-os@0.2.1
-npx productloop-os@0.2.1 doctor
-npx productloop-os@0.2.1 demo</code></pre></div>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#productloop-install">Copy</button><pre><code id="productloop-install">npm install productloop-os@0.2.2
+npx productloop-os@0.2.2 doctor
+npx productloop-os@0.2.2 demo</code></pre></div>
       <p><code>doctor</code> checks Node.js and packaged imports. It does not probe credentials, live browsers, model providers, networks, or external connector services.</p>
 
       <div class="callout">
         <strong>Verify every registry artifact</strong>
-        The table records release versions, not a permanent live-registry guarantee. Verify each npm version, provenance, integrity, and matching source release before installation. The <a href="https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.1">ProductLoop OS v0.2.1 GitHub release</a> is the source-side record for its exact artifacts. Maqam 0.3.1 is independently public with its own matching npm and GitHub release records.
+        The table records release versions, not a permanent live-registry guarantee. Verify each npm version, provenance, integrity, and matching source release before installation. The <a href="https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.2">ProductLoop OS v0.2.2 GitHub release</a> is the source-side record for its exact artifacts. Maqam 0.3.1 is independently public with its own matching npm and GitHub release records.
       </div>
 
       <div class="table-wrap" tabindex="0" role="region" aria-label="Recorded ProductLoop package versions and responsibilities">
@@ -77,23 +77,23 @@ npx productloop-os@0.2.1 demo</code></pre></div>
           <caption class="sr-only">Recorded ProductLoop package versions, npm verification links, responsibilities, and boundaries</caption>
           <thead><tr><th scope="col">Package / namespace</th><th scope="col">Version / status</th><th scope="col">Verify on npm</th><th scope="col">Primary job</th><th scope="col">Important boundary</th></tr></thead>
           <tbody>
-            <tr><th scope="row"><code>productloop-os</code></th><td>0.2.1</td><td><a href="https://www.npmjs.com/package/productloop-os">npm</a></td><td>Umbrella composition and named namespaces</td><td>Not a hosted control plane</td></tr>
-            <tr><th scope="row"><code>maqam</code></th><td>0.3.0</td><td><a href="https://www.npmjs.com/package/maqam/v/0.3.0">npm</a></td><td>Exact approvals, evidence, worker adapters, governed source routing, RSS or Atom parsing, and bounded HTTP crawling</td><td>Only calls routed through a configured gateway or ToolCaller are governed</td></tr>
-            <tr><th scope="row"><code>ajnas-runtime</code> / <code>runtime</code></th><td>0.2.1</td><td><a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></td><td>Ordered policy-gated tool execution</td><td>Fail-closed without an explicit policy</td></tr>
-            <tr><th scope="row"><code>ajnas-policy</code> / <code>policy</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-policy">npm</a></td><td>Declarative decisions and audit receipts</td><td>Does not execute tools</td></tr>
-            <tr><th scope="row"><code>ajnas-approvals</code> / <code>approvals</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></td><td>Human review state machine</td><td>Transport and identity remain host concerns</td></tr>
-            <tr><th scope="row"><code>ajnas-provenance</code> / <code>provenance</code></th><td>0.1.3</td><td><a href="https://www.npmjs.com/package/ajnas-provenance">npm</a></td><td>Hash-linked traces and signed bundles</td><td>Tamper evidence is not tamper prevention</td></tr>
-            <tr><th scope="row"><code>ajnas-skills-registry</code> / <code>skills</code></th><td>0.2.1</td><td><a href="https://www.npmjs.com/package/ajnas-skills-registry">npm</a></td><td>Signed skill manifests and install policy</td><td>Does not sandbox skill code</td></tr>
-            <tr><th scope="row"><code>ajnas-connectors</code> / <code>connectors</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-connectors">npm</a></td><td>Connector manifests and trust evaluation</td><td>Does not call external services</td></tr>
-            <tr><th scope="row"><code>ajnas-evals</code> / <code>evals</code></th><td>0.1.2</td><td><a href="https://www.npmjs.com/package/ajnas-evals">npm</a></td><td>Deterministic assertions over artifacts</td><td>Adapters supply the real executions</td></tr>
-            <tr><th scope="row"><code>ajnas-browser-research</code> / <code>browserResearch</code></th><td>0.1.3</td><td><a href="https://www.npmjs.com/package/ajnas-browser-research">npm</a></td><td>Governed plans, replay, citations, evidence</td><td>Not a browser engine</td></tr>
+            <tr><th scope="row"><code>productloop-os</code></th><td>0.2.2</td><td><a href="https://www.npmjs.com/package/productloop-os">npm</a></td><td>Umbrella composition and named namespaces</td><td>Not a hosted control plane</td></tr>
+            <tr><th scope="row"><code>maqam</code></th><td>0.3.1</td><td><a href="https://www.npmjs.com/package/maqam/v/0.3.1">npm</a></td><td>Exact approvals, evidence, worker adapters, governed source routing, RSS or Atom parsing, bounded HTTP crawling, and guarded structural browser actions</td><td>Only calls routed through a configured gateway or ToolCaller are governed</td></tr>
+            <tr><th scope="row"><code>ajnas-runtime</code> / <code>runtime</code></th><td>0.2.2</td><td><a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></td><td>Ordered policy-gated tool execution</td><td>Fail-closed without an explicit policy</td></tr>
+            <tr><th scope="row"><code>ajnas-policy</code> / <code>policy</code></th><td>0.1.3</td><td><a href="https://www.npmjs.com/package/ajnas-policy">npm</a></td><td>Declarative decisions and audit receipts</td><td>Does not execute tools</td></tr>
+            <tr><th scope="row"><code>ajnas-approvals</code> / <code>approvals</code></th><td>0.1.3</td><td><a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></td><td>Human review state machine</td><td>Transport and identity remain host concerns</td></tr>
+            <tr><th scope="row"><code>ajnas-provenance</code> / <code>provenance</code></th><td>0.1.4</td><td><a href="https://www.npmjs.com/package/ajnas-provenance">npm</a></td><td>Hash-linked traces and signed bundles</td><td>Tamper evidence is not tamper prevention</td></tr>
+            <tr><th scope="row"><code>ajnas-skills-registry</code> / <code>skills</code></th><td>0.2.2</td><td><a href="https://www.npmjs.com/package/ajnas-skills-registry">npm</a></td><td>Signed skill manifests and install policy</td><td>Does not sandbox skill code</td></tr>
+            <tr><th scope="row"><code>ajnas-connectors</code> / <code>connectors</code></th><td>0.1.3</td><td><a href="https://www.npmjs.com/package/ajnas-connectors">npm</a></td><td>Connector manifests and trust evaluation</td><td>Does not call external services</td></tr>
+            <tr><th scope="row"><code>ajnas-evals</code> / <code>evals</code></th><td>0.1.3</td><td><a href="https://www.npmjs.com/package/ajnas-evals">npm</a></td><td>Deterministic assertions over artifacts</td><td>Adapters supply the real executions</td></tr>
+            <tr><th scope="row"><code>ajnas-browser-research</code> / <code>browserResearch</code></th><td>0.1.4</td><td><a href="https://www.npmjs.com/package/ajnas-browser-research">npm</a></td><td>Governed plans, replay, citations, evidence</td><td>Not a browser engine</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="package-atlas">
         <section class="package-entry" id="umbrella">
-          <header><h2>productloop-os</h2><span class="package-version">public 0.2.1 · <a href="https://www.npmjs.com/package/productloop-os">npm</a></span></header>
+          <header><h2>productloop-os</h2><span class="package-version">public 0.2.2 · <a href="https://www.npmjs.com/package/productloop-os">npm</a></span></header>
           <div class="package-body">
             <p>Creates a deny-by-default composition with named namespaces, separate ledgers and registries, tested schema adapters, and a dependency doctor.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#umbrella-code">Copy</button><pre><code id="umbrella-code">import { createProductLoopOS } from "productloop-os";
@@ -159,7 +159,7 @@ console.log(await gateway.call(
         </section>
 
         <section class="package-entry" id="runtime">
-          <header><h2>ajnas-runtime</h2><span class="package-version">public 0.2.1 · <a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></span></header>
+          <header><h2>ajnas-runtime</h2><span class="package-version">public 0.2.2 · <a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></span></header>
           <div class="package-body">
             <p>Runs ordered workflow steps, evaluates every registered tool call, emits hash-linked provenance receipts, and optionally writes file-backed snapshots.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#runtime-code">Copy</button><pre><code id="runtime-code">import {
@@ -196,7 +196,7 @@ console.log(await runtime.run({
         </section>
 
         <section class="package-entry" id="policy">
-          <header><h2>ajnas-policy</h2><span class="package-version">public 0.1.2 · <a href="https://www.npmjs.com/package/ajnas-policy">npm</a></span></header>
+          <header><h2>ajnas-policy</h2><span class="package-version">public 0.1.3 · <a href="https://www.npmjs.com/package/ajnas-policy">npm</a></span></header>
           <div class="package-body">
             <p>Evaluates versioned bundles into <code>allow</code>, <code>deny</code>, or <code>require_approval</code> decisions and records replayable audit receipts.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#policy-code">Copy</button><pre><code id="policy-code">import {
@@ -233,7 +233,7 @@ console.log(decision, audit.verify());</code></pre></div>
         </section>
 
         <section class="package-entry" id="approvals">
-          <header><h2>ajnas-approvals</h2><span class="package-version">public 0.1.2 · <a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></span></header>
+          <header><h2>ajnas-approvals</h2><span class="package-version">public 0.1.3 · <a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></span></header>
           <div class="package-body">
             <p>Models staged review, quorum, delegation, expiry, escalation, decisions, and hash-linked audit history without choosing a notification transport.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#approvals-code">Copy</button><pre><code id="approvals-code">import {
@@ -274,7 +274,7 @@ console.log(ticket.status);</code></pre></div>
         </section>
 
         <section class="package-entry" id="provenance">
-          <header><h2>ajnas-provenance</h2><span class="package-version">public 0.1.3 · <a href="https://www.npmjs.com/package/ajnas-provenance">npm</a></span></header>
+          <header><h2>ajnas-provenance</h2><span class="package-version">public 0.1.4 · <a href="https://www.npmjs.com/package/ajnas-provenance">npm</a></span></header>
           <div class="package-body">
             <p>Records append-only events with SHA-256 receipt chains, redacts common secret fields, and creates verifiable or signed trace bundles.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#provenance-code">Copy</button><pre><code id="provenance-code">import {
@@ -303,7 +303,7 @@ console.log(verifyTraceBundle(bundle));</code></pre></div>
         </section>
 
         <section class="package-entry" id="skills">
-          <header><h2>ajnas-skills-registry</h2><span class="package-version">public 0.2.1 · <a href="https://www.npmjs.com/package/ajnas-skills-registry">npm</a></span></header>
+          <header><h2>ajnas-skills-registry</h2><span class="package-version">public 0.2.2 · <a href="https://www.npmjs.com/package/ajnas-skills-registry">npm</a></span></header>
           <div class="package-body">
             <p>Validates and registers signed skill manifests with capability, permission, publisher, compatibility, and license metadata.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#skills-code">Copy</button><pre><code id="skills-code">import { generateKeyPairSync } from "node:crypto";
@@ -359,7 +359,7 @@ registry.register(signed, { actor: "owner", source: "local-review" });</code></p
         </section>
 
         <section class="package-entry" id="connectors">
-          <header><h2>ajnas-connectors</h2><span class="package-version">public 0.1.2 · <a href="https://www.npmjs.com/package/ajnas-connectors">npm</a></span></header>
+          <header><h2>ajnas-connectors</h2><span class="package-version">public 0.1.3 · <a href="https://www.npmjs.com/package/ajnas-connectors">npm</a></span></header>
           <div class="package-body">
             <p>Validates connector manifests and turns declared permissions, operations, data classes, publisher metadata, and review state into trust decisions.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#connectors-code">Copy</button><pre><code id="connectors-code">import {
@@ -385,7 +385,7 @@ console.log(trust.decision, audit.verify());</code></pre></div>
         </section>
 
         <section class="package-entry" id="evals">
-          <header><h2>ajnas-evals</h2><span class="package-version">public 0.1.2 · <a href="https://www.npmjs.com/package/ajnas-evals">npm</a></span></header>
+          <header><h2>ajnas-evals</h2><span class="package-version">public 0.1.3 · <a href="https://www.npmjs.com/package/ajnas-evals">npm</a></span></header>
           <div class="package-body">
             <p>Evaluates normalized run artifacts against explicit status, JSON, event, policy, approval, provenance, connector, and browser-step assertions.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#evals-code">Copy</button><pre><code id="evals-code">import {
@@ -412,7 +412,7 @@ console.log(verifyEvalReport(report));</code></pre></div>
         </section>
 
         <section class="package-entry" id="browser">
-          <header><h2>ajnas-browser-research</h2><span class="package-version">public 0.1.3 · <a href="https://www.npmjs.com/package/ajnas-browser-research">npm</a></span></header>
+          <header><h2>ajnas-browser-research</h2><span class="package-version">public 0.1.4 · <a href="https://www.npmjs.com/package/ajnas-browser-research">npm</a></span></header>
           <div class="package-body">
             <p>Runs declarative research plans around replaceable browser, search, crawl, and note adapters with policy decisions, citations, replay, and provenance.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#browser-code">Copy</button><pre><code id="browser-code">import {
