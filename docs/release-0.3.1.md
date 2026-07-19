@@ -1,24 +1,26 @@
 # Maqam 0.3.1 Release Record
 
-**Lifecycle:** registry-defined. Maqam 0.3.1 is public only when the live npm record, provenance, integrity, registry `gitHead`, matching `v0.3.1` tag, and GitHub release identify the same reviewed artifact. Package metadata, a local tarball, a branch, or this document alone is not publication proof. At candidate preparation time, 0.3.0 was the previous verified public release.
+**Lifecycle:** unpublished source candidate. Maqam 0.3.1 becomes public only when the live npm record, provenance, integrity, registry `gitHead`, matching `v0.3.1` tag, and GitHub release identify the same reviewed artifact. Package metadata, a branch, a local tarball, benchmark JSON, or this document alone is not publication proof. Maqam 0.3.0 remains the previous verified public release at this snapshot.
 
 ## Purpose
 
-The npm README packed into 0.3.0 is immutable and retained pre-publication wording after the release completed. Version 0.3.1 prepares a truthful replacement while keeping live-state claims conditional on the npm registry, provenance, integrity, Git tag, and GitHub release.
+Version 0.3.1 prepares a guarded execution-verification API and a structural governed-browser boundary while correcting documentation that remained stale after 0.3.0 publication. It does not bundle a browser engine, model, browser profile, login flow, credential store, or third-party agent runtime.
 
-## Release Scope
+## Candidate Scope
 
-- synchronize the packaged README, current documentation, and website with the verified public 0.3.0 release;
-- label all reused 0.2.4 proof media and benchmark artifacts as historical 0.2.4 evidence;
-- add evergreen checks for the current npm dist-tag and latest GitHub release;
-- update package, lockfile, release-gate, trusted-publishing, and MCP client metadata to 0.3.1; and
-- add regression assertions that reject a return to stale 0.3.0 candidate wording.
+- expose `ToolGateway.registerGuardedTool()` with an unforgeable live-dispatch verifier for public guarded handlers while keeping Maqam's internal pre-approval validator private;
+- add `registerGovernedBrowserTools()` for bounded observe, preview, apply, and submit operations around a host-owned driver;
+- bind write plans to the issuing adapter instance and run with an opaque preview token, exact phase approval, exact target revision, exact request origins, one dispatch, and post-action observation;
+- keep raw values, selectors, scripts, cookies, credentials, external protocols, downloads, filesystem reads or writes, file-picker actions, clipboard reads or writes, permission prompts, print dialogs, and modal dialogs outside the modeled browser operation surface;
+- require the host driver to block prohibited effects before dispatch and return an explicit all-false effects attestation that Maqam validates after dispatch;
+- synchronize the packaged README, security guidance, release checklist, consumer types, website, package metadata, and release records; and
+- preserve prior release media and benchmark records under their original historical identities.
 
-This patch does not change Maqam's public API, policy decisions, approval semantics, evidence model, crawler behavior, source-routing behavior, dependencies, or documented security boundary.
+This candidate changes the public TypeScript and JavaScript API and the documented security boundary. It does not claim operating-system isolation, browser-driver trust, rollback, durable cross-instance plan tokens, unrestricted web access, or equivalent coverage to a general browser-agent product.
 
-## Required Candidate Verification
+## Required Final Verification
 
-Run from one clean committed source tree:
+Run from one clean committed source tree after all implementation and documentation changes are merged:
 
 ```bash
 npm ci
@@ -28,37 +30,36 @@ npm run benchmark:mges:performance -- --output /outside/worktree/maqam-0.3.1-mge
 npm pack --json --ignore-scripts --pack-destination /outside/worktree/artifacts
 ```
 
-Generate the MGES outputs and tarball outside the repository first. After a clean run, raw MGES JSON may be copied unchanged into a separate evidence-only commit that does not alter fingerprinted source; the tarball must remain outside the repository. Record the exact full source commit, tarball filename, positive byte size, independent SHA-256, npm SHA-512 integrity, packed-file list, and clean-tree state. The version and lockfile metadata changed, so the candidate must not reuse a prior version's benchmark identity or artifact approval.
+Generate MGES output and the tarball outside the repository. Record the exact full source commit, clean-tree state, Node and npm versions, operating system, tarball filename, positive byte size, independent SHA-256, npm SHA-512 integrity, and packed-file list. Compile a clean TypeScript consumer from that exact tarball and inspect its root exports. Raw MGES JSON may then be copied unchanged into a separate evidence-only commit that does not alter fingerprinted source; the tarball must remain outside the repository.
 
-## Candidate Evidence Snapshot
+Any source, test, documentation, package, lockfile, benchmark program, or fingerprint input change invalidates the final candidate identity and requires a new clean run. Do not update expected MGES source fingerprints merely to make a changed tree pass; generate them from the final reviewed clean commit through the documented evidence procedure.
 
-The implementation phase merged as exact clean `main` commit `513a7a0bf3711e26ca0e82b4ae1a1663553cc345`. The preparatory clean install was verified with npm `12.0.1`; MGES records Node `24.15.0`, Windows x64, and an AMD Ryzen 7 4800H. This evidence-only follow-up changes raw results, documentation, and tests, not the implementation, benchmark programs, or lockfile files recorded by the source fingerprints.
+## Current Evidence Status
 
-- [Performance candidate](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b.json): 30 fresh-process observations, `139.173 microseconds/call` governed median, `137.898-142.079` 95% bootstrap interval, `7.476%` governed coefficient of variation, and all four required project checks passed. SHA-256: `2a6b0238b7385629677a7952d2d5e4506b8f063be36ca538f5d965caec65715a`.
-- [Conformance candidate](../benchmarks/results/2026-07-19-mges-conformance-windows-node24-main-513a7a0b.json): `14/14` named deterministic fixtures passed. SHA-256: `3bd24204b519b82f3f52d40e609a33808e8667b4b1714a67464e4c5237a913df`.
+No final 0.3.1 artifact or MGES record exists for the guarded-tool and governed-browser source described above. Final commit, tarball hashes, npm integrity, packed-file list, and benchmark results are intentionally not invented in this document. They remain release gates.
 
-Three earlier clean-main performance runs remain in the repository as transparent `REVIEW` records. Their governed coefficients of variation exceeded the predeclared 10% stability gate; no observations, source files, or thresholds were removed or changed:
+The following files were produced for the earlier metadata-only candidate at commit `513a7a0bf3711e26ca0e82b4ae1a1663553cc345`. They are retained as transparent, superseded historical candidate evidence and must not be cited as proof of the current source or a public 0.3.1 release:
 
-| Run | Governed median | Governed CV | Status | SHA-256 |
-| --- | ---: | ---: | --- | --- |
-| [Review attempt 1](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt1.json) | 158.390 microseconds | 14.223% | `REVIEW` | `09c6e3d34581529bd57d3c9a837b8afdcee30c396f13ec84d1202156b6f5d843` |
-| [Review attempt 2](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt2.json) | 158.644 microseconds | 14.860% | `REVIEW` | `f8a0af8e0955cc5ddb62e18f33605d1711f2b42524cbb5b8ae2ca7f6389c2a31` |
-| [Review attempt 3](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt3.json) | 160.523 microseconds | 12.886% | `REVIEW` | `1ebafcc6c74bcc31cd40a545802aa06e6c3d7b07c997db1c704cecbc79660950` |
+- [Superseded performance candidate](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b.json), SHA-256 `2a6b0238b7385629677a7952d2d5e4506b8f063be36ca538f5d965caec65715a`.
+- [Superseded conformance candidate](../benchmarks/results/2026-07-19-mges-conformance-windows-node24-main-513a7a0b.json), SHA-256 `3bd24204b519b82f3f52d40e609a33808e8667b4b1714a67464e4c5237a913df`.
+- [Superseded review attempt 1](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt1.json), SHA-256 `09c6e3d34581529bd57d3c9a837b8afdcee30c396f13ec84d1202156b6f5d843`.
+- [Superseded review attempt 2](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt2.json), SHA-256 `f8a0af8e0955cc5ddb62e18f33605d1711f2b42524cbb5b8ae2ca7f6389c2a31`.
+- [Superseded review attempt 3](../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b-review-attempt3.json), SHA-256 `1ebafcc6c74bcc31cd40a545802aa06e6c3d7b07c997db1c704cecbc79660950`.
 
-The passing fourth run is the candidate, not proof of global performance. MGES is a local in-process regression profile; it excludes model, network, storage, human-review, and concurrency latency and is not a competitor benchmark, SLA, security score, compliance result, or certification. The public 0.3.0 evidence remains unchanged until 0.3.1 is actually published and independently verified.
+MGES is a local in-process regression profile. It excludes model, network, storage, browser, human-review, and concurrency latency and is not a competitor benchmark, SLA, security score, compliance result, or certification.
 
 ## Publication Boundary
 
 Before any publish action:
 
 - prove `maqam@0.3.1` is absent from npm;
-- use the successful clean-main CI candidate manifest as the Linux/npm-12 artifact identity;
-- obtain explicit maintainer approval for the exact 0.3.1 artifact and full commit;
+- complete final review and all clean-source checks, including the governed-browser tests, packed consumer compile, website check, audit, and MGES gates;
+- obtain explicit maintainer approval for the exact full commit and exact packed artifact identity;
 - publish only through the protected npm Trusted Publishing workflow; and
-- do not create `v0.3.1` or announce the release until npm version, `gitHead`, integrity, provenance, downloaded tarball SHA-256, signatures, and a clean install are verified.
+- do not create `v0.3.1` or announce the release until npm version, registry `gitHead`, integrity, provenance, downloaded tarball SHA-256, signatures, and a clean install are verified.
 
-Preparation of this candidate does not authorize publication, deployment, tagging, or a GitHub release.
+Preparation of this candidate does not authorize publication, deployment, tagging, a GitHub release, or an announcement.
 
 ## Historical Evidence
 
-The 0.3.0 npm artifact, `v0.3.0` release, integrity, source commit, and MGES records remain evidence for 0.3.0. The 0.2.4 media, transcripts, and benchmark records remain evidence for 0.2.4. Neither version's evidence may be silently relabeled as 0.3.1 evidence.
+The 0.3.0 npm artifact, `v0.3.0` release, integrity, source commit, and MGES records remain evidence for 0.3.0. The 0.2.4 media, transcripts, and benchmark records remain evidence for 0.2.4. The superseded 0.3.1 candidate records above remain evidence only for their exact earlier commit. None may be silently relabeled as final 0.3.1 evidence.

@@ -140,6 +140,16 @@ for (const file of htmlFiles) {
     requireMatch(/The modular toolbox around Maqam/i, "docs must define ProductLoop OS in plain English");
     requireMatch(/Calls that bypass the gateway remain outside Maqam's control/i, "docs must state the gateway bypass boundary");
     requireMatch(/ResearchSourceRegistry/, "docs must introduce governed research-source routing");
+    requireMatch(/href="\/docs\/browser\/"/, "docs must navigate to the governed browser guide");
+  }
+
+  if (label === path.join("docs", "browser", "index.html")) {
+    requireMatch(/Unpublished 0\.3\.1 source candidate/i, "browser guide must identify its unpublished lifecycle");
+    requireMatch(/registerGovernedBrowserTools/, "browser guide must show the registration API");
+    requireMatch(/only origins named by the exact request/i, "browser guide must state exact request origin narrowing");
+    requireMatch(/external protocols[\s\S]{0,300}modal dialogs/i, "browser guide must enumerate prohibited effects");
+    requireMatch(/attestation rather than rollback/i, "browser guide must state the post-dispatch effect boundary");
+    requireMatch(/does not discover profiles[\s\S]{0,200}distributed browser fleet/i, "browser guide must reject browser-engine and session overclaims");
   }
 
   if (label === path.join("docs", "sources", "index.html")) {

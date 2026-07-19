@@ -25,6 +25,28 @@ const CONTEXT_KEYS = new Set([
   "approvalEvidence", "evidence", "evidenceLedger", "approvals", "tools",
   "outputs", "trace"
 ]);
+const ACTIVE_BY_GATEWAY = new WeakMap();
+const INTERNAL_GUARDED_DEFINITIONS = new WeakSet();
+
+// Internal primitive for Maqam-owned adapters that need deterministic input
+// authenticity checks before an approval is created or consumed. It is not
+// exported from the package entry point and is not part of registerGuardedTool's
+// public factory contract.
+export function defineInternalGuardedTool(handler, validateInput) {
+  if (typeof handler !== "function" || typeof validateInput !== "function") {
+    throw new TypeError("Internal guarded tools require handler and validateInput functions.");
+  }
+  const definition = Object.freeze({ handler, validateInput });
+  INTERNAL_GUARDED_DEFINITIONS.add(definition);
+  return definition;
+}
+
+function executionRequired(expectedToolName) {
+  return new PolicyDeniedError("Tool execution requires its active ToolGateway dispatch.", {
+    code: "TOOL_GATEWAY_EXECUTION_REQUIRED",
+    details: { expectedToolName }
+  });
+}
 
 function safeErrorRecord(error) {
   const record = toErrorRecord(error);
@@ -427,6 +449,7 @@ export class ToolGateway {
     this.tools = new Map();
     this.trace = [];
     this.runCallCounts = new Map();
+    ACTIVE_BY_GATEWAY.set(this, new WeakMap());
   }
 
   registerTool(name, handler, metadata = {}) {
@@ -479,8 +502,57 @@ export class ToolGateway {
     this.tools.set(name, {
       name,
       handler,
-      metadata: snapshotToolMetadata(effectiveMetadata)
+      metadata: snapshotToolMetadata(effectiveMetadata),
+      validateInput: null,
+      registrationIdentity: Object.freeze(Object.create(null))
     });
+    return this;
+  }
+
+  registerGuardedTool(name, factory, metadata = {}) {
+    if (typeof name !== "string" || name.trim() === "" || typeof factory !== "function") {
+      throw new TypeError("ToolGateway.registerGuardedTool requires a name and handler factory.");
+    }
+    const gateway = this;
+    const registrationIdentity = Object.freeze(Object.create(null));
+    const verifier = Object.freeze(Object.assign(Object.create(null), {
+      requireExecution(input, context) {
+        const active = context && (typeof context === "object" || typeof context === "function")
+          ? ACTIVE_BY_GATEWAY.get(gateway)?.get(context)
+          : null;
+        const current = gateway.tools.get(name);
+        if (!active?.active
+          || active.registrationIdentity !== registrationIdentity
+          || current?.registrationIdentity !== registrationIdentity
+          || active.toolName !== name
+          || !Object.is(active.input, input)) {
+          throw executionRequired(name);
+        }
+        return active.receipt;
+      }
+    }));
+    const definition = factory(verifier);
+    let handler;
+    let validateInput = null;
+    if (typeof definition === "function") {
+      handler = definition;
+    } else if (INTERNAL_GUARDED_DEFINITIONS.has(definition)) {
+      const descriptors = Object.getOwnPropertyDescriptors(definition);
+      for (const key of ["handler", "validateInput"]) {
+        const descriptor = descriptors[key];
+        if (!descriptor?.enumerable || !Object.hasOwn(descriptor, "value")
+          || typeof descriptor.value !== "function") {
+          throw new TypeError(`Internal guarded tool definition.${key} must be a data function.`);
+        }
+      }
+      handler = descriptors.handler.value;
+      validateInput = descriptors.validateInput.value;
+    } else {
+      throw new TypeError("Guarded tool factories must return a handler function.");
+    }
+    this.registerTool(name, handler, metadata);
+    this.tools.get(name).registrationIdentity = registrationIdentity;
+    this.tools.get(name).validateInput = validateInput;
     return this;
   }
 
@@ -582,6 +654,18 @@ export class ToolGateway {
       throw error;
     }
 
+    if (tool.validateInput) {
+      try {
+        const validation = tool.validateInput(input, Object.freeze({ runId }));
+        if (validation !== undefined) {
+          throw new TypeError("Internal guarded input validation must return undefined.");
+        }
+      } catch (error) {
+        this.#recordTrace(traceBase, "denied", { decision, error: safeErrorRecord(error) });
+        throw error;
+      }
+    }
+
     let approvals = [];
     let handlerInput = input;
     if (decision.status === "needs_approval") {
@@ -632,7 +716,37 @@ export class ToolGateway {
         evidence: scopedEvidence,
         evidenceLedger: scopedEvidence
       });
-      const result = await tool.handler(handlerInput, handlerContext);
+      const receipt = snapshotJsonValue({
+        schemaVersion: "maqam.tool-execution.v1",
+        toolName,
+        runId,
+        inputHash,
+        decision,
+        approvalIds: approvals.map((approval) => approval.approvalId),
+        approvalActions: approvals.map((approval) => approval.action)
+      }, {
+        label: "Tool execution receipt",
+        allowNullPrototype: true,
+        freeze: true
+      });
+      const activeExecutions = ACTIVE_BY_GATEWAY.get(this);
+      const active = {
+        active: true,
+        registrationIdentity: tool.registrationIdentity,
+        toolName,
+        runId,
+        inputHash,
+        input: handlerInput,
+        receipt
+      };
+      activeExecutions.set(handlerContext, active);
+      let result;
+      try {
+        result = await tool.handler(handlerInput, handlerContext);
+      } finally {
+        active.active = false;
+        activeExecutions.delete(handlerContext);
+      }
 
       this.#recordTrace(traceBase, "completed", {
         decision,

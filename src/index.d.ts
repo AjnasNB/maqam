@@ -961,6 +961,217 @@ export function runToolAdapterConformance<TInput = unknown, TOutput = unknown>(
   options?: ToolAdapterConformanceOptions<TInput, TOutput>
 ): Promise<ToolAdapterConformanceReport>;
 
+export interface BrowserTarget {
+  readonly sessionId: string;
+  readonly pageId: string;
+  readonly origin: string;
+  readonly revision: string;
+}
+
+export interface BrowserElementStates {
+  readonly disabled?: boolean;
+  readonly checked?: boolean;
+  readonly selected?: boolean;
+  readonly expanded?: boolean;
+  readonly required?: boolean;
+  /** Indicates presence only; the adapter never returns a raw form value. */
+  readonly valuePresent?: boolean;
+}
+
+export interface BrowserObservedElement {
+  readonly elementId: string;
+  readonly role: string;
+  readonly name: string;
+  readonly states: Readonly<BrowserElementStates>;
+}
+
+export interface BrowserObservation {
+  readonly target: Readonly<BrowserTarget>;
+  readonly url: string;
+  readonly title: string;
+  readonly elements: readonly BrowserObservedElement[];
+}
+
+export interface BrowserObserveInput {
+  target: BrowserTarget;
+  maxElements?: number;
+}
+
+export type BrowserApplyOperation =
+  | { kind: "setValueRef"; elementId: string; /** `ref:`-prefixed host value/vault reference, never a raw value. */ valueRef: string }
+  | { kind: "selectOption"; elementId: string; optionId: string }
+  | { kind: "setChecked"; elementId: string; checked: boolean };
+
+export type BrowserSubmitOperation =
+  | {
+      kind: "activate" | "submitForm";
+      elementId: string;
+      expectedOrigin: string;
+      opensNewPage: boolean;
+    }
+  | {
+      kind: "navigate";
+      url: string;
+      expectedOrigin: string;
+      opensNewPage: boolean;
+    };
+
+export type BrowserPreviewInput =
+  | { target: BrowserTarget; phase: "apply"; operations: readonly BrowserApplyOperation[] }
+  | { target: BrowserTarget; phase: "submit"; operations: readonly [BrowserSubmitOperation] };
+
+export type BrowserPlan =
+  | {
+      readonly schemaVersion: "maqam.browser-plan.v1";
+      readonly target: Readonly<BrowserTarget>;
+      readonly phase: "apply";
+      readonly operations: readonly BrowserApplyOperation[];
+      readonly planHash: string;
+      /** Opaque same-adapter, same-run preview authenticity token. */
+      readonly planToken: string;
+    }
+  | {
+      readonly schemaVersion: "maqam.browser-plan.v1";
+      readonly target: Readonly<BrowserTarget>;
+      readonly phase: "submit";
+      readonly operations: readonly [BrowserSubmitOperation];
+      readonly planHash: string;
+      /** Opaque same-adapter, same-run preview authenticity token. */
+      readonly planToken: string;
+    };
+
+export interface BrowserMutationInput {
+  plan: BrowserPlan;
+  /** Host-deduplicated identifier; write adapters must not retry implicitly. */
+  operationId: string;
+}
+
+export interface BrowserDriverExecution {
+  readonly schemaVersion: "maqam.browser-driver-execution.v1";
+  readonly runId: string;
+  readonly toolName: string;
+  readonly inputHash: string;
+  readonly approvalIds: readonly string[];
+  readonly approvalActions: readonly string[];
+  /** Exact origins named by this request, intersected with adapter and policy scope. */
+  readonly authorizedOrigins: readonly string[];
+  /** Effects the host driver must block before dispatching the browser operation. */
+  readonly prohibitedEffects: readonly BrowserProhibitedEffect[];
+  readonly signal: AbortSignal | null;
+}
+
+export type BrowserProhibitedEffect =
+  | "external-protocol"
+  | "download"
+  | "filesystem-read"
+  | "filesystem-write"
+  | "file-picker"
+  | "clipboard-read"
+  | "clipboard-write"
+  | "permission-prompt"
+  | "print-dialog"
+  | "modal-dialog";
+
+/**
+ * Required host-driver attestation for a completed mutation. Each value must
+ * remain false; Maqam rejects missing, true, accessor-backed, or extra fields.
+ */
+export interface BrowserDriverEffects {
+  externalProtocol: false;
+  download: false;
+  filesystemRead: false;
+  filesystemWrite: false;
+  filePicker: false;
+  clipboardRead: false;
+  clipboardWrite: false;
+  permissionPrompt: false;
+  printDialog: false;
+  modalDialog: false;
+}
+
+export interface BrowserDriverPlanCore {
+  schemaVersion: "maqam.browser-plan.v1";
+  target: BrowserTarget;
+  phase: "apply" | "submit";
+  operations: readonly (BrowserApplyOperation | BrowserSubmitOperation)[];
+}
+
+export interface BrowserDriverMutationResult {
+  operationId: string;
+  target: BrowserTarget;
+  effects: BrowserDriverEffects;
+}
+
+/**
+ * Host-owned browser capability. Methods must be supplied as own enumerable
+ * data functions; bind class methods explicitly. Observe and preview must be
+ * read-only. Apply and submit must block every execution.prohibitedEffects
+ * entry before dispatch and return an all-false effects attestation. Maqam
+ * never creates a browser, imports a profile, or logs in.
+ */
+export interface GovernedBrowserDriver {
+  observe(
+    request: Readonly<Required<BrowserObserveInput>>,
+    execution: BrowserDriverExecution
+  ): BrowserObservation | Promise<BrowserObservation>;
+  preview(
+    request: BrowserPreviewInput,
+    execution: BrowserDriverExecution
+  ): BrowserDriverPlanCore | Promise<BrowserDriverPlanCore>;
+  apply(
+    request: BrowserMutationInput,
+    execution: BrowserDriverExecution
+  ): BrowserDriverMutationResult | Promise<BrowserDriverMutationResult>;
+  submit(
+    request: BrowserMutationInput,
+    execution: BrowserDriverExecution
+  ): BrowserDriverMutationResult | Promise<BrowserDriverMutationResult>;
+}
+
+export interface GovernedBrowserLimits {
+  maxElements?: number;
+  maxTextChars?: number;
+  maxOperations?: number;
+}
+
+export interface GovernedBrowserOptions {
+  driver: GovernedBrowserDriver;
+  /** Required, exact canonical HTTP(S) origins; wildcards are not accepted. */
+  allowedOrigins: readonly string[];
+  toolPrefix?: string;
+  limits?: GovernedBrowserLimits;
+}
+
+export interface GovernedBrowserRegistration {
+  readonly schemaVersion: "maqam.browser-adapter.v1";
+  readonly toolNames: Readonly<{
+    observe: string;
+    preview: string;
+    apply: string;
+    submit: string;
+  }>;
+  readonly allowedOrigins: readonly string[];
+  readonly prohibitedEffects: readonly BrowserProhibitedEffect[];
+  readonly limits: Readonly<Required<GovernedBrowserLimits>>;
+}
+
+export interface BrowserMutationResult {
+  readonly schemaVersion: "maqam.browser-result.v1";
+  readonly status: "applied" | "submitted";
+  readonly operationId: string;
+  readonly planHash: string;
+  readonly observation: BrowserObservation;
+}
+
+export const BROWSER_ADAPTER_SCHEMA_VERSION: "maqam.browser-adapter.v1";
+export const BROWSER_DRIVER_EXECUTION_SCHEMA_VERSION: "maqam.browser-driver-execution.v1";
+export const BROWSER_PLAN_SCHEMA_VERSION: "maqam.browser-plan.v1";
+export const BROWSER_RESULT_SCHEMA_VERSION: "maqam.browser-result.v1";
+export function registerGovernedBrowserTools(
+  gateway: ToolGateway,
+  options: GovernedBrowserOptions
+): GovernedBrowserRegistration;
+
 export interface ToolGatewayCommonOptions {
   evidenceLedger?: EvidenceLedger;
   approvalQueue?: ApprovalQueue;
@@ -973,11 +1184,30 @@ export type ToolGatewayOptions = ToolGatewayCommonOptions & (
   | { policyEngine?: undefined; /** Explicit opt-in for intentionally ungoverned use. */ allowUngoverned: true }
 );
 
+export interface ToolExecutionReceipt {
+  readonly schemaVersion: "maqam.tool-execution.v1";
+  readonly toolName: string;
+  readonly runId: string;
+  readonly inputHash: string;
+  readonly decision: Readonly<PolicyDecision>;
+  readonly approvalIds: readonly string[];
+  readonly approvalActions: readonly string[];
+}
+
+export interface ToolExecutionVerifier<TInput = unknown> {
+  requireExecution(input: TInput, context: AgentExecutionContext): ToolExecutionReceipt;
+}
+
 export class ToolGateway {
   constructor(options: ToolGatewayOptions);
   registerTool<TInput = unknown, TOutput = unknown>(
     name: string,
     handler: AgentHandler<TInput, TOutput>,
+    metadata?: ToolMetadata
+  ): this;
+  registerGuardedTool<TInput = unknown, TOutput = unknown>(
+    name: string,
+    factory: (verifier: ToolExecutionVerifier<TInput>) => AgentHandler<TInput, TOutput>,
     metadata?: ToolMetadata
   ): this;
   call<TOutput = unknown, TInput = unknown>(

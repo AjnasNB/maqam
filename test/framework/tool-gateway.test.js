@@ -20,6 +20,115 @@ test("ToolGateway executes registered tools through policy", async () => {
   assert.equal(gateway.trace[0].toolName, "echo");
 });
 
+test("guarded tools receive an unforgeable exact-dispatch receipt", async () => {
+  let verifier;
+  let retainedInput;
+  let retainedContext;
+  let receipt;
+  const gateway = new ToolGateway({
+    policyEngine: new PolicyEngine({ allowedTools: ["guarded"] })
+  });
+  gateway.registerGuardedTool("guarded", (executionVerifier) => {
+    verifier = executionVerifier;
+    return async (input, context) => {
+      retainedInput = input;
+      retainedContext = context;
+      receipt = verifier.requireExecution(input, context);
+      return { ok: true };
+    };
+  });
+
+  assert.throws(
+    () => verifier.requireExecution({}, {}),
+    (error) => error instanceof PolicyDeniedError
+      && error.code === "TOOL_GATEWAY_EXECUTION_REQUIRED"
+  );
+
+  assert.deepEqual(await gateway.call("guarded"), { ok: true });
+  assert.equal(receipt.schemaVersion, "maqam.tool-execution.v1");
+  assert.equal(receipt.toolName, "guarded");
+  assert.equal(receipt.runId, "default");
+  assert.match(receipt.inputHash, /^[a-f0-9]{64}$/);
+  assert.deepEqual([...receipt.approvalIds], []);
+  assert.equal(Object.isFrozen(receipt), true);
+  assert.throws(
+    () => verifier.requireExecution(retainedInput, retainedContext),
+    (error) => error.code === "TOOL_GATEWAY_EXECUTION_REQUIRED"
+  );
+});
+
+test("guarded tools bind authority to input identity and registration generation", async () => {
+  let firstVerifier;
+  let firstHandler;
+  const gateway = new ToolGateway({
+    policyEngine: new PolicyEngine({ allowedTools: ["guarded"] })
+  });
+  gateway.registerGuardedTool("guarded", (verifier) => {
+    firstVerifier = verifier;
+    firstHandler = async (input, context) => verifier.requireExecution(input, context);
+    return firstHandler;
+  });
+
+  gateway.registerGuardedTool("guarded", (verifier) => async (input, context) => {
+    context.toolName = "forged-name";
+    const receipt = verifier.requireExecution(input, context);
+    assert.throws(
+      () => verifier.requireExecution({ ...input }, context),
+      (error) => error.code === "TOOL_GATEWAY_EXECUTION_REQUIRED"
+    );
+    await assert.rejects(
+      () => firstHandler(input, context),
+      (error) => error.code === "TOOL_GATEWAY_EXECUTION_REQUIRED"
+    );
+    assert.throws(
+      () => firstVerifier.requireExecution(input, context),
+      (error) => error.code === "TOOL_GATEWAY_EXECUTION_REQUIRED"
+    );
+    return receipt;
+  });
+
+  const receipt = await gateway.call("guarded", { value: "exact" });
+  assert.equal(receipt.toolName, "guarded");
+});
+
+test("guarded tool authority is revoked when a handler throws", async () => {
+  let verifier;
+  let retainedInput;
+  let retainedContext;
+  const gateway = new ToolGateway({
+    policyEngine: new PolicyEngine({ allowedTools: ["fails"] })
+  });
+  gateway.registerGuardedTool("fails", (executionVerifier) => async (input, context) => {
+    verifier = executionVerifier;
+    retainedInput = input;
+    retainedContext = context;
+    verifier.requireExecution(input, context);
+    throw new Error("fixture failure");
+  });
+
+  await assert.rejects(() => gateway.call("fails"), /fixture failure/);
+  assert.throws(
+    () => verifier.requireExecution(retainedInput, retainedContext),
+    (error) => error.code === "TOOL_GATEWAY_EXECUTION_REQUIRED"
+  );
+});
+
+test("public guarded-tool factories cannot install pre-approval callbacks", () => {
+  const gateway = new ToolGateway({
+    policyEngine: new PolicyEngine({ allowedTools: ["guarded"] })
+  });
+  assert.throws(
+    () => gateway.registerGuardedTool("guarded", () => ({
+      preAuthorize() {},
+      async handler() {
+        return { ok: true };
+      }
+    })),
+    /must return a handler function/
+  );
+  assert.equal(gateway.tools.size, 0);
+});
+
 test("ToolGateway blocks disallowed tools before execution", async () => {
   const gateway = new ToolGateway({
     policyEngine: new PolicyEngine({ allowedTools: ["crawler"] })

@@ -13,17 +13,6 @@ function checkedResult(path) {
   return JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
 }
 
-function verifySourceFingerprint(result) {
-  const combined = createHash("sha256");
-  for (const file of result.sourceFingerprint.files) {
-    const bytes = readFileSync(new URL(`../${file.path}`, import.meta.url));
-    const digest = createHash("sha256").update(bytes).digest("hex");
-    assert.equal(digest, file.sha256, `${file.path} changed after the recorded MGES run`);
-    combined.update(`${file.path}\0${file.sha256}\n`);
-  }
-  assert.equal(combined.digest("hex"), result.sourceFingerprint.combined);
-}
-
 function verifyRecordedFingerprint(result) {
   assert.equal(result.sourceFingerprint.algorithm, "sha256");
   const combined = createHash("sha256");
@@ -156,7 +145,7 @@ test("previous public 0.3.0 MGES release artifacts remain internally consistent"
   verifyRecordedFingerprint(conformance);
 });
 
-test("0.3.1 clean-main MGES candidate retains review attempts and matches current source", () => {
+test("superseded 0.3.1 candidate MGES artifacts remain internally consistent historical records", () => {
   const expectedCommit = "513a7a0bf3711e26ca0e82b4ae1a1663553cc345";
   const performance = checkedResult(
     "../benchmarks/results/2026-07-19-mges-performance-windows-node24-main-513a7a0b.json"
@@ -177,8 +166,8 @@ test("0.3.1 clean-main MGES candidate retains review attempts and matches curren
   assert.equal(performance.results.governed.medianMicrosecondsPerOperation, 139.173);
   assert.equal(performance.results.governed.coefficientOfVariation, 0.074764);
   assert.deepEqual(conformance.summary, { total: 14, passed: 14, failed: 0, allPassed: true });
-  verifySourceFingerprint(performance);
-  verifySourceFingerprint(conformance);
+  verifyRecordedFingerprint(performance);
+  verifyRecordedFingerprint(conformance);
 
   for (const attempt of reviewAttempts) {
     assert.equal(attempt.repository.commit, expectedCommit);
