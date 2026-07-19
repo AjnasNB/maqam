@@ -133,6 +133,25 @@ for (const file of htmlFiles) {
     requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.0/i, "homepage install command must retain a live-record verification reminder");
     requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
     requireMatch(/Maqam is a security turnstile for agent actions/i, "homepage must include the plain-English Maqam definition");
+    requireMatch(/Node matrix[\s\S]{0,160}22\s*\/\s*24\s*\/\s*26/i, "homepage must show the maintained Node 22, 24, and 26 matrix");
+    requireMatch(/Unpublished 0\.3\.1 candidate MGES evidence/i, "homepage must label candidate benchmark evidence as unpublished 0.3.1 evidence");
+    requireMatch(/Previous public 0\.3\.0 MGES evidence/i, "homepage must retain and label the previous public 0.3.0 benchmark evidence");
+  }
+
+  if (label === path.join("docs", "benchmark", "index.html")) {
+    requireMatch(/Unpublished 0\.3\.1 candidate evidence/i, "benchmark docs must label the 0.3.1 benchmark as unpublished candidate evidence");
+    requireMatch(/Previous public 0\.3\.0 evidence/i, "benchmark docs must retain and label the previous public 0.3.0 evidence");
+    requireMatch(/a96413c4da5f27dc31b9772996e70faab0b38382/i, "benchmark docs must bind candidate evidence to the exact source commit");
+    requireMatch(/545fe8bbc40f21cec0f9ec2ae3954f3e75783f22/i, "benchmark docs must retain the previous public source commit");
+    requireMatch(/does not[\s\S]{0,120}test browser navigation/i, "benchmark docs must not imply browser-behavior coverage");
+  }
+
+  if (label === path.join("articles", "benchmarking-governance", "index.html")) {
+    requireMatch(/Unpublished 0\.3\.1 candidate evidence/i, "benchmark article must label the 0.3.1 benchmark as unpublished candidate evidence");
+    requireMatch(/Previous public 0\.3\.0 evidence/i, "benchmark article must retain and label the previous public 0.3.0 evidence");
+    requireMatch(/a96413c4da5f27dc31b9772996e70faab0b38382/i, "benchmark article must bind candidate evidence to the exact source commit");
+    requireMatch(/545fe8bbc40f21cec0f9ec2ae3954f3e75783f22/i, "benchmark article must retain the previous public source commit");
+    requireMatch(/does not test browser navigation/i, "benchmark article must not imply browser-behavior coverage");
   }
 
   if (label === path.join("docs", "index.html")) {

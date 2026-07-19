@@ -13,6 +13,12 @@ function checkedResult(path) {
   return JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
 }
 
+function checkedSha256(path) {
+  return createHash("sha256")
+    .update(readFileSync(new URL(path, import.meta.url)))
+    .digest("hex");
+}
+
 function verifyRecordedFingerprint(result) {
   assert.equal(result.sourceFingerprint.algorithm, "sha256");
   const combined = createHash("sha256");
@@ -141,6 +147,101 @@ test("previous public 0.3.0 MGES release artifacts remain internally consistent"
   assert.equal(conformance.repository.commit, performance.repository.commit);
   assert.equal(performance.quality.publicationCandidate, true);
   assert.equal(conformance.summary.allPassed, true);
+  verifyRecordedFingerprint(performance);
+  verifyRecordedFingerprint(conformance);
+});
+
+test("final 0.3.1 candidate MGES artifacts are exact-main, clean, and digest-bound", () => {
+  const expectedCommit = "a96413c4da5f27dc31b9772996e70faab0b38382";
+  const performancePath =
+    "../benchmarks/results/2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json";
+  const conformancePath =
+    "../benchmarks/results/2026-07-19-mges-conformance-ubuntu24-node24-main-a96413c4.json";
+  const manifestPath =
+    "../benchmarks/results/2026-07-19-mges-evidence-manifest-ubuntu24-node24-main-a96413c4.json";
+  const manifest = checkedResult(manifestPath);
+  const performance = checkedResult(performancePath);
+  const conformance = checkedResult(conformancePath);
+
+  assert.equal(performance.repository.commit, expectedCommit);
+  assert.equal(conformance.repository.commit, expectedCommit);
+  assert.equal(performance.repository.workingTreeDirty, false);
+  assert.equal(conformance.repository.workingTreeDirty, false);
+  assert.equal(performance.environment.runtime.node, "v24.18.0");
+  assert.equal(performance.environment.operatingSystem.platform, "linux");
+  assert.equal(performance.environment.operatingSystem.architecture, "x64");
+  assert.equal(performance.quality.publicationCandidate, true);
+  assert.equal(performance.results.governed.sampleCount, 30);
+  assert.equal(performance.results.governed.medianMicrosecondsPerOperation, 129.849);
+  assert.equal(performance.results.governed.coefficientOfVariation, 0.011106);
+  const requiredChecks = performance.quality.checks.filter((check) => check.required);
+  assert.equal(requiredChecks.length, 4);
+  assert.ok(requiredChecks.every((check) => check.passed));
+  assert.deepEqual(conformance.summary, { total: 14, passed: 14, failed: 0, allPassed: true });
+  assert.equal(
+    performance.sourceFingerprint.combined,
+    "00283c6f289cd1935177892a8a9356a8ebfaba4648ff6d2c50e12bbcb55d65fa"
+  );
+  assert.equal(
+    conformance.sourceFingerprint.combined,
+    "4f5f5c35454fbf09c34d1bbf43c1d5e91a7a3d0b319409c94f08e338369655f0"
+  );
+  verifyRecordedFingerprint(performance);
+  verifyRecordedFingerprint(conformance);
+
+  assert.equal(manifest.schema, "maqam.mges.evidence-manifest/v1");
+  assert.equal(manifest.gitCommit, expectedCommit);
+  assert.equal(manifest.cleanCheckout, true);
+  assert.equal(manifest.runtime, "v24.18.0");
+  assert.equal(manifest.runner, "linux-x64");
+  assert.equal(manifest.performance.filename, performancePath.split("/").at(-1));
+  assert.equal(manifest.conformance.filename, conformancePath.split("/").at(-1));
+  assert.equal(manifest.performance.sha256, checkedSha256(performancePath));
+  assert.equal(manifest.conformance.sha256, checkedSha256(conformancePath));
+  assert.equal(
+    manifest.performance.governedMedianMicroseconds,
+    performance.results.governed.medianMicrosecondsPerOperation
+  );
+  assert.equal(
+    manifest.performance.governedCoefficientOfVariation,
+    performance.results.governed.coefficientOfVariation
+  );
+  assert.equal(manifest.conformance.passed, conformance.summary.passed);
+  assert.equal(manifest.conformance.total, conformance.summary.total);
+  assert.equal(manifest.conformance.allPassed, conformance.summary.allPassed);
+  assert.equal(
+    checkedSha256(manifestPath),
+    "4b6d26a0f303c312124685cfa8ea0e257caf09e7f07db7d7bb9298301d4dd974"
+  );
+  assert.equal(manifest.performance.publicationCandidate, true);
+  assert.equal(manifest.conformance.allPassed, true);
+});
+
+test("superseded Node 20 action-runtime run remains a truthful passing historical record", () => {
+  const expectedCommit = "29c1b9ec0fb8af162d1b73f950851263d35a0527";
+  const performancePath =
+    "../benchmarks/results/2026-07-19-mges-performance-ubuntu24-node24-main-29c1b9ec.json";
+  const conformancePath =
+    "../benchmarks/results/2026-07-19-mges-conformance-ubuntu24-node24-main-29c1b9ec.json";
+  const manifestPath =
+    "../benchmarks/results/2026-07-19-mges-evidence-manifest-ubuntu24-node24-main-29c1b9ec.json";
+  const performance = checkedResult(performancePath);
+  const conformance = checkedResult(conformancePath);
+  const manifest = checkedResult(manifestPath);
+
+  assert.equal(performance.repository.commit, expectedCommit);
+  assert.equal(conformance.repository.commit, expectedCommit);
+  assert.equal(performance.repository.workingTreeDirty, false);
+  assert.equal(conformance.repository.workingTreeDirty, false);
+  assert.equal(performance.quality.publicationCandidate, true);
+  assert.deepEqual(conformance.summary, { total: 14, passed: 14, failed: 0, allPassed: true });
+  assert.equal(manifest.gitCommit, expectedCommit);
+  assert.equal(manifest.performance.sha256, checkedSha256(performancePath));
+  assert.equal(manifest.conformance.sha256, checkedSha256(conformancePath));
+  assert.equal(
+    checkedSha256(manifestPath),
+    "5daf94a9ad742d7bab08f70331db47e87ca4206671f509371a8699b4943b3370"
+  );
   verifyRecordedFingerprint(performance);
   verifyRecordedFingerprint(conformance);
 });

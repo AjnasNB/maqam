@@ -25,24 +25,24 @@ Every conformance claim must include:
 - raw JSON;
 - an explicit statement that the result is project-defined regression evidence, not a security score, penetration test, formal proof or certification.
 
-## Approved compact performance wording
+## Approved compact candidate performance wording
 
-> MGES v1.1.0 local-call release profile on Node 24.15.0 / Windows x64 / Ryzen 7 4800H: 140.816 microseconds median per governed call (95% bootstrap interval for the sample median: 138.983-142.820; 30 fresh-process observations; governed CV 5.020%; required project checks PASS). Measured from clean post-squash main commit `545fe8bbc40f21cec0f9ec2ae3954f3e75783f22`. Local in-process component benchmark; excludes model, network, storage and concurrency; not a competitor benchmark or SLA. [Raw JSON](results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json).
+> 0.3.1 pre-publication candidate evidence — MGES v1.1.0 local-call profile on Node 24.18.0 / Ubuntu 24.04 x64 / AMD EPYC 7763: 129.849 microseconds median per governed call (95% bootstrap interval for the sample median: 129.539-130.648; 30 fresh-process observations; governed CV 1.111%; required project checks PASS). Measured from exact clean main commit `a96413c4da5f27dc31b9772996e70faab0b38382`. Local in-process component benchmark; excludes model, network, storage, browser and concurrency; not a competitor benchmark, public-release announcement or SLA. [Raw JSON](results/2026-07-19-mges-performance-ubuntu24-node24-main-a96413c4.json).
 
-The current release artifact records clean source commit `545fe8bbc40f21cec0f9ec2ae3954f3e75783f22`. Prefix a result with **“Provisional result:”** whenever its artifact reports `workingTreeDirty: true`, has not passed the declared required project checks, or does not measure an ancestor of the final release commit.
+The previous public 0.3.0 artifact remains [separately recorded](results/2026-07-18-mges-performance-windows-node24-main-545fe8bb.json) at clean source commit `545fe8bbc40f21cec0f9ec2ae3954f3e75783f22`. Prefix a result with **“Provisional result:”** whenever its artifact reports `workingTreeDirty: true`, has not passed the declared required project checks, or does not measure an ancestor of the final release commit.
 
 ## Approved compact conformance wording
 
-> MGES v1.1.0 governance-boundary release profile: 14/14 project-defined fixtures passed on the clean-main source fingerprint. Regression evidence only—not a security score, penetration test, formal proof, compliance result or certification. [Raw JSON](results/2026-07-18-mges-conformance-windows-node24-main-545fe8bb.json).
+> 0.3.1 pre-publication candidate evidence — MGES v1.1.0 governance-boundary profile: 14/14 project-defined fixtures passed on the clean-main source fingerprint. Regression evidence only—not a browser-adapter test, security score, penetration test, formal proof, compliance result or certification. [Raw JSON](results/2026-07-19-mges-conformance-ubuntu24-node24-main-a96413c4.json).
 
 ## Video card
 
 Use no more than these three levels:
 
 ```text
-140.816 microseconds/call median
-138.983-142.820 microseconds · 95% bootstrap interval · 30 observations
-Local Node 24/Windows component fixture; no model/network/storage; not a competitor benchmark or SLA
+129.849 microseconds/call median · 0.3.1 pre-publication evidence
+129.539-130.648 microseconds · 95% bootstrap interval · 30 observations
+Node 24.18/Ubuntu 24.04 component fixture; no model/network/storage/browser; not a competitor benchmark or SLA
 ```
 
 For conformance:
