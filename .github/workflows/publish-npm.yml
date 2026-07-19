@@ -316,7 +316,27 @@ jobs:
 
           registry_dir="${RUNNER_TEMP}/registry-pack"
           mkdir -p "${registry_dir}"
-          npm pack "maqam@${EXPECTED_VERSION}" --ignore-scripts --pack-destination "${registry_dir}" >/dev/null
+          packed="false"
+          for attempt in {1..36}; do
+            # Use a fresh cache on every attempt. npm's packument cache can retain
+            # the pre-publication ETARGET response even after `npm view` has
+            # observed the new version on another registry edge.
+            pack_cache="${RUNNER_TEMP}/registry-pack-cache-${attempt}"
+            mkdir -p "${pack_cache}"
+            if npm pack "maqam@${EXPECTED_VERSION}" \
+              --ignore-scripts \
+              --pack-destination "${registry_dir}" \
+              --cache "${pack_cache}" \
+              --prefer-online >/dev/null; then
+              packed="true"
+              break
+            fi
+            sleep 5
+          done
+          if [[ "${packed}" != "true" ]]; then
+            echo "Registry tarball download did not converge after three minutes." >&2
+            exit 1
+          fi
           registry_tarball="${registry_dir}/maqam-${EXPECTED_VERSION}.tgz"
           registry_size_bytes="$(wc -c < "${registry_tarball}" | tr -d '[:space:]')"
           if [[ "${registry_size_bytes}" != "${EXPECTED_SIZE_BYTES}" ]]; then

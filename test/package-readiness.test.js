@@ -127,7 +127,7 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(comparison, /Microsoft Agent Governance Toolkit/);
   assert.match(benchmarking, /Maqam Governance Evaluation Suite/);
   assert.match(benchmarking, /not a globally standardized benchmark/);
-  assert.match(benchmarking, /0\.3\.1 clean-source candidate result/i);
+  assert.match(benchmarking, /Published 0\.3\.1 measured-source result/i);
   assert.match(benchmarking, /129\.849 microseconds\/call/i);
   assert.match(benchmarking, /previous public 0\.3\.0 release evidence/i);
   assert.match(quickstart, /^# Maqam Five-Minute Quickstart/m);
@@ -150,10 +150,12 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(release03, /sha512-0fV354AKT6JtVMYzWcMCfjUQpJHIjaNF\+bGjxq8TzcuElNVQsx3Cp5Yc062RgNJ5zSDVgUJSn1hzn04hT3jWuQ==/i);
   assert.match(release031, /^# Maqam 0\.3\.1 Release Record/m);
   assert.match(release031, /Lifecycle authority:\*\* live-record-driven/i);
-  assert.match(release031, /live npm record[\s\S]{0,180}matching `v0\.3\.1` tag/i);
+  assert.match(release031, /npm record[\s\S]{0,220}`v0\.3\.1` tag and GitHub release/i);
   assert.match(release031, /Final clean-main MGES candidate evidence now exists/i);
   assert.match(release031, /a96413c4da5f27dc31b9772996e70faab0b38382/i);
   assert.match(release031, /Digest manifest[\s\S]{0,220}4b6d26a0f303c312124685cfa8ea0e257caf09e7f07db7d7bb9298301d4dd974/i);
+  assert.match(release031, /2f7231db912012e37e89ec962f6d57c54c6275a3/i);
+  assert.match(release031, /5c6357eefd431b1de1c03d8106e2cc63e2ddfe6d87511767dc47e991916d5e02/i);
   assert.match(release031, /earlier metadata-only candidate[\s\S]{0,180}superseded historical candidate evidence/i);
   assert.doesNotMatch(release031, /implementation phase merged as exact clean `main` commit/i);
   assert.match(governedBrowser, /^# Governed browser adapters/m);
@@ -161,12 +163,13 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(governedBrowser, /external protocols[\s\S]{0,250}modal dialogs/i);
   assert.match(governedBrowser, /host-driver attestation checked after dispatch/i);
   assert.match(security, /^## Governed Browser Boundary/m);
-  assert.match(readme, /Release status is live-record-driven:[\s\S]{0,400}maqam@0\.3\.0/i);
+  assert.match(readme, /Release status is live-record-driven:[\s\S]{0,400}maqam@0\.3\.1/i);
   assert.match(readme, /0\.3\.1 release line/i);
+  assert.doesNotMatch(readme, /0\.3\.1 pre-publication/i);
   assert.match(readme, /npm view maqam@0\.3\.1 version gitHead dist\.integrity/i);
   assert.match(readme, /If both records exist and identify the same reviewed commit[\s\S]{0,160}otherwise treat 0\.3\.1 as unavailable/i);
   assert.match(readme, /previous public 0\.3\.0 evidence/i);
-  assert.match(readme, /0\.3\.1 pre-publication measured-source evidence/i);
+  assert.match(readme, /published 0\.3\.1 measured-source evidence/i);
   assert.match(readme, /a96413c4da5f27dc31b9772996e70faab0b38382/i);
   assert.match(readme, /129\.849 microseconds\/call/i);
   assert.match(readme, /0\.3 release line/i);
@@ -257,6 +260,9 @@ test("release governance docs require approval before publishing", () => {
   assert.match(publishWorkflow, /expected_sha256/);
   assert.match(publishWorkflow, /expected_integrity/);
   assert.match(publishWorkflow, /default: 0\.3\.1/);
+  assert.match(publishWorkflow, /registry-pack-cache-\$\{attempt\}/);
+  assert.match(publishWorkflow, /--prefer-online/);
+  assert.match(publishWorkflow, /Registry tarball download did not converge/);
   assert.match(publishWorkflow, /npm audit signatures/);
   assert.match(security, /^# Security Policy/m);
   assert.match(security, /approval/i);

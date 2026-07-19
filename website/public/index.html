@@ -33,7 +33,7 @@
         <a href="/docs/integrations/">Integrations</a>
         <a href="/docs/benchmark/">Benchmark</a>
         <a href="/roadmap/">Roadmap</a>
-        <a href="/releases/v0.3.0/">Release</a>
+        <a href="/releases/v0.3.1/">Release</a>
         <a href="/community/">Community</a>
         <a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a>
       </nav>
@@ -47,7 +47,7 @@
       <a href="/docs/integrations/">Integrations</a>
       <a href="/docs/benchmark/">Benchmark</a>
       <a href="/roadmap/">Roadmap</a>
-      <a href="/releases/v0.3.0/">Release</a>
+      <a href="/releases/v0.3.1/">Release</a>
       <a href="/community/">Community</a>
       <a href="https://github.com/AjnasNB/maqam">GitHub</a>
     </nav>
@@ -80,8 +80,8 @@
     </section>
 
     <div class="shell release-state" role="status">
-      <strong>v0.3.0 public release</strong>
-      <span>Governed source routing, RSS and Atom parsing, feed discovery, and a hardened crawler CLI &middot; npm Trusted Publishing and the matching GitHub release are verified &middot; 0.3.1 is an unpublished source candidate at the 2026-07-19 snapshot &middot; <a href="/releases/v0.3.0/">review the public release</a></span>
+      <strong>v0.3.1 public release</strong>
+      <span>Governed source routing plus guarded structural browser actions &middot; npm Trusted Publishing and the matching GitHub release are verified &middot; SLSA provenance, registry signatures, and exact tarball bytes match &middot; Node 22 / 24 / 26 &middot; <a href="https://github.com/AjnasNB/maqam/releases/tag/v0.3.1">review the public release</a></span>
     </div>
 
     <section class="proof-strip" aria-label="Release evidence">
@@ -300,8 +300,8 @@
     <section class="section">
       <div class="shell benchmark-showcase">
         <div class="benchmark-copy">
-          <blockquote>Unpublished 0.3.1 candidate MGES evidence: 129.849 microseconds per governed local call on Node 24.18.0 and Ubuntu 24.04 x64.</blockquote>
-          <p>The candidate run at exact clean-main commit <code>a96413c4da5f27dc31b9772996e70faab0b38382</code> passed 14 of 14 named governance-boundary fixtures. It does not change the public package or install authority, which remains 0.3.0 until npm verification completes.</p>
+          <blockquote>Published 0.3.1 measured-source MGES evidence: 129.849 microseconds per governed local call on Node 24.18.0 and Ubuntu 24.04 x64.</blockquote>
+          <p>The measured-source run at exact clean-main commit <code>a96413c4da5f27dc31b9772996e70faab0b38382</code> passed 14 of 14 named governance-boundary fixtures. The published <code>maqam@0.3.1</code> artifact at <code>2f7231db912012e37e89ec962f6d57c54c6275a3</code> retains the same fingerprinted implementation and benchmark source; npm and the matching tag are now the install authority.</p>
           <p>Previous public 0.3.0 MGES evidence at commit <code>545fe8bb</code> recorded 140.816 microseconds per governed local call and 14 of 14 fixtures on its recorded Windows environment.</p>
           <p>MGES v1.1.0 is project-defined. It is not a standard, certification, competitor ranking, security score, production capacity result, or SLA.</p>
           <div class="button-row">
@@ -333,8 +333,8 @@
         <div class="code-shell">
           <button class="copy-button" type="button" data-copy="#install-snippet">Copy</button>
           <pre><code id="install-snippet"># Verify the live npm and GitHub release records before use
-npx -y maqam@0.3.0 demo approval
-npm install maqam@0.3.0
+npx -y maqam@0.3.1 demo approval
+npm install maqam@0.3.1
 npm test</code></pre>
         </div>
       </div>
@@ -359,7 +359,7 @@ npm test</code></pre>
         <h3>Project</h3>
         <a href="/docs/benchmark/">MGES methodology</a>
         <a href="/roadmap/">Public roadmap</a>
-        <a href="/releases/v0.3.0/">0.3.0 release notes</a>
+        <a href="/releases/v0.3.1/">0.3.1 release notes</a>
       </div>
       <div>
         <h3>Source</h3>

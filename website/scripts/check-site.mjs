@@ -29,6 +29,7 @@ const requiredProductVisuals = new Map([
   [path.join("community", "index.html"), ["/assets/community-workbench-v2.png"]],
   [path.join("roadmap", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("releases", "v0.3.0", "index.html"), ["/assets/integration-dock-3d.png"]],
+  [path.join("releases", "v0.3.1", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("releases", "v0.2.4", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("docs", "benchmark", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("docs", "integrations", "index.html"), ["/assets/integration-dock-3d.png"]],
@@ -85,6 +86,13 @@ for (const file of htmlFiles) {
     if (!pattern.test(source)) failures.push(`${label}: ${message}`);
   };
 
+  if (/href="\/releases\/v0\.3\.0\/"[^>]*>Release</i.test(source)) {
+    failures.push(`${label}: primary Release navigation must target v0.3.1`);
+  }
+  if (label !== path.join("releases", "v0.3.0", "index.html") && /(?:npm install|npx[^\n<]*package=)\s*maqam@0\.3\.0/i.test(source)) {
+    failures.push(`${label}: active install examples must pin maqam@0.3.1`);
+  }
+
   for (const requiredVisual of requiredProductVisuals.get(label) || []) {
     if (!source.includes('src="' + requiredVisual + '"')) {
       failures.push(label + ": missing required product visual " + requiredVisual);
@@ -97,8 +105,8 @@ for (const file of htmlFiles) {
   requireMatch(/<a\s+class="skip-link"\s+href="#main">/i, "missing skip link");
   requireMatch(/<main\b[^>]*\bid="main"/i, "missing main landmark id");
 
-  if (source.includes('class="site-header"') && !source.includes('href="/releases/v0.3.0/"')) {
-    failures.push(`${label}: primary navigation must link the 0.3.0 release record`);
+  if (source.includes('class="site-header"') && !source.includes('href="/releases/v0.3.1/"')) {
+    failures.push(`${label}: primary navigation must link the 0.3.1 release record`);
   }
 
   if (/0\.2\.3|candidate pending exact release approval/i.test(source)) {
@@ -127,19 +135,19 @@ for (const file of htmlFiles) {
   }
 
   if (label === "index.html") {
-    requireMatch(/v0\.3\.0 public release/i, "homepage must identify 0.3.0 as a public release");
+    requireMatch(/v0\.3\.1 public release/i, "homepage must identify 0.3.1 as the public release");
     requireMatch(/npm Trusted Publishing and the matching GitHub release are verified/i, "homepage must identify the completed release verification");
-    requireMatch(/0\.3\.1 is an unpublished source candidate at the 2026-07-19 snapshot/i, "homepage must distinguish the 0.3.1 candidate from public 0.3.0");
-    requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.0/i, "homepage install command must retain a live-record verification reminder");
+    requireMatch(/SLSA provenance, registry signatures, and exact tarball bytes match/i, "homepage must summarize the verified 0.3.1 release identity");
+    requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.1/i, "homepage install command must retain a live-record verification reminder");
     requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
     requireMatch(/Maqam is a security turnstile for agent actions/i, "homepage must include the plain-English Maqam definition");
     requireMatch(/Node matrix[\s\S]{0,160}22\s*\/\s*24\s*\/\s*26/i, "homepage must show the maintained Node 22, 24, and 26 matrix");
-    requireMatch(/Unpublished 0\.3\.1 candidate MGES evidence/i, "homepage must label candidate benchmark evidence as unpublished 0.3.1 evidence");
+    requireMatch(/Published 0\.3\.1 measured-source MGES evidence/i, "homepage must label the public 0.3.1 measured-source evidence");
     requireMatch(/Previous public 0\.3\.0 MGES evidence/i, "homepage must retain and label the previous public 0.3.0 benchmark evidence");
   }
 
   if (label === path.join("docs", "benchmark", "index.html")) {
-    requireMatch(/Unpublished 0\.3\.1 candidate evidence/i, "benchmark docs must label the 0.3.1 benchmark as unpublished candidate evidence");
+    requireMatch(/Published 0\.3\.1 measured-source evidence/i, "benchmark docs must label the public 0.3.1 measured-source evidence");
     requireMatch(/Previous public 0\.3\.0 evidence/i, "benchmark docs must retain and label the previous public 0.3.0 evidence");
     requireMatch(/a96413c4da5f27dc31b9772996e70faab0b38382/i, "benchmark docs must bind candidate evidence to the exact source commit");
     requireMatch(/545fe8bbc40f21cec0f9ec2ae3954f3e75783f22/i, "benchmark docs must retain the previous public source commit");
@@ -147,7 +155,7 @@ for (const file of htmlFiles) {
   }
 
   if (label === path.join("articles", "benchmarking-governance", "index.html")) {
-    requireMatch(/Unpublished 0\.3\.1 candidate evidence/i, "benchmark article must label the 0.3.1 benchmark as unpublished candidate evidence");
+    requireMatch(/Published 0\.3\.1 measured-source evidence/i, "benchmark article must label the public 0.3.1 measured-source evidence");
     requireMatch(/Previous public 0\.3\.0 evidence/i, "benchmark article must retain and label the previous public 0.3.0 evidence");
     requireMatch(/a96413c4da5f27dc31b9772996e70faab0b38382/i, "benchmark article must bind candidate evidence to the exact source commit");
     requireMatch(/545fe8bbc40f21cec0f9ec2ae3954f3e75783f22/i, "benchmark article must retain the previous public source commit");
@@ -163,12 +171,19 @@ for (const file of htmlFiles) {
   }
 
   if (label === path.join("docs", "browser", "index.html")) {
-    requireMatch(/Unpublished 0\.3\.1 source candidate/i, "browser guide must identify its unpublished lifecycle");
+    requireMatch(/Published in Maqam 0\.3\.1/i, "browser guide must identify its public lifecycle");
     requireMatch(/registerGovernedBrowserTools/, "browser guide must show the registration API");
     requireMatch(/only origins named by the exact request/i, "browser guide must state exact request origin narrowing");
     requireMatch(/external protocols[\s\S]{0,300}modal dialogs/i, "browser guide must enumerate prohibited effects");
     requireMatch(/attestation rather than rollback/i, "browser guide must state the post-dispatch effect boundary");
     requireMatch(/does not discover profiles[\s\S]{0,200}distributed browser fleet/i, "browser guide must reject browser-engine and session overclaims");
+  }
+
+  if (label === path.join("releases", "v0.3.1", "index.html")) {
+    requireMatch(/npm install maqam@0\.3\.1/i, "0.3.1 release page must contain the pinned install command");
+    requireMatch(/2f7231db912012e37e89ec962f6d57c54c6275a3/i, "0.3.1 release page must contain the registry gitHead");
+    requireMatch(/5c6357eefd431b1de1c03d8106e2cc63e2ddfe6d87511767dc47e991916d5e02/i, "0.3.1 release page must contain the verified SHA-256");
+    requireMatch(/Node 22 \/ 24 \/ 26/i, "0.3.1 release page must contain the supported Node matrix");
   }
 
   if (label === path.join("docs", "sources", "index.html")) {

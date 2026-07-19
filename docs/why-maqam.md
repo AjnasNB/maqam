@@ -145,9 +145,9 @@ MGES v1.1.0 reran from exact clean post-squash `main` commit `545fe8bbc40f21cec0
 
 The conformance profile passes `14/14` named fixtures. The two new cases establish only that a source policy denial stops all registered backends before dispatch, and that ordinary unavailability can fall back in deterministic order while binding the normalized document to the selected adapter. They do not establish provider correctness, network isolation, factual accuracy, or universal security.
 
-## What The Final 0.3.1 Candidate Evaluation Establishes
+## What The Published 0.3.1 Measured-Source Evaluation Establishes
 
-The 0.3.1 pre-publication candidate MGES v1.1.0 run measured exact clean source commit `a96413c4da5f27dc31b9772996e70faab0b38382` on Node 24.18.0 and a GitHub-hosted Ubuntu 24.04 x64 runner. It records a `129.849 microseconds/call` governed median, `129.539-130.648` 95% bootstrap interval for the sample median, `1.111%` governed CV, and 30 fresh-process observations with every required project criterion passing. The matching conformance artifact passes `14/14` named fixtures.
+The published 0.3.1 measured-source MGES v1.1.0 run measured exact clean source commit `a96413c4da5f27dc31b9772996e70faab0b38382` on Node 24.18.0 and a GitHub-hosted Ubuntu 24.04 x64 runner. It records a `129.849 microseconds/call` governed median, `129.539-130.648` 95% bootstrap interval for the sample median, `1.111%` governed CV, and 30 fresh-process observations with every required project criterion passing. The matching conformance artifact passes `14/14` named fixtures. The public npm artifact is bound to `2f7231db912012e37e89ec962f6d57c54c6275a3`, whose release-only delta leaves the fingerprinted implementation and benchmark source unchanged.
 
 That source commit is the measured ancestor, not the eventual npm `gitHead`; the evidence-only follow-up changes package bytes and therefore requires a new exact tarball manifest before protected publication. MGES does not exercise the governed-browser adapter. Its separate browser tests cover the structural preview/apply/submit boundary, and neither test family is a security certification or proof of host-driver behavior.
 
@@ -173,6 +173,6 @@ npm install maqam
 - Provider-reported usage and activity can be observed after execution; not every provider exposes a preventive hard limit for every measure.
 - Calls that bypass registered adapters are outside Maqam's control.
 - Passing tests is evidence for covered cases, not proof that the software has no defects.
-- The previous public 0.3.0 MGES artifacts record commit `545fe8bbc40f21cec0f9ec2ae3954f3e75783f22`; the final 0.3.1 pre-publication candidate artifacts record measured-source commit `a96413c4da5f27dc31b9772996e70faab0b38382`. Rerun if any fingerprinted implementation or benchmark source changes before publication.
+- The historical 0.3.0 MGES artifacts record commit `545fe8bbc40f21cec0f9ec2ae3954f3e75783f22`; the published 0.3.1 measured-source artifacts record commit `a96413c4da5f27dc31b9772996e70faab0b38382`. Rerun if any fingerprinted implementation or benchmark source changes.
 
 Those limits are part of the product boundary, not footnotes to hide. The [public roadmap](../ROADMAP.md) identifies which ones Maqam intends to address next.

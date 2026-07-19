@@ -1,12 +1,12 @@
 # Maqam 0.3.1 Release Record
 
-**Lifecycle authority:** live-record-driven. Treat Maqam 0.3.1 as public only when the live npm record, provenance, integrity, registry `gitHead`, matching `v0.3.1` tag, and GitHub release identify the same reviewed artifact; otherwise treat it as unavailable. Package metadata, a branch, a local tarball, benchmark JSON, or this document alone is not publication proof. At the 2026-07-19 candidate-evidence snapshot, Maqam 0.3.0 was the previous verified public release.
+**Lifecycle authority:** live-record-driven. Maqam 0.3.1 is public: the [npm record](https://www.npmjs.com/package/maqam/v/0.3.1), SLSA provenance, integrity, registry `gitHead`, matching [`v0.3.1` tag and GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.1) identify the same reviewed artifact. Always re-check those live records rather than treating package metadata, a branch, a local tarball, benchmark JSON, or this document alone as publication proof.
 
 ## Purpose
 
 Version 0.3.1 prepares a guarded execution-verification API and a structural governed-browser boundary while correcting documentation that remained stale after 0.3.0 publication. It does not bundle a browser engine, model, browser profile, login flow, credential store, or third-party agent runtime.
 
-## Candidate Scope
+## Release Scope
 
 - expose `ToolGateway.registerGuardedTool()` with an unforgeable live-dispatch verifier for public guarded handlers while keeping Maqam's internal pre-approval validator private;
 - add `registerGovernedBrowserTools()` for bounded observe, preview, apply, and submit operations around a host-owned driver;
@@ -17,7 +17,7 @@ Version 0.3.1 prepares a guarded execution-verification API and a structural gov
 - synchronize the packaged README, security guidance, release checklist, consumer types, website, package metadata, and release records; and
 - preserve prior release media and benchmark records under their original historical identities.
 
-This candidate changes the public TypeScript and JavaScript API and the documented security boundary. It does not claim operating-system isolation, browser-driver trust, rollback, durable cross-instance plan tokens, unrestricted web access, or equivalent coverage to a general browser-agent product.
+This release changes the public TypeScript and JavaScript API and the documented security boundary. It does not claim operating-system isolation, browser-driver trust, rollback, durable cross-instance plan tokens, unrestricted web access, or equivalent coverage to a general browser-agent product.
 
 ## Required Final Verification
 
@@ -35,7 +35,7 @@ Generate MGES output and the tarball outside the repository. Record the exact fu
 
 Any change to a fingerprinted implementation file, benchmark program, or `package-lock.json` invalidates the measured-source identity and requires a new clean MGES run. An evidence-only follow-up may add unchanged raw artifacts and update non-fingerprinted documentation or tests while keeping the measured commit as an ancestor. Those package-included changes still alter tarball bytes, so they require a fresh post-merge pack and candidate manifest even though they do not relabel the measured fingerprint. Do not update expected MGES fingerprints merely to make a changed tree pass.
 
-## Current Evidence Status
+## Published Artifact and Evidence
 
 Final clean-main MGES candidate evidence now exists for the guarded-tool and governed-browser source at exact commit `a96413c4da5f27dc31b9772996e70faab0b38382`. The [successful evidence workflow](https://github.com/AjnasNB/maqam/actions/runs/29696564034) checked out that commit on a GitHub-hosted Ubuntu 24.04 x64 runner, installed pinned Node `24.18.0`, verified a clean tree, generated both profiles outside the checkout, validated their commit binding and digests, uploaded them with the Node 24-based `actions/upload-artifact@v7.0.1` runtime, and enforced the unchanged publication criteria. The run completed with zero job annotations.
 
@@ -43,7 +43,7 @@ Final clean-main MGES candidate evidence now exists for the guarded-tool and gov
 - [Final candidate conformance JSON](../benchmarks/results/2026-07-19-mges-conformance-ubuntu24-node24-main-a96413c4.json), SHA-256 `44b78de19625ba6337bad7508ffafba938a613c57895f3c55c5fd2f6eeb5675a`: `14/14` named project-defined fixtures passed.
 - [Digest manifest](../benchmarks/results/2026-07-19-mges-evidence-manifest-ubuntu24-node24-main-a96413c4.json), SHA-256 `4b6d26a0f303c312124685cfa8ea0e257caf09e7f07db7d7bb9298301d4dd974`: binds both raw filenames and SHA-256 digests to the exact commit, clean-checkout state, runtime, and runner class.
 
-These are final **candidate regression records**, not proof that `maqam@0.3.1` is public. Adding the unchanged evidence and this release record changes package bytes, so the authoritative tarball filename, size, SHA-256, npm integrity, packed-file list, and final Git commit must come from the successful post-merge main-CI candidate kit before the protected publish workflow is dispatched. Those package identity fields remain release gates.
+These measured-source regression records are not publication proof by themselves. Publication was independently verified against the post-merge CI candidate and the downloaded registry artifact: `maqam-0.3.1.tgz`, 346105 bytes, SHA-256 `5c6357eefd431b1de1c03d8106e2cc63e2ddfe6d87511767dc47e991916d5e02`, npm integrity `sha512-ZszRNaHqxoWls8bJ76ouptPwwNnbctfaolXP5PD3/pbFxj3fecvcuYmxSrnkvf2UxBUmWmzJls3hAuBAGqVIiA==`, and registry `gitHead` `2f7231db912012e37e89ec962f6d57c54c6275a3`. The registry install passed the exact-approval demo, production audit, 30-package signature audit, and 2-package attestation verification.
 
 An earlier clean evidence run at commit `29c1b9ec0fb8af162d1b73f950851263d35a0527` also passed, but its artifact upload emitted a Node 20 action-runtime deprecation annotation. It was superseded by the action-runtime fix and the annotation-free exact-main run above and is not cited as final 0.3.1 evidence. Its raw [performance](../benchmarks/results/2026-07-19-mges-performance-ubuntu24-node24-main-29c1b9ec.json), SHA-256 `fb7d94b9b97c6aa6d7448e2e86f6ef49d854a6b4e5c568c2ac22a1f1b08663f5`, [conformance](../benchmarks/results/2026-07-19-mges-conformance-ubuntu24-node24-main-29c1b9ec.json), SHA-256 `0294028d7407facca7f9901eb9e2c9460f19d35048394b71ad68d4a778e4587c`, and [manifest](../benchmarks/results/2026-07-19-mges-evidence-manifest-ubuntu24-node24-main-29c1b9ec.json), SHA-256 `5daf94a9ad742d7bab08f70331db47e87ca4206671f509371a8699b4943b3370`, are retained unchanged alongside [workflow run 29696392506](https://github.com/AjnasNB/maqam/actions/runs/29696392506).
 
@@ -57,17 +57,17 @@ The following files were produced for the earlier metadata-only candidate at com
 
 MGES is a local in-process regression profile. It excludes model, network, storage, browser, human-review, and concurrency latency and is not a competitor benchmark, SLA, security score, compliance result, or certification.
 
-## Publication Boundary
+## Completed Publication Gate
 
-Before any publish action:
+The release completed these gates before its tag and GitHub release were created:
 
-- prove `maqam@0.3.1` is absent from npm;
+- prove `maqam@0.3.1` was absent from npm before publication;
 - complete final review and all clean-source checks, including the governed-browser tests, packed consumer compile, website check, audit, and MGES gates;
 - obtain explicit maintainer approval for the exact full commit and exact packed artifact identity;
 - publish only through the protected npm Trusted Publishing workflow; and
 - do not create `v0.3.1` or announce the release until npm version, registry `gitHead`, integrity, provenance, downloaded tarball SHA-256, signatures, and a clean install are verified.
 
-Preparation of this candidate does not authorize publication, deployment, tagging, a GitHub release, or an announcement.
+The protected workflow published through npm Trusted Publishing on 2026-07-19. Its publish step succeeded; an immediate cached registry tarball lookup briefly returned `ETARGET`, so the downloaded artifact and signatures were reverified through a fresh cache before `v0.3.1` and the GitHub release were created.
 
 ## Historical Evidence
 
