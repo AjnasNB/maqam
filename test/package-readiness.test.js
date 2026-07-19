@@ -15,6 +15,7 @@ const comparison = readFileSync(new URL("../docs/comparison.md", import.meta.url
 const benchmarking = readFileSync(new URL("../docs/benchmarking.md", import.meta.url), "utf8");
 const quickstart = readFileSync(new URL("../docs/quickstart.md", import.meta.url), "utf8");
 const governedSources = readFileSync(new URL("../docs/governed-sources.md", import.meta.url), "utf8");
+const governedBrowser = readFileSync(new URL("../docs/governed-browser-adapters.md", import.meta.url), "utf8");
 const anonymousPublicSources = readFileSync(new URL("../docs/anonymous-public-sources.md", import.meta.url), "utf8");
 const migration03 = readFileSync(new URL("../docs/migration-0.3.md", import.meta.url), "utf8");
 const release03 = readFileSync(new URL("../docs/release-0.3.0.md", import.meta.url), "utf8");
@@ -145,8 +146,16 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(release03, /98c2d97dc31495ec30a0b44c5016fd76316c2074/i);
   assert.match(release03, /sha512-0fV354AKT6JtVMYzWcMCfjUQpJHIjaNF\+bGjxq8TzcuElNVQsx3Cp5Yc062RgNJ5zSDVgUJSn1hzn04hT3jWuQ==/i);
   assert.match(release031, /^# Maqam 0\.3\.1 Release Record/m);
-  assert.match(release031, /Lifecycle:\*\* registry-defined/i);
+  assert.match(release031, /Lifecycle:\*\* unpublished source candidate/i);
   assert.match(release031, /live npm record[\s\S]{0,180}matching `v0\.3\.1` tag/i);
+  assert.match(release031, /No final 0\.3\.1 artifact or MGES record exists/i);
+  assert.match(release031, /earlier metadata-only candidate[\s\S]{0,180}superseded historical candidate evidence/i);
+  assert.doesNotMatch(release031, /implementation phase merged as exact clean `main` commit/i);
+  assert.match(governedBrowser, /^# Governed browser adapters/m);
+  assert.match(governedBrowser, /only origins named by the exact/i);
+  assert.match(governedBrowser, /external protocols[\s\S]{0,250}modal dialogs/i);
+  assert.match(governedBrowser, /host-driver attestation checked after dispatch/i);
+  assert.match(security, /^## Governed Browser Boundary/m);
   assert.match(readme, /Previous verified release:[\s\S]{0,240}maqam@0\.3\.0/i);
   assert.match(readme, /0\.3\.1 release line/i);
   assert.match(readme, /npm view maqam@0\.3\.1 version gitHead dist\.integrity/i);

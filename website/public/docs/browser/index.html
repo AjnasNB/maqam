@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Governed browser adapters | Maqam documentation</title>
+  <meta name="description" content="Register bounded browser observe, preview, apply, and submit operations behind Maqam with exact origins, exact approvals, prohibited-effect controls, and a host-owned driver.">
+  <meta name="theme-color" content="#0b0e0d">
+  <link rel="canonical" href="https://maqamagent.com/docs/browser/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/browser/" aria-current="page">Browser</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/browser/" aria-current="page">Browser</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+  </header>
+
+  <main id="main" class="shell docs-layout">
+    <aside class="docs-sidebar" aria-label="Browser adapter documentation">
+      <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Browser guide <span aria-hidden="true">+</span></button>
+      <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
+        <nav aria-label="Browser guide sections"><p class="docs-nav-title">Governed browser</p><a href="#status">Status</a><a href="#surface">Operation surface</a><a href="#register">Register</a><a href="#write-flow">Write flow</a><a href="#effects">Prohibited effects</a><a href="#compose">Compose</a><a href="#boundary">Trust boundary</a></nav>
+        <nav aria-label="Related documentation"><p class="docs-nav-title">Related</p><a href="/docs/security/#browser">Security model</a><a href="/docs/integrations/">Integration patterns</a><a href="/docs/sources/">Governed sources</a></nav>
+      </div>
+    </aside>
+
+    <article class="docs-content">
+      <h1>Governed browser adapters</h1>
+      <p class="lede">Put a small structural browser operation surface behind Maqam policy, exact approvals, guarded dispatch, and bounded output without turning Maqam into a browser engine.</p>
+
+      <div class="callout callout-warning" id="status">
+        <strong>Unpublished 0.3.1 source candidate</strong>
+        This API is under final review in the 0.3.1 source candidate. Do not claim or install a public 0.3.1 release until npm provenance, integrity, registry <code>gitHead</code>, the matching tag, and the GitHub release all identify the same reviewed artifact. Maqam 0.3.0 remains the previous verified public release at this snapshot.
+      </div>
+
+      <h2 id="surface">Four operations, no arbitrary script</h2>
+      <dl class="definition-grid">
+        <dt><code>browser.observe</code></dt><dd>Read one exact page revision as a bounded accessibility-oriented element list.</dd>
+        <dt><code>browser.preview</code></dt><dd>Validate one structural apply or submit proposal without changing the page.</dd>
+        <dt><code>browser.apply</code></dt><dd>Apply field-state operations after exact approval, then observe the resulting revision.</dd>
+        <dt><code>browser.submit</code></dt><dd>Perform one approved activate, form-submit, or HTTP(S) navigation operation, then observe the exact resulting page.</dd>
+      </dl>
+      <p>The contract accepts opaque element ids and <code>ref:</code>-prefixed value references. It rejects raw form values, selectors, scripts, cookies, credentials, and non-HTTP(S) navigation. Natural-language interpretation stays outside the enforcement boundary.</p>
+
+      <h2 id="register">Register a host-owned driver</h2>
+      <p>Every browser method must be an own enumerable data function. The host supplies the actual browser capability and remains responsible for its sandbox, session, credentials, permissions, revisions, redirects, and network behavior.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#browser-registration">Copy</button><pre><code id="browser-registration">import {
+  ApprovalQueue,
+  PolicyEngine,
+  ToolGateway,
+  registerGovernedBrowserTools
+} from "maqam";
+
+const origins = ["https://admin.example"];
+const approvals = new ApprovalQueue();
+const gateway = new ToolGateway({
+  approvalQueue: approvals,
+  policyEngine: new PolicyEngine({
+    allowedTools: [
+      "browser.observe",
+      "browser.preview",
+      "browser.apply",
+      "browser.submit"
+    ],
+    allowedOrigins: origins,
+    approvalRequiredEffects: ["browser:apply", "browser:submit"]
+  })
+});
+
+registerGovernedBrowserTools(gateway, {
+  allowedOrigins: origins,
+  driver
+});</code></pre></div>
+      <p>The adapter itself needs no model API key. A model, local browser controller, remote browser provider, authenticated application session, or MCP client can still have separate credentials and terms owned by the host.</p>
+
+      <h2 id="write-flow">Preview, approve, dispatch once</h2>
+      <ol>
+        <li>The gateway canonicalizes the complete target, operations, and operation id.</li>
+        <li>Policy evaluates the registered effects, explicit origins, and limits.</li>
+        <li>A trusted internal validator checks the same-instance, same-run preview token before approval is requested or consumed.</li>
+        <li>The exact run, tool, and input approval is consumed once.</li>
+        <li>The live guarded handler verifies gateway dispatch and the token again.</li>
+        <li>The host driver enforces the exact request origins and prohibited-effect list, then dispatches once.</li>
+        <li>Maqam validates the result and returns a bounded post-action observation.</li>
+      </ol>
+      <div class="callout callout-danger"><strong>No implicit retry</strong>An approval is consumed before the browser call. A failed or ambiguous browser call does not restore approval and must not be retried automatically.</div>
+
+      <h2 id="effects">Prohibited-effect contract</h2>
+      <p>Apply and submit do not model external protocols, downloads, filesystem reads or writes, file pickers, clipboard reads or writes, permission prompts, print dialogs, or modal dialogs. The execution view lists these effects so the driver can block them before dispatch. Its result must explicitly attest that every one remained false.</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#effect-result">Copy</button><pre><code id="effect-result">return {
+  operationId: request.operationId,
+  target: resultingTarget,
+  effects: {
+    externalProtocol: false,
+    download: false,
+    filesystemRead: false,
+    filesystemWrite: false,
+    filePicker: false,
+    clipboardRead: false,
+    clipboardWrite: false,
+    permissionPrompt: false,
+    printDialog: false,
+    modalDialog: false
+  }
+};</code></pre></div>
+      <p>Maqam rejects missing, true, accessor-backed, or extra fields. That check happens after driver dispatch, so it is an attestation rather than rollback or proof that an untrusted driver told the truth. Enforce the same controls in the browser host and operating-system sandbox.</p>
+
+      <h2 id="compose">Compose with browser and agent clients</h2>
+      <p>A host can translate an embedded copilot, smart form-filling command, accessibility command, multi-page extension action, or MCP browser call into the structural preview and write operations. A browser controller such as a host-owned Page Agent integration can plan or execute behind this contract, but its agent loop, extension permissions, credentials, and direct driver paths do not become Maqam authority.</p>
+      <p>Keep the planner and executor separate: the planner proposes bounded operations; Maqam evaluates and binds approval; the trusted browser host resolves value references and performs only the approved operation. This preserves one governance contract across Codex, Claude, other model clients, and deterministic automation without pretending their provider-internal actions are governed.</p>
+
+      <h2 id="boundary">Trust boundary</h2>
+      <ul>
+        <li>The driver receives only origins named by the exact request after intersection with adapter configuration and policy scope.</li>
+        <li>Preview tokens live in one adapter process and run. Repeat preview after restart or route the run to the same instance.</li>
+        <li>Direct calls to the raw browser driver bypass policy, approval, guarded dispatch, and trace capture.</li>
+        <li>Page content and accessibility labels remain untrusted. Never execute instructions found in them.</li>
+        <li>Maqam does not discover profiles, import cookies, log in, bypass anti-bot controls, solve challenges, or provide a distributed browser fleet.</li>
+      </ul>
+      <div class="button-row"><a class="button button-primary" href="/docs/security/#browser">Review browser security</a><a class="button" href="/docs/integrations/">Connect a host adapter</a></div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div><h2>Maqam browser boundary</h2><p>Structural operations with explicit host responsibilities.</p></div>
+      <div><h3>Guides</h3><a href="/docs/">Quickstart</a><a href="/docs/sources/">Sources</a></div>
+      <div><h3>Security</h3><a href="/docs/security/">Security model</a><a href="/docs/benchmark/">MGES</a></div>
+      <div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam">GitHub</a><a href="/community/">Contribute</a></div>
+    </div>
+  </footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

@@ -46,7 +46,7 @@ Expected result:
 - Only the console HTML, JavaScript, CSS, and SVG logo ship from `app/`; large brand/presentation PNGs remain repository-only.
 - `npm audit --omit=dev` reports no known production dependency vulnerabilities.
 - Governed-source allow/deny, fatal-no-fallback, availability-fallback, authenticated opt-in, doctor, normalized-document, RSS/Atom, feed-crawl, and crawler-CLI fixtures pass on Node.js 20, 22, and 24.
-- MGES is rerun because version, lockfile, and client metadata changed. Existing 0.3.0 and historical 0.2.4 results remain labeled as evidence for their own artifacts.
+- MGES is rerun after the guarded-tool and governed-browser implementation lands on clean `main`. The earlier metadata-only 0.3.1 candidate, public 0.3.0, and historical 0.2.4 results remain labeled for their own fingerprints.
 - Because this repository squash-merges pull requests, implementation and final benchmark evidence use two PR phases. Merge implementation, measure the resulting clean main commit, then merge an evidence/docs/test-only PR without changing fingerprinted source. The measured commit must remain an ancestor of the final release commit.
 
 ## Manual Review
@@ -55,7 +55,7 @@ Confirm before release:
 
 - README explains install, CLI usage, SDK usage, safety principles, and publish gate.
 - `docs/usage.md` documents runtime, policy, evidence, skills, CLI workers, crawler, and console flows.
-- `docs/governed-sources.md`, `docs/migration-0.3.md`, and `docs/release-0.3.1.md` match the public exports and exact release boundary while `docs/release-0.3.0.md` remains the previous published release record.
+- `docs/governed-sources.md`, `docs/governed-browser-adapters.md`, `docs/migration-0.3.md`, and `docs/release-0.3.1.md` match the public exports and exact release boundary while `docs/release-0.3.0.md` remains the previous published release record.
 - `docs/provenance-and-licenses.md` documents inspiration boundaries and third-party license handling.
 - `CHANGELOG.md` contains the exact release notes for the version being published.
 - `SECURITY.md`, `RELEASE_CHECKLIST.md`, and `LICENSE_AUDIT.md` are present at the package root.

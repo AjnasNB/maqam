@@ -16,7 +16,7 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 > **Previous verified release:** [`maqam@0.3.0`](https://www.npmjs.com/package/maqam/v/0.3.0) was published through npm Trusted Publishing and is paired with the [`v0.3.0` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.0). Because npm dist-tags and the latest GitHub release can advance independently of a packaged README, verify the current release with `npm view maqam dist-tags.latest gitHead dist.integrity` and the repository's [latest release page](https://github.com/AjnasNB/maqam/releases/latest).
 
-> **0.3.1 release line — 2026-07-19:** this package refreshes release truth without changing Maqam's public API or governance behavior. Package metadata is not publication proof: verify `npm view maqam@0.3.1 version gitHead dist.integrity` and the matching [`v0.3.1` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.1). Until both records exist and identify the same reviewed commit, treat 0.3.1 as unavailable; once they match, those live records are the public-release authority. See the [0.3.1 release record](docs/release-0.3.1.md).
+> **0.3.1 release line - 2026-07-19:** this candidate adds gateway-authenticated guarded handlers and a structural preview/apply/submit browser boundary alongside the release-truth corrections. Package metadata is not publication proof: verify `npm view maqam@0.3.1 version gitHead dist.integrity` and the matching [`v0.3.1` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.1). Until both records exist and identify the same reviewed commit, treat 0.3.1 as unavailable; once they match, those live records are the public-release authority. See the [0.3.1 release record](docs/release-0.3.1.md).
 
 > **0.3 release line:** governed source routing, hosted-anonymous Exa web search, public YouTube metadata and available captions through an explicitly configured `yt-dlp`, normalized research documents, offline RSS/Atom parsing, feed-aware crawling, and exact network-origin controls. See the [0.3.0 release record](docs/release-0.3.0.md) and [migration guide](docs/migration-0.3.md).
 
@@ -32,7 +32,7 @@ They are one ecosystem with explicit boundaries, not one silently merged runtime
 
 | Choose | When you need |
 |---|---|
-| `maqam@0.3.1` (after live registry verification) | One compact boundary around tool calls, exact approvals, worker adapters, traces, evidence, governed source routing, anonymous web search, public YouTube metadata/captions, or bounded HTTP/feed research |
+| `maqam@0.3.1` (after live registry verification) | One compact boundary around tool calls, exact approvals, guarded structural browser actions, worker adapters, traces, evidence, governed source routing, anonymous web search, public YouTube metadata/captions, or bounded HTTP/feed research |
 | `productloop-os@0.2.1` | The wider modular package family for runtime, policy, approvals, provenance, skills, connectors, evaluations, and research |
 | Both beneath an orchestrator | Google ADK, OpenAI Agents SDK, LangGraph, or another agent loop already plans work and Maqam should govern selected side effects |
 
@@ -62,6 +62,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 | [Integration guide](https://maqamagent.com/docs/integrations/) and [Google ADK / Microsoft Agent 365 boundary](https://github.com/AjnasNB/maqam/blob/main/docs/integrations-google-adk-agent365.md) | Host adapters, prerequisites, copy-paste templates, and bypass warnings |
 | [Governed Sources](https://github.com/AjnasNB/maqam/blob/main/docs/governed-sources.md) | Ordered source adapters, `ToolGateway` routing, normalized documents, source doctor, RSS/Atom, fallback, and security boundaries |
 | [Anonymous-public source pack](https://github.com/AjnasNB/maqam/blob/main/docs/anonymous-public-sources.md) | No-developer-key Exa MCP search and separately installed `yt-dlp` YouTube metadata/captions, with credential classes, limits, terms, privacy, and safe registration |
+| [Governed browser adapters](https://github.com/AjnasNB/maqam/blob/main/docs/governed-browser-adapters.md) | Structural observe/preview/apply/submit contracts, exact origins and approvals, opaque value references, Page Agent composition, and driver trust boundaries |
 | [MGES benchmark guide](https://maqamagent.com/docs/benchmark/) and [raw methodology](https://github.com/AjnasNB/maqam/blob/main/benchmarks/README.md) | Reproducible local-call and conformance evidence with claim limits |
 | [Security guide](https://maqamagent.com/docs/security/) and [security policy](https://github.com/AjnasNB/maqam/blob/main/SECURITY.md) | Threat boundaries, reporting, crawler safety, and required host controls |
 | [Coding-agent guide](https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md) | Codex, Claude Code, generic CLI workers, approvals, and outcome checks |
@@ -131,6 +132,8 @@ See the [detailed, dated comparison](https://github.com/AjnasNB/maqam/blob/main/
 - `PolicyEngine`: fail-closed goal and tool-call decisions for allowed tools, origins, effects, clamped tenant limits, and approval gates.
 - `EvidenceLedger`: private, transactional provenance records with computed source hashes, same-run claim links, confidence, and unsupported-claim checks.
 - `ToolGateway`: a policy-required path with call ceilings, redacted traces, effective origin scope, non-downgradable handler effects and risk, fail-closed policy-decision validation, and exact one-time approval binding.
+- `ToolGateway.registerGuardedTool`: gives an adapter a private verifier for the exact active input, handler context, registration, decision, and consumed approval receipt without exposing a reusable capability.
+- `registerGovernedBrowserTools`: registers structural observe, preview, apply, and submit operations around a host-owned driver; plans must be issued by preview for the same run, writes require exact phase approval, each driver call receives only the origins named by that request, and raw values, selectors, scripts, downloads, file/clipboard/permission actions, and dialogs are excluded. Apply and submit drivers must block the prohibited effects before dispatch and return the explicit all-false effects record described in the [browser adapter guide](docs/governed-browser-adapters.md).
 - `createAgentTool`: wraps any function agent or explicitly bound object agent so Maqam can control it through policy, trace, approval, and atomic evidence/claim capture.
 - `createCliAgentTool`: wraps fixed command-line workers with cwd roots, environment allowlists, cancellation, timeout, approximate token limits, JSONL parsing, and no shell execution by default.
 - `createCodexAgentTool`: runs Codex non-interactively with a read-only default, ephemeral sessions, JSONL activity, and normalized token usage.

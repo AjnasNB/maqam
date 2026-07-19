@@ -16,17 +16,17 @@
   <header class="site-header">
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
-      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/" aria-current="page">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam/security">Security</a></nav>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/" aria-current="page">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/browser/">Browser</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam/security">Security</a></nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
-    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam/security">Security</a></nav>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/browser/">Browser</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.0/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam/security">Security</a></nav>
   </header>
 
   <main id="main" class="shell docs-layout">
     <aside class="docs-sidebar" aria-label="Security documentation">
       <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">Security menu <span aria-hidden="true">+</span></button>
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
-        <nav aria-label="Security sections"><p class="docs-nav-title">Security model</p><a href="#boundary">Boundary</a><a href="#policy">Policy</a><a href="#approval">Approval</a><a href="#adapters">Adapters</a><a href="#sources">Sources</a><a href="#crawler">Crawler</a><a href="#agents">External agents</a><a href="#evidence">Evidence</a><a href="#deployment">Deployment</a><a href="#report">Report an issue</a></nav>
+        <nav aria-label="Security sections"><p class="docs-nav-title">Security model</p><a href="#boundary">Boundary</a><a href="#policy">Policy</a><a href="#approval">Approval</a><a href="#adapters">Adapters</a><a href="#browser">Browser</a><a href="#sources">Sources</a><a href="#crawler">Crawler</a><a href="#agents">External agents</a><a href="#evidence">Evidence</a><a href="#deployment">Deployment</a><a href="#report">Report an issue</a></nav>
       </div>
     </aside>
 
@@ -92,6 +92,17 @@ const gateway = new ToolGateway({
         <li>Inspect the application for direct client paths that bypass the gateway.</li>
         <li>Validate external output before using it as evidence or passing it to another side effect.</li>
       </ul>
+
+      <h2 id="browser">Governed browser controls</h2>
+      <p>The unpublished 0.3.1 source candidate registers bounded observe, preview, apply, and submit operations around a host-owned browser driver. Maqam does not supply the browser engine, profile, login, credential store, planner, or operating-system sandbox.</p>
+      <ul>
+        <li>Configure exact canonical HTTP(S) origins in both adapter and policy. The driver receives only origins named by that exact request after scope intersection.</li>
+        <li>Keep observe and preview read-only, and revalidate the exact session, page, origin, and revision before dispatch.</li>
+        <li>Block external protocols, downloads, filesystem reads and writes, file pickers, clipboard reads and writes, permission prompts, print dialogs, and modal dialogs in the host before apply or submit.</li>
+        <li>Require the all-false effects result, but treat it as a host attestation checked after dispatch rather than rollback or proof that an untrusted driver is truthful.</li>
+        <li>Repeat preview after process restart and never call the raw browser driver as a policy bypass.</li>
+      </ul>
+      <p>See the <a href="/docs/browser/">governed-browser guide</a> for the structural contract and complete trust boundary.</p>
 
       <h2 id="sources">Research source routing</h2>
       <p>The 0.3.0 source registry is an ordering and normalization layer. It becomes a governed path only when <code>route()</code> receives a ToolCaller bound to a real configured gateway. A direct adapter read or <code>routeUngoverned()</code> remains outside that enforcement path.</p>

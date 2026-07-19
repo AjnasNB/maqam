@@ -1003,6 +1003,13 @@ export {
   registerToolAdapter,
   runToolAdapterConformance
 } from "./framework/tool-adapter.js";
+export {
+  BROWSER_ADAPTER_SCHEMA_VERSION,
+  BROWSER_DRIVER_EXECUTION_SCHEMA_VERSION,
+  BROWSER_PLAN_SCHEMA_VERSION,
+  BROWSER_RESULT_SCHEMA_VERSION,
+  registerGovernedBrowserTools
+} from "./framework/browser-adapter.js";
 export { createCliAgentTool, estimateCliInputTokens, parseCliJsonLines } from "./framework/cli-agent-tool.js";
 export {
   createCodexAgentTool,

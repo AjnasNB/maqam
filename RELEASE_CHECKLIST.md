@@ -38,9 +38,10 @@ Required result:
 - `npm run test:consumer-types` packs the candidate into a temporary clean project and strictly compiles both `maqam` and `maqam/server` without adding consumer type dependencies.
 - `npm run test:website` verifies release truth, internal links, accessibility structure, local assets, and Worker media semantics.
 - Governed-source allow/deny, fatal-no-fallback, availability-fallback, authentication opt-in, doctor, normalized-document, RSS/Atom, feed-crawl, and crawler-CLI fixtures pass on Node.js 20, 22, and 24.
-- MGES conformance and performance are rerun because version, lockfile, and client metadata changed; 0.3.0 and 0.2.4 figures are not relabeled as 0.3.1 evidence.
+- Guarded-dispatch and governed-browser fixtures prove exact input/context/registration authority, same-instance same-run plan tokens, exact request origins, exact phase approval, prohibited-effect attestation, structural limits, and post-action observation.
+- MGES conformance and performance are rerun because the guarded-tool/browser public source, version, lockfile, and client metadata changed; earlier metadata-only 0.3.1 results and the 0.3.0 or 0.2.4 figures are not relabeled as final 0.3.1 evidence.
 - With squash merging enabled, use two PR phases: merge implementation first, rerun MGES from that exact clean main commit, then merge an evidence/docs/test-only PR. The measured main commit must remain an ancestor of the final release commit and no fingerprinted source may change in the evidence PR.
-- `npm pack --dry-run` includes `src/`, `src/index.d.ts`, `src/maqam/server.d.ts`, `examples/`, `docs/governed-sources.md`, `docs/migration-0.3.md`, both versioned 0.3 release records, the other public docs, `README.md`, `LICENSE`, `CHANGELOG.md`, `SECURITY.md`, `RELEASE_CHECKLIST.md`, and `LICENSE_AUDIT.md`.
+- `npm pack --dry-run` includes `src/`, `src/index.d.ts`, `src/maqam/server.d.ts`, `examples/`, `docs/governed-sources.md`, `docs/governed-browser-adapters.md`, `docs/migration-0.3.md`, both versioned 0.3 release records, the other public docs, `README.md`, `LICENSE`, `CHANGELOG.md`, `SECURITY.md`, `RELEASE_CHECKLIST.md`, and `LICENSE_AUDIT.md`.
 - The tarball includes only `app/index.html`, `app/app.js`, `app/styles.css`, and `app/assets/maqam-logo.svg` from the console; repository-only presentation PNGs are excluded.
 - `npm audit --omit=dev` reports no known production dependency vulnerabilities.
 - The packed artifact identity and current full Git commit are recorded before approval. The worktree is clean and the commit is pushed.
@@ -58,7 +59,7 @@ Approval must name:
 - Command: `npm publish --access public --ignore-scripts --provenance`
 - Artifact: filename, byte size, npm integrity, independent SHA-256, and Git commit
 
-For `createReleaseGateReport`, the approval action must be `publish:npm`. Its subject must exactly match `packageName`, `version`, `registry`, `publishCommand`, `artifactFilename`, `artifactSizeBytes`, `artifactIntegrity`, and `gitCommit`. Provenance must explicitly record `copiedThirdPartyCode: false` and the Agent Reach reference-only boundary, and every required test, clean-consumer, benchmark, audit, and pack check must pass.
+For `createReleaseGateReport`, the approval action must be `publish:npm`. Its subject must exactly match `packageName`, `version`, `registry`, `publishCommand`, `artifactFilename`, `artifactSizeBytes`, `artifactIntegrity`, and `gitCommit`. Provenance must explicitly record `copiedThirdPartyCode: false`, the Agent Reach reference-only boundary, and the independent Page Agent composition boundary; every required test, clean-consumer, benchmark, audit, and pack check must pass.
 
 ## After Approval
 

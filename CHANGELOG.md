@@ -4,14 +4,20 @@ All notable Maqam changes are tracked here before release.
 
 ## 0.3.1
 
-Documentation and release-truth patch. Availability is defined by the live npm registry, provenance, integrity, matching Git tag, and GitHub release—not by this packaged changelog. At candidate preparation time, 0.3.0 was the previous verified public release.
+Guarded adapter and release-truth update. Availability is defined by the live npm registry, provenance, integrity, matching Git tag, and GitHub release - not by this packaged changelog. At candidate preparation time, 0.3.0 was the previous verified public release.
+
+### Added
+
+- `ToolGateway.registerGuardedTool()` with a private, one-dispatch verifier bound to the exact active input, context object, registration identity, run, canonical input hash, policy decision, and consumed approvals.
+- `registerGovernedBrowserTools()` with bounded structural observe/preview/apply/submit contracts, exact origins and revisions, opaque `valueRef` values, same-run preview authenticity tokens, exact phase approvals, post-action observation, and no bundled browser engine.
+- An independent Page Agent composition guide for embedded copilots, form filling, accessibility, multi-page extensions, and MCP-facing browser hosts without importing or treating its agent loop as Maqam authority.
 
 ### Changed
 
 - Replaced stale pre-publication 0.3.0 wording in the packaged README, documentation, and website with verified public-release records and evergreen registry checks.
 - Kept the 0.2.4 videos and benchmark artifacts explicitly labeled as historical evidence for that artifact rather than relabeling them as 0.3 evidence.
-- Updated package, release-gate, trusted-publishing, and MCP client metadata to the 0.3.1 identity without changing the public API or governance behavior.
-- Adds clean-main 0.3.1 MGES candidate evidence from commit `513a7a0bf3711e26ca0e82b4ae1a1663553cc345` in a separate evidence-only follow-up, while preserving the public 0.3.0 benchmark record and all three preceding `REVIEW` attempts.
+- Updated package, release-gate, trusted-publishing, and MCP client metadata to the 0.3.1 identity.
+- Retains the MGES records from metadata-only commit `513a7a0bf3711e26ca0e82b4ae1a1663553cc345` as explicitly superseded historical candidate evidence; they are not evidence for the guarded/browser source, which requires fresh clean-main fingerprints, an evidence-only follow-up, and exact-artifact approval.
 
 See [docs/release-0.3.1.md](docs/release-0.3.1.md) for the release boundary and required verification.
 

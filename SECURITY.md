@@ -4,7 +4,7 @@ Maqam is designed for governed local agent workflows. Treat every tool, connecto
 
 ## Supported Version
 
-The maintained source line is `0.3.x`. Treat a version as a supported public artifact only after its exact npm record, provenance, integrity, registry `gitHead`, matching Git tag, and GitHub release have been verified; source metadata alone is not publication proof. Version 0.3.0 adds a fail-closed governed-source caller boundary, fatal-error fallback rules, explicit authenticated-source opt-in, offline bounded feed parsing, and exact cross-origin crawler controls. The published `0.2.4` artifact remains historical, and security fixes are backported only when maintainers explicitly choose to support an older line.
+The maintained source line is `0.3.x`. Treat a version as a supported public artifact only after its exact npm record, provenance, integrity, registry `gitHead`, matching Git tag, and GitHub release have been verified; source metadata alone is not publication proof. Version 0.3.0 adds a fail-closed governed-source caller boundary, fatal-error fallback rules, explicit authenticated-source opt-in, offline bounded feed parsing, and exact cross-origin crawler controls. The unpublished 0.3.1 source candidate adds guarded dispatch verification and a host-supplied governed browser contract; it is not a public release until the same artifact checks pass. The published `0.2.4` artifact remains historical, and security fixes are backported only when maintainers explicitly choose to support an older line.
 
 ## Reporting Issues
 
@@ -45,6 +45,17 @@ Report security issues privately to the package owner before public disclosure. 
 - Keep source `check()` implementations local and deterministic. `doctor()` applies timeout and result validation but cannot sandbox arbitrary host JavaScript or prove that a custom check is offline or side-effect free.
 - `parseRssAtom()` performs no network request and rejects DTD/entity declarations. The host-supplied reader used by RSS/Atom adapter factories still needs DNS/redirect authorization, byte/time limits, egress controls, and credential isolation.
 - The crawler CLI no longer supports `--all-origins`. Use repeatable exact `--allowed-origin` values; this remains an application scope decision, not a substitute for deployment egress control.
+
+## Governed Browser Boundary
+
+- `registerGovernedBrowserTools()` registers structural observe, preview, apply, and submit tools around a host-owned driver. Maqam does not bundle a browser engine, browser profile, login flow, credential store, natural-language planner, or arbitrary script executor.
+- Route the real browser call through the registered gateway tools. Keeping or calling the raw driver directly is a bypass outside Maqam's policy, approval, trace, and guarded-dispatch boundary.
+- Configure exact canonical HTTP(S) origins in both the adapter and policy. The driver receives only the origins named by the exact request after intersection with those two scopes; it must enforce them across redirects, form actions, navigation, and new-page creation.
+- Treat `observe` and `preview` as strictly read-only. The driver must revalidate the exact session, page, origin, and revision before dispatch.
+- Apply and submit drivers must block external protocols, downloads, filesystem reads and writes, file pickers, clipboard reads and writes, permission prompts, print dialogs, and modal dialogs before dispatch. They must return the required all-false effects record; missing, true, accessor-backed, and extra fields are rejected.
+- The effects record is a host-driver attestation checked after dispatch. It cannot undo an effect or make an untrusted driver truthful. Enforce browser permissions, downloads, protocol handlers, filesystem access, clipboard access, and dialogs in the browser host or operating-system sandbox as well.
+- A preview token is scoped to one adapter instance and run. It is not durable across process restarts or horizontally shared instances; repeat preview after restart or route the same run to the same instance.
+- Keep raw field values in host-managed storage and pass only opaque `ref:` value references. Never put cookies, credentials, session exports, selectors, scripts, or secrets into plans, traces, URLs, or evidence.
 
 ## External Agent Boundary
 

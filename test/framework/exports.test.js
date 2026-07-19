@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import * as maqam from "../../src/index.js";
 import {
   AgentRuntime,
   EvidenceLedger,
@@ -46,6 +47,7 @@ import {
 } from "../../src/index.js";
 
 test("framework primitives are exported without removing crawler exports", () => {
+  assert.equal(Object.hasOwn(maqam, "defineInternalGuardedTool"), false);
   assert.equal(typeof crawl, "function");
   assert.equal(typeof AgentRuntime, "function");
   assert.equal(typeof EvidenceLedger, "function");
