@@ -28,12 +28,12 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 Maqam is the governed execution kernel: policy before a registered operation, approval bound to the exact run/tool/input, one-use consumption by default, and reviewable trace and evidence records. [ProductLoop OS](https://github.com/AjnasNB/productloop-os) is the companion ecosystem: its public umbrella and eight small packages add workflow runtime, policy decisions, approval operations, provenance, evaluations, connector trust, skill manifests, and replayable browser-research records.
 
-They are one ecosystem with explicit boundaries, not one silently merged runtime. `productloop-os@0.2.1` exposes Maqam and the Ajnas packages as named namespaces and tested adapters, while their contracts and ledgers remain distinct.
+They are one ecosystem with explicit boundaries, not one silently merged runtime. [`productloop-os@0.2.2`](https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.2) exposes Maqam and the Ajnas packages as named namespaces and tested adapters, while their contracts and ledgers remain distinct.
 
 | Choose | When you need |
 |---|---|
 | `maqam@0.3.1` (after live registry verification) | One compact boundary around tool calls, exact approvals, guarded structural browser actions, worker adapters, traces, evidence, governed source routing, anonymous web search, public YouTube metadata/captions, or bounded HTTP/feed research |
-| `productloop-os@0.2.1` | The wider modular package family for runtime, policy, approvals, provenance, skills, connectors, evaluations, and research |
+| [`productloop-os@0.2.2`](https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.2) | The wider modular package family for runtime, policy, approvals, provenance, skills, connectors, evaluations, and research |
 | Both beneath an orchestrator | Google ADK, OpenAI Agents SDK, LangGraph, or another agent loop already plans work and Maqam should govern selected side effects |
 
 Maqam and ProductLoop do not replace model providers, durable orchestration, identity, databases, browser engines, or operating-system sandboxes. Only operations routed through a registered boundary are governed. See the [package atlas and copy-paste examples](https://maqamagent.com/docs/productloop/).
