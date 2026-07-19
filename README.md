@@ -14,9 +14,9 @@ More technically, Maqam is an MIT-licensed TypeScript execution boundary for gov
 
 The crawler is not the product center; it is one built-in connector. Maqam governs workers that enter through `ToolGateway`, including function agents, explicitly bound object agents, Codex CLI, Claude Code, generic command-line workers, browser and research adapters, internal services, and write actions that need human approval. Calls that bypass a registered adapter are outside Maqam's control.
 
-> **Release status is live-record-driven:** [`maqam@0.3.1`](https://www.npmjs.com/package/maqam/v/0.3.1) is the verified public release published through npm Trusted Publishing and paired with [`v0.3.1`](https://github.com/AjnasNB/maqam/releases/tag/v0.3.1). Its registry `gitHead` is `2f7231db912012e37e89ec962f6d57c54c6275a3`; always re-check `npm view maqam dist-tags.latest gitHead dist.integrity` and the repository's [latest release page](https://github.com/AjnasNB/maqam/releases/latest) because a README snapshot cannot predict a later release.
+> **Release status is live-record-driven:** [`maqam@0.3.1`](https://www.npmjs.com/package/maqam/v/0.3.1) was the verified public release when this source candidate was prepared. It was published through npm Trusted Publishing and paired with [`v0.3.1`](https://github.com/AjnasNB/maqam/releases/tag/v0.3.1); its registry `gitHead` is `2f7231db912012e37e89ec962f6d57c54c6275a3`. Always re-check `npm view maqam dist-tags.latest gitHead dist.integrity` and the repository's [latest release page](https://github.com/AjnasNB/maqam/releases/latest), because a README snapshot cannot predict a later release.
 
-> **0.3.1 release line - 2026-07-19:** 0.3.1 adds gateway-authenticated guarded handlers and a structural preview/apply/submit browser boundary alongside the release-truth corrections. Package metadata is not publication proof: verify `npm view maqam@0.3.1 version gitHead dist.integrity` and the matching [`v0.3.1` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.1). If both records exist and identify the same reviewed commit, they are the public-release authority; otherwise treat 0.3.1 as unavailable. See the [0.3.1 release record](docs/release-0.3.1.md).
+> **0.3.2 package line:** this source and packaged README target 0.3.2 so a future immutable npm artifact carries the verified ProductLoop OS 0.2.2 companion map instead of the stale 0.2.1 snapshot in 0.3.1. No runtime or security boundary changes. Package metadata is not publication proof: verify `npm view maqam@0.3.2 version gitHead dist.integrity` and the matching [`v0.3.2` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.2). If both records exist and identify the same reviewed commit, they are the public-release authority; otherwise use the verified 0.3.1 release. See the [0.3.2 release record](docs/release-0.3.2.md).
 
 > **0.3 release line:** governed source routing, hosted-anonymous Exa web search, public YouTube metadata and available captions through an explicitly configured `yt-dlp`, normalized research documents, offline RSS/Atom parsing, feed-aware crawling, and exact network-origin controls. See the [0.3.0 release record](docs/release-0.3.0.md) and [migration guide](docs/migration-0.3.md).
 
@@ -32,7 +32,7 @@ They are one ecosystem with explicit boundaries, not one silently merged runtime
 
 | Choose | When you need |
 |---|---|
-| `maqam@0.3.1` (after live registry verification) | One compact boundary around tool calls, exact approvals, guarded structural browser actions, worker adapters, traces, evidence, governed source routing, anonymous web search, public YouTube metadata/captions, or bounded HTTP/feed research |
+| `maqam@0.3.2` (only after live registry and release verification) | One compact boundary around tool calls, exact approvals, guarded structural browser actions, worker adapters, traces, evidence, governed source routing, anonymous web search, public YouTube metadata/captions, or bounded HTTP/feed research |
 | [`productloop-os@0.2.2`](https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.2) | The wider modular package family for runtime, policy, approvals, provenance, skills, connectors, evaluations, and research |
 | Both beneath an orchestrator | Google ADK, OpenAI Agents SDK, LangGraph, or another agent loop already plans work and Maqam should govern selected side effects |
 
@@ -167,8 +167,8 @@ Agent systems fail in production when tools run outside policy, outputs cannot b
 Maqam supports the maintained Node.js 22 LTS, 24 LTS, and 26 Current release lines.
 
 ```bash
-npm view maqam@0.3.1 version dist.integrity gitHead
-npm install -g maqam@0.3.1
+npm view maqam@0.3.2 version dist.integrity gitHead
+npm install -g maqam@0.3.2
 ```
 
 Run the exact-approval proof without a model key or hosted account:
@@ -192,7 +192,7 @@ Then open `http://127.0.0.1:8787`.
 Use inside a project:
 
 ```bash
-npm install maqam@0.3.1
+npm install maqam@0.3.2
 ```
 
 ## Crawler CLI
@@ -440,11 +440,11 @@ The npm tarball intentionally excludes the large brand-board and presentation PN
 
 ## Publish
 
-`maqam@0.3.0` is a verified historical npm release. This source and packaged README target 0.3.1, but source metadata alone does not prove publication. Determine live 0.3.1 status from `npm view maqam@0.3.1 version gitHead dist.integrity`, npm provenance, and the matching [`v0.3.1` release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.1) before installation. Do not republish an existing version. New releases use the maintainer-approved [trusted npm publishing workflow](https://github.com/AjnasNB/maqam/actions/workflows/publish-npm.yml), which rebuilds and verifies the exact approved artifact before npm's OIDC publisher accepts it.
+`maqam@0.3.1` is a verified public npm release. This source and packaged README target 0.3.2, but source metadata alone does not prove publication. Determine live 0.3.2 status from `npm view maqam@0.3.2 version gitHead dist.integrity`, npm provenance, and the matching [`v0.3.2` release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.2) before installation; if either record is absent or mismatched, use 0.3.1. Do not republish an existing version. New releases use the maintainer-approved [trusted npm publishing workflow](https://github.com/AjnasNB/maqam/actions/workflows/publish-npm.yml), which rebuilds and verifies the exact approved artifact before npm's OIDC publisher accepts it.
 
 Before a new version is approved, the final clean commit must pass the complete release checklist, a fresh tarball must be inspected and installed in a clean consumer, and the package owner must approve that artifact's filename, byte size, integrity, SHA-256, version, registry, command, and Git commit. After publication, verify the registry integrity, provenance, and `gitHead`, then create the matching annotated tag and GitHub release.
 
-See the [0.3.1 release record](docs/release-0.3.1.md) for required evidence. The [0.3.0 release record](docs/release-0.3.0.md), [0.2.4 source release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md), and [v0.2.4 GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) remain historical evidence for their own artifacts.
+See the [0.3.2 release record](docs/release-0.3.2.md) for required evidence. The [0.3.1 release record](docs/release-0.3.1.md), [0.3.0 release record](docs/release-0.3.0.md), [0.2.4 source release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md), and [v0.2.4 GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) remain historical evidence for their own artifacts.
 
 ## License
 

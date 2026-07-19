@@ -5,11 +5,11 @@ import { createReleaseGateReport } from "../../src/framework/release-gate.js";
 
 const artifact = {
   packageName: "maqam",
-  version: "0.3.1",
+  version: "0.3.2",
   sha256: "b".repeat(64),
   integrity: `sha512-${Buffer.alloc(64, 7).toString("base64")}`,
   gitCommit: "a".repeat(40),
-  filename: "maqam-0.3.1.tgz",
+  filename: "maqam-0.3.2.tgz",
   sizeBytes: 12_345
 };
 
@@ -25,7 +25,7 @@ const requiredVerificationCommands = [
 
 const completeInput = {
   packageName: "maqam",
-  version: "0.3.1",
+  version: "0.3.2",
   license: "MIT",
   registry: "https://registry.npmjs.org/",
   publishCommand: "npm publish --access public --ignore-scripts --provenance",
@@ -63,7 +63,7 @@ const completeInput = {
 function requestReleaseApproval(queue, overrides = {}) {
   return queue.requestApproval({
     action: "publish:npm",
-    reason: "Maqam 0.3.1 is ready for owner approval.",
+    reason: "Maqam 0.3.2 is ready for owner approval.",
     subject: {
       packageName: completeInput.packageName,
       version: completeInput.version,
@@ -112,7 +112,7 @@ test("createReleaseGateReport marks an exact approved complete release publish-r
   assert.equal(report.status, "approved");
   assert.equal(report.readyToPublish, true);
   assert.deepEqual(report.blockers, []);
-  assert.match(report.summary, /maqam@0\.3\.1/);
+  assert.match(report.summary, /maqam@0\.3\.2/);
 });
 
 test("unrelated actions and mismatched release subjects cannot authorize publishing", () => {
@@ -167,13 +167,13 @@ test("release gate requires every promised check on the exact artifact commit", 
 test("createReleaseGateReport explains missing and invalid production evidence", () => {
   const report = createReleaseGateReport({
     packageName: "maqam",
-    version: "0.3.1",
+    version: "0.3.2",
     license: "MIT",
     registry: "https://registry.example/",
     publishCommand: "npm publish",
     artifact: {
       packageName: "other-package",
-      version: "0.3.1",
+      version: "0.3.2",
       sha256: "not-a-digest",
       integrity: "sha256:wrong-algorithm",
       gitCommit: "short",
