@@ -212,12 +212,12 @@ test("governed browser observe and preview expose bounded structural read-only r
     submit: "browser.submit"
   });
   assert.deepEqual([...registration.prohibitedEffects], PROHIBITED_EFFECTS);
-  assert.deepEqual(gateway.tools.get("browser.apply").metadata.effects, [
+  assert.deepEqual([...gateway.tools.get("browser.apply").metadata.effects], [
     "browser:write",
     "browser:apply",
     "network:write"
   ]);
-  assert.deepEqual(gateway.tools.get("browser.submit").metadata.effects, [
+  assert.deepEqual([...gateway.tools.get("browser.submit").metadata.effects], [
     "browser:write",
     "browser:submit",
     "network:write"
