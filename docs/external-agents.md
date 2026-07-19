@@ -23,7 +23,7 @@ Preventive controls run before or during execution. Observed controls inspect pr
 
 ## Prerequisites
 
-- Node.js 20.18.1 or newer.
+- A maintained Node.js 22, 24, or 26 release.
 - `maqam` installed in the project.
 - The provider CLI installed and authenticated through its own supported login flow.
 - A trusted Git working directory for coding-agent runs.

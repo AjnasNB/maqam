@@ -1,6 +1,6 @@
 # Maqam Five-Minute Quickstart
 
-This quickstart proves the exact-approval path locally. It needs Node.js 20.18.1 or later and does not need a model key, hosted account, browser, database, or external side effect.
+This quickstart proves the exact-approval path locally. It needs a maintained Node.js 22, 24, or 26 release and does not need a model key, hosted account, browser, database, or external side effect.
 
 Commands below target the exact `maqam@0.3.1` release line. Before running them, confirm that `npm view maqam@0.3.1 version dist.integrity gitHead` returns the reviewed version, integrity, and commit; source metadata alone is not proof that the package is public.
 

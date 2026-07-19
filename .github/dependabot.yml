@@ -7,7 +7,7 @@ updates:
     open-pull-requests-limit: 5
     ignore:
       # Major upgrades are reviewed deliberately against the supported
-      # Node 20/22/24 matrix instead of being auto-proposed into release work.
+      # Node 22/24/26 maintained-runtime matrix instead of being auto-proposed into release work.
       - dependency-name: "*"
         update-types:
           - version-update:semver-major

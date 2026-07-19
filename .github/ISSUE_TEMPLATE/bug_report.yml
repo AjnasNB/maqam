@@ -19,7 +19,7 @@ body:
     attributes:
       label: Environment
       description: Node.js version, operating system, architecture, and package manager.
-      placeholder: Node 24.15.0, Windows 11 x64, npm 11
+      placeholder: Node 24.18.0, Windows 11 x64, npm 11
     validations:
       required: true
   - type: textarea

@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20, 22, 24]
+        node-version: [22, 24, 26]
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -57,7 +57,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24.15.0
+          node-version: 24.18.0
           package-manager-cache: false
 
       - name: Setup release npm CLI
@@ -103,7 +103,7 @@ jobs:
             echo "- Size: \`${size_bytes}\` bytes"
             echo "- SHA-256: \`${sha256}\`"
             echo "- Integrity: \`${integrity}\`"
-            echo "- Toolchain: Node \`24.15.0\`, npm \`12.0.1\`"
+            echo "- Toolchain: Node \`24.18.0\`, npm \`12.0.1\`"
             echo "- This job did not publish or request publish approval."
           } >> "${GITHUB_STEP_SUMMARY}"
 

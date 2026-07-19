@@ -91,7 +91,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.keywords.includes("yt-dlp"));
   assert.ok(packageJson.keywords.includes("rss"));
   assert.equal(packageJson.dependencies["ipaddr.js"], "^2.4.0");
-  assert.equal(packageJson.dependencies["@types/node"], "^20.19.43");
+  assert.equal(packageJson.dependencies["@types/node"], "^22.20.1");
   assert.equal(packageJson.devDependencies.typescript, "^5.9.3");
   assert.match(packageJson.scripts.prepublishOnly, /test:consumer-types/);
   assert.equal(packageJson.scripts["demo:approval"], "node bin/maqam.js demo approval");
@@ -99,7 +99,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.scripts["benchmark:mges:performance"], "node benchmarks/governance-suite.mjs");
   assert.equal(packageJson.scripts["benchmark:mges:conformance"], "node benchmarks/governance-conformance.mjs");
   assert.equal(packageJson.dependencies.undici, "^7.28.0");
-  assert.equal(packageJson.engines.node, ">=20.18.1");
+  assert.equal(packageJson.engines.node, "^22.0.0 || ^24.0.0 || ^26.0.0");
 });
 
 test("public docs and brand assets match Maqam identity", () => {
