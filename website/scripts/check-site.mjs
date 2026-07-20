@@ -30,6 +30,7 @@ const requiredProductVisuals = new Map([
   [path.join("roadmap", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("releases", "v0.3.0", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("releases", "v0.3.1", "index.html"), ["/assets/integration-dock-3d.png"]],
+  [path.join("releases", "v0.3.2", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("releases", "v0.2.4", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("docs", "benchmark", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("docs", "integrations", "index.html"), ["/assets/integration-dock-3d.png"]],
@@ -86,11 +87,12 @@ for (const file of htmlFiles) {
     if (!pattern.test(source)) failures.push(`${label}: ${message}`);
   };
 
-  if (/href="\/releases\/v0\.3\.0\/"[^>]*>Release</i.test(source)) {
-    failures.push(`${label}: primary Release navigation must target v0.3.1`);
+  if (/href="\/releases\/v0\.3\.[01]\/"[^>]*>Release</i.test(source)) {
+    failures.push(`${label}: primary Release navigation must target v0.3.2`);
   }
-  if (label !== path.join("releases", "v0.3.0", "index.html") && /(?:npm install|npx[^\n<]*package=)\s*maqam@0\.3\.0/i.test(source)) {
-    failures.push(`${label}: active install examples must pin maqam@0.3.1`);
+  if (![path.join("releases", "v0.3.0", "index.html"), path.join("releases", "v0.3.1", "index.html")].includes(label)
+    && /(?:npm install|npx[^\n<]*(?:package=)?)[^\n<]*maqam@0\.3\.[01]/i.test(source)) {
+    failures.push(`${label}: active install examples must pin maqam@0.3.2`);
   }
 
   for (const requiredVisual of requiredProductVisuals.get(label) || []) {
@@ -105,12 +107,12 @@ for (const file of htmlFiles) {
   requireMatch(/<a\s+class="skip-link"\s+href="#main">/i, "missing skip link");
   requireMatch(/<main\b[^>]*\bid="main"/i, "missing main landmark id");
 
-  if (source.includes('class="site-header"') && !source.includes('href="/releases/v0.3.1/"')) {
-    failures.push(`${label}: primary navigation must link the 0.3.1 release record`);
+  if (source.includes('class="site-header"') && !source.includes('href="/releases/v0.3.2/"')) {
+    failures.push(`${label}: primary navigation must link the 0.3.2 release record`);
   }
 
-  if (/0\.2\.3|candidate pending exact release approval/i.test(source)) {
-    failures.push(`${label}: contains stale pre-0.2.4 publication wording`);
+  if (/candidate pending exact release approval/i.test(source)) {
+    failures.push(`${label}: contains stale pre-publication wording`);
   }
 
   if (/Maqam 0\.3\.0 candidate|v0\.3\.0 release candidate|0\.3\.0 source candidate|0\.3\.0 candidate API line|0\.3\.0 candidate install gate/i.test(source)) {
@@ -135,14 +137,15 @@ for (const file of htmlFiles) {
   }
 
   if (label === "index.html") {
-    requireMatch(/v0\.3\.1 public release/i, "homepage must identify 0.3.1 as the public release");
+    requireMatch(/v0\.3\.2 public release/i, "homepage must identify 0.3.2 as the public release");
     requireMatch(/npm Trusted Publishing and the matching GitHub release are verified/i, "homepage must identify the completed release verification");
-    requireMatch(/SLSA provenance, registry signatures, and exact tarball bytes match/i, "homepage must summarize the verified 0.3.1 release identity");
-    requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.1/i, "homepage install command must retain a live-record verification reminder");
+    requireMatch(/SLSA provenance, registry signatures, and exact tarball bytes match/i, "homepage must summarize the verified 0.3.2 release identity");
+    requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.2/i, "homepage install command must retain a live-record verification reminder");
     requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
     requireMatch(/Maqam is a security turnstile for agent actions/i, "homepage must include the plain-English Maqam definition");
     requireMatch(/Node matrix[\s\S]{0,160}22\s*\/\s*24\s*\/\s*26/i, "homepage must show the maintained Node 22, 24, and 26 matrix");
-    requireMatch(/Published 0\.3\.1 measured-source MGES evidence/i, "homepage must label the public 0.3.1 measured-source evidence");
+    requireMatch(/Published 0\.3\.2 exact-main MGES evidence/i, "homepage must label the public 0.3.2 exact-main evidence");
+    requireMatch(/Historical 0\.3\.1 measured-source MGES evidence/i, "homepage must retain and label the historical 0.3.1 measured-source evidence");
     requireMatch(/Previous public 0\.3\.0 MGES evidence/i, "homepage must retain and label the previous public 0.3.0 benchmark evidence");
   }
 
@@ -186,6 +189,15 @@ for (const file of htmlFiles) {
     requireMatch(/Node 22 \/ 24 \/ 26/i, "0.3.1 release page must contain the supported Node matrix");
   }
 
+  if (label === path.join("releases", "v0.3.2", "index.html")) {
+    requireMatch(/npm install maqam@0\.3\.2/i, "0.3.2 release page must contain the pinned install command");
+    requireMatch(/ea3266e520cbec84d3dba68a8d0f07e26d4c2d66/i, "0.3.2 release page must contain the registry gitHead");
+    requireMatch(/30402c9d9badf45e691fd8d3199a9c4e60b97a32c27850a7449e0ba3bca18f53/i, "0.3.2 release page must contain the verified SHA-256");
+    requireMatch(/sha512-KMLhPi1Yt58icbWbpvCn83uwUvK3VDC\/H5nF40GJmPMHwGK69WvVpCZe3KgB\+HcEMqfjXHoSgNec8\/Lg1Ohr\/g==/i, "0.3.2 release page must contain the verified npm integrity");
+    requireMatch(/14 of 14[\s\S]{0,180}129\.273[\s\S]{0,120}2\.0305%/i, "0.3.2 release page must contain exact-main MGES results");
+    requireMatch(/Node 22 \/ 24 \/ 26/i, "0.3.2 release page must contain the supported Node matrix");
+  }
+
   if (label === path.join("docs", "sources", "index.html")) {
     requireMatch(/Governed research sources/i, "sources guide must define the new product surface");
     requireMatch(/routeUngoverned\(\).*bypasses that gateway/i, "sources guide must label direct routing as ungoverned");
@@ -201,12 +213,12 @@ for (const file of htmlFiles) {
   }
 
   if (label === path.join("docs", "productloop", "index.html")) {
-    requireMatch(/productloop-os@0\.2\.2/, "ProductLoop install command must pin productloop-os@0.2.2");
-    requireMatch(/productloop-os\/releases\/tag\/v0\.2\.2/, "ProductLoop atlas must link the v0.2.2 source release");
-    requireMatch(/npmjs\.com\/package\/maqam\/v\/0\.3\.1/, "ProductLoop atlas must link the current Maqam npm release");
+    requireMatch(/productloop-os@0\.2\.3/, "ProductLoop install command must pin productloop-os@0.2.3");
+    requireMatch(/productloop-os\/releases\/tag\/v0\.2\.3/, "ProductLoop atlas must link the v0.2.3 source release");
+    requireMatch(/npmjs\.com\/package\/maqam\/v\/0\.3\.2/, "ProductLoop atlas must link the current Maqam npm release");
     requireMatch(/records release versions, not a permanent live-registry guarantee/i, "ProductLoop atlas must avoid a blanket npm publication claim");
     for (const [packageName, version] of [
-      ["productloop-os", "0.2.2"],
+      ["productloop-os", "0.2.3"],
       ["ajnas-runtime", "0.2.2"],
       ["ajnas-skills-registry", "0.2.2"],
       ["ajnas-provenance", "0.1.4"],
@@ -221,18 +233,18 @@ for (const file of htmlFiles) {
         `${packageName} must show public version ${version}`
       );
     }
-    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.1<\/td>/, "ProductLoop atlas must show public Maqam 0.3.1");
+    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.2<\/td>/, "ProductLoop atlas must show public Maqam 0.3.2");
     requireMatch(/historical 0\.2\.4 proof video/i, "ProductLoop atlas must label its 0.2.4 video as historical");
   }
 
   if (label === path.join("docs", "integrations", "index.html")) {
-    requireMatch(/productloop-os@0\.2\.2/, "integration guide must name the current ProductLoop umbrella");
-    requireMatch(/productloop-os\/releases\/tag\/v0\.2\.2/, "integration guide must link the v0.2.2 source release");
+    requireMatch(/productloop-os@0\.2\.3/, "integration guide must name the current ProductLoop umbrella");
+    requireMatch(/productloop-os\/releases\/tag\/v0\.2\.3/, "integration guide must link the v0.2.3 source release");
   }
 
   if (label === path.join("roadmap", "index.html")) {
-    requireMatch(/ProductLoop OS 0\.2\.2 public/i, "roadmap must name the current ProductLoop release");
-    requireMatch(/productloop-os\/releases\/tag\/v0\.2\.2/, "roadmap must link the v0.2.2 source release");
+    requireMatch(/ProductLoop OS 0\.2\.3 public/i, "roadmap must name the current ProductLoop release");
+    requireMatch(/productloop-os\/releases\/tag\/v0\.2\.3/, "roadmap must link the v0.2.3 source release");
   }
 
   if (label === path.join("articles", "exact-agent-approvals", "index.html")) {
