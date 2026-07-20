@@ -7,13 +7,13 @@ This guide describes the integration boundary Maqam can support today for Google
 | Surface | Status | Exact claim |
 | --- | --- | --- |
 | Maqam `defineToolAdapter()`, `registerToolAdapter()` and `ToolGateway` routing | Tested in this repository | A registered host function can be routed through Maqam policy, approval, trace and evidence capabilities. |
-| Google ADK `FunctionTool` calling a Maqam gateway | Illustrative; not provider-tested here | The documented ADK `execute` callback provides a place for an application to call a registered Maqam tool. |
+| Google ADK `FunctionTool` calling a Maqam gateway | Tested by an isolated offline fixture | A `FunctionTool` can call a registered Maqam adapter and preserve allow/deny policy behavior without a Google account, Gemini key, network request or database operation. |
 | Google ADK Tool Confirmation synchronized with Maqam approval | Not implemented | The application would need a durable correlation bridge that preserves the same run, tool, input and Maqam approval id across pause and resume. |
 | Microsoft Agent 365 SDK operation wrapped by a Maqam adapter | Illustrative; not provider-tested here | An explicitly callable SDK operation can be invoked inside a static Maqam adapter. |
 | Microsoft Work IQ tools automatically governed by Maqam | Not implemented | Agent 365's automatic tool registration does not route later tool calls through Maqam. |
 | Native MCP client, server, discovery or authentication | Not supplied by Maqam | `transport: "mcp"` is a descriptive adapter label, not a protocol implementation. |
 
-The Maqam adapter contract is exercised by `test/framework/tool-adapter.test.js`. The deterministic example in `examples/tool-adapter-ecosystem.mjs` uses local fixture clients and performs no Google, Microsoft, HTTP or MCP request.
+The Maqam adapter contract is exercised by `test/framework/tool-adapter.test.js`. The Google ADK `FunctionTool` boundary is exercised by `integration-fixtures/google-adk-function-tool/google-adk-function-tool.fixture.mjs`, which is a private fixture workspace with its own lockfile and audit. The deterministic example in `examples/tool-adapter-ecosystem.mjs` uses local fixture clients and performs no Google, Microsoft, HTTP or MCP request.
 
 ## The boundary that applies to both providers
 
@@ -138,7 +138,7 @@ Run it using Google's documented development CLI:
 npx adk run agent.ts
 ```
 
-Provider status: this code follows the documented Google API shape, but it is not part of Maqam's automated test matrix and has not been run here with a Gemini key. `adk web` is documented by Google as a development and debugging interface, not a production deployment.
+Provider status: the repository now includes an automated offline `@google/adk` fixture for the `FunctionTool` callback-to-gateway shape. It is part of Maqam's CI matrix through `npm run install:google-adk-fixture`, `npm run audit:google-adk-fixture` and `npm run test:google-adk-fixture`. It has still not been run here with a Gemini key, Google account or live provider service. `adk web` is documented by Google as a development and debugging interface, not a production deployment.
 
 ### Replacing the local function with an SDK call
 
@@ -347,6 +347,10 @@ The same specification assigns input validation, access control, rate limiting a
 Use this wording in release material:
 
 > Maqam is framework-neutral. A host application can expose a registered Maqam operation as a Google ADK `FunctionTool`, or wrap an explicitly callable Microsoft Agent 365 SDK or MCP-client operation. Only calls routed through that static `ToolGateway` adapter are governed. Maqam does not supply provider authentication, discovery, protocol clients, tenant controls or automatic provider approval synchronization. The Google and Microsoft examples are integration templates, not official partnerships or provider certifications.
+
+If mentioning the repository test, use this narrower wording:
+
+> Maqam includes an isolated offline Google ADK `FunctionTool` fixture. The fixture verifies that one ADK function tool can route through Maqam's static `ToolGateway` adapter and preserve policy allow/deny behavior. It does not certify live Gemini, Google account, ADK confirmation, MCPToolset, or production deployment behavior.
 
 Avoid these statements:
 

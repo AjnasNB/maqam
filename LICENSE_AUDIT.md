@@ -1,6 +1,6 @@
 # License Audit
 
-Audit date: 2026-07-18.
+Audit date: 2026-07-20.
 
 ## Package License
 
@@ -43,6 +43,18 @@ These integrations are not npm dependencies and are not distributed in the Maqam
 
 The original Maqam video composition, narration, captions, and generated proof assets are covered by the root MIT project license. Third-party rendering software retains its own terms. See [`demo/remotion/ASSET_PROVENANCE.md`](demo/remotion/ASSET_PROVENANCE.md) and the [official Remotion license page](https://www.remotion.dev/docs/license/pricing). This project records Ajnas NB as an individual publisher; any larger organization must confirm its own eligibility before re-rendering or operationalizing the toolchain.
 
+## Repository-Only Google ADK Fixture
+
+`integration-fixtures/google-adk-function-tool/` is a private fixture workspace. It is excluded from Maqam's root package allowlist and is not a runtime dependency of `maqam`.
+
+| Package | Version | License observed | Purpose |
+| --- | --- | --- | --- |
+| `@google/adk` | 1.2.0 | Apache-2.0 | Offline `FunctionTool` callback fixture that routes one deterministic function call through Maqam's `ToolGateway`. |
+
+The fixture is installed in CI with `npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts`, audited with `npm run audit:google-adk-fixture`, and tested with `npm run test:google-adk-fixture`. Install scripts are deliberately disabled because the resolved fixture tree contains install-script packages (`@google/genai`, `protobufjs`, `sqlite3`) while the offline FunctionTool fixture does not require native compilation or provider setup. The fixture lockfile uses npm `overrides` to keep audited vulnerable transitive paths on patched versions.
+
+The resolved fixture tree's package metadata reported no missing license fields during the 2026-07-20 audit. License identifiers observed in the tree include MIT, Apache-2.0, ISC, BSD-family identifiers, 0BSD, BlueOak-1.0.0, LGPL-2.1-or-later and Python-2.0. This fixture does not certify live Google ADK, Gemini, Google account, Tool Confirmation, MCPToolset or production behavior.
+
 ## Inspected References, Not Dependencies
 
 No source code, documentation text, examples, tests, prompts, assets, logos, or branding from these projects was copied into Maqam.
@@ -66,6 +78,7 @@ No source code, documentation text, examples, tests, prompts, assets, logos, or 
 | [Qwen-Agent](https://github.com/QwenLM/Qwen-Agent) | Apache-2.0. | Reference inspection only; no code incorporated. |
 | [PageAgent](https://github.com/alibaba/page-agent) | MIT. | Reference inspection only; no code incorporated. This corrects an earlier audit entry that incorrectly listed Apache-2.0. |
 | [Qwen Code](https://github.com/QwenLM/qwen-code) | Apache-2.0. | Reference inspection only; no code incorporated. |
+| [Google ADK](https://adk.dev/get-started/typescript/) / [`@google/adk`](https://www.npmjs.com/package/@google/adk) | Apache-2.0 from inspected package metadata. | Optional integration pattern and private offline fixture only; no source, docs text, provider credentials, account state, branding or live service output incorporated. |
 
 ## Distribution Boundary
 
