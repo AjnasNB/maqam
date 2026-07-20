@@ -32,6 +32,15 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Install Google ADK integration fixture
+        run: npm run install:google-adk-fixture
+
+      - name: Audit Google ADK integration fixture dependency tree
+        run: npm run audit:google-adk-fixture
+
+      - name: Test Google ADK integration fixture
+        run: npm run test:google-adk-fixture
+
       - name: Clean consumer TypeScript compile
         run: npm run test:consumer-types
 

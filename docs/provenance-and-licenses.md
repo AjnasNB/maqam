@@ -1,6 +1,6 @@
 # Provenance and License Notes
 
-Last reviewed: 2026-07-18.
+Last reviewed: 2026-07-20.
 
 Maqam is an original Ajnas NB implementation distributed under the MIT license. The package implementation, API names, documentation, examples, tests, command-line behavior, product identity, and visual assets are maintained as Maqam work.
 
@@ -33,6 +33,14 @@ The anonymous-public source pack uses two explicit external boundaries, neither 
 
 The `2026.07.04` Windows standalone used for the 2026-07-18 manual compatibility check remained outside the repository and package. Its SHA-256 was `52FE3C26DCF71FBDC85B528589020BB0B8E383155CFA81B64DD447BBE35E24B8`, matching the upstream release checksum file. This compatibility check does not pin, install, endorse, or redistribute that executable for package consumers.
 
+## Repository-Only Integration Fixtures
+
+`integration-fixtures/google-adk-function-tool/` is a private npm workspace used to exercise an offline Google ADK `FunctionTool` callback routed through Maqam's `ToolGateway`. It is not listed in the root `files` allowlist and is not part of the published `maqam` npm tarball.
+
+The fixture has its own lockfile and pins `@google/adk@1.2.0` under Apache-2.0. Its CI install command uses `npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts`; this is intentional because the resolved fixture tree contains packages that declare install scripts, including `@google/genai`, `protobufjs`, and `sqlite3`, while the offline callback test does not need install-time native compilation. The fixture lockfile uses npm `overrides` for audited vulnerable transitive paths and is checked by `npm run audit:google-adk-fixture`.
+
+The fixture audit observed no missing package-license fields in the resolved dependency tree. License identifiers present in the resolved tree include MIT, Apache-2.0, ISC, BSD-family identifiers, 0BSD, BlueOak-1.0.0, LGPL-2.1-or-later and Python-2.0. This record is dependency-surface evidence only; it is not legal advice and does not make Google ADK a Maqam runtime dependency.
+
 ## Upstream Inspection Log
 
 The following entries record reference inspection only. None is a Maqam runtime dependency, and no code from them was copied into this package.
@@ -48,6 +56,7 @@ The following entries record reference inspection only. None is a Maqam runtime 
 | [Qwen-Agent](https://github.com/QwenLM/Qwen-Agent) | Apache-2.0. | Public agent, tool, model, MCP, and application separation patterns. |
 | [PageAgent](https://github.com/alibaba/page-agent) | MIT. | Public in-page browser-agent boundaries and MCP positioning. Earlier audit text that called this project Apache-2.0 was incorrect and has been corrected. |
 | [Qwen Code](https://github.com/QwenLM/qwen-code) | Apache-2.0. | Public terminal-agent and provider-neutral model configuration patterns. |
+| [Google ADK](https://adk.dev/get-started/typescript/) / [`@google/adk`](https://www.npmjs.com/package/@google/adk) | Apache-2.0 from the inspected npm package metadata. | Optional integration pattern plus the repository-only offline `FunctionTool` fixture. No Google source, docs text, credentials, service output, branding or provider account state is copied into Maqam. |
 
 See [comparison.md](comparison.md) for the evidence-linked product comparison derived from this inspection.
 

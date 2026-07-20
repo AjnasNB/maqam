@@ -65,6 +65,9 @@
   "scripts": {
     "test": "node --test",
     "test:consumer-types": "node scripts/clean-consumer-types.mjs",
+    "install:google-adk-fixture": "npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts",
+    "audit:google-adk-fixture": "npm --prefix integration-fixtures/google-adk-function-tool audit",
+    "test:google-adk-fixture": "npm --prefix integration-fixtures/google-adk-function-tool test",
     "verify": "npm test && npm run test:consumer-types && npm run test:website && npm audit --omit=dev && npm pack --dry-run --ignore-scripts",
     "test:website": "npm --prefix website run check",
     "prepublishOnly": "npm test && npm run test:consumer-types && npm audit --omit=dev",
