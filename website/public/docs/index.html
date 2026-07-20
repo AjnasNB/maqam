@@ -17,12 +17,12 @@
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
       <nav class="desktop-nav" aria-label="Primary navigation">
-        <a href="/docs/" aria-current="page">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/browser/">Browser</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a>
+        <a href="/docs/" aria-current="page">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/browser/">Browser</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.2/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a>
       </nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
     <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden>
-      <a href="/docs/" aria-current="page">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/browser/">Browser</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a>
+      <a href="/docs/" aria-current="page">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/browser/">Browser</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.2/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/maqam">GitHub</a>
     </nav>
   </header>
 
@@ -32,7 +32,7 @@
       <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
         <nav aria-label="Maqam guide">
           <p class="docs-nav-title">Maqam</p>
-          <a href="#start-here">Start here</a><a href="#install">Install 0.3.0</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#source-routing">Source routing</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#adapter-apis">0.3.0 APIs</a><a href="#boundary">Boundary</a>
+          <a href="#start-here">Start here</a><a href="#install">Install 0.3.2</a><a href="#proof">Run the proof</a><a href="#first-tool">First governed tool</a><a href="#worker-adapters">Worker adapters</a><a href="#source-routing">Source routing</a><a href="#crawler">Crawler</a><a href="#console">Local console</a><a href="#adapter-apis">0.3.0 APIs</a><a href="#boundary">Boundary</a>
         </nav>
         <nav aria-label="Other documentation">
           <p class="docs-nav-title">More</p>
@@ -42,7 +42,7 @@
     </aside>
 
     <article class="docs-content">
-      <h1>Maqam 0.3.1 quickstart</h1>
+      <h1>Maqam 0.3.2 quickstart</h1>
       <p class="lede">Run the exact-approval proof, register a governed tool, route normalized research sources, and use the feed-aware bounded crawler.</p>
       <h2 id="start-here">Start here: the product in plain English</h2>
       <dl class="definition-grid">
@@ -62,19 +62,19 @@
       </div>
       <div class="callout">
         <strong>Public package state</strong>
-        Version 0.3.0 is public on npm through Trusted Publishing with a matching GitHub tag and release. Verify the live version, provenance, integrity, and registry <code>gitHead</code> before installation because the npm dist-tag can advance.
+        Version 0.3.2 is public on npm through Trusted Publishing with a matching GitHub tag and release. Verify the live version, provenance, integrity, and registry <code>gitHead</code> before installation because the npm dist-tag can advance.
       </div>
 
-      <h2 id="install">Install Maqam 0.3.1</h2>
+      <h2 id="install">Install Maqam 0.3.2</h2>
       <p>After checking that the live registry metadata still matches the tagged source, use the pinned command-line proof without modifying a project or pin the package in your dependency manifest.</p>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#install-code">Copy</button>
         <pre><code id="install-code"># Verify npm, provenance, integrity, and the matching tag first
 # One-off proof from the verified release
-npx -y maqam@0.3.1 demo approval
+npx -y maqam@0.3.2 demo approval
 
 # Pinned project dependency
-npm install maqam@0.3.1</code></pre>
+npm install maqam@0.3.2</code></pre>
       </div>
 
       <h2 id="proof">Run the exact-approval proof</h2>
@@ -82,8 +82,8 @@ npm install maqam@0.3.1</code></pre>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#proof-code">Copy</button>
         <pre><code id="proof-code"># Run only after registry verification
-npx -y maqam@0.3.1 demo approval
-npx -y maqam@0.3.1 demo approval --json</code></pre>
+npx -y maqam@0.3.2 demo approval
+npx -y maqam@0.3.2 demo approval --json</code></pre>
       </div>
       <p>Expected checkpoints:</p>
       <div class="code-shell">
@@ -231,7 +231,7 @@ console.log(result.stats);</code></pre>
       </div>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#crawler-cli">Copy</button>
-        <pre><code id="crawler-cli">npx --yes --package=maqam@0.3.1 maqam-crawl https://example.com \
+        <pre><code id="crawler-cli">npx --yes --package=maqam@0.3.2 maqam-crawl https://example.com \
   --max-pages 25 \
   --max-requests 100 \
   --feeds \
@@ -264,17 +264,17 @@ console.log(result.stats);</code></pre>
       <div class="code-shell">
         <button class="copy-button" type="button" data-copy="#console-code">Copy</button>
         <pre><code id="console-code"># Verify the live registry record first
-npx -y maqam@0.3.1
+npx -y maqam@0.3.2
 # Open http://127.0.0.1:8787</code></pre>
       </div>
       <p>The console binds to loopback by default. Remote binding requires authentication, an explicit Host allowlist, trusted UI origins, and deployment-level egress controls.</p>
 
       <h2 id="adapter-apis">0.3.0 integration APIs</h2>
       <div class="callout">
-        <strong>Available in Maqam 0.3.1</strong>
+        <strong>Available in Maqam 0.3.2</strong>
         The 0.2 tool-adapter APIs remain available. Version 0.3.0 adds <code>ResearchSourceRegistry</code>, <code>defineResearchSourceAdapter()</code>, normalized research documents, bounded host-defined source checks, and RSS or Atom helpers.
       </div>
-      <p>Use the <a href="/docs/integrations/">integration guide</a> for tool adapters, the <a href="/docs/sources/">source guide</a> for research backends, and the <a href="/docs/browser/">governed-browser guide</a> for the structural browser boundary published in 0.3.1. Production projects can pin <code>maqam@0.3.1</code> after verifying its npm provenance, registry <code>gitHead</code>, integrity, and matching <a href="https://github.com/AjnasNB/maqam/releases/tag/v0.3.1">source release</a>.</p>
+      <p>Use the <a href="/docs/integrations/">integration guide</a> for tool adapters, the <a href="/docs/sources/">source guide</a> for research backends, and the <a href="/docs/browser/">governed-browser guide</a> for the structural browser boundary introduced in 0.3.1 and retained in 0.3.2. Production projects can pin <code>maqam@0.3.2</code> after verifying its npm provenance, registry <code>gitHead</code>, integrity, and matching <a href="https://github.com/AjnasNB/maqam/releases/tag/v0.3.2">source release</a>.</p>
 
       <h2 id="boundary">Know the boundary</h2>
       <dl class="definition-grid">

@@ -16,10 +16,10 @@
   <header class="site-header">
     <div class="shell nav-row">
       <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
-      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.2/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
       <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
     </div>
-    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.1/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.2/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
   </header>
 
   <main id="main" class="shell docs-layout">
@@ -62,14 +62,14 @@
       </section>
 
       <h2 id="install">Install the umbrella</h2>
-      <div class="code-shell"><button class="copy-button" type="button" data-copy="#productloop-install">Copy</button><pre><code id="productloop-install">npm install productloop-os@0.2.2
-npx productloop-os@0.2.2 doctor
-npx productloop-os@0.2.2 demo</code></pre></div>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#productloop-install">Copy</button><pre><code id="productloop-install">npm install productloop-os@0.2.3
+npx productloop-os@0.2.3 doctor
+npx productloop-os@0.2.3 demo</code></pre></div>
       <p><code>doctor</code> checks Node.js and packaged imports. It does not probe credentials, live browsers, model providers, networks, or external connector services.</p>
 
       <div class="callout">
         <strong>Verify every registry artifact</strong>
-        The table records release versions, not a permanent live-registry guarantee. Verify each npm version, provenance, integrity, and matching source release before installation. The <a href="https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.2">ProductLoop OS v0.2.2 GitHub release</a> is the source-side record for its exact artifacts. Maqam 0.3.1 is independently public with its own matching npm and GitHub release records.
+        The table records release versions, not a permanent live-registry guarantee. Verify each npm version, provenance, integrity, and matching source release before installation. The <a href="https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.3">ProductLoop OS v0.2.3 GitHub release</a> is the source-side record for its exact umbrella artifact. Maqam 0.3.2 is independently public with its own matching npm and GitHub release records. ProductLoop's leaf packages retain their independently published versions; the 0.2.3 umbrella release does not relabel them.
       </div>
 
       <div class="table-wrap" tabindex="0" role="region" aria-label="Recorded ProductLoop package versions and responsibilities">
@@ -77,8 +77,8 @@ npx productloop-os@0.2.2 demo</code></pre></div>
           <caption class="sr-only">Recorded ProductLoop package versions, npm verification links, responsibilities, and boundaries</caption>
           <thead><tr><th scope="col">Package / namespace</th><th scope="col">Version / status</th><th scope="col">Verify on npm</th><th scope="col">Primary job</th><th scope="col">Important boundary</th></tr></thead>
           <tbody>
-            <tr><th scope="row"><code>productloop-os</code></th><td>0.2.2</td><td><a href="https://www.npmjs.com/package/productloop-os">npm</a></td><td>Umbrella composition and named namespaces</td><td>Not a hosted control plane</td></tr>
-            <tr><th scope="row"><code>maqam</code></th><td>0.3.1</td><td><a href="https://www.npmjs.com/package/maqam/v/0.3.1">npm</a></td><td>Exact approvals, evidence, worker adapters, governed source routing, RSS or Atom parsing, bounded HTTP crawling, and guarded structural browser actions</td><td>Only calls routed through a configured gateway or ToolCaller are governed</td></tr>
+            <tr><th scope="row"><code>productloop-os</code></th><td>0.2.3</td><td><a href="https://www.npmjs.com/package/productloop-os/v/0.2.3">npm</a></td><td>Umbrella composition and named namespaces</td><td>Not a hosted control plane</td></tr>
+            <tr><th scope="row"><code>maqam</code></th><td>0.3.2</td><td><a href="https://www.npmjs.com/package/maqam/v/0.3.2">npm</a></td><td>Exact approvals, evidence, worker adapters, governed source routing, RSS or Atom parsing, bounded HTTP crawling, and guarded structural browser actions</td><td>Only calls routed through a configured gateway or ToolCaller are governed</td></tr>
             <tr><th scope="row"><code>ajnas-runtime</code> / <code>runtime</code></th><td>0.2.2</td><td><a href="https://www.npmjs.com/package/ajnas-runtime">npm</a></td><td>Ordered policy-gated tool execution</td><td>Fail-closed without an explicit policy</td></tr>
             <tr><th scope="row"><code>ajnas-policy</code> / <code>policy</code></th><td>0.1.3</td><td><a href="https://www.npmjs.com/package/ajnas-policy">npm</a></td><td>Declarative decisions and audit receipts</td><td>Does not execute tools</td></tr>
             <tr><th scope="row"><code>ajnas-approvals</code> / <code>approvals</code></th><td>0.1.3</td><td><a href="https://www.npmjs.com/package/ajnas-approvals">npm</a></td><td>Human review state machine</td><td>Transport and identity remain host concerns</td></tr>
@@ -93,7 +93,7 @@ npx productloop-os@0.2.2 demo</code></pre></div>
 
       <div class="package-atlas">
         <section class="package-entry" id="umbrella">
-          <header><h2>productloop-os</h2><span class="package-version">public 0.2.2 · <a href="https://www.npmjs.com/package/productloop-os">npm</a></span></header>
+          <header><h2>productloop-os</h2><span class="package-version">public 0.2.3 · <a href="https://www.npmjs.com/package/productloop-os/v/0.2.3">npm</a></span></header>
           <div class="package-body">
             <p>Creates a deny-by-default composition with named namespaces, separate ledgers and registries, tested schema adapters, and a dependency doctor.</p>
             <div class="code-shell"><button class="copy-button" type="button" data-copy="#umbrella-code">Copy</button><pre><code id="umbrella-code">import { createProductLoopOS } from "productloop-os";
