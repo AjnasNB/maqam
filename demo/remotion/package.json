@@ -13,13 +13,13 @@
     "@remotion/cli": "4.0.490",
     "@remotion/captions": "4.0.490",
     "@remotion/media": "4.0.490",
-    "react": "19.2.3",
+    "react": "19.2.7",
     "react-dom": "19.2.7",
     "remotion": "4.0.490"
   },
   "devDependencies": {
     "@remotion/eslint-config-flat": "4.0.490",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.17",
     "@types/web": "0.0.352",
     "eslint": "9.39.5",
     "prettier": "3.9.5",
