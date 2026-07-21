@@ -1,0 +1,42 @@
+name: Verify website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - website/**
+      - .github/workflows/verify-website.yml
+  pull_request:
+    paths:
+      - website/**
+      - .github/workflows/verify-website.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify website artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install website dependencies
+        working-directory: website
+        run: npm ci --ignore-scripts
+
+      - name: Check content, routes, assets, accessibility contracts, and media behavior
+        working-directory: website
+        run: npm run check
