@@ -23,30 +23,14 @@ The 0.3.0 governed-sources guide and release page reuse `integration-dock-3d.png
 
 Matching `.webp` files are high-quality delivery derivatives generated from the committed PNG masters. Pages use `<picture>` so supported browsers receive the smaller WebP while PNG remains the fallback and social-card source.
 
-## R2 release media
+## Release media
 
-The Worker exposes only fixed public paths from the `maqam-media` R2 bucket. Release media is assembled from the repository's `demo/remotion/out` renders and the versioned release-asset staging directory before upload.
+Release videos, posters, captions, demo stills, and benchmark artifacts are
+assembled from the repository's reviewed Remotion outputs and versioned release
+asset staging directory. The fixed public paths are declared in `src/index.js`;
+the short `/media/maqam-*` aliases remain for backwards compatibility.
 
-| Public path | R2 object key | Source |
-|---|---|---|
-| `/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4` | `releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4` | Rendered 60-second Remotion release video |
-| `/media/releases/maqam/v0.2.4/maqam-demo-poster.png` | `releases/maqam/v0.2.4/maqam-demo-poster.png` | Rendered exact-approval poster |
-| `/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.vtt` | `releases/maqam/v0.2.4/maqam-exact-approval-demo.vtt` | Authored VTT captions |
-| `/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.srt` | `releases/maqam/v0.2.4/maqam-exact-approval-demo.srt` | Authored SRT captions |
-| `/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4` | `releases/maqam/v0.2.4/productloop-os-ecosystem-overview.mp4` | Rendered 55-second Remotion ecosystem video |
-| `/media/releases/maqam/v0.2.4/productloop-os-ecosystem-poster.png` | `releases/maqam/v0.2.4/productloop-os-ecosystem-poster.png` | ProductLoop video poster |
-| `/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.vtt` | `releases/maqam/v0.2.4/productloop-os-ecosystem-overview.vtt` | Authored VTT captions |
-| `/media/releases/maqam/v0.2.4/productloop-os-ecosystem-overview.srt` | `releases/maqam/v0.2.4/productloop-os-ecosystem-overview.srt` | Authored SRT captions |
-| `/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4` | `releases/maqam/v0.2.4/maqam-crawler-governed-research.mp4` | Rendered 55-second Remotion crawler video |
-| `/media/releases/maqam/v0.2.4/maqam-crawler-governed-research-poster.png` | `releases/maqam/v0.2.4/maqam-crawler-governed-research-poster.png` | Crawler video poster |
-| `/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt` | `releases/maqam/v0.2.4/maqam-crawler-governed-research.vtt` | Authored VTT captions |
-| `/media/releases/maqam/v0.2.4/maqam-crawler-governed-research.srt` | `releases/maqam/v0.2.4/maqam-crawler-governed-research.srt` | Authored SRT captions |
-| `/media/01-scope-mismatch.png` | `releases/maqam/v0.2.4/01-scope-mismatch.png` | Demo still |
-| `/media/02-exact-execution.png` | `releases/maqam/v0.2.4/02-exact-execution.png` | Demo still |
-| `/media/03-evidence-linked.png` | `releases/maqam/v0.2.4/03-evidence-linked.png` | Demo still |
-| `/media/04-benchmark-method.png` | `releases/maqam/v0.2.4/04-benchmark-method.png` | Demo still |
-| `/media/05-ecosystem-boundary.png` | `releases/maqam/v0.2.4/05-ecosystem-boundary.png` | Demo still |
-| `/media/mges-performance.json` | `releases/maqam/v0.2.4/mges-performance-windows-node24.json` | Clean MGES performance artifact |
-| `/media/mges-conformance.json` | `releases/maqam/v0.2.4/mges-conformance-windows-node24.json` | MGES conformance artifact |
-
-The short `/media/maqam-*` exact-approval aliases remain in the Worker for backwards compatibility. Website pages use the explicit versioned paths. The release operator must preserve the rendered-video and benchmark provenance files beside their original outputs. Uploading to R2 changes the delivery surface, not the authorship or benchmark claims.
+The release operator must preserve rendered-video and benchmark provenance
+beside their original outputs. Hosting provider, account, bucket, object-key,
+route, credential, and environment configuration are intentionally outside the
+public repository and do not change the authorship or benchmark claims.
