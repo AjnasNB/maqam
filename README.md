@@ -4,11 +4,13 @@
 [![CI](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml/badge.svg)](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](https://github.com/AjnasNB/maqam/blob/main/LICENSE)
 
-**Policy before execution. Exact approval for the call. Evidence behind the claim.**
+**Give AI agents hands without handing them the keys.**
 
 ![Maqam governed agent framework hero](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-readme-hero.png)
 
-**In plain English:** Maqam is a security turnstile for actions performed by software agents. It checks policy, binds approval to the exact input that will run, allows that approved call once, and records what happened.
+**In plain English:** Maqam is the guarded door between an AI agent and the tools that can change real software. It checks policy, binds approval to the exact input that will run, allows that approved call once, and leaves a verifiable receipt.
+
+Cockroach Crawler gives the stack bounded eyes on public sources. Qarinah gives it compact, evidence-linked memory. Maqam governs the hands that act. Only operations routed through a registered Maqam adapter are governed.
 
 More technically, Maqam is an MIT-licensed TypeScript execution boundary for governed workflows. It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, and a crawler-backed research workflow.
 
@@ -66,6 +68,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 | [MGES benchmark guide](https://maqamagent.com/docs/benchmark/) and [raw methodology](https://github.com/AjnasNB/maqam/blob/main/benchmarks/README.md) | Reproducible local-call and conformance evidence with claim limits |
 | [Security guide](https://maqamagent.com/docs/security/) and [security policy](https://github.com/AjnasNB/maqam/blob/main/SECURITY.md) | Threat boundaries, reporting, crawler safety, and required host controls |
 | [Coding-agent guide](https://github.com/AjnasNB/maqam/blob/main/docs/external-agents.md) | Codex, Claude Code, generic CLI workers, approvals, and outcome checks |
+| [Launch kit](https://github.com/AjnasNB/maqam/tree/main/docs/launch) | Benefit-first descriptions, platform copy, media assignments, launch order, and claim checks |
 | [Cockroach Crawler docs](https://cockroachcrawler.com/docs/) and [Maqam integration guide](https://cockroachcrawler.com/docs/agents/) | Dedicated bounded crawling plus a copy-pasteable registered <code>ToolGateway</code> composition |
 | [Public roadmap](https://maqamagent.com/roadmap/) and [source roadmap](https://github.com/AjnasNB/maqam/blob/main/ROADMAP.md) | Shipped baseline, next work, exit criteria, and explicit non-goals |
 | [Community hub](https://maqamagent.com/community/), [contributing](https://github.com/AjnasNB/maqam/blob/main/CONTRIBUTING.md), and [governance](https://github.com/AjnasNB/maqam/blob/main/GOVERNANCE.md) | Questions, examples, issues, forks, reviewed pull requests, and maintenance policy |

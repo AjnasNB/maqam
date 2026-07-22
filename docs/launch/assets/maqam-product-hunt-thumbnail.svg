@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">Maqam product thumbnail</title>
+  <desc id="desc">A geometric M mark built from interlocking frames and a protected evidence core.</desc>
+  <rect width="240" height="240" rx="54" fill="#0c1110"/>
+  <g transform="translate(30 30) scale(1.40625)">
+    <path d="M27 91V37h17l20 28 20-28h17v54H84V62L66 88h-4L44 62v29H27Z" fill="#f4f7f3"/>
+    <path d="M44 37h20l-8 12H44V37Z" fill="#48c7ff"/>
+    <path d="M84 37h17v17H90l-6-17Z" fill="#84e07f"/>
+    <path d="M64 65 84 37h17L70 80h-12L27 37h17l20 28Z" fill="url(#g)" fill-opacity=".62"/>
+    <circle cx="64" cy="72" r="9" fill="#0c1110" stroke="#84e07f" stroke-width="4"/>
+    <path d="M35 100h58" stroke="#48c7ff" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <defs><linearGradient id="g" x1="27" y1="37" x2="101" y2="80" gradientUnits="userSpaceOnUse"><stop stop-color="#48c7ff"/><stop offset="1" stop-color="#84e07f"/></linearGradient></defs>
+</svg>
