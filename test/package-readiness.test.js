@@ -38,8 +38,9 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageLockJson.packages[""].version, "0.3.2");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.author, "Ajnas NB");
-  assert.match(packageJson.description, /governed web search/i);
-  assert.match(packageJson.description, /YouTube metadata and captions/i);
+  assert.match(packageJson.description, /hands without handing them the keys/i);
+  assert.match(packageJson.description, /exact one-use approvals/i);
+  assert.match(packageJson.description, /verifiable receipts/i);
   assert.equal(packageJson.type, "module");
   assert.equal(packageJson.sideEffects, false);
   assert.equal(packageJson.types, "src/index.d.ts");
@@ -70,6 +71,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.files.includes("docs/migration-0.3.md"));
   assert.ok(packageJson.files.includes("docs/governed-sources.md"));
   assert.ok(packageJson.files.includes("docs/anonymous-public-sources.md"));
+  assert.ok(packageJson.files.includes("docs/launch/"));
   assert.ok(packageJson.files.includes("docs/release-0.3.0.md"));
   assert.ok(packageJson.files.includes("docs/release-0.3.1.md"));
   assert.ok(packageJson.files.includes("docs/release-0.3.2.md"));
