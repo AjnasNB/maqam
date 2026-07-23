@@ -21,12 +21,14 @@ async function walk(directory) {
 }
 
 function decodeAttribute(value) {
-  return value
-    .replaceAll("&amp;", "&")
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#39;", "'")
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">");
+  const entities = new Map([
+    ["&amp;", "&"],
+    ["&quot;", '"'],
+    ["&#39;", "'"],
+    ["&lt;", "<"],
+    ["&gt;", ">"]
+  ]);
+  return value.replace(/&(?:amp|quot|#39|lt|gt);/g, (entity) => entities.get(entity));
 }
 
 function escapeAttribute(value) {
@@ -155,7 +157,10 @@ for (const file of await walk(publicRoot)) {
     `  <script type="application/ld+json" data-search-metadata>${schema}</script>`
   ].join("\n");
 
-  html = html.replace(/(\s*<link rel="canonical" href="[^"]+">)/i, `\n${metadata}$1`);
+  html = html.replace(
+    /\s*<link rel="canonical" href="[^"]+">/i,
+    `\n${metadata}\n  <link rel="canonical" href="${escapeAttribute(canonical)}">`
+  );
   await writeFile(file, html.replace(/\n{3,}/g, "\n\n"), "utf8");
 }
 
