@@ -38,7 +38,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageLockJson.packages[""].version, "0.3.2");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.author, "Ajnas NB");
-  assert.match(packageJson.description, /hands without handing them the keys/i);
+  assert.match(packageJson.description, /open-source AI agent governance for TypeScript/i);
   assert.match(packageJson.description, /exact one-use approvals/i);
   assert.match(packageJson.description, /verifiable receipts/i);
   assert.equal(packageJson.type, "module");
@@ -108,7 +108,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
 
 test("public docs and brand assets match Maqam identity", () => {
   assert.match(readme, /^# Maqam/m);
-  assert.match(readme, /maqam-readme-hero\.png/);
+  assert.doesNotMatch(readme, /maqam-readme-hero\.png/);
   assert.match(readme, /maqam-system-map\.svg/);
   assert.match(readme, /maqam-cli-agent-flow\.png/);
   assert.match(readme, /Full documentation/);
@@ -163,28 +163,29 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(release031, /earlier metadata-only candidate[\s\S]{0,180}superseded historical candidate evidence/i);
   assert.doesNotMatch(release031, /implementation phase merged as exact clean `main` commit/i);
   assert.match(release032, /^# Maqam 0\.3\.2 Release Record/m);
-  assert.match(release032, /source candidate, not a published release/i);
-  assert.match(release032, /ProductLoop OS 0\.2\.2 companion release/i);
+  assert.match(release032, /Maqam 0\.3\.2 is a published public release/i);
+  assert.match(release032, /ea3266e520cbec84d3dba68a8d0f07e26d4c2d66/i);
+  assert.match(release032, /ProductLoop OS 0\.2\.2 companion correction/i);
   assert.match(release032, /does not change Maqam's policy, approval, evidence, crawler, browser, research, network, or credential boundaries/i);
   assert.match(release032, /published 0\.3\.1 MGES results[\s\S]{0,180}must not be relabeled as 0\.3\.2 results/i);
-  assert.match(release032, /Do not publish, tag, or announce 0\.3\.2 from a release-preparation branch/i);
+  assert.match(release032, /Historical Publication Gate/i);
   assert.match(governedBrowser, /^# Governed browser adapters/m);
   assert.match(governedBrowser, /only origins named by the exact/i);
   assert.match(governedBrowser, /external protocols[\s\S]{0,250}modal dialogs/i);
   assert.match(governedBrowser, /host-driver attestation checked after dispatch/i);
   assert.match(security, /^## Governed Browser Boundary/m);
-  assert.match(readme, /Release status is live-record-driven:[\s\S]{0,400}maqam@0\.3\.1/i);
-  assert.match(readme, /0\.3\.2 package line/i);
+  assert.match(readme, /Current public release:[\s\S]{0,200}maqam@0\.3\.2/i);
+  assert.doesNotMatch(readme, /Release status is live-record-driven:[\s\S]{0,400}maqam@0\.3\.1/i);
+  assert.doesNotMatch(readme, /0\.3\.2 package line/i);
   assert.doesNotMatch(readme, /0\.3\.1 pre-publication/i);
-  assert.match(readme, /npm view maqam@0\.3\.2 version gitHead dist\.integrity/i);
-  assert.match(readme, /If both records exist and identify the same reviewed commit[\s\S]{0,180}otherwise use the verified 0\.3\.1 release/i);
-  assert.match(readme, /productloop-os@0\.2\.2/i);
+  assert.match(readme, /npm view maqam dist-tags\.latest gitHead dist\.integrity/i);
+  assert.match(readme, /Start with Maqam\. Expand only when you need more\./i);
   assert.doesNotMatch(readme, /productloop-os@0\.2\.1/i);
   assert.match(readme, /previous public 0\.3\.0 evidence/i);
   assert.match(readme, /published 0\.3\.1 measured-source evidence/i);
   assert.match(readme, /a96413c4da5f27dc31b9772996e70faab0b38382/i);
   assert.match(readme, /129\.849 microseconds\/call/i);
-  assert.match(readme, /0\.3 release line/i);
+  assert.match(readme, /Current public release:[\s\S]{0,200}maqam@0\.3\.2/i);
   assert.match(readme, /hosted-anonymous Exa web search/i);
   assert.match(readme, /public YouTube metadata and available captions/i);
   assert.match(readme, /npm view maqam dist-tags\.latest gitHead dist\.integrity/i);

@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Static landing and documentation site for Maqam and ProductLoop OS.",
   "scripts": {
+    "metadata": "node scripts/enhance-search-metadata.mjs",
     "check": "node scripts/check-site.mjs",
     "check:live": "node scripts/check-live-media.mjs"
   },

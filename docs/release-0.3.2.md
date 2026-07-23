@@ -1,10 +1,10 @@
 # Maqam 0.3.2 Release Record
 
-**Lifecycle authority:** live-record-driven. This document describes a source candidate, not a published release. Treat 0.3.2 as public only when the [npm record](https://www.npmjs.com/package/maqam/v/0.3.2), SLSA provenance, integrity, registry `gitHead`, and matching [`v0.3.2` tag and GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.2) identify the same reviewed artifact. Until then, [0.3.1](https://www.npmjs.com/package/maqam/v/0.3.1) remains the verified public release.
+**Lifecycle authority:** live-record-driven. Maqam 0.3.2 is a published public release. The [npm record](https://www.npmjs.com/package/maqam/v/0.3.2), SLSA provenance, registry `gitHead` `ea3266e520cbec84d3dba68a8d0f07e26d4c2d66`, npm integrity `sha512-KMLhPi1Yt58icbWbpvCn83uwUvK3VDC/H5nF40GJmPMHwGK69WvVpCZe3KgB+HcEMqfjXHoSgNec8/Lg1Ohr/g==`, and matching [`v0.3.2` tag and GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.2) identify the reviewed artifact. Re-check those live records whenever exact artifact identity matters.
 
 ## Purpose
 
-Version 0.3.2 is a release-truth patch. The 0.3.1 npm artifact is immutable and its packaged README still names ProductLoop OS 0.2.1. Repository documentation now correctly identifies the verified ProductLoop OS 0.2.2 companion release, so a new Maqam version is required for npm to carry that correction.
+Version 0.3.2 is a release-truth patch. The 0.3.1 npm artifact is immutable and its packaged README still names ProductLoop OS 0.2.1. Version 0.3.2 carries the reviewed ProductLoop OS 0.2.2 companion correction.
 
 ## Release Scope
 
@@ -18,7 +18,7 @@ This patch does not change Maqam's policy, approval, evidence, crawler, browser,
 
 ## Required Verification
 
-Run from one clean committed source tree after this candidate is merged:
+These commands formed the clean-source verification path for the release:
 
 ```bash
 npm install --global npm@12.0.1 --ignore-scripts
@@ -34,15 +34,15 @@ npm audit --omit=dev
 
 Changing `package-lock.json` changes the MGES performance fingerprint. The published 0.3.1 MGES results therefore remain historical 0.3.1 evidence and must not be relabeled as 0.3.2 results. Record fresh 0.3.2 results only after measuring an exact clean commit; if squash merging changes that commit, follow the repository's two-phase evidence process.
 
-## Publication Gate
+## Historical Publication Gate
 
-Do not publish, tag, or announce 0.3.2 from a release-preparation branch. After review and clean-main verification:
+The release was not published, tagged, or announced from a release-preparation branch. Its publication gate required:
 
-1. prove `maqam@0.3.2` is absent from npm;
-2. obtain explicit maintainer approval for the exact package, version, registry, publish command, tarball filename, byte size, integrity, SHA-256, and full Git commit;
-3. publish only through the protected npm Trusted Publishing workflow;
-4. verify registry version, `gitHead`, integrity, provenance, signatures, downloaded tarball bytes, clean install, and the exact-approval demo; and
-5. create `v0.3.2` and the GitHub release only after every registry check succeeds.
+1. proof that `maqam@0.3.2` was absent from npm;
+2. explicit maintainer approval for the exact package, version, registry, publish command, tarball filename, byte size, integrity, SHA-256, and full Git commit;
+3. publication only through the protected npm Trusted Publishing workflow;
+4. verification of registry version, `gitHead`, integrity, provenance, signatures, downloaded tarball bytes, clean install, and the exact-approval demo; and
+5. creation of `v0.3.2` and the GitHub release only after every registry check succeeded.
 
 The release workflow fails closed if its approved commit or artifact identity differs. It does not accept a reusable npm token or a local tarball path.
 

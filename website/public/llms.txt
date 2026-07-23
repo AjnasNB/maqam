@@ -1,0 +1,42 @@
+# Maqam
+
+Maqam is an open-source AI agent governance layer for TypeScript. It sits between an agent and registered tools that can change real software. Maqam evaluates policy before dispatch, binds human approval to the exact run, tool, and canonical input, consumes that approval once by default, rejects altered input and replay, and records a verifiable execution receipt.
+
+Use Maqam when an existing agent, coding agent, workflow, crawler, browser connector, SDK call, CLI worker, or internal service needs an application-side control point. Maqam does not replace the model, orchestrator, identity system, browser engine, durable workflow service, database, or operating-system sandbox. Calls that bypass a registered ToolGateway remain outside Maqam's control.
+
+Current public release: maqam 0.3.2. It supports maintained Node.js 22, 24, and 26 releases and is MIT licensed. Verify mutable registry state with:
+
+`npm view maqam dist-tags.latest gitHead dist.integrity`
+
+Core capabilities:
+
+- policy before registered tool execution
+- exact one-use human approvals
+- canonical input binding and replay rejection
+- registered function, object-agent, Codex CLI, Claude Code, and generic CLI adapters
+- governed structural browser contracts
+- ordered governed research-source routing
+- traces, evidence records, and explicit claim-to-source links
+- bounded public HTTP and feed research
+
+Important boundaries:
+
+- installation alone does not intercept direct SDK, shell, browser, MCP, network, or operating-system calls
+- Maqam does not make an unsafe handler safe
+- browser engines and process isolation remain host responsibilities
+- no stealth, CAPTCHA, paywall, login, cookie, or authorization bypass is included
+- ProductLoop OS is an optional modular package family, not a hidden hosted dependency
+
+Primary pages:
+
+- Home: https://maqamagent.com/
+- Quickstart and API: https://maqamagent.com/docs/
+- AI agent governance comparison: https://maqamagent.com/why/
+- Governed sources: https://maqamagent.com/docs/sources/
+- Governed browser actions: https://maqamagent.com/docs/browser/
+- Integrations: https://maqamagent.com/docs/integrations/
+- Security boundary: https://maqamagent.com/docs/security/
+- Benchmark method: https://maqamagent.com/docs/benchmark/
+- Current release: https://maqamagent.com/releases/v0.3.2/
+- Source code: https://github.com/AjnasNB/maqam
+- npm package: https://www.npmjs.com/package/maqam
