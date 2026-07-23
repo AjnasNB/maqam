@@ -5,6 +5,7 @@ import { test } from "node:test";
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const packageLockJson = JSON.parse(readFileSync(new URL("../package-lock.json", import.meta.url), "utf8"));
 const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+const featureInventory = readFileSync(new URL("../docs/FEATURES.md", import.meta.url), "utf8");
 const usageGuide = readFileSync(new URL("../docs/usage.md", import.meta.url), "utf8");
 const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
 const provenanceGuide = readFileSync(new URL("../docs/provenance-and-licenses.md", import.meta.url), "utf8");
@@ -61,6 +62,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.files.includes("docs/release-checklist.md"));
   assert.ok(packageJson.files.includes("docs/provenance-and-licenses.md"));
   assert.ok(packageJson.files.includes("docs/comparison.md"));
+  assert.ok(packageJson.files.includes("docs/FEATURES.md"));
   assert.ok(packageJson.files.includes("docs/benchmarking.md"));
   assert.ok(packageJson.files.includes("docs/quickstart.md"));
   assert.ok(packageJson.files.includes("docs/why-maqam.md"));
@@ -104,6 +106,38 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.scripts["benchmark:mges:conformance"], "node benchmarks/governance-conformance.mjs");
   assert.equal(packageJson.dependencies.undici, "^7.28.0");
   assert.equal(packageJson.engines.node, "^22.0.0 || ^24.0.0 || ^26.0.0");
+});
+
+test("the packed feature inventory stays complete and boundary-honest", () => {
+  assert.match(readme, /Complete feature inventory/);
+  for (const section of [
+    "Installation and runtime surfaces",
+    "Policy engine",
+    "Tool gateway and execution receipts",
+    "Exact one-use approvals",
+    "Evidence and claims",
+    "Workflow runtime",
+    "Skill registry",
+    "Agent and object adapters",
+    "Command-line worker adapters",
+    "Codex and Claude Code adapters",
+    "Governed browser adapter contract",
+    "Research document model",
+    "Governed source routing",
+    "Public research adapters",
+    "Built-in bounded crawler",
+    "Release gate",
+    "Local server and console",
+    "Security and hostile-input handling",
+    "Verification and benchmark surfaces",
+    "Documentation update on the current branch",
+    "Explicit boundaries and non-goals"
+  ]) {
+    assert.match(featureInventory, new RegExp(`^## ${section}$`, "m"), section);
+  }
+  assert.match(featureInventory, /governs only calls routed through its registered boundaries/);
+  assert.match(featureInventory, /not an operating-system sandbox/);
+  assert.match(featureInventory, /not a universal internet-access promise/);
 });
 
 test("public docs and brand assets match Maqam identity", () => {

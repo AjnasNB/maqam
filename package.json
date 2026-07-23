@@ -31,6 +31,7 @@
     "app/assets/maqam-logo.svg",
     "bin/",
     "docs/comparison.md",
+    "docs/FEATURES.md",
     "docs/benchmarking.md",
     "docs/quickstart.md",
     "docs/why-maqam.md",

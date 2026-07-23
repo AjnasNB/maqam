@@ -55,6 +55,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 
 | Start with | Use it for |
 |---|---|
+| [Complete feature inventory](https://github.com/AjnasNB/maqam/blob/main/docs/FEATURES.md) | Every public runtime, policy, approval, evidence, adapter, browser, research, crawler, server, release, verification, and security capability, plus explicit non-goals |
 | [Five-minute quickstart](https://github.com/AjnasNB/maqam/blob/main/docs/quickstart.md) and [full usage guide](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md) | Local proof, installation, APIs, cleanup, and deployment boundaries |
 | [Why Maqam](https://maqamagent.com/why/) and [detailed comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md) | Product fit, alternatives, differences, limitations, sources, and licenses |
 | [ProductLoop package atlas](https://maqamagent.com/docs/productloop/) | Package-by-package roles, versions, examples, and Maqam relationship |
