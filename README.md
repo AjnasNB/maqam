@@ -14,7 +14,7 @@ It combines a local runtime, policy engine, evidence ledger, skill registry, too
 
 The crawler is not the product center; it is one built-in connector. Maqam governs workers that enter through `ToolGateway`, including function agents, explicitly bound object agents, Codex CLI, Claude Code, generic command-line workers, browser and research adapters, internal services, and write actions that need human approval. Calls that bypass a registered adapter are outside Maqam's control.
 
-**Current public release:** [`maqam@0.3.2`](https://www.npmjs.com/package/maqam/v/0.3.2), published through npm Trusted Publishing and paired with the verified [`v0.3.2` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.2). Run `npm view maqam dist-tags.latest gitHead dist.integrity` when exact artifact identity matters.
+**Current stable release:** [`maqam@0.3.3`](https://www.npmjs.com/package/maqam/v/0.3.3). It carries the full 0.3 governance surface with an image-free npm README and current package metadata. Verify the immutable artifact with `npm view maqam@0.3.3 version gitHead dist.integrity`.
 
 [Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
 
@@ -37,11 +37,11 @@ Install Maqam when you need one compact governance boundary around registered to
 
 Neither product replaces model providers, durable orchestration, identity, databases, browser engines, or operating-system sandboxes. Only operations routed through a registered boundary are governed. See the [Maqam quickstart](https://maqamagent.com/docs/) or the separate [ProductLoop package atlas](https://maqamagent.com/docs/productloop/).
 
-## Watch the Proofs
+## Reproduce the Proofs
 
 The proof media in this section was produced for the historical 0.2.4 release and remains labeled with that artifact identity. It demonstrates durable product behavior, but it is not relabeled as 0.3.0 release evidence.
 
-[![Watch the 60-second Maqam governance proof](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-demo-poster.png)](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4)
+[Watch the 60-second exact-approval proof](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4), then reproduce the same approval, mismatch, execution, replay, and evidence sequence locally with `npx -y maqam@0.3.3 demo approval --json`.
 
 The exact-approval video is rendered from JSON emitted by the real `maqam demo approval --json` command. Its approval id, hashes, execution counts, evidence ids, and rejection codes come from the released implementation rather than a staged interface.
 
@@ -75,9 +75,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 
 Articles: [Your Agent Approval May Not Authorize the Input That Actually Executes](https://maqamagent.com/articles/exact-agent-approvals/) · [Benchmarking an Agent-Governance Boundary Without Fooling Yourself](https://maqamagent.com/articles/benchmarking-governance/)
 
-![Maqam system map](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-system-map.svg)
-
-![Maqam governed CLI worker flow](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-cli-agent-flow.png)
+[Open the Maqam system map](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-system-map.svg) · [Open the governed CLI worker flow](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-cli-agent-flow.png)
 
 ## Universal Agent Control
 
@@ -168,8 +166,8 @@ Agent systems fail in production when tools run outside policy, outputs cannot b
 Maqam supports the maintained Node.js 22 LTS, 24 LTS, and 26 Current release lines.
 
 ```bash
-npm view maqam@0.3.2 version dist.integrity gitHead
-npm install -g maqam@0.3.2
+npm view maqam@0.3.3 version dist.integrity gitHead
+npm install -g maqam@0.3.3
 ```
 
 Run the exact-approval proof without a model key or hosted account:
@@ -193,7 +191,7 @@ Then open `http://127.0.0.1:8787`.
 Use inside a project:
 
 ```bash
-npm install maqam@0.3.2
+npm install maqam@0.3.3
 ```
 
 ## Crawler CLI
@@ -441,11 +439,11 @@ The npm tarball intentionally excludes the large brand-board and presentation PN
 
 ## Publish
 
-`maqam@0.3.1` is a verified public npm release. This source and packaged README target 0.3.2, but source metadata alone does not prove publication. Determine live 0.3.2 status from `npm view maqam@0.3.2 version gitHead dist.integrity`, npm provenance, and the matching [`v0.3.2` release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.2) before installation; if either record is absent or mismatched, use 0.3.1. Do not republish an existing version. New releases use the maintainer-approved [trusted npm publishing workflow](https://github.com/AjnasNB/maqam/actions/workflows/publish-npm.yml), which rebuilds and verifies the exact approved artifact before npm's OIDC publisher accepts it.
+`maqam@0.3.3` is the stable package line documented by this README. New releases use the maintainer-approved [trusted npm publishing workflow](https://github.com/AjnasNB/maqam/actions/workflows/publish-npm.yml), which rebuilds and verifies the exact approved artifact before npm's OIDC publisher accepts it. Verify the public record with `npm view maqam@0.3.3 version gitHead dist.integrity` and the matching [`v0.3.3` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.3). Do not republish an existing version.
 
 Before a new version is approved, the final clean commit must pass the complete release checklist, a fresh tarball must be inspected and installed in a clean consumer, and the package owner must approve that artifact's filename, byte size, integrity, SHA-256, version, registry, command, and Git commit. After publication, verify the registry integrity, provenance, and `gitHead`, then create the matching annotated tag and GitHub release.
 
-See the [0.3.2 release record](docs/release-0.3.2.md) for required evidence. The [0.3.1 release record](docs/release-0.3.1.md), [0.3.0 release record](docs/release-0.3.0.md), [0.2.4 source release record](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md), and [v0.2.4 GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.2.4) remain historical evidence for their own artifacts.
+See the [0.3.3 release record](docs/release-0.3.3.md) for the patch boundary and verification commands. The [0.3.2](docs/release-0.3.2.md), [0.3.1](docs/release-0.3.1.md), [0.3.0](docs/release-0.3.0.md), and [0.2.4](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md) records remain historical evidence for their own artifacts.
 
 ## License
 
