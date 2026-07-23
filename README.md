@@ -24,6 +24,16 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 [Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
 
+## What an agent can ask Maqam to govern
+
+- Evaluate policy before a registered tool, CLI worker, browser action, or research adapter runs.
+- Bind human approval to the exact run, tool, and canonical input instead of a vague future action.
+- Consume exact approval once by default, rejecting changed input and replay.
+- Keep declared tool, origin, time, output, and evidence boundaries attached to dispatch.
+- Record reviewable execution facts and source-linked evidence without treating them as proof that an external claim is true.
+
+Maqam does not intercept direct operating-system calls or make an unsafe tool safe. An operation is governed only when the host deliberately routes it through a registered Maqam boundary.
+
 ## Maqam and ProductLoop OS
 
 **Maqam is the guarded door. ProductLoop OS is the toolbox around it.**
