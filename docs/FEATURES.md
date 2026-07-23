@@ -1,13 +1,13 @@
 # Maqam Feature Inventory
 
-This is the source-backed inventory for Maqam `0.3.2` and the documentation
+This is the source-backed inventory for Maqam `0.3.3` and the documentation
 changes proposed after that release. It describes behavior that is represented
 by public code, public types, tests, or an explicit host contract. It does not
 turn roadmap ideas into release claims.
 
 Status terms:
 
-- **Public 0.3.2** means the feature exists in the current npm package.
+- **Public 0.3.3** means the feature exists in the current npm package.
 - **Optional** means the feature requires an explicitly configured executable,
   credential, network reader, browser driver, or host component.
 - **Documentation update** means the implementation is already public and the
@@ -324,7 +324,8 @@ Status terms:
 ## Documentation update on the current branch
 
 1. Removes the oversized README hero image from the npm landing page.
-2. Replaces stale candidate status blocks with current public `0.3.2` truth.
+2. Keeps the npm README image-free and replaces stale packaged release text
+   with current public `0.3.3` truth.
 3. Reduces ProductLoop detail in the Maqam-first README.
 4. Adds a direct complete-feature inventory.
 5. Generates canonical, robots, Open Graph, Twitter, and JSON-LD metadata for

@@ -2,14 +2,14 @@
 
 This quickstart proves the exact-approval path locally. It needs a maintained Node.js 22, 24, or 26 release and does not need a model key, hosted account, browser, database, or external side effect.
 
-Commands below target the exact `maqam@0.3.2` release line. Before running them, confirm that `npm view maqam@0.3.2 version dist.integrity gitHead` returns the reviewed version, integrity, and commit and that the matching `v0.3.2` GitHub release exists; source metadata alone is not proof that the package is public. Until both records exist, use the verified 0.3.1 release instead.
+Commands below target the exact `maqam@0.3.3` stable release. Confirm that `npm view maqam@0.3.3 version dist.integrity gitHead` returns the reviewed version, integrity, and commit and that the matching `v0.3.3` GitHub release identifies the same source.
 
 ## 1. Run The Built-In Proof
 
 From any directory:
 
 ```bash
-npx -y maqam@0.3.2 demo approval
+npx -y maqam@0.3.3 demo approval
 ```
 
 Expected checkpoints:
@@ -29,7 +29,7 @@ PASS
 The command creates a temporary isolated workspace, performs one exact approved file write, verifies it, and removes the workspace. Add `--json` for the deterministic machine-readable report used by the launch video:
 
 ```bash
-npx -y maqam@0.3.2 demo approval --json
+npx -y maqam@0.3.3 demo approval --json
 ```
 
 ## 2. Install In A Project
@@ -38,7 +38,7 @@ npx -y maqam@0.3.2 demo approval --json
 mkdir maqam-quickstart
 cd maqam-quickstart
 npm init -y
-npm install maqam@0.3.2
+npm install maqam@0.3.3
 ```
 
 Create `approval.mjs` with this local, side-effect-free example:

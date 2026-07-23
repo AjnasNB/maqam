@@ -1,11 +1,11 @@
 # Maqam Release Checklist
 
-Use this root checklist as the release gate for `maqam@0.3.2`. The artifact remains a candidate until the protected publication and post-publish verification gates complete; afterward, the live registry and matching GitHub release define its status. Maqam 0.3.1 was the previous verified public release when this candidate was prepared, and historical artifacts remain evidence for their own versions only.
+Use this root checklist as the release gate for `maqam@0.3.3`. The artifact remains unpublished until the protected publication and post-publish verification gates complete; afterward, the live registry and matching GitHub release define its status. Historical artifacts remain evidence for their own versions only.
 
 ## Package
 
 - Name: `maqam`
-- Version: `0.3.2`
+- Version: `0.3.3`
 - State: candidate until protected publication completes; package metadata is not publication proof
 - License: MIT
 - Registry: npm public registry
@@ -39,7 +39,7 @@ Required result:
 - `npm run test:website` verifies release truth, internal links, accessibility structure, local assets, and Worker media semantics.
 - Governed-source allow/deny, fatal-no-fallback, availability-fallback, authentication opt-in, doctor, normalized-document, RSS/Atom, feed-crawl, and crawler-CLI fixtures pass on Node.js 22, 24, and 26.
 - Guarded-dispatch and governed-browser fixtures prove exact input/context/registration authority, same-instance same-run plan tokens, exact request origins, exact phase approval, prohibited-effect attestation, structural limits, and post-action observation.
-- MGES conformance and performance are rerun because the 0.3.2 version, lockfile, and client metadata changed. The published 0.3.1, 0.3.0, and 0.2.4 figures remain historical evidence for their own exact fingerprints and are not relabeled as 0.3.2 evidence.
+- MGES conformance and performance are rerun because the 0.3.3 version, lockfile, and client metadata changed. The published 0.3.2, 0.3.1, 0.3.0, and 0.2.4 figures remain historical evidence for their own exact fingerprints and are not relabeled as 0.3.3 evidence.
 - With squash merging enabled, use two PR phases: merge implementation first, rerun MGES from that exact clean main commit, then merge an evidence/docs/test-only PR. The measured main commit must remain an ancestor of the final release commit and no fingerprinted source may change in the evidence PR.
 - If the local host cannot satisfy the predeclared variance gate because of background load, dispatch `mges-evidence.yml` from exact `main`. It uses a clean Ubuntu 24.04 checkout and pinned Node 24.18.0, uploads raw PASS/REVIEW JSON plus a digest manifest, and fails rather than publishing when required criteria are not met.
 - `npm pack --dry-run` includes `src/`, `src/index.d.ts`, `src/maqam/server.d.ts`, `examples/`, `docs/governed-sources.md`, `docs/governed-browser-adapters.md`, `docs/migration-0.3.md`, all versioned 0.3 release records, the other public docs, `README.md`, `LICENSE`, `CHANGELOG.md`, `SECURITY.md`, `RELEASE_CHECKLIST.md`, and `LICENSE_AUDIT.md`.
@@ -50,12 +50,12 @@ Required result:
 
 ## Approval Gate
 
-Do not start the trusted publishing job until the exact artifact receives explicit maintainer approval for `maqam@0.3.2` and the protected GitHub environment can enforce that approval.
+Do not start the trusted publishing job until the exact artifact receives explicit maintainer approval for `maqam@0.3.3` and the protected GitHub environment can enforce that approval.
 
 Approval must name:
 
 - Package: `maqam`
-- Version: `0.3.2`
+- Version: `0.3.3`
 - Target: npm public registry
 - Command: `npm publish --access public --ignore-scripts --provenance`
 - Artifact: filename, byte size, npm integrity, independent SHA-256, and Git commit
@@ -66,8 +66,8 @@ For `createReleaseGateReport`, the approval action must be `publish:npm`. Its su
 
 ```bash
 npm publish --access public --ignore-scripts --provenance
-npm view maqam@0.3.2 version dist.integrity gitHead _resolved _from
-npx -y maqam@0.3.2 demo approval
+npm view maqam@0.3.3 version dist.integrity gitHead _resolved _from
+npx -y maqam@0.3.3 demo approval
 ```
 
-The protected GitHub workflow should publish with npm trusted OIDC provenance from the reviewed, clean, pushed commit; do not pass a local `.tgz` path or paste a reusable npm token/OTP into workflow input. Require registry `gitHead` to equal the approved commit and confirm `_resolved` and `_from` are absent or contain no local filesystem path. Record the published version and integrity, then create annotated tag `v0.3.2` and the GitHub release only after npm verification succeeds.
+The protected GitHub workflow should publish with npm trusted OIDC provenance from the reviewed, clean, pushed commit; do not pass a local `.tgz` path or paste a reusable npm token/OTP into workflow input. Require registry `gitHead` to equal the approved commit and confirm `_resolved` and `_from` are absent or contain no local filesystem path. Record the published version and integrity, then create annotated tag `v0.3.3` and the GitHub release only after npm verification succeeds.

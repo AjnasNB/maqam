@@ -2,6 +2,24 @@
 
 All notable Maqam changes are tracked here before release.
 
+## 0.3.3 - 2026-07-23
+
+Registry-presentation patch with no runtime policy, approval, browser, crawler,
+or research behavior changes.
+
+### Changed
+
+- Removed rendered proof and architecture images from the packaged README so
+  npm leads with the product promise, install command, feature inventory, and
+  reproducible proof links.
+- Replaced the immutable 0.3.2 README's pre-publication wording with the stable
+  0.3.3 package identity and exact registry verification command.
+- Aligned the package, lockfile, CLI version, Exa MCP client identity,
+  clean-consumer fixture, release assertions, and trusted-publishing default.
+
+See [docs/release-0.3.3.md](docs/release-0.3.3.md) for the patch boundary and
+required artifact checks.
+
 ## 0.3.2
 
 Release-truth patch. Availability is defined by the live npm registry, provenance, integrity, matching Git tag, and GitHub release—not by this source changelog or a local tarball. Maqam 0.3.1 remains the verified public release until those records exist for 0.3.2.

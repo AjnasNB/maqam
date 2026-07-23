@@ -5,13 +5,13 @@ Use this checklist before publishing any Maqam release.
 ## Previous Completed Release At Candidate Preparation
 
 - Package: `maqam`
-- Version: `0.3.1`
-- State: published on npm with matching `v0.3.1` GitHub release
+- Version: `0.3.2`
+- State: published on npm with matching `v0.3.2` GitHub release
 
 ## Release Target
 
 - Package: `maqam`
-- Version: `0.3.2`
+- Version: `0.3.3`
 - State: candidate until protected publication completes; verify the live registry and matching GitHub release afterward
 - License: MIT
 - Registry target: npm public registry
@@ -46,7 +46,7 @@ Expected result:
 - Only the console HTML, JavaScript, CSS, and SVG logo ship from `app/`; large brand/presentation PNGs remain repository-only.
 - `npm audit --omit=dev` reports no known production dependency vulnerabilities.
 - Governed-source allow/deny, fatal-no-fallback, availability-fallback, authenticated opt-in, doctor, normalized-document, RSS/Atom, feed-crawl, and crawler-CLI fixtures pass on Node.js 22, 24, and 26.
-- MGES is rerun after the 0.3.2 identity and lockfile land on clean `main`. Published 0.3.1, public 0.3.0, and historical 0.2.4 results remain labeled for their own fingerprints.
+- MGES is rerun after the 0.3.3 identity and lockfile land on clean `main`. Published 0.3.2, 0.3.1, public 0.3.0, and historical 0.2.4 results remain labeled for their own fingerprints.
 - Because this repository squash-merges pull requests, implementation and final benchmark evidence use two PR phases. Merge implementation, measure the resulting clean main commit, then merge an evidence/docs/test-only PR without changing fingerprinted source. The measured commit must remain an ancestor of the final release commit.
 - When a local machine is too noisy for the predeclared performance variance gate, dispatch `.github/workflows/mges-evidence.yml` from exact `main`. The job runs on a clean Ubuntu 24.04 checkout with Node 24.18.0, retains raw REVIEW attempts, emits a SHA-256 manifest, and succeeds only when conformance and every required publication criterion pass.
 
@@ -56,7 +56,7 @@ Confirm before release:
 
 - README explains install, CLI usage, SDK usage, safety principles, and publish gate.
 - `docs/usage.md` documents runtime, policy, evidence, skills, CLI workers, crawler, and console flows.
-- `docs/governed-sources.md`, `docs/governed-browser-adapters.md`, `docs/migration-0.3.md`, and `docs/release-0.3.2.md` match the public exports and exact release boundary while `docs/release-0.3.1.md` remains the previous published release record.
+- `docs/governed-sources.md`, `docs/governed-browser-adapters.md`, `docs/migration-0.3.md`, and `docs/release-0.3.3.md` match the public exports and exact release boundary while earlier release records remain historical.
 - `docs/provenance-and-licenses.md` documents inspiration boundaries and third-party license handling.
 - `CHANGELOG.md` contains the exact release notes for the version being published.
 - `SECURITY.md`, `RELEASE_CHECKLIST.md`, and `LICENSE_AUDIT.md` are present at the package root.
@@ -69,17 +69,17 @@ Confirm before release:
 
 ## Approval Gate
 
-Publishing requires explicit maintainer approval for the exact package, version, registry, command, artifact identity, and Git commit. Approval must name `maqam@0.3.2`, use the `publish:npm` action, and be enforced by the protected trusted-publishing environment.
+Publishing requires explicit maintainer approval for the exact package, version, registry, command, artifact identity, and Git commit. Approval must name `maqam@0.3.3`, use the `publish:npm` action, and be enforced by the protected trusted-publishing environment.
 
 When represented as an `ApprovalQueue` record, the subject must exactly match:
 
 ```js
 {
   packageName: "maqam",
-  version: "0.3.2",
+  version: "0.3.3",
   registry: "https://registry.npmjs.org/",
   publishCommand: "npm publish --access public --ignore-scripts --provenance",
-  artifactFilename: "maqam-0.3.2.tgz",
+  artifactFilename: "maqam-0.3.3.tgz",
   artifactSizeBytes: 123456,
   artifactSha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   artifactIntegrity: "sha512-...",
@@ -95,8 +95,8 @@ Do not dispatch the trusted publishing workflow from an unattended, scheduled, o
 
 ```bash
 npm publish --access public --ignore-scripts --provenance
-npm view maqam@0.3.2 version dist.integrity gitHead _resolved _from
-npx -y maqam@0.3.2 demo approval
+npm view maqam@0.3.3 version dist.integrity gitHead _resolved _from
+npx -y maqam@0.3.3 demo approval
 ```
 
-Run the publish command only inside the protected trusted-publishing job for the reviewed, clean, pushed commit and do not publish by passing a local `.tgz` path. After publishing, require registry `gitHead` to match the approved commit, verify version, integrity, and provenance, and confirm `_resolved` and `_from` expose no local filesystem path. Only then create annotated tag `v0.3.2` and the GitHub release with the npm package URL.
+Run the publish command only inside the protected trusted-publishing job for the reviewed, clean, pushed commit and do not publish by passing a local `.tgz` path. After publishing, require registry `gitHead` to match the approved commit, verify version, integrity, and provenance, and confirm `_resolved` and `_from` expose no local filesystem path. Only then create annotated tag `v0.3.3` and the GitHub release with the npm package URL.
