@@ -11,7 +11,7 @@
   "private": true,
   "dependencies": {
     "@remotion/cli": "4.0.490",
-    "@remotion/captions": "4.0.490",
+    "@remotion/captions": "4.0.498",
     "@remotion/media": "4.0.490",
     "react": "19.2.7",
     "react-dom": "19.2.7",
