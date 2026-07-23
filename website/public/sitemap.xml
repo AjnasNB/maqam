@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://maqamagent.com/</loc></url>
-  <url><loc>https://maqamagent.com/docs/</loc></url>
-  <url><loc>https://maqamagent.com/docs/sources/</loc></url>
-  <url><loc>https://maqamagent.com/docs/browser/</loc></url>
-  <url><loc>https://maqamagent.com/docs/productloop/</loc></url>
-  <url><loc>https://maqamagent.com/docs/integrations/</loc></url>
-  <url><loc>https://maqamagent.com/docs/benchmark/</loc></url>
-  <url><loc>https://maqamagent.com/docs/security/</loc></url>
-  <url><loc>https://maqamagent.com/why/</loc></url>
-  <url><loc>https://maqamagent.com/roadmap/</loc></url>
-  <url><loc>https://maqamagent.com/releases/v0.3.0/</loc></url>
-  <url><loc>https://maqamagent.com/releases/v0.3.1/</loc></url>
-  <url><loc>https://maqamagent.com/releases/v0.3.2/</loc></url>
-  <url><loc>https://maqamagent.com/releases/v0.2.4/</loc></url>
-  <url><loc>https://maqamagent.com/community/</loc></url>
-  <url><loc>https://maqamagent.com/articles/exact-agent-approvals/</loc></url>
-  <url><loc>https://maqamagent.com/articles/benchmarking-governance/</loc></url>
+  <url><loc>https://maqamagent.com/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/docs/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/docs/sources/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/docs/browser/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/docs/productloop/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/docs/integrations/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/docs/benchmark/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/docs/security/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/why/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/roadmap/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/releases/v0.3.0/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/releases/v0.3.1/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/releases/v0.3.2/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/releases/v0.2.4/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/community/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/articles/exact-agent-approvals/</loc><lastmod>2026-07-23</lastmod></url>
+  <url><loc>https://maqamagent.com/articles/benchmarking-governance/</loc><lastmod>2026-07-23</lastmod></url>
 </urlset>

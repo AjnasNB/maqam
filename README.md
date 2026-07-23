@@ -4,52 +4,38 @@
 [![CI](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml/badge.svg)](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](https://github.com/AjnasNB/maqam/blob/main/LICENSE)
 
-**Give AI agents the power to act across real software - without handing them a blank cheque.**
+**Give AI agents the power to act across real software. Keep the final authority.**
 
-![Maqam governed agent framework hero](https://raw.githubusercontent.com/AjnasNB/maqam/main/app/assets/maqam-readme-hero.png)
-
-**In plain English:** Maqam is the control point between an AI agent and the tools that can change real software. Put a function, CLI worker, coding agent, crawler, browser connector, or internal service behind one registered gateway; Maqam checks policy, binds approval to the exact input that will run, allows that approved call once, and leaves a verifiable receipt.
+Maqam is an open-source AI agent governance layer for TypeScript. Put a function, CLI worker, coding agent, crawler, browser connector, MCP-backed operation, or internal service behind one registered gateway. Maqam checks policy before dispatch, binds human approval to the exact input that will run, allows that approved call once, rejects altered input and replay, and leaves a verifiable receipt.
 
 Cockroach Crawler gives the stack bounded eyes on public sources. Qarinah gives it compact, evidence-linked memory. Maqam governs the hands that act. Only operations routed through a registered Maqam adapter are governed.
 
-More technically, Maqam is an MIT-licensed TypeScript execution boundary for governed workflows. It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, and a crawler-backed research workflow.
+It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, governed browser contracts, and research-source routing in one MIT-licensed package.
 
 The crawler is not the product center; it is one built-in connector. Maqam governs workers that enter through `ToolGateway`, including function agents, explicitly bound object agents, Codex CLI, Claude Code, generic command-line workers, browser and research adapters, internal services, and write actions that need human approval. Calls that bypass a registered adapter are outside Maqam's control.
 
-> **Release status is live-record-driven:** [`maqam@0.3.1`](https://www.npmjs.com/package/maqam/v/0.3.1) was the verified public release when this source candidate was prepared. It was published through npm Trusted Publishing and paired with [`v0.3.1`](https://github.com/AjnasNB/maqam/releases/tag/v0.3.1); its registry `gitHead` is `2f7231db912012e37e89ec962f6d57c54c6275a3`. Always re-check `npm view maqam dist-tags.latest gitHead dist.integrity` and the repository's [latest release page](https://github.com/AjnasNB/maqam/releases/latest), because a README snapshot cannot predict a later release.
-
-> **0.3.2 package line:** this source and packaged README target 0.3.2 so a future immutable npm artifact carries the verified ProductLoop OS 0.2.2 companion map instead of the stale 0.2.1 snapshot in 0.3.1. No runtime or security boundary changes. Package metadata is not publication proof: verify `npm view maqam@0.3.2 version gitHead dist.integrity` and the matching [`v0.3.2` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.2). If both records exist and identify the same reviewed commit, they are the public-release authority; otherwise use the verified 0.3.1 release. See the [0.3.2 release record](docs/release-0.3.2.md).
-
-> **0.3 release line:** governed source routing, hosted-anonymous Exa web search, public YouTube metadata and available captions through an explicitly configured `yt-dlp`, normalized research documents, offline RSS/Atom parsing, feed-aware crawling, and exact network-origin controls. See the [0.3.0 release record](docs/release-0.3.0.md) and [migration guide](docs/migration-0.3.md).
+**Current public release:** [`maqam@0.3.2`](https://www.npmjs.com/package/maqam/v/0.3.2), published through npm Trusted Publishing and paired with the verified [`v0.3.2` GitHub release](https://github.com/AjnasNB/maqam/releases/tag/v0.3.2). Run `npm view maqam dist-tags.latest gitHead dist.integrity` when exact artifact identity matters.
 
 [Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
 
 ## Agent superpowers, governed by you
 
 - Put registered functions, object agents, Codex CLI, Claude Code, fixed command-line workers, browser actions, crawlers, research adapters, and internal services behind one inspectable control path.
+- Add a practical application-side control plane without replacing the model, orchestrator, agent SDK, or existing tool implementation.
 - Evaluate policy before a registered operation runs, including its declared effect, origin, time, output, call, and evidence boundaries.
 - Bind human approval to the exact run, tool, and canonical input instead of approving a vague future action.
 - Consume exact approval once by default, rejecting changed input and replay.
 - Turn successful dispatches, denials, approval use, and evidence links into reviewable execution records.
 - Combine governed action with bounded browser and research adapters without silently widening their network or credential authority.
+- Route hosted-anonymous Exa web search, public YouTube metadata and available captions, RSS/Atom feeds, and host-supplied crawlers through explicit governed source adapters.
 
 Maqam does not intercept direct operating-system calls or make an unsafe tool safe. An operation is governed only when the host deliberately routes it through a registered Maqam boundary.
 
-## Maqam and ProductLoop OS
+## Start with Maqam. Expand only when you need more.
 
-**Maqam is the guarded door. ProductLoop OS is the toolbox around it.**
+Install Maqam when you need one compact governance boundary around registered tool calls, exact approvals, guarded browser actions, coding-agent workers, traces, evidence, and governed research sources. [ProductLoop OS](https://github.com/AjnasNB/productloop-os) is the optional modular toolbox for teams that also need separate workflow, policy, approval, provenance, skill, connector, evaluation, and research packages.
 
-Maqam is the governed execution kernel: policy before a registered operation, approval bound to the exact run/tool/input, one-use consumption by default, and reviewable trace and evidence records. [ProductLoop OS](https://github.com/AjnasNB/productloop-os) is the companion ecosystem: its public umbrella and eight small packages add workflow runtime, policy decisions, approval operations, provenance, evaluations, connector trust, skill manifests, and replayable browser-research records.
-
-They are one ecosystem with explicit boundaries, not one silently merged runtime. [`productloop-os@0.2.2`](https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.2) exposes Maqam and the Ajnas packages as named namespaces and tested adapters, while their contracts and ledgers remain distinct.
-
-| Choose | When you need |
-|---|---|
-| `maqam@0.3.2` (only after live registry and release verification) | One compact boundary around tool calls, exact approvals, guarded structural browser actions, worker adapters, traces, evidence, governed source routing, anonymous web search, public YouTube metadata/captions, or bounded HTTP/feed research |
-| [`productloop-os@0.2.2`](https://github.com/AjnasNB/productloop-os/releases/tag/v0.2.2) | The wider modular package family for runtime, policy, approvals, provenance, skills, connectors, evaluations, and research |
-| Both beneath an orchestrator | Google ADK, OpenAI Agents SDK, LangGraph, or another agent loop already plans work and Maqam should govern selected side effects |
-
-Maqam and ProductLoop do not replace model providers, durable orchestration, identity, databases, browser engines, or operating-system sandboxes. Only operations routed through a registered boundary are governed. See the [package atlas and copy-paste examples](https://maqamagent.com/docs/productloop/).
+Neither product replaces model providers, durable orchestration, identity, databases, browser engines, or operating-system sandboxes. Only operations routed through a registered boundary are governed. See the [Maqam quickstart](https://maqamagent.com/docs/) or the separate [ProductLoop package atlas](https://maqamagent.com/docs/productloop/).
 
 ## Watch the Proofs
 
@@ -69,6 +55,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 
 | Start with | Use it for |
 |---|---|
+| [Complete feature inventory](https://github.com/AjnasNB/maqam/blob/main/docs/FEATURES.md) | Every public runtime, policy, approval, evidence, adapter, browser, research, crawler, server, release, verification, and security capability, plus explicit non-goals |
 | [Five-minute quickstart](https://github.com/AjnasNB/maqam/blob/main/docs/quickstart.md) and [full usage guide](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md) | Local proof, installation, APIs, cleanup, and deployment boundaries |
 | [Why Maqam](https://maqamagent.com/why/) and [detailed comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md) | Product fit, alternatives, differences, limitations, sources, and licenses |
 | [ProductLoop package atlas](https://maqamagent.com/docs/productloop/) | Package-by-package roles, versions, examples, and Maqam relationship |

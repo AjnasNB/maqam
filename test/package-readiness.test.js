@@ -5,6 +5,7 @@ import { test } from "node:test";
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const packageLockJson = JSON.parse(readFileSync(new URL("../package-lock.json", import.meta.url), "utf8"));
 const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+const featureInventory = readFileSync(new URL("../docs/FEATURES.md", import.meta.url), "utf8");
 const usageGuide = readFileSync(new URL("../docs/usage.md", import.meta.url), "utf8");
 const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
 const provenanceGuide = readFileSync(new URL("../docs/provenance-and-licenses.md", import.meta.url), "utf8");
@@ -38,7 +39,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageLockJson.packages[""].version, "0.3.2");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.author, "Ajnas NB");
-  assert.match(packageJson.description, /hands without handing them the keys/i);
+  assert.match(packageJson.description, /open-source AI agent governance for TypeScript/i);
   assert.match(packageJson.description, /exact one-use approvals/i);
   assert.match(packageJson.description, /verifiable receipts/i);
   assert.equal(packageJson.type, "module");
@@ -61,6 +62,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.files.includes("docs/release-checklist.md"));
   assert.ok(packageJson.files.includes("docs/provenance-and-licenses.md"));
   assert.ok(packageJson.files.includes("docs/comparison.md"));
+  assert.ok(packageJson.files.includes("docs/FEATURES.md"));
   assert.ok(packageJson.files.includes("docs/benchmarking.md"));
   assert.ok(packageJson.files.includes("docs/quickstart.md"));
   assert.ok(packageJson.files.includes("docs/why-maqam.md"));
@@ -106,9 +108,41 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.engines.node, "^22.0.0 || ^24.0.0 || ^26.0.0");
 });
 
+test("the packed feature inventory stays complete and boundary-honest", () => {
+  assert.match(readme, /Complete feature inventory/);
+  for (const section of [
+    "Installation and runtime surfaces",
+    "Policy engine",
+    "Tool gateway and execution receipts",
+    "Exact one-use approvals",
+    "Evidence and claims",
+    "Workflow runtime",
+    "Skill registry",
+    "Agent and object adapters",
+    "Command-line worker adapters",
+    "Codex and Claude Code adapters",
+    "Governed browser adapter contract",
+    "Research document model",
+    "Governed source routing",
+    "Public research adapters",
+    "Built-in bounded crawler",
+    "Release gate",
+    "Local server and console",
+    "Security and hostile-input handling",
+    "Verification and benchmark surfaces",
+    "Documentation update on the current branch",
+    "Explicit boundaries and non-goals"
+  ]) {
+    assert.match(featureInventory, new RegExp(`^## ${section}$`, "m"), section);
+  }
+  assert.match(featureInventory, /governs only calls routed through its registered boundaries/);
+  assert.match(featureInventory, /not an operating-system sandbox/);
+  assert.match(featureInventory, /not a universal internet-access promise/);
+});
+
 test("public docs and brand assets match Maqam identity", () => {
   assert.match(readme, /^# Maqam/m);
-  assert.match(readme, /maqam-readme-hero\.png/);
+  assert.doesNotMatch(readme, /maqam-readme-hero\.png/);
   assert.match(readme, /maqam-system-map\.svg/);
   assert.match(readme, /maqam-cli-agent-flow\.png/);
   assert.match(readme, /Full documentation/);
@@ -163,28 +197,29 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(release031, /earlier metadata-only candidate[\s\S]{0,180}superseded historical candidate evidence/i);
   assert.doesNotMatch(release031, /implementation phase merged as exact clean `main` commit/i);
   assert.match(release032, /^# Maqam 0\.3\.2 Release Record/m);
-  assert.match(release032, /source candidate, not a published release/i);
-  assert.match(release032, /ProductLoop OS 0\.2\.2 companion release/i);
+  assert.match(release032, /Maqam 0\.3\.2 is a published public release/i);
+  assert.match(release032, /ea3266e520cbec84d3dba68a8d0f07e26d4c2d66/i);
+  assert.match(release032, /ProductLoop OS 0\.2\.2 companion correction/i);
   assert.match(release032, /does not change Maqam's policy, approval, evidence, crawler, browser, research, network, or credential boundaries/i);
   assert.match(release032, /published 0\.3\.1 MGES results[\s\S]{0,180}must not be relabeled as 0\.3\.2 results/i);
-  assert.match(release032, /Do not publish, tag, or announce 0\.3\.2 from a release-preparation branch/i);
+  assert.match(release032, /Historical Publication Gate/i);
   assert.match(governedBrowser, /^# Governed browser adapters/m);
   assert.match(governedBrowser, /only origins named by the exact/i);
   assert.match(governedBrowser, /external protocols[\s\S]{0,250}modal dialogs/i);
   assert.match(governedBrowser, /host-driver attestation checked after dispatch/i);
   assert.match(security, /^## Governed Browser Boundary/m);
-  assert.match(readme, /Release status is live-record-driven:[\s\S]{0,400}maqam@0\.3\.1/i);
-  assert.match(readme, /0\.3\.2 package line/i);
+  assert.match(readme, /Current public release:[\s\S]{0,200}maqam@0\.3\.2/i);
+  assert.doesNotMatch(readme, /Release status is live-record-driven:[\s\S]{0,400}maqam@0\.3\.1/i);
+  assert.doesNotMatch(readme, /0\.3\.2 package line/i);
   assert.doesNotMatch(readme, /0\.3\.1 pre-publication/i);
-  assert.match(readme, /npm view maqam@0\.3\.2 version gitHead dist\.integrity/i);
-  assert.match(readme, /If both records exist and identify the same reviewed commit[\s\S]{0,180}otherwise use the verified 0\.3\.1 release/i);
-  assert.match(readme, /productloop-os@0\.2\.2/i);
+  assert.match(readme, /npm view maqam dist-tags\.latest gitHead dist\.integrity/i);
+  assert.match(readme, /Start with Maqam\. Expand only when you need more\./i);
   assert.doesNotMatch(readme, /productloop-os@0\.2\.1/i);
   assert.match(readme, /previous public 0\.3\.0 evidence/i);
   assert.match(readme, /published 0\.3\.1 measured-source evidence/i);
   assert.match(readme, /a96413c4da5f27dc31b9772996e70faab0b38382/i);
   assert.match(readme, /129\.849 microseconds\/call/i);
-  assert.match(readme, /0\.3 release line/i);
+  assert.match(readme, /Current public release:[\s\S]{0,200}maqam@0\.3\.2/i);
   assert.match(readme, /hosted-anonymous Exa web search/i);
   assert.match(readme, /public YouTube metadata and available captions/i);
   assert.match(readme, /npm view maqam dist-tags\.latest gitHead dist\.integrity/i);
