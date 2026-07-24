@@ -10,15 +10,15 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@remotion/cli": "4.0.490",
-    "@remotion/captions": "4.0.490",
-    "@remotion/media": "4.0.490",
+    "@remotion/cli": "4.0.498",
+    "@remotion/captions": "4.0.498",
+    "@remotion/media": "4.0.498",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "remotion": "4.0.490"
+    "remotion": "4.0.498"
   },
   "devDependencies": {
-    "@remotion/eslint-config-flat": "4.0.490",
+    "@remotion/eslint-config-flat": "4.0.498",
     "@types/react": "19.2.17",
     "@types/web": "0.0.352",
     "eslint": "9.39.5",
