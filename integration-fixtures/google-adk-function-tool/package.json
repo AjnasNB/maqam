@@ -11,9 +11,10 @@
     "audit:production": "npm audit --omit=dev"
   },
   "dependencies": {
-    "@google/adk": "1.2.0"
+    "@google/adk": "1.4.0"
   },
   "overrides": {
+    "adm-zip": "0.6.0",
     "@hono/node-server": "2.0.11",
     "@opentelemetry/core": "2.9.0",
     "@opentelemetry/exporter-logs-otlp-http": "0.220.0",
@@ -26,7 +27,9 @@
     "@opentelemetry/sdk-metrics": "2.9.0",
     "@opentelemetry/sdk-trace-base": "2.9.0",
     "@tootallnate/once": "3.0.1",
-    "tar": "7.5.20",
+    "brace-expansion": "5.0.8",
+    "sqlite3": "6.0.1",
+    "tar": "7.5.22",
     "uuid": "14.0.1"
   },
   "engines": {
