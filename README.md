@@ -39,6 +39,11 @@ Neither product replaces model providers, durable orchestration, identity, datab
 
 ## Reproduce the Proofs
 
+The current control-plane demo runs Cockroach Crawler source collection,
+Qarinah context compilation, Maqam policy, altered-input rejection, one exact
+approved write, replay rejection, tests, and a causal receipt as one continuous
+engineering workflow. [Read the 60-second workflow and run it locally](docs/launch/YC-CONTROL-PLANE-DEMO.md).
+
 The proof media in this section was produced for the historical 0.2.4 release and remains labeled with that artifact identity. It demonstrates durable product behavior, but it is not relabeled as 0.3.0 release evidence.
 
 [Watch the 60-second exact-approval proof](https://maqamagent.com/media/releases/maqam/v0.2.4/maqam-exact-approval-demo.mp4), then reproduce the same approval, mismatch, execution, replay, and evidence sequence locally with `npx -y maqam@0.3.3 demo approval --json`.
