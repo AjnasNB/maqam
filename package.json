@@ -66,7 +66,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test",
+    "test": "node scripts/run-tests.mjs",
     "test:consumer-types": "node scripts/clean-consumer-types.mjs",
     "install:google-adk-fixture": "npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts",
     "audit:google-adk-fixture": "npm --prefix integration-fixtures/google-adk-function-tool audit",
@@ -78,6 +78,10 @@
     "crawl": "node bin/ajnas-crawl.js",
     "maqam": "node bin/maqam.js",
     "demo:approval": "node bin/maqam.js demo approval",
+    "demo:yc:check": "npm --prefix demo/yc-dashboard run check",
+    "demo:yc:generate": "npm --prefix demo/yc-dashboard run generate",
+    "demo:yc:serve": "npm --prefix demo/yc-dashboard run serve",
+    "demo:yc:record": "npm --prefix demo/yc-dashboard run record",
     "benchmark:governance": "node benchmarks/governance-overhead.mjs",
     "benchmark:mges:performance": "node benchmarks/governance-suite.mjs",
     "benchmark:mges:conformance": "node benchmarks/governance-conformance.mjs",

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="A live Maqam control-plane demo: evidence, compact project memory, exact approval, one execution, and a causal receipt."
+    >
+    <title>Maqam - YC control-plane demo</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='5' width='22' height='22' rx='1' fill='%23090d0e' stroke='%2365f2bb' stroke-width='2' transform='rotate(45 16 16)'/%3E%3Cpath d='M11 19V12m5 7V9m5 10v-4' stroke='%2365f2bb' stroke-width='2'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app-shell" id="app" data-state="ready">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Maqam demo home">
+          <span class="brand-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </span>
+          <span class="brand-name">MAQAM</span>
+          <span class="brand-tag">CONTROL PLANE</span>
+        </a>
+
+        <nav class="primary-nav" aria-label="Demo sections">
+          <button class="nav-item active" data-tab="run" type="button">RUN</button>
+          <button class="nav-item" data-tab="approval" type="button">APPROVAL</button>
+          <button class="nav-item" data-tab="receipt" type="button">RECEIPT</button>
+        </nav>
+
+        <div class="topbar-actions">
+          <span class="environment"><span class="status-dot"></span> ENGINEERING SANDBOX</span>
+          <button class="run-button" id="run-workflow" type="button">
+            <span>RUN GOVERNED WORKFLOW</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="run-rail" aria-label="Workflow timeline">
+          <div class="rail-heading">
+            <p class="eyebrow">ACTIVE RUN</p>
+            <p class="run-number">RUN-001</p>
+          </div>
+          <ol class="timeline" id="timeline">
+            <li class="timeline-step" data-step="task">
+              <span class="step-index">01</span>
+              <span><b>Task received</b><small>Agent request</small></span>
+              <i></i>
+            </li>
+            <li class="timeline-step" data-step="policy">
+              <span class="step-index">02</span>
+              <span><b>Policy evaluated</b><small>Maqam</small></span>
+              <i></i>
+            </li>
+            <li class="timeline-step" data-step="memory">
+              <span class="step-index">03</span>
+              <span><b>Context compiled</b><small>Qarinah</small></span>
+              <i></i>
+            </li>
+            <li class="timeline-step" data-step="evidence">
+              <span class="step-index">04</span>
+              <span><b>Evidence fetched</b><small>Cockroach</small></span>
+              <i></i>
+            </li>
+            <li class="timeline-step" data-step="proposal">
+              <span class="step-index">05</span>
+              <span><b>Patch proposed</b><small>Coding agent</small></span>
+              <i></i>
+            </li>
+            <li class="timeline-step" data-step="altered">
+              <span class="step-index">06</span>
+              <span><b>Altered input</b><small>Blocked</small></span>
+              <i></i>
+            </li>
+            <li class="timeline-step" data-step="exact">
+              <span class="step-index">07</span>
+              <span><b>Exact input</b><small>Executed once</small></span>
+              <i></i>
+            </li>
+            <li class="timeline-step" data-step="receipt">
+              <span class="step-index">08</span>
+              <span><b>Receipt verified</b><small>Causal proof</small></span>
+              <i></i>
+            </li>
+          </ol>
+          <div class="package-stack">
+            <p class="eyebrow">LIVE PACKAGES</p>
+            <div><span>Maqam</span><code id="version-maqam">0.3.3</code></div>
+            <div><span>Qarinah</span><code id="version-qarinah">0.1.2</code></div>
+            <div><span>Cockroach</span><code id="version-crawler">0.5.1</code></div>
+          </div>
+        </aside>
+
+        <section class="run-canvas" aria-labelledby="run-title">
+          <div class="canvas-head">
+            <div>
+              <p class="eyebrow"><span id="run-state">READY</span> · <span id="run-id">RUN_VENDOR_V2_001</span></p>
+              <h1 id="run-title">Migrate a vendor API without surrendering control.</h1>
+            </div>
+            <div class="canvas-progress" aria-label="Workflow progress">
+              <span id="progress-label">0 / 8 verified</span>
+              <div class="progress-track"><span id="progress-bar"></span></div>
+            </div>
+          </div>
+
+          <div class="task-brief">
+            <div class="brief-icon" aria-hidden="true">⌁</div>
+            <div>
+              <p class="brief-label">AGENT TASK</p>
+              <p id="task-text">Migrate the Acme Jobs client from v1 to v2. Preserve retry safety, run tests, and do not write without exact approval.</p>
+            </div>
+            <span class="brief-badge">WRITE · HIGH RISK</span>
+          </div>
+
+          <article class="focus-panel" id="focus-panel" aria-live="polite">
+            <div class="focus-idle">
+              <p class="eyebrow">ONE CONTINUOUS RUN</p>
+              <h2>Evidence in. Exact action out. Proof all the way through.</h2>
+              <p>
+                Start the workflow to watch project memory, source evidence, policy,
+                approval, execution, and outcome become one verifiable receipt.
+              </p>
+              <div class="idle-chain" aria-hidden="true">
+                <span>MEMORY</span><i>→</i><span>EVIDENCE</span><i>→</i>
+                <span>POLICY</span><i>→</i><span>ACTION</span><i>→</i><span>RECEIPT</span>
+              </div>
+            </div>
+          </article>
+
+          <div class="signal-grid" aria-label="Run signals">
+            <article class="signal-card" data-signal="policy">
+              <p>POLICY</p>
+              <strong id="signal-policy">Awaiting run</strong>
+              <small id="signal-policy-detail">No tool dispatched</small>
+            </article>
+            <article class="signal-card" data-signal="memory">
+              <p>PROJECT MEMORY</p>
+              <strong id="signal-memory">Not compiled</strong>
+              <small id="signal-memory-detail">0 cited items</small>
+            </article>
+            <article class="signal-card" data-signal="evidence">
+              <p>SOURCE EVIDENCE</p>
+              <strong id="signal-evidence">Not fetched</strong>
+              <small id="signal-evidence-detail">No source hash</small>
+            </article>
+            <article class="signal-card" data-signal="action">
+              <p>ACTION</p>
+              <strong id="signal-action">0 executions</strong>
+              <small id="signal-action-detail">Exact approval required</small>
+            </article>
+          </div>
+        </section>
+
+        <aside class="proof-rail" aria-label="Live proof">
+          <div class="proof-heading">
+            <p class="eyebrow">LIVE PROOF</p>
+            <span class="proof-status" id="proof-status">WAITING</span>
+          </div>
+
+          <section class="proof-section">
+            <p class="proof-label">BOUNDARY</p>
+            <div class="boundary-row">
+              <span>Registered tool</span><code>apply_patch</code>
+            </div>
+            <div class="boundary-row">
+              <span>Authority</span><code>exact · one use</code>
+            </div>
+            <div class="boundary-row">
+              <span>Network</span><code>approved source</code>
+            </div>
+          </section>
+
+          <section class="approval-card" id="approval-card">
+            <div class="approval-icon" aria-hidden="true">◇</div>
+            <div>
+              <p class="proof-label">APPROVAL</p>
+              <strong id="approval-state">Not requested</strong>
+              <small id="approval-detail">Bound to run + tool + input hash</small>
+            </div>
+          </section>
+
+          <section class="receipt-preview">
+            <p class="proof-label">CAUSAL RECEIPT</p>
+            <ol id="receipt-chain">
+              <li data-receipt="source"><span></span>Source</li>
+              <li data-receipt="context"><span></span>Context</li>
+              <li data-receipt="policy"><span></span>Policy</li>
+              <li data-receipt="approval"><span></span>Approval</li>
+              <li data-receipt="action"><span></span>Action</li>
+              <li data-receipt="outcome"><span></span>Outcome</li>
+            </ol>
+          </section>
+
+          <div class="proof-hash">
+            <p class="proof-label">RECEIPT HASH</p>
+            <code id="receipt-hash">Pending successful execution</code>
+          </div>
+        </aside>
+      </main>
+
+      <div class="error-toast" id="error-toast" role="alert"></div>
+    </div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

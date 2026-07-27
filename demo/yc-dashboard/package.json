@@ -1,0 +1,19 @@
+{
+  "name": "maqam-yc-control-plane-demo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "generate": "node scripts/generate-workflow.mjs",
+    "serve": "node scripts/serve.mjs",
+    "record": "node scripts/record-demo.mjs",
+    "check": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "cockroach-crawler": "0.5.1",
+    "qarinah": "0.1.2"
+  },
+  "devDependencies": {
+    "playwright": "1.61.1"
+  }
+}

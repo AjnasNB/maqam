@@ -1,0 +1,201 @@
+{
+  "schemaVersion": "maqam.yc-control-plane-demo.v1",
+  "status": "passed",
+  "run": {
+    "id": "run_vendor_v2_001",
+    "title": "Acme Jobs API v2 migration",
+    "task": "Migrate the Acme Jobs client from v1 to v2. Preserve retry safety, run tests, and do not write without exact approval.",
+    "requestedBy": "coding-agent",
+    "environment": "engineering-sandbox",
+    "durationMs": 832
+  },
+  "packages": {
+    "maqam": "0.3.3",
+    "qarinah": "0.1.2",
+    "cockroachCrawler": "0.5.1"
+  },
+  "policy": {
+    "decision": "allow_with_approval",
+    "reason": "Source reads are allowed. A write requires approval bound to this run, tool, and exact input hash.",
+    "tool": "apply_patch",
+    "effects": [
+      "write"
+    ],
+    "risk": "high"
+  },
+  "memory": {
+    "provider": "Qarinah",
+    "query": "Acme Jobs v2 tasks migration idempotency retry approval vendor client",
+    "items": [
+      {
+        "eventId": "evt_0343205d-4943-4f3c-ac89-63b3457f7c2c",
+        "kind": "decision",
+        "title": "Migration acceptance criteria",
+        "excerpt": "Acme Jobs v2 tasks migration: the vendor client must preserve idempotency on retry, and production change approval remains mandatory.",
+        "confidence": "verified",
+        "reason": "hybrid rank bm25#1, fuzzy#1; diversified=0.35",
+        "hash": "sha256:86b8f8d9522fea57c1b01d9d84572dec8faf28f035185c0af49542f2908dcc8b"
+      },
+      {
+        "eventId": "evt_e0c2fc5d-39a7-49dc-99d7-e1c6b103c4c9",
+        "kind": "approval",
+        "title": "Production writes require exact one-use approval",
+        "excerpt": "Any patch that changes an outbound vendor request requires approval bound to run ID, tool name, and the exact input hash. Approval is consumed after one successful call.",
+        "confidence": "verified",
+        "reason": "hybrid rank bm25#3, fuzzy#3; diversified=0.290136",
+        "hash": "sha256:01a7b07aa3434fad2bd2d96ed354124dbd84cc86106fba6adf768198b04a3141"
+      },
+      {
+        "eventId": "evt_44fc32c5-5876-423a-9d0f-5523e114bbcc",
+        "kind": "artifact",
+        "title": "Vendor client implementation",
+        "excerpt": "src/vendor-client.js owns the createJob request. The current client uses POST /v1/jobs and sends payload directly.\n{\"contentHash\":\"sha256:261f98c4abae64e49caaea390ddb2bbdca72059ca068fa09d3234d352f56e464\",\"path\":\"src/vendor-client.js\"}",
+        "confidence": "extracted",
+        "reason": "hybrid rank bm25#2, fuzzy#4; diversified=0.285573",
+        "hash": "sha256:d0220439e3698cb404a80da3c44f9bbdfe7f15a4ac16183654e831b8ff3ad8b8"
+      },
+      {
+        "eventId": "evt_6749b716-950c-4cbf-9a05-604ae5a2de2c",
+        "kind": "decision",
+        "title": "Retryable creates must be idempotent",
+        "excerpt": "All retryable vendor create operations must send one stable idempotency key for the same logical operation.",
+        "confidence": "verified",
+        "reason": "hybrid rank bm25#4, fuzzy#2; diversified=0.2753",
+        "hash": "sha256:30fae8c54f488cdc82f2c238f6a3393f72625d55d28749cad35abb0fb61d6d9d"
+      }
+    ],
+    "itemCount": 4,
+    "usedChars": 3094,
+    "estimatedTokens": 774,
+    "manifestHash": "sha256:7688404d754098fc35c094a040fb4025d1fd81a56dd2c585ef500f7fe5b959f1",
+    "coverage": {
+      "method": "query-term-overlap-v1",
+      "status": "direct",
+      "queryTermCount": 10,
+      "bestExactTermCount": 10,
+      "bestExactTermRatio": 1,
+      "directCandidateCount": 4
+    },
+    "store": {
+      "eventCount": 4,
+      "headHash": "sha256:86b8f8d9522fea57c1b01d9d84572dec8faf28f035185c0af49542f2908dcc8b",
+      "verified": true
+    },
+    "markdownHash": "sha256:b67e315d470ff6e83718a8285e7afab4c43d6a9f9c181f79a7b32eb420cac6b0"
+  },
+  "evidence": {
+    "provider": "Cockroach Crawler",
+    "sourceLabel": "Approved vendor migration guide",
+    "sourceKind": "controlled documentation fixture",
+    "url": "vendor-docs://migration/jobs-v2",
+    "title": "Acme Jobs API v2 migration guide",
+    "excerpt": "POST /v2/tasks wraps the payload under task. Retryable creates require Idempotency-Key.",
+    "contentHash": "sha256:853be684b87f32e9d32cbf3f8638a4f687d5b0cca4a7a1c5f79c647562b37050",
+    "fetchedAt": "2026-07-26T19:38:20.661Z",
+    "records": 1,
+    "bytes": 783,
+    "requests": 2,
+    "failures": []
+  },
+  "proposal": {
+    "path": "src/vendor-client.js",
+    "patch": "diff --git a/src/vendor-client.js b/src/vendor-client.js\nindex 7a49b87..4f6d99a 100644\n--- a/src/vendor-client.js\n+++ b/src/vendor-client.js\n@@ -1,12 +1,15 @@\n-export async function createJob(payload, token) {\n-  const response = await fetch(\"https://api.acme.test/v1/jobs\", {\n+import { randomUUID } from \"node:crypto\";\n+\n+export async function createJob(payload, token, idempotencyKey = randomUUID()) {\n+  const response = await fetch(\"https://api.acme.test/v2/tasks\", {\n     method: \"POST\",\n     headers: {\n       authorization: `Bearer ${token}`,\n-      \"content-type\": \"application/json\"\n+      \"content-type\": \"application/json\",\n+      \"idempotency-key\": idempotencyKey\n     },\n-    body: JSON.stringify(payload)\n+    body: JSON.stringify({ task: payload })\n   });\n",
+    "checks": [
+      "uses POST /v2/tasks",
+      "preserves one idempotency key across retries",
+      "wraps the request body under task"
+    ]
+  },
+  "approval": {
+    "id": "approval_1",
+    "status": "approved",
+    "reusable": false,
+    "subject": {
+      "runId": "run_vendor_v2_001",
+      "toolName": "apply_patch",
+      "inputHash": "aa7b4dd503d3baa8f66b058595e02d28a30d232822f06935a73211166d582e12"
+    },
+    "requested": {
+      "code": "APPROVAL_REQUIRED",
+      "executions": 0
+    },
+    "alteredInput": {
+      "code": "APPROVAL_SCOPE_MISMATCH",
+      "executions": 0,
+      "reason": "Removing Idempotency-Key changed the approved input hash."
+    },
+    "exactInput": {
+      "status": "completed",
+      "executions": 1,
+      "consumptionCount": 1,
+      "result": {
+        "path": "src/vendor-client.js",
+        "contentHash": "sha256:4bb31185b5747c6dd776051cd554d207319b1a2ffe0c3923f8c8ad5f47507d5b",
+        "bytes": 514,
+        "tests": {
+          "passed": true,
+          "checks": [
+            "uses POST /v2/tasks",
+            "preserves one idempotency key across retries",
+            "wraps the request body under task"
+          ]
+        },
+        "evidenceIds": [
+          "ev_1",
+          "ev_2"
+        ],
+        "claimId": "claim_1"
+      }
+    },
+    "replay": {
+      "code": "APPROVAL_INVALID",
+      "executions": 1
+    }
+  },
+  "receipt": {
+    "runId": "run_vendor_v2_001",
+    "sourceHash": "sha256:853be684b87f32e9d32cbf3f8638a4f687d5b0cca4a7a1c5f79c647562b37050",
+    "contextManifestHash": "sha256:7688404d754098fc35c094a040fb4025d1fd81a56dd2c585ef500f7fe5b959f1",
+    "policy": "write_requires_exact_one_use_approval",
+    "approvalId": "approval_1",
+    "approvedInputHash": "aa7b4dd503d3baa8f66b058595e02d28a30d232822f06935a73211166d582e12",
+    "outputHash": "sha256:4bb31185b5747c6dd776051cd554d207319b1a2ffe0c3923f8c8ad5f47507d5b",
+    "claimId": "claim_1",
+    "receiptHash": "sha256:60f197a5130617535887cbcd8bea0637154e7ef4983ddfce192f55fab6811d20",
+    "chain": [
+      {
+        "kind": "source",
+        "label": "Vendor migration guide",
+        "hash": "sha256:853be684b87f32e9d32cbf3f8638a4f687d5b0cca4a7a1c5f79c647562b37050"
+      },
+      {
+        "kind": "context",
+        "label": "Qarinah context pack",
+        "hash": "sha256:7688404d754098fc35c094a040fb4025d1fd81a56dd2c585ef500f7fe5b959f1"
+      },
+      {
+        "kind": "policy",
+        "label": "Write requires exact approval",
+        "hash": "sha256:1cb283220c9583d3fcb306bf9d2ea8e98de792e521a8723eabe25def538e99ec"
+      },
+      {
+        "kind": "approval",
+        "label": "One exact input approved",
+        "hash": "sha256:b65d9112bf6d68ddda6513bfe043fd65e081dc85acaaee87c906cba6059de1a1"
+      },
+      {
+        "kind": "action",
+        "label": "Patch applied once",
+        "hash": "sha256:4bb31185b5747c6dd776051cd554d207319b1a2ffe0c3923f8c8ad5f47507d5b"
+      },
+      {
+        "kind": "outcome",
+        "label": "3 migration checks passed",
+        "hash": "sha256:14e4a214558c95b62845f6f19d5be1d6f4f3cbea965b8b9f84d15c6c91644583"
+      }
+    ],
+    "evidenceRecords": 2,
+    "claims": 1,
+    "unsupportedClaims": 0
+  }
+}
