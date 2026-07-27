@@ -170,6 +170,10 @@ for (const file of htmlFiles) {
     requireMatch(/2,330 downloads in npm's latest complete weekly window/i, "homepage must show the verified ecosystem download signal");
     requireMatch(/835[\s\S]{0,200}1,146[\s\S]{0,200}349/i, "homepage must show the verified package download counts");
     requireMatch(/not unique people, active users, customers, or revenue/i, "homepage must label registry downloads accurately");
+    requireMatch(/Built on the open-source stack/i, "homepage must identify the connected open-source stack");
+    requireMatch(/href="https:\/\/cockroachcrawler\.com\/"[\s\S]{0,300}Bounded web evidence/i, "homepage must link Cockroach Crawler to bounded web evidence");
+    requireMatch(/href="https:\/\/qarinah\.io\/"[\s\S]{0,300}Evidence-linked project memory/i, "homepage must link Qarinah to evidence-linked project memory");
+    requireMatch(/href="https:\/\/github\.com\/AjnasNB\/maqam"[\s\S]{0,300}Policy, approvals, execution, and receipts/i, "homepage must link the Maqam source to its control-plane responsibilities");
     requireMatch(/Node matrix[\s\S]{0,160}22\s*\/\s*24\s*\/\s*26/i, "homepage must show the maintained Node 22, 24, and 26 matrix");
     requireMatch(/Published 0\.3\.2 exact-main MGES evidence/i, "homepage must label the public 0.3.2 exact-main evidence");
     requireMatch(/Historical 0\.3\.1 measured-source MGES evidence/i, "homepage must retain and label the historical 0.3.1 measured-source evidence");
