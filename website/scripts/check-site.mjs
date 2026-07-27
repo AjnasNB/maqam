@@ -31,6 +31,7 @@ const requiredProductVisuals = new Map([
   [path.join("releases", "v0.3.0", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("releases", "v0.3.1", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("releases", "v0.3.2", "index.html"), ["/assets/integration-dock-3d.png"]],
+  [path.join("releases", "v0.3.3", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("releases", "v0.2.4", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("docs", "benchmark", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("docs", "integrations", "index.html"), ["/assets/integration-dock-3d.png"]],
@@ -87,12 +88,12 @@ for (const file of htmlFiles) {
     if (!pattern.test(source)) failures.push(`${label}: ${message}`);
   };
 
-  if (/href="\/releases\/v0\.3\.[01]\/"[^>]*>Release</i.test(source)) {
-    failures.push(`${label}: primary Release navigation must target v0.3.2`);
+  if (/href="\/releases\/v0\.3\.[012]\/"[^>]*>Release</i.test(source)) {
+    failures.push(`${label}: primary Release navigation must target v0.3.3`);
   }
-  if (![path.join("releases", "v0.3.0", "index.html"), path.join("releases", "v0.3.1", "index.html")].includes(label)
-    && /(?:npm install|npx[^\n<]*(?:package=)?)[^\n<]*maqam@0\.3\.[01]/i.test(source)) {
-    failures.push(`${label}: active install examples must pin maqam@0.3.2`);
+  if (![path.join("releases", "v0.3.0", "index.html"), path.join("releases", "v0.3.1", "index.html"), path.join("releases", "v0.3.2", "index.html")].includes(label)
+    && /(?:npm install|npx[^\n<]*(?:package=)?)[^\n<]*maqam@0\.3\.[012]/i.test(source)) {
+    failures.push(`${label}: active install examples must pin maqam@0.3.3`);
   }
 
   for (const requiredVisual of requiredProductVisuals.get(label) || []) {
@@ -130,8 +131,8 @@ for (const file of htmlFiles) {
   requireMatch(/<a\s+class="skip-link"\s+href="#main">/i, "missing skip link");
   requireMatch(/<main\b[^>]*\bid="main"/i, "missing main landmark id");
 
-  if (source.includes('class="site-header"') && !source.includes('href="/releases/v0.3.2/"')) {
-    failures.push(`${label}: primary navigation must link the 0.3.2 release record`);
+  if (source.includes('class="site-header"') && !source.includes('href="/releases/v0.3.3/"')) {
+    failures.push(`${label}: primary navigation must link the 0.3.3 release record`);
   }
 
   if (/candidate pending exact release approval/i.test(source)) {
@@ -160,12 +161,15 @@ for (const file of htmlFiles) {
   }
 
   if (label === "index.html") {
-    requireMatch(/v0\.3\.2 public release/i, "homepage must identify 0.3.2 as the public release");
-    requireMatch(/npm Trusted Publishing and the matching GitHub release are verified/i, "homepage must identify the completed release verification");
-    requireMatch(/SLSA provenance, registry signatures, and exact tarball bytes match/i, "homepage must summarize the verified 0.3.2 release identity");
-    requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.2/i, "homepage install command must retain a live-record verification reminder");
+    requireMatch(/v0\.3\.3 is live/i, "homepage must identify 0.3.3 as the public release");
+    requireMatch(/f43c2493084f8a6c8c755a50a3d9feb38d72ebcc/i, "homepage must identify the current registry source commit");
+    requireMatch(/Trusted Publishing with provenance/i, "homepage must identify the completed release verification");
+    requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.3/i, "homepage install command must retain a live-record verification reminder");
     requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
-    requireMatch(/Maqam sits between an AI agent and the tools that change real software/i, "homepage must include the plain-English Maqam definition");
+    requireMatch(/Control what agents can access, remember, and do/i, "homepage must state the complete control-plane value proposition");
+    requireMatch(/2,330 downloads in npm's latest complete weekly window/i, "homepage must show the verified ecosystem download signal");
+    requireMatch(/835[\s\S]{0,200}1,146[\s\S]{0,200}349/i, "homepage must show the verified package download counts");
+    requireMatch(/not unique people, active users, customers, or revenue/i, "homepage must label registry downloads accurately");
     requireMatch(/Node matrix[\s\S]{0,160}22\s*\/\s*24\s*\/\s*26/i, "homepage must show the maintained Node 22, 24, and 26 matrix");
     requireMatch(/Published 0\.3\.2 exact-main MGES evidence/i, "homepage must label the public 0.3.2 exact-main evidence");
     requireMatch(/Historical 0\.3\.1 measured-source MGES evidence/i, "homepage must retain and label the historical 0.3.1 measured-source evidence");
@@ -221,6 +225,15 @@ for (const file of htmlFiles) {
     requireMatch(/Node 22 \/ 24 \/ 26/i, "0.3.2 release page must contain the supported Node matrix");
   }
 
+  if (label === path.join("releases", "v0.3.3", "index.html")) {
+    requireMatch(/npm install maqam@0\.3\.3/i, "0.3.3 release page must contain the pinned install command");
+    requireMatch(/f43c2493084f8a6c8c755a50a3d9feb38d72ebcc/i, "0.3.3 release page must contain the registry gitHead");
+    requireMatch(/1bbc68a0da892b155f94fd0321099c57b4868c2c/i, "0.3.3 release page must contain the npm shasum");
+    requireMatch(/sha512-fNojQD0AOAkmLevAPqnzQJffcqeAooQxq3DK\+u180U\/dDmdz0S392Ug27M1dJUfEQXSihhBDETZG7PnVqOrSxg==/i, "0.3.3 release page must contain the verified npm integrity");
+    requireMatch(/Node 22 \/ 24 \/ 26/i, "0.3.3 release page must contain the supported Node matrix");
+    requireMatch(/does not claim a new MGES result/i, "0.3.3 release page must not relabel historical evidence");
+  }
+
   if (label === path.join("docs", "sources", "index.html")) {
     requireMatch(/Governed research sources/i, "sources guide must define the new product surface");
     requireMatch(/routeUngoverned\(\).*bypasses that gateway/i, "sources guide must label direct routing as ungoverned");
@@ -238,7 +251,7 @@ for (const file of htmlFiles) {
   if (label === path.join("docs", "productloop", "index.html")) {
     requireMatch(/productloop-os@0\.2\.3/, "ProductLoop install command must pin productloop-os@0.2.3");
     requireMatch(/productloop-os\/releases\/tag\/v0\.2\.3/, "ProductLoop atlas must link the v0.2.3 source release");
-    requireMatch(/npmjs\.com\/package\/maqam\/v\/0\.3\.2/, "ProductLoop atlas must link the current Maqam npm release");
+    requireMatch(/npmjs\.com\/package\/maqam\/v\/0\.3\.3/, "ProductLoop atlas must link the current Maqam npm release");
     requireMatch(/records release versions, not a permanent live-registry guarantee/i, "ProductLoop atlas must avoid a blanket npm publication claim");
     for (const [packageName, version] of [
       ["productloop-os", "0.2.3"],
@@ -256,7 +269,7 @@ for (const file of htmlFiles) {
         `${packageName} must show public version ${version}`
       );
     }
-    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.2<\/td>/, "ProductLoop atlas must show public Maqam 0.3.2");
+    requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.3<\/td>/, "ProductLoop atlas must show public Maqam 0.3.3");
     requireMatch(/historical 0\.2\.4 proof video/i, "ProductLoop atlas must label its 0.2.4 video as historical");
   }
 
@@ -358,8 +371,9 @@ else {
 
 const sitemap = await readFile(path.join(publicRoot, "sitemap.xml"), "utf8");
 const sitemapUrls = (sitemap.match(/<url>/g) || []).length;
-const sitemapLastModified = (sitemap.match(/<lastmod>2026-07-23<\/lastmod>/g) || []).length;
-if (!sitemapUrls || sitemapUrls !== sitemapLastModified) failures.push("every sitemap URL must carry the reviewed lastmod date");
+const sitemapLastModified = (sitemap.match(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g) || []).length;
+if (!sitemapUrls || sitemapUrls !== sitemapLastModified) failures.push("every sitemap URL must carry a reviewed lastmod date");
+if (!sitemap.includes("https://maqamagent.com/releases/v0.3.3/")) failures.push("sitemap must include the current 0.3.3 release");
 
 assert.deepEqual(parseByteRange("bytes=2-5", 10), { offset: 2, length: 4, end: 5 });
 assert.deepEqual(parseByteRange("bytes=7-", 10), { offset: 7, length: 3, end: 9 });

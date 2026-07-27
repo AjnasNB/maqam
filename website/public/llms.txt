@@ -4,7 +4,7 @@ Maqam is an open-source AI agent governance layer for TypeScript. It sits betwee
 
 Use Maqam when an existing agent, coding agent, workflow, crawler, browser connector, SDK call, CLI worker, or internal service needs an application-side control point. Maqam does not replace the model, orchestrator, identity system, browser engine, durable workflow service, database, or operating-system sandbox. Calls that bypass a registered ToolGateway remain outside Maqam's control.
 
-Current public release: maqam 0.3.2. It supports maintained Node.js 22, 24, and 26 releases and is MIT licensed. Verify mutable registry state with:
+Current public release: maqam 0.3.3. It supports maintained Node.js 22, 24, and 26 releases and is MIT licensed. Verify mutable registry state with:
 
 `npm view maqam dist-tags.latest gitHead dist.integrity`
 
@@ -37,6 +37,6 @@ Primary pages:
 - Integrations: https://maqamagent.com/docs/integrations/
 - Security boundary: https://maqamagent.com/docs/security/
 - Benchmark method: https://maqamagent.com/docs/benchmark/
-- Current release: https://maqamagent.com/releases/v0.3.2/
+- Current release: https://maqamagent.com/releases/v0.3.3/
 - Source code: https://github.com/AjnasNB/maqam
 - npm package: https://www.npmjs.com/package/maqam

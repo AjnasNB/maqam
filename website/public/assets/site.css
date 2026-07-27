@@ -416,6 +416,64 @@ button {
   font-weight: 700;
 }
 
+.traction-section {
+  border-top: 0;
+  background:
+    linear-gradient(90deg, transparent 0, rgb(112 242 166 / 0.04) 50%, transparent 100%),
+    var(--surface);
+}
+
+.traction-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--line-strong);
+}
+
+.traction-grid > div {
+  min-width: 0;
+  padding: clamp(1.2rem, 2.5vw, 2rem);
+  background: var(--bg);
+}
+
+.traction-grid dt,
+.traction-grid span,
+.metric-note {
+  font-family: var(--mono);
+}
+
+.traction-grid dt {
+  min-height: 2.5em;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.traction-grid dd {
+  margin: 0.55rem 0 0;
+  color: var(--accent);
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.traction-grid span {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--faint);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.metric-note {
+  max-width: 86ch;
+  margin: 1rem 0 0;
+  color: var(--faint);
+  font-size: 0.72rem;
+}
+
 .section {
   padding-block: clamp(3.5rem, 6vw, 6rem);
 }
@@ -1290,6 +1348,10 @@ tr:last-child td {
     grid-template-columns: repeat(3, 1fr);
   }
 
+  .traction-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .proof-grid > * {
     border-bottom: 1px solid var(--line);
   }
@@ -1432,6 +1494,14 @@ tr:last-child td {
 
   .proof-grid {
     grid-template-columns: 1fr;
+  }
+
+  .traction-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .traction-grid dt {
+    min-height: 0;
   }
 
   .proof-grid > * {
