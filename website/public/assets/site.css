@@ -516,6 +516,73 @@ button {
   font-size: 0.72rem;
 }
 
+.open-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--line-strong);
+  overflow: hidden;
+}
+
+.open-stack-card {
+  display: flex;
+  min-width: 0;
+  min-height: 220px;
+  padding: clamp(1.25rem, 2.5vw, 1.75rem);
+  flex-direction: column;
+  color: var(--text);
+  background: var(--surface);
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.open-stack-card:hover,
+.open-stack-card:focus-visible {
+  color: #010409;
+  background: var(--accent);
+}
+
+.open-stack-number,
+.open-stack-action {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.open-stack-card:hover .open-stack-number,
+.open-stack-card:hover .open-stack-action,
+.open-stack-card:focus-visible .open-stack-number,
+.open-stack-card:focus-visible .open-stack-action {
+  color: #08251d;
+}
+
+.open-stack-card h3 {
+  margin: 1.25rem 0 0;
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  letter-spacing: -0.025em;
+}
+
+.open-stack-card p {
+  margin: 0.55rem 0 1.5rem;
+  color: var(--muted);
+}
+
+.open-stack-card:hover p,
+.open-stack-card:focus-visible p {
+  color: #10382e;
+}
+
+.open-stack-action {
+  margin-top: auto;
+}
+
 .section {
   padding-block: clamp(3.5rem, 6vw, 6rem);
 }
@@ -1398,8 +1465,13 @@ tr:last-child td {
   }
 
   .system-intro,
-  .recipe-grid {
+  .recipe-grid,
+  .open-stack-grid {
     grid-template-columns: 1fr;
+  }
+
+  .open-stack-card {
+    min-height: 180px;
   }
 
   .hero-media {
