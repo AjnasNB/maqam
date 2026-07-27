@@ -9,30 +9,17 @@ const approvalCard = document.querySelector("#approval-card");
 const approvalState = document.querySelector("#approval-state");
 const approvalDetail = document.querySelector("#approval-detail");
 const receiptHash = document.querySelector("#receipt-hash");
-const finalFrame = document.querySelector("#final-frame");
 const errorToast = document.querySelector("#error-toast");
 
 const params = new URLSearchParams(location.search);
-const speed = Math.max(0.02, Number(params.get("speed") || 1));
-const timers = new Set();
-let proof = null;
-let running = false;
-
-const schedule = [
-  { at: 0, id: "task", render: renderTask },
-  { at: 5_000, id: "policy", render: renderPolicy },
-  { at: 12_000, id: "memory", render: renderMemory },
-  { at: 19_000, id: "evidence", render: renderEvidence },
-  { at: 27_000, id: "proposal", render: renderProposal },
-  { at: 35_000, id: "altered", render: renderAltered },
-  { at: 42_000, id: "exact", render: renderExact },
-  { at: 48_000, id: "replay", render: renderReplay },
-  { at: 53_000, id: "receipt", render: renderReceipt },
-  { at: 57_000, id: "final", render: renderFinal }
-];
+let run = null;
+let runId = null;
+let pollTimer = null;
+let renderedSequence = 0;
+let approvalSubmitted = false;
 
 function escapeHtml(value) {
-  return String(value)
+  return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -43,7 +30,11 @@ function escapeHtml(value) {
 function shortHash(value, size = 14) {
   if (!value) return "pending";
   const normalized = String(value).replace(/^sha256:/, "");
-  return `sha256:${normalized.slice(0, size)}…`;
+  return `sha256:${normalized.slice(0, size)}...`;
+}
+
+function tail(value, lines = 10) {
+  return String(value || "").trim().split(/\r?\n/).slice(-lines).join("\n");
 }
 
 function setFocus({ eyebrow, title, description, body = "", meta = [] }) {
@@ -64,12 +55,12 @@ function setTimeline(id, state = "running") {
   const steps = [...document.querySelectorAll(".timeline-step")];
   const index = steps.findIndex((step) => step.dataset.step === id);
   steps.forEach((step, stepIndex) => {
-    step.classList.remove("running", "blocked");
+    step.classList.remove("running", "complete", "blocked");
     if (stepIndex < index) step.classList.add("complete");
     if (stepIndex === index) step.classList.add(state);
   });
   const verified = Math.min(8, Math.max(0, index + (state === "blocked" ? 0 : 1)));
-  progressLabel.textContent = `${verified} / 8 verified`;
+  progressLabel.textContent = `${verified} / 8 live stages`;
   progressBar.style.width = `${verified * 12.5}%`;
 }
 
@@ -87,108 +78,105 @@ function completeReceipt(kind) {
 
 function setRunLive(label = "RUNNING") {
   runState.textContent = label;
-  proofStatus.textContent = label === "VERIFIED" ? "VERIFIED" : "RECORDING";
+  proofStatus.textContent = label === "VERIFIED" ? "VERIFIED LIVE" : label;
   proofStatus.className = `proof-status ${label === "VERIFIED" ? "verified" : "live"}`;
 }
 
-function renderTask() {
-  setRunLive();
+function renderTask(event) {
+  setRunLive("RUNNING");
   setTimeline("task");
+  const baseline = run.baseline;
   setFocus({
-    eyebrow: "01 · TASK RECEIVED",
-    title: proof.run.title,
-    description: proof.run.task,
+    eyebrow: "01 - REAL SAMPLE REPOSITORY",
+    title: "A failing v1 client is now open on disk.",
+    description: run.task,
+    body: `
+      <div class="approval-proof">
+        <div>
+          <p class="proof-label">PERSISTED WORKSPACE</p>
+          <strong>${escapeHtml(run.repository?.sourcePath || "creating repository...")}</strong>
+          <code>${escapeHtml(run.workspace)}</code>
+        </div>
+        <div>
+          <p class="proof-label">BASELINE TEST</p>
+          <strong>${baseline ? "EXPECTED FAILURE REPRODUCED" : "RUNNING NODE TESTS"}</strong>
+          <code>${baseline ? `exit=${baseline.exitCode}` : "node --test test/vendor-client.test.js"}</code>
+        </div>
+      </div>
+    `,
     meta: [
-      { text: "REQUESTED BY coding-agent" },
-      { text: proof.run.environment.toUpperCase() },
-      { text: "NO TOOL DISPATCHED", tone: "good" }
+      { text: "REAL GIT REPOSITORY", tone: "good" },
+      { text: baseline ? "BASELINE FAILED AS EXPECTED" : event.label, tone: "good" },
+      { text: "WORKSPACE IS PRESERVED" }
     ]
   });
 }
 
 function renderPolicy() {
   setTimeline("policy");
-  setSignal("policy", "Allow with approval", "Exact input · one use");
+  setSignal("policy", "Allow with approval", "Exact input - one use");
   completeReceipt("policy");
   setFocus({
-    eyebrow: "02 · MAQAM POLICY",
-    title: "Read freely. Stop before the write.",
-    description: proof.policy.reason,
+    eyebrow: "02 - MAQAM POLICY",
+    title: "The agent can read and propose. It cannot write.",
+    description: run.policy.reason,
     body: `
       <div class="approval-proof">
-        <div>
-          <p class="proof-label">REGISTERED TOOL</p>
-          <strong>${escapeHtml(proof.policy.tool)}</strong>
-          <code>effect=${escapeHtml(proof.policy.effects.join(","))} · risk=${escapeHtml(proof.policy.risk)}</code>
-        </div>
-        <div>
-          <p class="proof-label">DECISION</p>
-          <strong>ALLOW WITH EXACT APPROVAL</strong>
-          <code>run_id + tool_name + input_hash</code>
-        </div>
+        <div><p class="proof-label">REGISTERED TOOL</p><strong>${escapeHtml(run.policy.tool)}</strong><code>effect=${escapeHtml(run.policy.effects.join(","))} - risk=${escapeHtml(run.policy.risk)}</code></div>
+        <div><p class="proof-label">WRITE AUTHORITY</p><strong>EXACT INPUT - ONE USE</strong><code>run_id + tool_name + input_hash</code></div>
       </div>
     `,
     meta: [
       { text: "POLICY BEFORE DISPATCH", tone: "good" },
-      { text: "CREATOR-OWNED AUTHORITY" }
+      { text: "NO WRITE YET", tone: "good" }
     ]
   });
 }
 
 function renderMemory() {
   setTimeline("memory");
-  setSignal("memory", `${proof.memory.itemCount} cited items`, `~${proof.memory.estimatedTokens} tokens`);
+  setSignal("memory", `${run.memory.itemCount} cited items`, `~${run.memory.estimatedTokens} tokens`);
   completeReceipt("context");
-  const items = proof.memory.items.map((item) => `
-    <div class="memory-item">
-      <b>${escapeHtml(item.title)}</b>
-      <small>${escapeHtml(item.kind)} · ${escapeHtml(shortHash(item.hash, 9))}</small>
-    </div>
+  const items = run.memory.items.map((item) => `
+    <div class="memory-item"><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.kind)} - ${escapeHtml(shortHash(item.hash, 9))}</small></div>
   `).join("");
   setFocus({
-    eyebrow: "03 · QARINAH PROJECT MEMORY",
-    title: "Only the decisions this task needs.",
-    description: `${proof.memory.itemCount} evidence-linked records were selected with direct query coverage. The local event chain verified before compilation.`,
+    eyebrow: "03 - QARINAH PROJECT MEMORY",
+    title: "The coding worker gets a small, cited context pack.",
+    description: `${run.memory.itemCount} project records were selected. Qarinah verified the local event chain before compilation.`,
     body: `<div class="memory-list">${items}</div>`,
     meta: [
-      { text: `~${proof.memory.estimatedTokens} TOKENS`, tone: "good" },
-      { text: "DIRECT COVERAGE 10/10", tone: "good" },
-      { text: shortHash(proof.memory.manifestHash) }
+      { text: `~${run.memory.estimatedTokens} TOKENS`, tone: "good" },
+      { text: `${run.memory.coverage.status.toUpperCase()} COVERAGE`, tone: "good" },
+      { text: shortHash(run.memory.manifestHash) }
     ]
   });
 }
 
 function renderEvidence() {
   setTimeline("evidence");
-  setSignal("evidence", "1 verified record", shortHash(proof.evidence.contentHash, 10));
+  setSignal("evidence", "1 verified record", shortHash(run.evidence.contentHash, 10));
   completeReceipt("source");
   setFocus({
-    eyebrow: "04 · COCKROACH SOURCE EVIDENCE",
-    title: "The migration guide becomes a source record.",
-    description: "The crawler admitted one approved origin, obeyed robots, bounded requests and bytes, and returned normalized evidence with a content hash.",
+    eyebrow: "04 - COCKROACH SOURCE EVIDENCE",
+    title: "The live vendor contract is fetched and content-addressed.",
+    description: "One approved origin, finite request and byte budgets, robots honored, and normalized source evidence.",
     body: `
       <div class="evidence-record">
-        <div>
-          <p class="proof-label">${escapeHtml(proof.evidence.sourceLabel)}</p>
-          <blockquote>“${escapeHtml(proof.evidence.excerpt)}”</blockquote>
-        </div>
-        <div class="hash-box">
-          <p class="proof-label">CONTENT IDENTITY</p>
-          <code>${escapeHtml(proof.evidence.contentHash)}</code>
-        </div>
+        <div><p class="proof-label">${escapeHtml(run.evidence.sourceLabel)}</p><blockquote>"${escapeHtml(run.evidence.excerpt)}"</blockquote></div>
+        <div class="hash-box"><p class="proof-label">CONTENT IDENTITY</p><code>${escapeHtml(run.evidence.contentHash)}</code></div>
       </div>
     `,
     meta: [
-      { text: `${proof.evidence.requests} BOUNDED REQUESTS`, tone: "good" },
-      { text: `${proof.evidence.bytes} BYTES` },
-      { text: "0 FAILURES", tone: "good" }
+      { text: `${run.evidence.requests} BOUNDED REQUESTS`, tone: "good" },
+      { text: `${run.evidence.bytes} BYTES` },
+      { text: `${run.evidence.failures.length} FAILURES`, tone: "good" }
     ]
   });
 }
 
-function renderProposal() {
-  setTimeline("proposal");
-  const coloredDiff = escapeHtml(proof.proposal.patch)
+function coloredDiff(value) {
+  return escapeHtml(value)
     .split("\n")
     .map((line) => {
       if (line.startsWith("+") && !line.startsWith("+++")) return `<span class="add">${line}</span>`;
@@ -196,20 +184,54 @@ function renderProposal() {
       return line;
     })
     .join("\n");
-  approvalCard.className = "approval-card requested";
-  approvalState.textContent = "Exact approval requested";
-  approvalDetail.textContent = `Input ${shortHash(proof.approval.subject.inputHash, 12)}`;
+}
+
+function renderAgentWorking() {
+  setTimeline("proposal");
   setFocus({
-    eyebrow: "05 · PROPOSED PATCH",
-    title: "The agent can propose. It cannot silently write.",
-    description: "The patch is bound to the source hash, Qarinah manifest, run, registered tool, and exact input hash before approval.",
-    body: `<pre class="diff">${coloredDiff}</pre>`,
+    eyebrow: "05 - READ-ONLY CODING WORKER",
+    title: `${run.worker?.name || "Codex CLI"} is inspecting the real project.`,
+    description: "It receives the Qarinah context pack and crawler evidence, reads the committed tests, and can only return a typed proposal. Maqam owns the write.",
+    body: `
+      <div class="terminal-output">
+        <div class="terminal-head"><span>LIVE WORKER</span><span>${run.worker?.eventCount || 0} EVENTS</span></div>
+        <pre>authority = read-only
+workspace = ${escapeHtml(run.workspace)}
+status = ${escapeHtml(run.worker?.status || "starting")}
+target = src/vendor-client.js</pre>
+      </div>
+    `,
     meta: [
-      { text: proof.approval.requested.code, tone: "good" },
-      { text: "0 EXECUTIONS", tone: "good" },
-      { text: "AWAITING HUMAN" }
+      { text: "CODEX CLI", tone: "good" },
+      { text: "READ-ONLY SANDBOX", tone: "good" },
+      { text: "NO FILE CHANGE" }
     ]
   });
+}
+
+function renderProposal() {
+  setTimeline("proposal");
+  approvalCard.className = "approval-card requested";
+  approvalState.textContent = "Waiting for your exact approval";
+  approvalDetail.textContent = `Input ${shortHash(run.approval.subject.inputHash, 12)}`;
+  setFocus({
+    eyebrow: "05 - REAL APPROVAL PAUSE",
+    title: "Review the generated diff, then approve it once.",
+    description: "This button resumes the backend. Until you click it, the file remains unchanged and no test can pass.",
+    body: `
+      <pre class="diff">${coloredDiff(run.proposal.patch)}</pre>
+      <button class="approve-button" id="approve-patch" type="button">
+        APPROVE THIS EXACT PATCH ONCE
+        <span>${escapeHtml(shortHash(run.approval.subject.inputHash, 12))}</span>
+      </button>
+    `,
+    meta: [
+      { text: run.approval.requested.code, tone: "good" },
+      { text: "0 EXECUTIONS", tone: "good" },
+      { text: "REAL USER ACTION REQUIRED" }
+    ]
+  });
+  document.querySelector("#approve-patch")?.addEventListener("click", approvePatch, { once: true });
 }
 
 function renderAltered() {
@@ -219,21 +241,13 @@ function renderAltered() {
   approvalState.textContent = "Changed input rejected";
   approvalDetail.textContent = "The approved input hash no longer matched.";
   setFocus({
-    eyebrow: "06 · AUTHORITY DID NOT EXPAND",
-    title: "One line changed. The write was blocked.",
-    description: proof.approval.alteredInput.reason,
+    eyebrow: "06 - AUTHORITY DID NOT EXPAND",
+    title: "A changed patch was rejected before the tool ran.",
+    description: run.approval.alteredInput.reason,
     body: `
       <div class="approval-proof">
-        <div>
-          <p class="proof-label">APPROVED</p>
-          <strong>v2 endpoint + Idempotency-Key</strong>
-          <code>${escapeHtml(shortHash(proof.approval.subject.inputHash, 22))}</code>
-        </div>
-        <div>
-          <p class="proof-label">ALTERED</p>
-          <strong>Idempotency-Key removed</strong>
-          <code>${escapeHtml(proof.approval.alteredInput.code)}</code>
-        </div>
+        <div><p class="proof-label">APPROVED</p><strong>v2 endpoint + Idempotency-Key</strong><code>${escapeHtml(shortHash(run.approval.subject.inputHash, 22))}</code></div>
+        <div><p class="proof-label">ALTERED</p><strong>Idempotency-Key removed</strong><code>${escapeHtml(run.approval.alteredInput.code)}</code></div>
       </div>
     `,
     meta: [
@@ -246,58 +260,40 @@ function renderAltered() {
 
 function renderExact() {
   setTimeline("exact");
-  setSignal("action", "1 exact execution", "3 migration checks passed", "active");
+  const result = run.approval.exactInput?.result;
+  if (!result) {
+    setFocus({
+      eyebrow: "07 - EXACT INPUT EXECUTING",
+      title: "Maqam is writing the approved content and running the committed tests.",
+      description: "The approval will be consumed only for this exact call.",
+      body: `<div class="terminal-output"><div class="terminal-head"><span>NODE TEST</span><span>RUNNING</span></div><pre>node --test test/vendor-client.test.js</pre></div>`,
+      meta: [
+        { text: "EXACT INPUT MATCH", tone: "good" },
+        { text: "TEST PROCESS RUNNING" }
+      ]
+    });
+    return;
+  }
+  setSignal("action", "1 exact execution", "3 real Node tests passed", "active");
   completeReceipt("approval");
   completeReceipt("action");
   approvalCard.className = "approval-card approved";
   approvalState.textContent = "Approved input executed once";
   approvalDetail.textContent = "Approval consumed after the successful call.";
   setFocus({
-    eyebrow: "07 · EXACT INPUT EXECUTED",
-    title: "The reviewed patch ran once - and passed.",
-    description: "The stored file matched the authorized content. Three migration checks passed and the approval was consumed.",
+    eyebrow: "07 - REAL FILE WRITE + REAL TEST PROCESS",
+    title: "The reviewed patch ran once and the committed tests passed.",
+    description: "This output came from Node's test runner inside the persisted sample repository.",
     body: `
-      <div class="receipt-grid">
-        ${proof.proposal.checks.map((check, index) => `
-          <div>
-            <p class="proof-label">CHECK 0${index + 1}</p>
-            <b>${escapeHtml(check)}</b>
-            <code>PASS</code>
-          </div>
-        `).join("")}
+      <div class="terminal-output">
+        <div class="terminal-head"><span>${escapeHtml(result.tests.command)}</span><span>EXIT ${result.tests.exitCode}</span></div>
+        <pre>${escapeHtml(tail(result.tests.stdout, 13))}</pre>
       </div>
     `,
     meta: [
       { text: "1 EXECUTION", tone: "good" },
-      { text: "1 APPROVAL CONSUMPTION", tone: "good" },
-      { text: shortHash(proof.approval.exactInput.result.contentHash) }
-    ]
-  });
-}
-
-function renderReplay() {
-  setTimeline("exact");
-  setFocus({
-    eyebrow: "07B · REPLAY ATTEMPT",
-    title: "The same approval could not be used twice.",
-    description: "A second call with the already approved input was rejected. Execution count remained one and the output stayed unchanged.",
-    body: `
-      <div class="approval-proof">
-        <div>
-          <p class="proof-label">FIRST CALL</p>
-          <strong>COMPLETED</strong>
-          <code>approval consumptions = 1</code>
-        </div>
-        <div>
-          <p class="proof-label">REPLAY</p>
-          <strong>${escapeHtml(proof.approval.replay.code)}</strong>
-          <code>executions = ${proof.approval.replay.executions}</code>
-        </div>
-      </div>
-    `,
-    meta: [
-      { text: "REPLAY BLOCKED", tone: "bad" },
-      { text: "OUTPUT UNCHANGED", tone: "good" }
+      { text: "3 TESTS PASSED", tone: "good" },
+      { text: "GIT DIFF CLEAN", tone: "good" }
     ]
   });
 }
@@ -306,107 +302,169 @@ function renderReceipt() {
   setTimeline("receipt");
   setRunLive("VERIFIED");
   completeReceipt("outcome");
-  receiptHash.textContent = proof.receipt.receiptHash;
+  receiptHash.textContent = run.receipt.receiptHash;
   setFocus({
-    eyebrow: "08 · CAUSAL RECEIPT",
-    title: "The answer to what happened is one receipt.",
-    description: "Source, context, policy, approval, action, and outcome are linked by content identity. Every selected memory and action points back to evidence.",
+    eyebrow: "08 - INSPECTABLE END DASHBOARD",
+    title: "The code changed. Tests passed. Every decision is linked.",
+    description: "The sample repository remains on disk with its source, Qarinah store, Git diff, test output, and governed receipt.",
     body: `
-      <div class="receipt-grid">
-        ${proof.receipt.chain.map((item) => `
-          <div>
-            <p class="proof-label">${escapeHtml(item.kind)}</p>
-            <b>${escapeHtml(item.label)}</b>
-            <code>${escapeHtml(shortHash(item.hash, 12))}</code>
-          </div>
-        `).join("")}
+      <div class="final-dashboard">
+        <div class="final-metric"><b>${escapeHtml(run.memory.itemCount)}</b><span>cited memories</span></div>
+        <div class="final-metric"><b>${escapeHtml(run.evidence.records)}</b><span>verified source</span></div>
+        <div class="final-metric"><b>${escapeHtml(run.approval.exactInput.executions)}</b><span>exact execution</span></div>
+        <div class="final-metric"><b>3/3</b><span>real tests passed</span></div>
+        <div class="final-metric"><b>${escapeHtml(run.receipt.unsupportedClaims)}</b><span>unsupported claims</span></div>
       </div>
+      <div class="terminal-output compact">
+        <div class="terminal-head"><span>VERIFICATION</span><span>EXIT ${run.receipt.testExitCode}</span></div>
+        <pre>${escapeHtml(tail(run.receipt.testOutput, 8))}</pre>
+      </div>
+      <div class="workspace-proof"><span>WORKSPACE PRESERVED</span><code>${escapeHtml(run.receipt.workspace)}</code></div>
     `,
     meta: [
-      { text: `${proof.receipt.evidenceRecords} EVIDENCE RECORDS`, tone: "good" },
-      { text: `${proof.receipt.claims} SUPPORTED CLAIM`, tone: "good" },
-      { text: `${proof.receipt.unsupportedClaims} UNSUPPORTED CLAIMS`, tone: "good" }
+      { text: "ALTERED WRITE BLOCKED", tone: "good" },
+      { text: "REPLAY REJECTED", tone: "good" },
+      { text: shortHash(run.receipt.receiptHash) }
     ]
   });
-  app.dataset.state = "complete";
-}
-
-function renderFinal() {
-  finalFrame.classList.add("visible");
-  finalFrame.setAttribute("aria-hidden", "false");
+  approvalCard.className = "approval-card approved";
+  approvalState.textContent = "One approval consumed";
+  approvalDetail.textContent = `${run.approval.replay.code} on replay`;
   runButton.disabled = false;
-  runButton.querySelector("span").textContent = "REPLAY WORKFLOW";
-  running = false;
+  runButton.querySelector("span").textContent = "RUN ANOTHER REAL TASK";
+  app.dataset.state = "complete";
+  clearTimeout(pollTimer);
 }
 
-function clearRun() {
-  timers.forEach(clearTimeout);
-  timers.clear();
-  finalFrame.classList.remove("visible");
-  finalFrame.setAttribute("aria-hidden", "true");
-  document.querySelectorAll(".timeline-step").forEach((step) => {
-    step.classList.remove("running", "complete", "blocked");
-  });
-  document.querySelectorAll(".signal-card").forEach((card) => {
-    card.classList.remove("active", "blocked");
-  });
+function renderEvent(event) {
+  if (event.kind === "workspace.created" || event.kind === "baseline.failed") renderTask(event);
+  if (event.kind === "policy.evaluated") renderPolicy();
+  if (event.kind === "memory.compiled") renderMemory();
+  if (event.kind === "evidence.fetched") renderEvidence();
+  if (event.kind === "agent.started" || event.kind === "proposal.generated") renderAgentWorking();
+  if (event.kind === "approval.requested") renderProposal();
+  if (event.kind === "approval.approved") renderExact();
+  if (event.kind === "tamper.rejected") renderAltered();
+  if (event.kind === "patch.applied" || event.kind === "tests.completed" || event.kind === "replay.rejected") renderExact();
+  if (event.kind === "receipt.verified") renderReceipt();
+  if (event.kind === "run.failed") showError(event.label);
+}
+
+function renderSnapshot() {
+  if (!run) return;
+  document.querySelector("#task-text").textContent = run.task;
+  document.querySelector("#run-id").textContent = run.id.toUpperCase();
+  document.querySelector(".run-number").textContent = run.id.slice(-10).toUpperCase();
+  if (run.packages?.maqam) document.querySelector("#version-maqam").textContent = run.packages.maqam;
+  if (run.packages?.qarinah) document.querySelector("#version-qarinah").textContent = run.packages.qarinah;
+  if (run.packages?.cockroachCrawler) document.querySelector("#version-crawler").textContent = run.packages.cockroachCrawler;
+  for (const event of run.events.filter((entry) => entry.sequence > renderedSequence)) {
+    renderEvent(event);
+    renderedSequence = event.sequence;
+  }
+  if (run.status === "running" && run.stage === "proposal" && run.worker?.status === "working") renderAgentWorking();
+  if (run.status === "waiting_approval" && run.approval && !document.querySelector("#approve-patch")) renderProposal();
+  if (run.status === "failed") showError(run.error || "The live workflow failed.");
+}
+
+function resetUi() {
+  clearTimeout(pollTimer);
+  renderedSequence = 0;
+  approvalSubmitted = false;
+  document.querySelectorAll(".timeline-step").forEach((step) => step.classList.remove("running", "complete", "blocked"));
+  document.querySelectorAll(".signal-card").forEach((card) => card.classList.remove("active", "blocked"));
   document.querySelectorAll("#receipt-chain li").forEach((item) => item.classList.remove("complete"));
   approvalCard.className = "approval-card";
+  approvalState.textContent = "Not requested";
+  approvalDetail.textContent = "Bound to run + tool + input hash";
   receiptHash.textContent = "Pending successful execution";
   progressBar.style.width = "0";
-  progressLabel.textContent = "0 / 8 verified";
+  progressLabel.textContent = "0 / 8 live stages";
+  errorToast.classList.remove("visible");
   app.dataset.state = "running";
 }
 
-async function runWorkflow() {
-  if (running) return;
-  running = true;
-  clearRun();
-  runButton.disabled = true;
-  runButton.querySelector("span").textContent = "RUNNING VERIFIED STACK";
-  proofStatus.textContent = "EXECUTING";
-  proofStatus.className = "proof-status live";
-  runState.textContent = "EXECUTING";
+async function fetchRun() {
+  const response = await fetch(`/api/runs/${encodeURIComponent(runId)}`);
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || "Could not load live run state.");
+  run = result;
+  renderSnapshot();
+  if (!["passed", "failed"].includes(run.status)) pollTimer = setTimeout(poll, 350);
+}
+
+async function poll() {
   try {
-    const response = await fetch("/api/run", { method: "POST" });
-    const result = await response.json();
-    if (!response.ok || result.status !== "passed") {
-      throw new Error(result.error || "The workflow did not return a verified proof.");
-    }
-    proof = result;
-    document.querySelector("#task-text").textContent = proof.run.task;
-    document.querySelector("#run-id").textContent = proof.run.id.toUpperCase();
-    document.querySelector("#version-maqam").textContent = proof.packages.maqam;
-    document.querySelector("#version-qarinah").textContent = proof.packages.qarinah;
-    document.querySelector("#version-crawler").textContent = proof.packages.cockroachCrawler;
-    schedule.forEach((entry) => {
-      const timer = setTimeout(entry.render, Math.round(entry.at * speed));
-      timers.add(timer);
-    });
+    await fetchRun();
   } catch (error) {
-    running = false;
-    runButton.disabled = false;
-    runButton.querySelector("span").textContent = "RUN GOVERNED WORKFLOW";
-    app.dataset.state = "error";
-    errorToast.textContent = error instanceof Error ? error.message : String(error);
-    errorToast.classList.add("visible");
+    showError(error instanceof Error ? error.message : String(error));
   }
 }
 
-runButton.addEventListener("click", runWorkflow);
+async function startWorkflow() {
+  if (run && !["passed", "failed"].includes(run.status)) return;
+  resetUi();
+  runButton.disabled = true;
+  runButton.querySelector("span").textContent = "CREATING REAL WORKSPACE";
+  setRunLive("STARTING");
+  try {
+    const response = await fetch("/api/runs", { method: "POST" });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Could not create the live run.");
+    run = result;
+    runId = result.id;
+    runButton.querySelector("span").textContent = "LIVE RUN IN PROGRESS";
+    renderSnapshot();
+    pollTimer = setTimeout(poll, 150);
+  } catch (error) {
+    showError(error instanceof Error ? error.message : String(error));
+  }
+}
+
+async function approvePatch() {
+  if (approvalSubmitted || !runId) return;
+  approvalSubmitted = true;
+  const button = document.querySelector("#approve-patch");
+  if (button) {
+    button.disabled = true;
+    button.firstChild.textContent = "APPROVAL SENT - EXECUTING ";
+  }
+  try {
+    const response = await fetch(`/api/runs/${encodeURIComponent(runId)}/approve`, { method: "POST" });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "The exact approval was rejected.");
+    run = result;
+    renderSnapshot();
+  } catch (error) {
+    approvalSubmitted = false;
+    showError(error instanceof Error ? error.message : String(error));
+  }
+}
+
+function showError(message) {
+  clearTimeout(pollTimer);
+  runButton.disabled = false;
+  runButton.querySelector("span").textContent = "RUN GOVERNED WORKFLOW";
+  app.dataset.state = "error";
+  errorToast.textContent = message;
+  errorToast.classList.add("visible");
+}
+
+runButton.addEventListener("click", startWorkflow);
 document.querySelectorAll(".nav-item").forEach((item) => {
   item.addEventListener("click", () => {
     document.querySelectorAll(".nav-item").forEach((nav) => nav.classList.remove("active"));
     item.classList.add("active");
-    if (item.dataset.tab === "approval") {
-      document.querySelector('[data-step="altered"]')?.scrollIntoView({ block: "center" });
-    }
-    if (item.dataset.tab === "receipt") {
-      receiptHash.focus?.();
-    }
   });
 });
 
 if (params.get("autoplay") === "1") {
-  window.addEventListener("load", () => setTimeout(runWorkflow, 800), { once: true });
+  window.addEventListener("load", () => setTimeout(startWorkflow, 700), { once: true });
+  const autoApprove = setInterval(() => {
+    const button = document.querySelector("#approve-patch");
+    if (button && !approvalSubmitted) {
+      clearInterval(autoApprove);
+      setTimeout(() => button.click(), 1_500);
+    }
+  }, 250);
 }

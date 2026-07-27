@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["content", "rationale", "tests"],
+  "properties": {
+    "content": {
+      "type": "string",
+      "description": "Complete replacement content for src/vendor-client.js."
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "tests": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "type": "string" }
+    }
+  }
+}

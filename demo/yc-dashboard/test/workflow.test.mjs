@@ -19,17 +19,23 @@ test("the YC workflow returns one evidence-linked exact execution", async () => 
   assert.equal(proof.approval.replay.code, "APPROVAL_INVALID");
   assert.equal(proof.receipt.chain.length, 6);
   assert.equal(proof.receipt.unsupportedClaims, 0);
+  assert.equal(proof.receipt.testExitCode, 0);
+  assert.match(proof.receipt.testOutput, /pass 3/);
+  assert.match(proof.receipt.gitDiff, /\/v2\/tasks/);
+  assert.equal(proof.repository.persisted, true);
+  assert.match(proof.workspace, /yc-dashboard[\\/]\.runs[\\/]run_vendor_v2_/);
 });
 
 test("the dashboard carries the YC control-plane story without audio", async () => {
   const html = await readFile(resolve(import.meta.dirname, "..", "public", "index.html"), "utf8");
   const app = await readFile(resolve(import.meta.dirname, "..", "public", "app.js"), "utf8");
 
-  assert.match(html, /Control what AI agents can/);
-  assert.match(html, /access, remember, and do/);
   assert.match(html, /RUN GOVERNED WORKFLOW/);
   assert.match(html, /CAUSAL RECEIPT/);
   assert.doesNotMatch(html, /<audio|<video/i);
   assert.match(app, /alteredInput\.code/);
-  assert.match(app, /REPLAY BLOCKED/);
+  assert.match(app, /APPROVE THIS EXACT PATCH ONCE/);
+  assert.match(app, /REAL FILE WRITE \+ REAL TEST PROCESS/);
+  assert.match(app, /api\/runs/);
+  assert.doesNotMatch(app, /const schedule/);
 });
