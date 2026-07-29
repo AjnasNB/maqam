@@ -1,0 +1,19 @@
+{
+  "name": "maqam-cockroach-browser-fixture",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Isolated exact-version Cockroach Browser integration fixture for Maqam.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node --test cockroach-browser.fixture.mjs",
+    "audit:all": "npm audit",
+    "audit:production": "npm audit --omit=dev"
+  },
+  "dependencies": {
+    "cockroach-browser": "0.1.0"
+  },
+  "engines": {
+    "node": "^22.0.0 || ^24.0.0 || ^26.0.0"
+  }
+}

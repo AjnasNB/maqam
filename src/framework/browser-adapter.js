@@ -15,7 +15,13 @@ const BROWSER_RESULT_SCHEMA_VERSION = "maqam.browser-result.v1";
 const BROWSER_DRIVER_EXECUTION_SCHEMA_VERSION = "maqam.browser-driver-execution.v1";
 
 const DRIVER_METHODS = ["observe", "preview", "apply", "submit"];
-const OPTION_KEYS = new Set(["driver", "allowedOrigins", "toolPrefix", "limits"]);
+const OPTION_KEYS = new Set([
+  "driver",
+  "createDriver",
+  "allowedOrigins",
+  "toolPrefix",
+  "limits"
+]);
 const LIMIT_KEYS = new Set(["maxElements", "maxTextChars", "maxOperations"]);
 const TARGET_KEYS = new Set(["sessionId", "pageId", "origin", "revision"]);
 const OBSERVE_INPUT_KEYS = new Set(["target", "maxElements"]);
@@ -721,6 +727,28 @@ async function callDriver(methods, method, request, execution) {
   }
 }
 
+function executionVerificationEnvelope(execution) {
+  return Object.freeze(Object.assign(Object.create(null), {
+    schemaVersion: execution.schemaVersion,
+    runId: execution.runId,
+    toolName: execution.toolName,
+    inputHash: execution.inputHash,
+    approvalIds: Object.freeze([...execution.approvalIds]),
+    approvalActions: Object.freeze([...execution.approvalActions]),
+    authorizedOrigins: Object.freeze([...execution.authorizedOrigins]),
+    prohibitedEffects: Object.freeze([...execution.prohibitedEffects])
+  }));
+}
+
+function postMutationObservationExecution(execution, observeToolName) {
+  return Object.freeze(Object.assign(Object.create(null), {
+    ...execution,
+    toolName: observeToolName,
+    approvalIds: Object.freeze([]),
+    approvalActions: Object.freeze([])
+  }));
+}
+
 function validatePreviewResult(value, request, limits) {
   const core = normalizePlanCore(value, limits, "Browser driver preview result");
   const requestedCore = planCore(request.target, request.phase, request.operations);
@@ -766,7 +794,6 @@ function browserMetadata(operation) {
  */
 export function registerGovernedBrowserTools(gateway, options) {
   options = configRecord(options, OPTION_KEYS, "Governed browser options");
-  const methods = ownDriverMethods(options.driver);
   const configuredOrigins = normalizeOrigins(options.allowedOrigins);
   const limits = normalizeLimits(options.limits || {});
   const toolPrefix = options.toolPrefix === undefined
@@ -792,6 +819,7 @@ export function registerGovernedBrowserTools(gateway, options) {
     maxElements: Math.max(limits.maxElements, configuredOrigins.length)
   });
   const planTokenKey = randomBytes(32);
+  const activeDriverCalls = new Set();
 
   function planTokenPayload(runId, planHash, nonce) {
     return JSON.stringify([BROWSER_PLAN_SCHEMA_VERSION, runId, planHash, nonce]);
@@ -832,6 +860,89 @@ export function registerGovernedBrowserTools(gateway, options) {
     return plan;
   }
 
+  function canonicalAuthorityRequest(value, label) {
+    try {
+      return canonicalJson(value, label, limits);
+    } catch {
+      return null;
+    }
+  }
+
+  const authority = Object.freeze({
+    async verifyExecution(request) {
+      const supplied = canonicalAuthorityRequest(
+        request,
+        "Governed browser execution verification request"
+      );
+      if (supplied === null) return false;
+      for (const active of activeDriverCalls) {
+        if (active.executionRequest === supplied) return true;
+      }
+      return false;
+    },
+    async verifyPlanToken(request) {
+      const supplied = canonicalAuthorityRequest(
+        request,
+        "Governed browser plan-token verification request"
+      );
+      if (supplied === null) return false;
+      for (const active of activeDriverCalls) {
+        if (active.planRequest !== supplied) continue;
+        try {
+          verifyPlanToken(request.plan, request.execution.runId);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    }
+  });
+
+  const suppliedDriver = options.driver;
+  const suppliedFactory = options.createDriver;
+  if ((suppliedDriver === undefined) === (suppliedFactory === undefined)) {
+    throw new TypeError(
+      "Governed browser options must provide exactly one of driver or createDriver."
+    );
+  }
+  const driver = suppliedFactory === undefined
+    ? suppliedDriver
+    : dataFunction(options, "createDriver", "Governed browser options")(authority);
+  if (driver && typeof driver.then === "function") {
+    throw new TypeError("Governed browser createDriver must return a driver synchronously.");
+  }
+  const methods = ownDriverMethods(driver);
+
+  async function callAuthorizedDriver(method, request, execution) {
+    const expectedApprovalAction = method === "apply" || method === "submit"
+      ? `effect:browser:${method}`
+      : null;
+    const envelope = executionVerificationEnvelope(execution);
+    const executionRequest = canonicalAuthorityRequest({
+      expectedToolName: execution.toolName,
+      expectedApprovalAction,
+      execution: envelope
+    }, "Governed browser active execution authority");
+    const planRequest = expectedApprovalAction === null
+      ? null
+      : canonicalAuthorityRequest({
+          phase: method,
+          plan: request.plan,
+          execution: envelope
+        }, "Governed browser active plan authority");
+    if (executionRequest === null || (expectedApprovalAction !== null && planRequest === null)) {
+      throw invalidInput();
+    }
+    const active = Object.freeze({ executionRequest, planRequest });
+    activeDriverCalls.add(active);
+    try {
+      return await callDriver(methods, method, request, execution);
+    } finally {
+      activeDriverCalls.delete(active);
+    }
+  }
+
   function preAuthorizePlan(input, phase, context) {
     const request = normalizeCallInput(() => normalizeMutationInput(input, phase, limits));
     verifyPlanToken(request.plan, context.runId || "default");
@@ -842,7 +953,7 @@ export function registerGovernedBrowserTools(gateway, options) {
     const request = normalizeCallInput(() => normalizeObserveInput(input, limits));
     requireAuthorizedOrigin(receipt, configuredOrigins, request.target.origin);
     const execution = driverExecution(receipt, context, configuredOrigins, request);
-    const raw = await callDriver(methods, "observe", request, execution);
+    const raw = await callAuthorizedDriver("observe", request, execution);
     const observation = normalizeDriverOutput("observe", () => (
       normalizeObservation(raw, request, limits)
     ));
@@ -854,7 +965,7 @@ export function registerGovernedBrowserTools(gateway, options) {
     const request = normalizeCallInput(() => normalizePreviewInput(input, limits));
     requireOperationOrigins(receipt, configuredOrigins, request);
     const execution = driverExecution(receipt, context, configuredOrigins, request);
-    const raw = await callDriver(methods, "preview", request, execution);
+    const raw = await callAuthorizedDriver("preview", request, execution);
     const core = normalizeDriverOutput("preview", () => validatePreviewResult(raw, request, limits));
     return issuePlan(core, receipt.runId);
   }, browserMetadata("preview"));
@@ -867,7 +978,7 @@ export function registerGovernedBrowserTools(gateway, options) {
       requireApprovalAction(receipt, "effect:browser:apply");
       verifyPlanToken(request.plan, receipt.runId);
       const execution = driverExecution(receipt, context, configuredOrigins, request.plan);
-      const raw = await callDriver(methods, "apply", request, execution);
+      const raw = await callAuthorizedDriver("apply", request, execution);
       const mutation = normalizeDriverOutput("apply", () => (
         normalizeMutationResult(raw, request, "apply", limits)
       ));
@@ -876,7 +987,11 @@ export function registerGovernedBrowserTools(gateway, options) {
         target: mutation.target,
         maxElements: limits.maxElements
       }));
-      const observedRaw = await callDriver(methods, "observe", observeRequest, execution);
+      const observedRaw = await callAuthorizedDriver(
+        "observe",
+        observeRequest,
+        postMutationObservationExecution(execution, toolNames.observe)
+      );
       const observation = normalizeDriverOutput("observe", () => (
         normalizeObservation(observedRaw, observeRequest, limits)
       ));
@@ -901,7 +1016,7 @@ export function registerGovernedBrowserTools(gateway, options) {
       requireApprovalAction(receipt, "effect:browser:submit");
       verifyPlanToken(request.plan, receipt.runId);
       const execution = driverExecution(receipt, context, configuredOrigins, request.plan);
-      const raw = await callDriver(methods, "submit", request, execution);
+      const raw = await callAuthorizedDriver("submit", request, execution);
       const mutation = normalizeDriverOutput("submit", () => (
         normalizeMutationResult(raw, request, "submit", limits)
       ));
@@ -910,7 +1025,11 @@ export function registerGovernedBrowserTools(gateway, options) {
         target: mutation.target,
         maxElements: limits.maxElements
       }));
-      const observedRaw = await callDriver(methods, "observe", observeRequest, execution);
+      const observedRaw = await callAuthorizedDriver(
+        "observe",
+        observeRequest,
+        postMutationObservationExecution(execution, toolNames.observe)
+      );
       const observation = normalizeDriverOutput("observe", () => (
         normalizeObservation(observedRaw, observeRequest, limits)
       ));

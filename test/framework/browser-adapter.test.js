@@ -270,6 +270,9 @@ test("apply requires its exact approval action, exact plan, active guard, and re
   assert.deepEqual([...calls.apply[0].execution.prohibitedEffects], PROHIBITED_EFFECTS);
   assert.equal(calls.apply[0].execution.toolName, "browser.apply");
   assert.equal(Object.hasOwn(calls.apply[0].execution, "context"), false);
+  assert.equal(calls.observe[0].execution.toolName, "browser.observe");
+  assert.deepEqual([...calls.observe[0].execution.approvalIds], []);
+  assert.deepEqual([...calls.observe[0].execution.approvalActions], []);
 });
 
 test("write plans must be issued by the same adapter preview and run", async () => {
@@ -694,4 +697,77 @@ test("registration requires explicit origins and four own driver data functions"
     /unsupported characters/
   );
   assert.equal(invalidGateway.tools.size, 0);
+});
+
+test("createDriver receives an active-call-only host authority bridge", async () => {
+  const approvalQueue = new ApprovalQueue();
+  const gateway = new ToolGateway({
+    approvalQueue,
+    policyEngine: new PolicyEngine({
+      allowedTools: TOOL_NAMES,
+      allowedOrigins: [APP_ORIGIN],
+      approvalRequiredEffects: ["browser:apply", "browser:submit"]
+    })
+  });
+  let authority;
+  let verifiedDuringObserve = false;
+  const { driver: baseDriver } = createFakeDriver();
+  registerGovernedBrowserTools(gateway, {
+    allowedOrigins: [APP_ORIGIN],
+    createDriver(hostAuthority) {
+      authority = hostAuthority;
+      return {
+        ...baseDriver,
+        async observe(request, execution) {
+          verifiedDuringObserve = await hostAuthority.verifyExecution({
+            expectedToolName: "browser.observe",
+            expectedApprovalAction: null,
+            execution: {
+              schemaVersion: execution.schemaVersion,
+              runId: execution.runId,
+              toolName: execution.toolName,
+              inputHash: execution.inputHash,
+              approvalIds: [...execution.approvalIds],
+              approvalActions: [...execution.approvalActions],
+              authorizedOrigins: [...execution.authorizedOrigins],
+              prohibitedEffects: [...execution.prohibitedEffects]
+            }
+          });
+          return baseDriver.observe(request, execution);
+        }
+      };
+    }
+  });
+
+  const forged = {
+    expectedToolName: "browser.observe",
+    expectedApprovalAction: null,
+    execution: {
+      schemaVersion: "maqam.browser-driver-execution.v1",
+      runId: "outside-dispatch",
+      toolName: "browser.observe",
+      inputHash: "0".repeat(64),
+      approvalIds: [],
+      approvalActions: [],
+      authorizedOrigins: [APP_ORIGIN],
+      prohibitedEffects: PROHIBITED_EFFECTS
+    }
+  };
+  assert.equal(await authority.verifyExecution(forged), false);
+
+  await gateway.call("browser.observe", { target: target() }, { runId: "factory-observe" });
+  assert.equal(verifiedDuringObserve, true);
+  assert.equal(await authority.verifyExecution(forged), false);
+
+  const duplicateGateway = new ToolGateway({
+    policyEngine: new PolicyEngine({ allowedTools: TOOL_NAMES, allowedOrigins: [APP_ORIGIN] })
+  });
+  assert.throws(
+    () => registerGovernedBrowserTools(duplicateGateway, {
+      driver: baseDriver,
+      createDriver: () => baseDriver,
+      allowedOrigins: [APP_ORIGIN]
+    }),
+    /exactly one of driver or createDriver/
+  );
 });

@@ -1134,13 +1134,61 @@ export interface GovernedBrowserLimits {
   maxOperations?: number;
 }
 
-export interface GovernedBrowserOptions {
-  driver: GovernedBrowserDriver;
+export interface BrowserExecutionVerificationEnvelope {
+  readonly schemaVersion: "maqam.browser-driver-execution.v1";
+  readonly runId: string;
+  readonly toolName: string;
+  readonly inputHash: string;
+  readonly approvalIds: readonly string[];
+  readonly approvalActions: readonly string[];
+  readonly authorizedOrigins: readonly string[];
+  readonly prohibitedEffects: readonly BrowserProhibitedEffect[];
+}
+
+export interface BrowserExecutionVerificationRequest {
+  expectedToolName: string;
+  expectedApprovalAction: string | null;
+  execution: BrowserExecutionVerificationEnvelope;
+}
+
+export interface BrowserPlanTokenVerificationRequest {
+  phase: "apply" | "submit";
+  plan: BrowserPlan;
+  execution: BrowserExecutionVerificationEnvelope;
+}
+
+/**
+ * Host-only callbacks for drivers that independently verify Maqam authority.
+ * They return true only while the exact registered driver call is active.
+ * Do not expose this object to an agent or transport.
+ */
+export interface GovernedBrowserAuthority {
+  verifyExecution(request: BrowserExecutionVerificationRequest): Promise<boolean>;
+  verifyPlanToken(request: BrowserPlanTokenVerificationRequest): Promise<boolean>;
+}
+
+export interface GovernedBrowserCommonOptions {
   /** Required, exact canonical HTTP(S) origins; wildcards are not accepted. */
   allowedOrigins: readonly string[];
   toolPrefix?: string;
   limits?: GovernedBrowserLimits;
 }
+
+export type GovernedBrowserOptions = GovernedBrowserCommonOptions & (
+  | {
+      driver: GovernedBrowserDriver;
+      createDriver?: never;
+    }
+  | {
+      driver?: never;
+      /**
+       * Synchronously creates a driver with a host-only, active-dispatch
+       * authority bridge. Use this for drivers that verify Maqam execution and
+       * signed plan tokens independently.
+       */
+      createDriver(authority: GovernedBrowserAuthority): GovernedBrowserDriver;
+    }
+);
 
 export interface GovernedBrowserRegistration {
   readonly schemaVersion: "maqam.browser-adapter.v1";

@@ -2,6 +2,19 @@
 
 All notable Maqam changes are tracked here before release.
 
+## Unreleased
+
+### Added
+
+- A synchronous `createDriver(authority)` registration path for host drivers
+  that independently verify the exact active Maqam execution envelope and
+  signed browser plan. The verifier bridge is host-only, inactive outside the
+  registered call, and does not expose gateway or approval authority.
+- A repository-only fixture pinned to public `cockroach-browser@0.1.0` covering
+  observe, preview, exact one-use approval, apply, re-observation, tamper,
+  replay, and stale-target failure paths without adding the AGPL package to
+  Maqam's MIT runtime or published tarball.
+
 ## 0.3.3 - 2026-07-23
 
 Registry-presentation patch with no runtime policy, approval, browser, crawler,
