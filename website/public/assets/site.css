@@ -245,9 +245,13 @@ button {
 .hero {
   min-height: min(720px, calc(100dvh - var(--nav-height)));
   display: grid;
+  grid-template-areas:
+    "heading heading"
+    "copy media";
   grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
   align-items: center;
   gap: clamp(2rem, 4.5vw, 4.5rem);
+  row-gap: clamp(1.5rem, 2.75vw, 2.75rem);
   padding-block: clamp(3rem, 5vw, 4.5rem);
   border-bottom: 1px solid var(--line);
   background:
@@ -260,16 +264,27 @@ button {
 }
 
 .hero-copy {
+  grid-area: copy;
   max-width: 620px;
+}
+
+.hero-heading {
+  grid-area: heading;
+  min-width: 0;
+}
+
+.hero-heading .eyebrow {
+  margin-bottom: 0.65rem;
 }
 
 .hero h1 {
   margin: 0;
-  max-width: 14ch;
-  font-size: clamp(2.75rem, 4.25vw, 4.25rem);
+  max-width: none;
+  font-size: clamp(2.65rem, 4.2vw, 4rem);
   font-weight: 500;
-  letter-spacing: -0.038em;
-  line-height: 1.02;
+  letter-spacing: -0.042em;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .hero-copy > p {
@@ -355,6 +370,7 @@ button {
 }
 
 .hero-media {
+  grid-area: media;
   position: relative;
   align-self: center;
   width: 100%;
@@ -1460,8 +1476,16 @@ tr:last-child td {
   }
 
   .hero {
+    grid-template-areas:
+      "heading"
+      "copy"
+      "media";
     grid-template-columns: minmax(0, 1fr);
     min-height: auto;
+  }
+
+  .hero h1 {
+    white-space: normal;
   }
 
   .system-intro,
