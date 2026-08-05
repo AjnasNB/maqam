@@ -106,7 +106,7 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.scripts["benchmark:governance"], "node benchmarks/governance-overhead.mjs");
   assert.equal(packageJson.scripts["benchmark:mges:performance"], "node benchmarks/governance-suite.mjs");
   assert.equal(packageJson.scripts["benchmark:mges:conformance"], "node benchmarks/governance-conformance.mjs");
-  assert.equal(packageJson.dependencies.undici, "^7.28.0");
+  assert.equal(packageJson.dependencies.undici, "^7.29.0");
   assert.equal(packageJson.engines.node, "^22.0.0 || ^24.0.0 || ^26.0.0");
 });
 

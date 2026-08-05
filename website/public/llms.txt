@@ -34,6 +34,8 @@ Primary pages:
 - AI agent governance comparison: https://maqamagent.com/why/
 - Governed sources: https://maqamagent.com/docs/sources/
 - Governed browser actions: https://maqamagent.com/docs/browser/
+- ProductLoop Workbench: https://maqamagent.com/docs/workbench/
+- ProductLoop package atlas: https://maqamagent.com/docs/productloop/
 - Integrations: https://maqamagent.com/docs/integrations/
 - Security boundary: https://maqamagent.com/docs/security/
 - Benchmark method: https://maqamagent.com/docs/benchmark/

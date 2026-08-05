@@ -66,6 +66,8 @@ Exit criteria:
 
 ## Next: Durable Governance State
 
+ProductLoop Workbench `0.1.0` is an adjacent source candidate for a single-operator SQLite run ledger, review inbox, evidence and memory references, and proof export. Its review record is not a Maqam approval receipt and its resume action does not dispatch a tool. The Maqam work below remains necessary for restart-safe exact approval inside the real gateway boundary.
+
 - Design storage interfaces for runs, approvals, evidence, claims, and trace events.
 - Provide a reference local durable store after crash-safety, concurrency, migration, secret handling, and integrity tests are defined.
 - Support restart-safe approval wait/resume without treating untrusted serialized queue data as an authenticated decision.

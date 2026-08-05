@@ -33,9 +33,9 @@ Maqam does not intercept direct operating-system calls or make an unsafe tool sa
 
 ## Start with Maqam. Expand only when you need more.
 
-Install Maqam when you need one compact governance boundary around registered tool calls, exact approvals, guarded browser actions, coding-agent workers, traces, evidence, and governed research sources. [ProductLoop OS](https://github.com/AjnasNB/productloop-os) is the optional modular toolbox for teams that also need separate workflow, policy, approval, provenance, skill, connector, evaluation, and research packages.
+Install Maqam when you need one compact governance boundary around registered tool calls, exact approvals, guarded browser actions, coding-agent workers, traces, evidence, and governed research sources. [ProductLoop OS](https://github.com/AjnasNB/productloop-os) is the optional modular toolbox for teams that also need separate workflow, policy, approval, provenance, skill, connector, evaluation, and research packages. The new [ProductLoop Workbench source candidate](https://maqamagent.com/docs/workbench/) adds a loopback-only, single-operator view for durable runs, review records, evidence, memory links, policies, and proof export.
 
-Neither product replaces model providers, durable orchestration, identity, databases, browser engines, or operating-system sandboxes. Only operations routed through a registered boundary are governed. See the [Maqam quickstart](https://maqamagent.com/docs/) or the separate [ProductLoop package atlas](https://maqamagent.com/docs/productloop/).
+None of these products replaces model providers, distributed orchestration, organizational identity, browser isolation, or operating-system sandboxes. Workbench approval state does not execute a tool; only operations routed through a registered Maqam boundary are governed. See the [Maqam quickstart](https://maqamagent.com/docs/), [Workbench guide](https://maqamagent.com/docs/workbench/), or the separate [ProductLoop package atlas](https://maqamagent.com/docs/productloop/).
 
 ## Reproduce the Proofs
 
@@ -64,6 +64,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 | [Five-minute quickstart](https://github.com/AjnasNB/maqam/blob/main/docs/quickstart.md) and [full usage guide](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md) | Local proof, installation, APIs, cleanup, and deployment boundaries |
 | [Why Maqam](https://maqamagent.com/why/) and [detailed comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md) | Product fit, alternatives, differences, limitations, sources, and licenses |
 | [ProductLoop package atlas](https://maqamagent.com/docs/productloop/) | Package-by-package roles, versions, examples, and Maqam relationship |
+| [ProductLoop Workbench guide](https://maqamagent.com/docs/workbench/) | Local dashboard, SQLite run ledger, exact review records, evidence and memory links, proof bundles, security boundary, and the separation between the public community package and private hosted services |
 | [Integration guide](https://maqamagent.com/docs/integrations/) and [Google ADK / Microsoft Agent 365 boundary](https://github.com/AjnasNB/maqam/blob/main/docs/integrations-google-adk-agent365.md) | Host adapters, prerequisites, copy-paste templates, and bypass warnings |
 | [Governed Sources](https://github.com/AjnasNB/maqam/blob/main/docs/governed-sources.md) | Ordered source adapters, `ToolGateway` routing, normalized documents, source doctor, RSS/Atom, fallback, and security boundaries |
 | [Anonymous-public source pack](https://github.com/AjnasNB/maqam/blob/main/docs/anonymous-public-sources.md) | No-developer-key Exa MCP search and separately installed `yt-dlp` YouTube metadata/captions, with credential classes, limits, terms, privacy, and safe registration |
