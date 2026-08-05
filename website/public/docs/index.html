@@ -55,7 +55,7 @@
         </nav>
         <nav aria-label="Other documentation">
           <p class="docs-nav-title">More</p>
-          <a href="https://github.com/AjnasNB/maqam/blob/main/docs/FEATURES.md">Complete feature inventory</a><a href="/docs/sources/">Governed sources</a><a href="/docs/browser/">Governed browser</a><a href="/docs/productloop/">ProductLoop packages</a><a href="/docs/integrations/">Integration patterns</a><a href="/docs/benchmark/">MGES benchmark</a><a href="/docs/security/">Security model</a>
+          <a href="https://github.com/AjnasNB/maqam/blob/main/docs/FEATURES.md">Complete feature inventory</a><a href="/docs/sources/">Governed sources</a><a href="/docs/browser/">Governed browser</a><a href="/docs/workbench/">ProductLoop Workbench</a><a href="/docs/productloop/">ProductLoop packages</a><a href="/docs/integrations/">Integration patterns</a><a href="/docs/benchmark/">MGES benchmark</a><a href="/docs/security/">Security model</a>
         </nav>
       </div>
     </aside>
@@ -68,6 +68,7 @@
       <dl class="definition-grid">
         <dt>Maqam</dt><dd>A security turnstile for actions performed by software agents. It checks policy, binds approval to the exact input that will run, permits that approved call once, and records the decision and result.</dd>
         <dt>ProductLoop OS</dt><dd>The modular toolbox around Maqam. It adds focused packages for runtime, policy, approval workflows, provenance, skills, connector trust, evaluations, and browser-research records.</dd>
+        <dt>ProductLoop Workbench</dt><dd>The open-source local operator surface around those records. It adds durable single-operator runs, an exact approval inbox, evidence and memory views, policy explanations, and proof export.</dd>
         <dt>Use Maqam alone</dt><dd>When a TypeScript application needs one compact execution boundary around functions, SDK calls, CLI workers, file writes, publishing, or bounded HTTP research.</dd>
         <dt>Use ProductLoop too</dt><dd>When the application also needs the broader package family and explicit composition helpers. ProductLoop does not turn the modules into a hidden hosted control plane.</dd>
       </dl>
@@ -314,7 +315,7 @@ npx -y maqam@0.3.3
   <footer class="site-footer">
     <div class="shell footer-grid">
       <div><h2>Maqam docs</h2><p>Runnable examples with explicit boundaries.</p></div>
-      <div><h3>Packages</h3><a href="/docs/productloop/">ProductLoop OS</a><a href="https://www.npmjs.com/package/maqam">npm</a></div>
+      <div><h3>Packages</h3><a href="/docs/workbench/">Workbench</a><a href="/docs/productloop/">ProductLoop OS</a><a href="https://www.npmjs.com/package/maqam">npm</a></div>
       <div><h3>Evidence</h3><a href="/docs/benchmark/">MGES</a><a href="/articles/exact-agent-approvals/">Approval article</a></div>
       <div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam">GitHub</a><a href="/community/">Contribute</a></div>
     </div>

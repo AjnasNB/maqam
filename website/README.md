@@ -29,6 +29,7 @@ it.
 
 - Maqam is the focused TypeScript governance boundary.
 - ProductLoop OS is the composed package family.
+- ProductLoop Workbench is the unpublished, local-first operator source candidate; hosted team identity, synchronization, managed execution, billing, and multi-tenant retention remain outside this public site and package.
 - External SDK examples are labeled as host integration sketches when they are not shipped or tested by this repository.
 - MGES is a project-defined regression suite, not a standard, certification, security score, competitor ranking, capacity benchmark, or SLA.
 

@@ -37,6 +37,7 @@ const requiredProductVisuals = new Map([
   [path.join("docs", "integrations", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("docs", "sources", "index.html"), ["/assets/integration-dock-3d.png"]],
   [path.join("docs", "productloop", "index.html"), ["/assets/productloop-modular-hub-3d.png"]],
+  [path.join("docs", "workbench", "index.html"), ["/assets/productloop-modular-hub-3d.png"]],
   [path.join("docs", "security", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("articles", "benchmarking-governance", "index.html"), ["/assets/approval-gate-art.png"]],
   [path.join("articles", "exact-agent-approvals", "index.html"), ["/assets/evidence-article.png"]]
@@ -275,6 +276,22 @@ for (const file of htmlFiles) {
     }
     requireMatch(/<code>maqam<\/code>[\s\S]{0,120}<td>0\.3\.3<\/td>/, "ProductLoop atlas must show public Maqam 0.3.3");
     requireMatch(/historical 0\.2\.4 proof video/i, "ProductLoop atlas must label its 0.2.4 video as historical");
+    requireMatch(/<code>productloop-workbench<\/code>[\s\S]{0,120}<td>0\.1\.0 source candidate<\/td>/, "ProductLoop atlas must label Workbench as an unpublished source candidate");
+    requireMatch(/href="\/docs\/workbench\/"/, "ProductLoop atlas must link the Workbench guide");
+  }
+
+  if (label === path.join("docs", "workbench", "index.html")) {
+    requireMatch(/0\.1\.0 source candidate/i, "Workbench guide must identify the unpublished source lifecycle");
+    requireMatch(/not yet a public npm release/i, "Workbench guide must not claim registry publication");
+    requireMatch(/Runs[\s\S]{0,120}Approvals[\s\S]{0,120}Evidence[\s\S]{0,120}Memory[\s\S]{0,120}Policies/i, "Workbench guide must name the five operator surfaces");
+    requireMatch(/Approval is not dispatch/i, "Workbench guide must separate review state from real execution");
+    requireMatch(/TeamControlPlaneAdapter/, "Workbench guide must identify the private integration boundary");
+    requireMatch(/SSO/i, "Workbench guide must identify private identity capabilities");
+    requireMatch(/billing/i, "Workbench guide must identify the private billing boundary");
+    requireMatch(/multi-tenant/i, "Workbench guide must identify the private tenant boundary");
+    requireMatch(/127\.0\.0\.1:43120/, "Workbench guide must identify the loopback server");
+    requireMatch(/active loopback <code>Host<\/code>/i, "Workbench guide must document DNS-rebinding-resistant Host validation");
+    requireMatch(/64 KiB/i, "Workbench guide must document the mutation body limit");
   }
 
   if (label === path.join("docs", "integrations", "index.html")) {
@@ -285,6 +302,9 @@ for (const file of htmlFiles) {
   if (label === path.join("roadmap", "index.html")) {
     requireMatch(/ProductLoop OS 0\.2\.3 public/i, "roadmap must name the current ProductLoop release");
     requireMatch(/productloop-os\/releases\/tag\/v0\.2\.3/, "roadmap must link the v0.2.3 source release");
+    requireMatch(/Workbench 0\.1\.0 source candidate/i, "roadmap must identify the Workbench source candidate");
+    requireMatch(/href="\/docs\/workbench\/"/, "roadmap must link the Workbench boundary guide");
+    requireMatch(/not yet an npm, tag, or GitHub release claim/i, "roadmap must not imply that Workbench is already published");
   }
 
   if (label === path.join("articles", "exact-agent-approvals", "index.html")) {

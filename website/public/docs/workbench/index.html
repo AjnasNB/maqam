@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ProductLoop Workbench | Maqam documentation</title>
+  <meta name="description" content="Run the open-source local control center for durable governed runs, exact approvals, evidence, Qarinah memory links, policy inspection, and proof export.">
+  <meta name="theme-color" content="#0b0e0d">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="author" content="Ajnas N B">
+  <meta name="application-name" content="Maqam">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Maqam">
+  <meta property="og:title" content="ProductLoop Workbench | Maqam documentation">
+  <meta property="og:description" content="Run the open-source local control center for durable governed runs, exact approvals, evidence, Qarinah memory links, policy inspection, and proof export.">
+  <meta property="og:url" content="https://maqamagent.com/docs/workbench/">
+  <meta property="og:image" content="https://maqamagent.com/assets/maqam-exact-gate-3d.png">
+  <meta property="og:image:width" content="1586">
+  <meta property="og:image:height" content="992">
+  <meta property="og:image:alt" content="Maqam exact approval gate for governed AI agent actions">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ProductLoop Workbench | Maqam documentation">
+  <meta name="twitter:description" content="Run the open-source local control center for durable governed runs, exact approvals, evidence, Qarinah memory links, policy inspection, and proof export.">
+  <meta name="twitter:image" content="https://maqamagent.com/assets/maqam-exact-gate-3d.png">
+  <meta name="twitter:image:alt" content="Maqam exact approval gate for governed AI agent actions">
+  <script type="application/ld+json" data-search-metadata>{"@context":"https://schema.org","@type":"WebPage","name":"ProductLoop Workbench | Maqam documentation","description":"Run the open-source local control center for durable governed runs, exact approvals, evidence, Qarinah memory links, policy inspection, and proof export.","url":"https://maqamagent.com/docs/workbench/","dateModified":"2026-08-05","isPartOf":{"@type":"WebSite","name":"Maqam","url":"https://maqamagent.com"},"about":{"@type":"SoftwareApplication","name":"Maqam","url":"https://maqamagent.com"}}</script>
+  <link rel="canonical" href="https://maqamagent.com/docs/workbench/">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.3/">Release</a><a href="/community/">Community</a><a class="nav-action" href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/" aria-current="page">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/roadmap/">Roadmap</a><a href="/releases/v0.3.3/">Release</a><a href="/community/">Community</a><a href="https://github.com/AjnasNB/productloop-os">GitHub</a></nav>
+  </header>
+
+  <main id="main" class="shell docs-layout">
+    <aside class="docs-sidebar" aria-label="Workbench documentation navigation">
+      <button class="docs-toggle" type="button" data-docs-toggle aria-expanded="false" aria-controls="docs-drawer">On this page <span aria-hidden="true">+</span></button>
+      <div class="docs-drawer" id="docs-drawer" data-docs-drawer hidden>
+        <nav aria-label="Workbench sections"><p class="docs-nav-title">Workbench</p><a href="#status">Release status</a><a href="#start">Start from source</a><a href="#surfaces">Five surfaces</a><a href="#approval">Approval lifecycle</a><a href="#storage">Durable store</a><a href="#proof">Proof bundles</a><a href="#private">Private boundary</a><a href="#security">Security</a></nav>
+        <nav aria-label="Related documentation"><p class="docs-nav-title">Related</p><a href="/docs/productloop/">Package atlas</a><a href="/docs/">Maqam quickstart</a><a href="/docs/integrations/">Adapter patterns</a><a href="/docs/security/">Security model</a></nav>
+      </div>
+    </aside>
+
+    <article class="docs-content">
+      <p class="eyebrow">Open-source local control center</p>
+      <h1>ProductLoop Workbench</h1>
+      <p class="lede">Give one operator a durable view of governed runs, exact approvals, evidence, memory links, policies, and proof exports without requiring a hosted account.</p>
+
+      <div class="callout" id="status">
+        <strong>0.1.0 source candidate</strong>
+        The implementation exists in the ProductLoop monorepo and passes its local build and test suite. It is not yet a public npm release. Do not use an npm install claim until the reviewed tarball, provenance, Git tag, GitHub release, and registry record match.
+      </div>
+
+      <figure class="media-frame media-frame--art">
+        <picture><source srcset="/assets/productloop-modular-hub-3d.webp" type="image/webp"><img src="/assets/productloop-modular-hub-3d.png" width="1568" height="1003" alt="ProductLoop modules connected through an explicit central composition boundary" loading="lazy"></picture>
+        <figcaption>Workbench is the local operator layer above the existing package family. It does not merge or silently broaden the authority of the underlying products.</figcaption>
+      </figure>
+
+      <h2 id="start">Start from the reviewed source</h2>
+      <p>After the Workbench changes reach the public ProductLoop branch, build the exact source candidate locally:</p>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#workbench-start">Copy</button><pre><code id="workbench-start">git clone https://github.com/AjnasNB/productloop-os.git
+cd productloop-os
+npm ci
+npm run build --workspace=productloop-workbench
+node productloop-workbench/bin/productloop-workbench.js init
+node productloop-workbench/bin/productloop-workbench.js demo
+node productloop-workbench/bin/productloop-workbench.js serve</code></pre></div>
+      <p>The server binds to <code>127.0.0.1:43120</code>. The no-key demo uses deterministic local ProductLoop, Maqam, policy, approval, provenance, browser replay, and evaluation fixtures. It does not make a live browser, crawler, provider, model, or publish request.</p>
+
+      <h2 id="surfaces">Five operator surfaces</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Workbench operator surfaces">
+        <table>
+          <caption class="sr-only">ProductLoop Workbench operator surfaces and authority boundaries</caption>
+          <thead><tr><th scope="col">Surface</th><th scope="col">What it shows</th><th scope="col">What it does not grant</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Runs</th><td>Purpose, risk, status, policy reason, current step, and receipt head</td><td>Tool execution authority</td></tr>
+            <tr><th scope="row">Approvals</th><td>Exact tool, effect, canonical input, digest, reviewer, and consumption state</td><td>Proof that an external effect executed</td></tr>
+            <tr><th scope="row">Evidence</th><td>Bounded records from ProductLoop, Maqam, Cockroach Browser, Cockroach Crawler, or custom adapters</td><td>Truth or source authorization</td></tr>
+            <tr><th scope="row">Memory</th><td>Qarinah event IDs, hashes, relationships, and bounded summaries</td><td>Qarinah disclosure or append permission</td></tr>
+            <tr><th scope="row">Policies</th><td>Concise allow, deny, and approval explanations</td><td>An operating-system sandbox</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="approval">Exact approval lifecycle</h2>
+      <ol>
+        <li>The host creates a durable run and records its purpose.</li>
+        <li>Policy identifies a consequential operation.</li>
+        <li>Workbench stores the exact tool, effect, risk, canonical input, and digest.</li>
+        <li>A reviewer approves or rejects that specific proposal.</li>
+        <li>Resume atomically changes one approved record to <code>consumed</code>.</li>
+        <li>A trusted host independently verifies the binding and dispatches the real operation through Maqam.</li>
+        <li>The host attaches the Maqam, browser, crawler, or provider receipt as evidence.</li>
+      </ol>
+      <div class="callout"><strong>Approval is not dispatch</strong>A Workbench button updates a local review record. It never calls an external tool by itself. Consequential effects must still pass through the real enforcement boundary.</div>
+
+      <h2 id="storage">Durable local store</h2>
+      <p>Workbench uses a SQLite database under <code>.productloop-workbench</code> by default. The database enables WAL journaling, full synchronous commits, foreign keys, bounded fields, transactional mutations, and a per-run hash-linked event ledger so each exported run contains its own verifiable chain. An approved decision can be consumed once by one local transaction.</p>
+      <p>This is single-operator local durability. It is not a distributed scheduler, shared database, cross-device synchronization system, backup service, or multi-tenant audit store.</p>
+
+      <h2 id="proof">Export the proof</h2>
+      <div class="code-shell"><button class="copy-button" type="button" data-copy="#workbench-proof">Copy</button><pre><code id="workbench-proof">node productloop-workbench/bin/productloop-workbench.js status --json
+node productloop-workbench/bin/productloop-workbench.js export RUN_ID</code></pre></div>
+      <p>A proof bundle contains the run, approval history, evidence, memory links, selected events, current integrity report, and a canonical bundle digest. Receipts make later modification detectable; they do not prove that a recorded external claim is true.</p>
+
+      <h2 id="private">Where the private product starts</h2>
+      <p>The public package exports a <code>TeamControlPlaneAdapter</code> contract but no hosted implementation.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Open-source and private product boundary">
+        <table>
+          <caption class="sr-only">Open-source ProductLoop Workbench capabilities and separately operated private services</caption>
+          <thead><tr><th scope="col">Open-source community package</th><th scope="col">Separately operated private service</th></tr></thead>
+          <tbody>
+            <tr><td>One operator and local SQLite</td><td>Organizations, hosted team synchronization, and backups</td></tr>
+            <tr><td>Local approval inbox</td><td>SSO, RBAC, reviewer directories, and centralized queues</td></tr>
+            <tr><td>Local evidence and memory references</td><td>Multi-tenant retention, audit administration, and encrypted device sync</td></tr>
+            <tr><td>Local adapters and deterministic demo</td><td>Managed browser workers, secret broker, billing, entitlements, and SLA</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="security">Security boundary</h2>
+      <ul>
+        <li>The dashboard is loopback-only, validates its exact active loopback <code>Host</code>, and uses a per-process API token.</li>
+        <li>Cross-origin or non-JSON mutations are denied, request bodies are capped at 64 KiB, and restrictive browser security headers are emitted.</li>
+        <li>The database may contain sensitive purpose text, inputs, evidence excerpts, and project metadata. Protect it accordingly.</li>
+        <li>Do not place API keys, tokens, cookies, private keys, or browser profile values in Workbench records.</li>
+        <li>Qarinah capture stays explicit per workspace and metadata-only by default.</li>
+        <li>Cockroach Browser and Crawler keep their own origin, profile, network, access, and content boundaries.</li>
+        <li>Maqam governs only operations routed through its configured gateway or adapter.</li>
+      </ul>
+      <div class="button-row"><a class="button button-primary" href="https://github.com/AjnasNB/productloop-os">Review the source repository</a><a class="button" href="/docs/productloop/">Inspect every package</a><a class="button" href="/docs/security/">Read the Maqam security boundary</a></div>
+    </article>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-grid"><div><h2>ProductLoop Workbench</h2><p>Local operation, explicit authority.</p></div><div><h3>Start</h3><a href="/docs/workbench/">Workbench</a><a href="/docs/productloop/">Package atlas</a></div><div><h3>Review</h3><a href="/docs/security/">Security</a><a href="/docs/integrations/">Integrations</a></div><div><h3>Source</h3><a href="https://github.com/AjnasNB/productloop-os">ProductLoop GitHub</a><a href="https://github.com/AjnasNB/maqam">Maqam GitHub</a></div></div></footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>
