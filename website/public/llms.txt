@@ -31,7 +31,8 @@ Primary pages:
 
 - Home: https://maqamagent.com/
 - Quickstart and API: https://maqamagent.com/docs/
-- AI agent governance comparison: https://maqamagent.com/why/
+- AI agent governance alternatives: https://maqamagent.com/alternatives/
+- Product fit and boundary overview: https://maqamagent.com/why/
 - Governed sources: https://maqamagent.com/docs/sources/
 - Governed browser actions: https://maqamagent.com/docs/browser/
 - ProductLoop Workbench: https://maqamagent.com/docs/workbench/

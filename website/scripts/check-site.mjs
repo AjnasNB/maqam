@@ -25,6 +25,7 @@ const productVisualDimensions = new Map([
 ]);
 const requiredProductVisuals = new Map([
   ["index.html", ["/assets/maqam-exact-gate-3d.png", "/assets/productloop-modular-hub-3d.png", "/assets/evidence-metrology-3d.png"]],
+  [path.join("alternatives", "index.html"), []],
   [path.join("why", "index.html"), ["/assets/maqam-exact-gate-3d.png"]],
   [path.join("community", "index.html"), ["/assets/community-workbench-v2.png"]],
   [path.join("roadmap", "index.html"), ["/assets/evidence-metrology-3d.png"]],
@@ -142,6 +143,9 @@ for (const file of htmlFiles) {
   if (source.includes('class="site-header"') && !source.includes('href="/releases/v0.3.3/"')) {
     failures.push(`${label}: primary navigation must link the 0.3.3 release record`);
   }
+  if (source.includes('class="site-header"') && !source.includes('href="/alternatives/"')) {
+    failures.push(`${label}: primary navigation must link the alternatives guide`);
+  }
 
   if (/candidate pending exact release approval/i.test(source)) {
     failures.push(`${label}: contains stale pre-publication wording`);
@@ -198,6 +202,25 @@ for (const file of htmlFiles) {
     requireMatch(/does not claim a new MGES measurement/i, "paper page must preserve the 0.3.3 benchmark boundary");
     requireMatch(/DOI 10\.5281\/zenodo\.21851251/i, "paper page must publish the archival DOI");
     requireMatch(/CC BY 4\.0/i, "paper page must publish the manuscript license");
+  }
+
+  if (label === path.join("alternatives", "index.html")) {
+    requireMatch(/"@type":"CollectionPage"/i, "alternatives page must publish CollectionPage JSON-LD");
+    requireMatch(/"@type":"ItemList"/i, "alternatives page must publish an ItemList");
+    requireMatch(/"@type":"FAQPage"/i, "alternatives page must publish visible direct answers");
+    requireMatch(/Microsoft Agent Governance Toolkit/i, "alternatives page must cover the broad governance toolkit category");
+    requireMatch(/OpenAI Agents SDK for TypeScript/i, "alternatives page must cover the TypeScript agent runtime category");
+    requireMatch(/LangGraph for JavaScript/i, "alternatives page must cover durable workflow orchestration");
+    requireMatch(/Open Policy Agent/i, "alternatives page must cover OPA");
+    requireMatch(/Cedar Policy Language/i, "alternatives page must cover Cedar");
+    requireMatch(/Invariant Guardrails/i, "alternatives page must cover contextual agent security");
+    requireMatch(/NVIDIA NeMo Guardrails/i, "alternatives page must cover model and dialog guardrails");
+    requireMatch(/Guardrails AI/i, "alternatives page must cover validation and structured outputs");
+    requireMatch(/Not complete enterprise governance/i, "alternatives page must reject a complete-enterprise-platform claim");
+    requireMatch(/not a performance benchmark, security certification, or exhaustive feature matrix/i, "alternatives page must label the comparison method");
+    requireMatch(/reviewed on 08 August 2026 using the official project documentation/i, "alternatives page must state its source method and review date");
+    requireMatch(/Calls that bypass a registered Maqam gateway remain outside its control/i, "alternatives page must state the bypass boundary");
+    requireMatch(/Does this page prove Maqam is better[\s\S]{0,300}No\./i, "alternatives page must reject a universal superiority claim");
   }
 
   if (label === path.join("docs", "benchmark", "index.html")) {
@@ -410,7 +433,7 @@ else {
   const llms = await readFile(llmsPath, "utf8");
   const llmsLines = new Set(llms.split(/\r?\n/u).map((line) => line.trim()));
   if (!llms.startsWith("# Maqam\n\nMaqam is an open-source enterprise AI agent governance layer for TypeScript.")) failures.push("llms.txt must define Maqam plainly");
-  if (!llmsLines.has("- AI agent governance comparison: https://maqamagent.com/why/")) failures.push("llms.txt must link the comparison page");
+  if (!llmsLines.has("- AI agent governance alternatives: https://maqamagent.com/alternatives/")) failures.push("llms.txt must link the alternatives page");
   if (!llmsLines.has("- Technical white paper: https://maqamagent.com/paper/")) failures.push("llms.txt must link the technical paper");
 }
 
@@ -438,6 +461,7 @@ else {
   const searchIndex = JSON.parse(await readFile(searchIndexPath, "utf8"));
   if (searchIndex?.software?.version !== "0.3.3") failures.push("search.json must identify Maqam 0.3.3");
   if (!searchIndex?.pages?.some((page) => page.url === "https://maqamagent.com/paper/")) failures.push("search.json must include the technical paper");
+  if (!searchIndex?.pages?.some((page) => page.url === "https://maqamagent.com/alternatives/")) failures.push("search.json must include the alternatives guide");
 }
 
 const sitemap = await readFile(path.join(publicRoot, "sitemap.xml"), "utf8");
@@ -449,6 +473,7 @@ const sitemapLocations = new Set(
 if (!sitemapUrls || sitemapUrls !== sitemapLastModified) failures.push("every sitemap URL must carry a reviewed lastmod date");
 if (!sitemapLocations.has("https://maqamagent.com/releases/v0.3.3/")) failures.push("sitemap must include the current 0.3.3 release");
 if (!sitemapLocations.has("https://maqamagent.com/paper/")) failures.push("sitemap must include the technical paper");
+if (!sitemapLocations.has("https://maqamagent.com/alternatives/")) failures.push("sitemap must include the alternatives guide");
 
 assert.deepEqual(parseByteRange("bytes=2-5", 10), { offset: 2, length: 4, end: 5 });
 assert.deepEqual(parseByteRange("bytes=7-", 10), { offset: 7, length: 3, end: 9 });

@@ -59,6 +59,35 @@ function ensurePaperNavigation(html, className) {
   });
 }
 
+function ensureAlternativesNavigation(html, className, route) {
+  const navigation = new RegExp(`(<nav\\s+class="${className}"[^>]*>)([\\s\\S]*?)(<\\/nav>)`, "i");
+  return html.replace(navigation, (whole, opening, content, closing) => {
+    const active = route === "/alternatives/" ? ' aria-current="page"' : "";
+    const link = `<a href="/alternatives/"${active}>Compare</a>`;
+
+    if (/href="\/alternatives\/"/i.test(content)) {
+      content = content.replace(
+        /<a href="\/alternatives\/"(?:\s+aria-current="page")?>[^<]*<\/a>/i,
+        link
+      );
+    } else if (/href="\/why\/"/i.test(content)) {
+      content = content.replace(
+        /<a href="\/why\/"(?:\s+aria-current="page")?>[^<]*<\/a>/i,
+        link
+      );
+    } else if (/\s*<a href="\/docs\/integrations\/"/i.test(content)) {
+      content = content.replace(
+        /(\s*)(<a href="\/docs\/integrations\/"[^>]*>)/i,
+        `$1${link}$1$2`
+      );
+    } else {
+      content += `\n      ${link}`;
+    }
+
+    return opening + content + closing;
+  });
+}
+
 function breadcrumbFor(route) {
   const labels = new Map([
     ["articles", "Articles"], ["benchmarking-governance", "Benchmarking governance"],
@@ -66,7 +95,7 @@ function breadcrumbFor(route) {
     ["docs", "Documentation"], ["benchmark", "Benchmark"], ["browser", "Browser"],
     ["integrations", "Integrations"], ["productloop", "ProductLoop OS"],
     ["security", "Security"], ["sources", "Sources"], ["workbench", "Workbench"],
-    ["paper", "Technical paper"], ["releases", "Releases"], ["roadmap", "Roadmap"],
+    ["alternatives", "Alternatives"], ["paper", "Technical paper"], ["releases", "Releases"], ["roadmap", "Roadmap"],
     ["why", "Why Maqam"]
   ]);
   const parts = route.split("/").filter(Boolean);
@@ -186,6 +215,77 @@ function jsonLdFor({ canonical, description, route, title }) {
     };
   }
 
+  if (route === "/alternatives/") {
+    const alternatives = [
+      ["Microsoft Agent Governance Toolkit", "https://github.com/microsoft/agent-governance-toolkit"],
+      ["OpenAI Agents SDK for TypeScript", "https://openai.github.io/openai-agents-js/"],
+      ["LangGraph for JavaScript", "https://docs.langchain.com/oss/javascript/langgraph/overview"],
+      ["Open Policy Agent", "https://www.openpolicyagent.org/docs"],
+      ["Cedar Policy Language", "https://docs.cedarpolicy.com/"],
+      ["Invariant Guardrails", "https://invariantlabs.ai/blog/guardrails"],
+      ["NVIDIA NeMo Guardrails", "https://docs.nvidia.com/nemo/guardrails/latest/home"],
+      ["Guardrails AI", "https://github.com/guardrails-ai/guardrails"]
+    ];
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          name: title,
+          description,
+          url: canonical,
+          dateModified: modifiedDate,
+          inLanguage: "en",
+          isPartOf: { "@type": "WebSite", name: "Maqam", url: siteUrl },
+          about: { "@type": "SoftwareApplication", name: "Maqam", softwareVersion: "0.3.3", url: siteUrl },
+          mainEntity: { "@id": `${canonical}#alternatives` }
+        },
+        {
+          "@type": "ItemList",
+          "@id": `${canonical}#alternatives`,
+          name: "Representative AI agent governance alternatives and complements",
+          numberOfItems: alternatives.length,
+          itemListElement: alternatives.map(([name, url], index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name,
+            url
+          }))
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "Is Maqam a complete enterprise AI governance platform?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "No. Maqam is a compact TypeScript boundary for registered actions. It does not provide enterprise identity, fleet inventory, operating-system isolation, a distributed approval service, or compliance certification."
+              }
+            },
+            {
+              "@type": "Question",
+              name: "Does Maqam replace OpenAI Agents SDK or LangGraph?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "No. OpenAI Agents SDK and LangGraph build and run agents or workflows. Maqam can sit around selected registered tools where policy, exact-input approval, one-use consumption, and execution receipts are required."
+              }
+            },
+            {
+              "@type": "Question",
+              name: "Can Maqam be used with OPA or Cedar?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes. OPA or Cedar can supply an authorization decision while Maqam retains the application-side dispatch, approval, and receipt boundary. The host must implement and test that integration."
+              }
+            }
+          ]
+        },
+        breadcrumbFor(route)
+      ]
+    };
+  }
+
   const article = route.startsWith("/articles/") || route.startsWith("/releases/") || route.startsWith("/docs/") || route === "/docs/";
   return {
     "@context": "https://schema.org",
@@ -246,12 +346,15 @@ for (const file of await walk(publicRoot)) {
     .replace(/\s*<link rel="search"[^>]*>\s*/gi, "\n")
     .replace(/\s*<script type="application\/ld\+json" data-search-metadata>[\s\S]*?<\/script>\s*/gi, "\n");
 
+  const keywords = route === "/alternatives/"
+    ? "Maqam alternatives, AI agent governance comparison, TypeScript agent governance, OpenAI Agents SDK, LangGraph, OPA, Cedar, NeMo Guardrails"
+    : "Maqam, AI agent governance, exact approval, tool gateway, execution receipts, TypeScript";
   const metadata = [
     '  <meta name="theme-color" content="#050908">',
     '  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">',
     '  <meta name="author" content="Ajnas N B">',
     '  <meta name="application-name" content="Maqam">',
-    '  <meta name="keywords" content="Maqam, AI agent governance, exact approval, tool gateway, execution receipts, TypeScript">',
+    `  <meta name="keywords" content="${keywords}">`,
     `  <meta property="og:type" content="${article ? "article" : "website"}">`,
     '  <meta property="og:locale" content="en_US">',
     '  <meta property="og:site_name" content="Maqam">',
@@ -287,6 +390,8 @@ for (const file of await walk(publicRoot)) {
   );
   html = ensurePaperNavigation(html, "desktop-nav");
   html = ensurePaperNavigation(html, "mobile-nav");
+  html = ensureAlternativesNavigation(html, "desktop-nav", route);
+  html = ensureAlternativesNavigation(html, "mobile-nav", route);
   await writeFile(file, html.replace(/\n{3,}/g, "\n\n"), "utf8");
 }
 
