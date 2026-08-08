@@ -11,3 +11,4 @@ npm-debug.log*
 Thumbs.db
 .impeccable/
 demo/yc-dashboard/.runs/
+tmp/pdfs/
