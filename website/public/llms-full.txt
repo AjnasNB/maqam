@@ -34,4 +34,3 @@ Current public package: maqam 0.3.3 on npm. Runtime support: Node.js 22, 24, and
 ## Evidence and claims
 
 Maqam's project-defined MGES measurements are regression evidence for the published implementation. They are not a certification, a universal security guarantee, a competitor ranking, or a production-capacity benchmark. Paper, benchmark, and release pages preserve the exact artifact identity and limitations.
-
