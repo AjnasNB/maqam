@@ -1,0 +1,35 @@
+{
+  "title": "Maqam: Exact-Input Governance for Registered AI-Agent Actions",
+  "upload_type": "publication",
+  "publication_type": "report",
+  "description": "Implementation-backed technical report for Maqam 0.3.3. It documents policy-before-dispatch, exact run/tool/input approval, one-use consumption, execution receipts, evidence links, adapters, MGES evaluation scope, deployment responsibilities, and explicit limitations. The report has not undergone independent peer review, formal verification, penetration testing, or independent security certification.",
+  "creators": [
+    {
+      "name": "N B, Ajnas"
+    }
+  ],
+  "version": "1.0",
+  "publication_date": "2026-08-08",
+  "keywords": [
+    "AI agent governance",
+    "exact-input approval",
+    "tool gateway",
+    "execution receipts",
+    "evidence provenance",
+    "TypeScript",
+    "MGES"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/AjnasNB/maqam/tree/v0.3.3",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://www.npmjs.com/package/maqam/v/0.3.3",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "notes": "Draft deposit metadata. Before publication, the author must choose the manuscript license and access right, confirm author identity metadata, and review the final reserved DOI."
+}

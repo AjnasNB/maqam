@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use Maqam, cite the software release and the technical paper."
+title: "Maqam"
+type: software
+authors:
+  - family-names: "N B"
+    given-names: "Ajnas"
+    alias: "AjnasNB"
+version: 0.3.3
+date-released: 2026-07-23
+license: MIT
+repository-code: "https://github.com/AjnasNB/maqam"
+url: "https://maqamagent.com"
+preferred-citation:
+  type: report
+  title: "Maqam: Exact-Input Governance for Registered AI-Agent Actions"
+  authors:
+    - family-names: "N B"
+      given-names: "Ajnas"
+      alias: "AjnasNB"
+  version: "1.0"
+  year: 2026
+  url: "https://maqamagent.com/paper/"

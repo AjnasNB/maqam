@@ -16,7 +16,9 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 **Current stable release:** [`maqam@0.3.3`](https://www.npmjs.com/package/maqam/v/0.3.3). It carries the full 0.3 governance surface with an image-free npm README and current package metadata. Verify the immutable artifact with `npm view maqam@0.3.3 version gitHead dist.integrity`.
 
-[Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
+[Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Technical white paper](https://maqamagent.com/paper/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
+
+The [Maqam technical white paper](https://maqamagent.com/paper/) documents the 0.3.3 architecture, exact-input approval protocol, adapters, verification evidence, MGES scope, and deployment limits. It is anchored to immutable tag [`v0.3.3`](https://github.com/AjnasNB/maqam/tree/v0.3.3) at commit `f43c2493084f8a6c8c755a50a3d9feb38d72ebcc`; it does not claim independent peer review, certification, or a new 0.3.3 benchmark result.
 
 ## Agent superpowers, governed by you
 
