@@ -414,6 +414,24 @@ else {
   if (!llmsLines.has("- Technical white paper: https://maqamagent.com/paper/")) failures.push("llms.txt must link the technical paper");
 }
 
+const llmsFullPath = path.join(publicRoot, "llms-full.txt");
+if (!await exists(llmsFullPath)) failures.push("missing llms-full.txt");
+else {
+  const llmsFull = await readFile(llmsFullPath, "utf8");
+  if (!llmsFull.startsWith("# Maqam - complete public documentation index\n")) failures.push("llms-full.txt must identify the complete Maqam index");
+  for (const requiredUrl of [
+    "https://maqamagent.com/docs/",
+    "https://maqamagent.com/docs/security/",
+    "https://maqamagent.com/docs/benchmark/",
+    "https://maqamagent.com/paper/",
+    "https://github.com/AjnasNB/maqam",
+    "https://www.npmjs.com/package/maqam"
+  ]) {
+    if (!llmsFull.includes(requiredUrl)) failures.push(`llms-full.txt must include ${requiredUrl}`);
+  }
+  if (!llmsFull.includes("not a certification")) failures.push("llms-full.txt must preserve the evidence claim boundary");
+}
+
 const searchIndexPath = path.join(publicRoot, "search.json");
 if (!await exists(searchIndexPath)) failures.push("missing search.json");
 else {

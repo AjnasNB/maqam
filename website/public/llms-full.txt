@@ -1,0 +1,37 @@
+# Maqam - complete public documentation index
+
+Maqam is an open-source enterprise AI agent governance layer for TypeScript. It evaluates policy before registered tool execution, binds approvals to exact canonical input, consumes approvals once by default, rejects replay, and records evidence-linked execution receipts.
+
+Current public package: maqam 0.3.3 on npm. Runtime support: Node.js 22, 24, and 26. The current software license is MIT. The technical white paper is a separate CC BY 4.0 publication.
+
+## Authority boundary
+
+- Maqam governs only operations deliberately routed through a registered Maqam boundary.
+- It does not intercept direct SDK, shell, browser, MCP, network, provider, or operating-system calls.
+- It does not replace identity, sandboxing, browser isolation, durable workflow storage, or service-specific authorization.
+- Exact approval is bound to the run, tool, and canonical input hash; altered input and replay are rejected.
+
+## Public documentation
+
+- Product overview: https://maqamagent.com/
+- Quickstart and API: https://maqamagent.com/docs/
+- Governed sources: https://maqamagent.com/docs/sources/
+- Governed browser actions: https://maqamagent.com/docs/browser/
+- ProductLoop Workbench: https://maqamagent.com/docs/workbench/
+- ProductLoop package atlas: https://maqamagent.com/docs/productloop/
+- Integrations: https://maqamagent.com/docs/integrations/
+- Security boundary: https://maqamagent.com/docs/security/
+- Benchmark method and limitations: https://maqamagent.com/docs/benchmark/
+- Product comparison and fit: https://maqamagent.com/why/
+- Technical white paper: https://maqamagent.com/paper/
+- Release 0.3.3: https://maqamagent.com/releases/v0.3.3/
+- Release history: https://maqamagent.com/releases/
+- Roadmap: https://maqamagent.com/roadmap/
+- Community: https://maqamagent.com/community/
+- Source code: https://github.com/AjnasNB/maqam
+- npm package: https://www.npmjs.com/package/maqam
+
+## Evidence and claims
+
+Maqam's project-defined MGES measurements are regression evidence for the published implementation. They are not a certification, a universal security guarantee, a competitor ranking, or a production-capacity benchmark. Paper, benchmark, and release pages preserve the exact artifact identity and limitations.
+
