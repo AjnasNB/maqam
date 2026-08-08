@@ -32,6 +32,7 @@ Primary pages:
 - Home: https://maqamagent.com/
 - Quickstart and API: https://maqamagent.com/docs/
 - AI agent governance alternatives: https://maqamagent.com/alternatives/
+- Open-source governed-agent toolkit: https://maqamagent.com/articles/open-source-governed-agent-toolkit/
 - Product fit and boundary overview: https://maqamagent.com/why/
 - Governed sources: https://maqamagent.com/docs/sources/
 - Governed browser actions: https://maqamagent.com/docs/browser/
@@ -45,3 +46,10 @@ Primary pages:
 - Current release: https://maqamagent.com/releases/v0.3.3/
 - Source code: https://github.com/AjnasNB/maqam
 - npm package: https://www.npmjs.com/package/maqam
+
+Governed-agent toolkit boundary:
+
+- Qarinah, Maqam, Cockroach Browser, and Cockroach Crawler are separate open-source projects by Ajnas N B.
+- Cockroach Browser uses Playwright and Chromium. Cockroach Crawler discloses Trafilatura as its optional quality dependency.
+- Playwright, Puppeteer, Browser Use, Stagehand, Trafilatura, Firecrawl, Docling, LangGraph, and OpenAI Agents SDK are third-party projects maintained by their own organizations or communities.
+- The toolkit article is a composition guide, not a ranking, affiliation claim, matched benchmark, or endorsement.
