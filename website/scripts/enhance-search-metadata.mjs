@@ -9,6 +9,7 @@ const repository = "https://github.com/AjnasNB/maqam";
 const npmPackage = "https://www.npmjs.com/package/maqam";
 const defaultImage = `${siteUrl}/assets/maqam-exact-gate-3d.png`;
 const modifiedDate = "2026-08-08";
+const toolkitArticleDate = "2026-08-09";
 const author = { "@type": "Person", name: "Ajnas N B", url: "https://github.com/AjnasNB" };
 const publisher = { "@type": "Organization", name: "Maqam", url: siteUrl };
 
@@ -92,6 +93,7 @@ function breadcrumbFor(route) {
   const labels = new Map([
     ["articles", "Articles"], ["benchmarking-governance", "Benchmarking governance"],
     ["exact-agent-approvals", "Exact agent approvals"], ["community", "Community"],
+    ["open-source-governed-agent-toolkit", "Open-source governed-agent toolkit"],
     ["docs", "Documentation"], ["benchmark", "Benchmark"], ["browser", "Browser"],
     ["integrations", "Integrations"], ["productloop", "ProductLoop OS"],
     ["security", "Security"], ["sources", "Sources"], ["workbench", "Workbench"],
@@ -286,6 +288,99 @@ function jsonLdFor({ canonical, description, route, title }) {
     };
   }
 
+  if (route === "/articles/open-source-governed-agent-toolkit/") {
+    const toolkit = [
+      ["Qarinah", "https://qarinah.io/", "Project memory and context"],
+      ["Maqam", "https://maqamagent.com/", "Registered action governance"],
+      ["Cockroach Browser", "https://cockroachbrowser.com/", "Authorized browser runtime"],
+      ["Cockroach Crawler", "https://cockroachcrawler.com/", "Governed web acquisition"],
+      ["Playwright", "https://playwright.dev/docs/intro", "Browser automation primitive"],
+      ["Puppeteer", "https://pptr.dev/guides/what-is-puppeteer", "Browser automation primitive"],
+      ["Browser Use", "https://github.com/browser-use/browser-use", "Agentic browser framework"],
+      ["Stagehand", "https://docs.stagehand.dev/v3/first-steps/introduction", "Agentic browser framework"],
+      ["Trafilatura", "https://trafilatura.readthedocs.io/en/stable/index.html", "Web extraction library"],
+      ["Firecrawl", "https://docs.firecrawl.dev/introduction", "Web data platform"],
+      ["Docling", "https://docling-project.github.io/docling/", "Document conversion toolkit"],
+      ["LangGraph", "https://docs.langchain.com/oss/javascript/langgraph/overview", "Agent and workflow runtime"],
+      ["OpenAI Agents SDK", "https://openai.github.io/openai-agents-js/", "Agent runtime"]
+    ];
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Article",
+          "@id": `${canonical}#article`,
+          headline: title,
+          description,
+          url: canonical,
+          mainEntityOfPage: canonical,
+          datePublished: toolkitArticleDate,
+          dateModified: toolkitArticleDate,
+          author,
+          publisher,
+          inLanguage: "en",
+          about: { "@id": `${canonical}#toolkit-map` }
+        },
+        {
+          "@type": "ItemList",
+          "@id": `${canonical}#toolkit-map`,
+          name: "Open-source governed-agent toolkit and established adjacent tools",
+          itemListOrder: "https://schema.org/ItemListUnordered",
+          numberOfItems: toolkit.length,
+          itemListElement: toolkit.map(([name, url, category], index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            item: {
+              "@type": "SoftwareApplication",
+              name,
+              url,
+              applicationCategory: category
+            }
+          }))
+        },
+        {
+          "@type": "FAQPage",
+          "@id": `${canonical}#faq`,
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "Is this one bundled agent platform?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "No. Qarinah, Maqam, Cockroach Browser, and Cockroach Crawler are separate open-source projects. The other named tools are third-party primitives or integration choices."
+              }
+            },
+            {
+              "@type": "Question",
+              name: "Does Cockroach Browser replace Playwright?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "No. Cockroach Browser uses Playwright and Chromium. It adds an explicit session-authority, evidence, audit, and human-handoff boundary for agent use."
+              }
+            },
+            {
+              "@type": "Question",
+              name: "Does Maqam govern every action an agent can take?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "No. Maqam governs registered actions deliberately routed through its gateway. Calls that bypass that boundary remain outside its control."
+              }
+            },
+            {
+              "@type": "Question",
+              name: "Are the established tools products by Ajnas N B?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "No. Playwright, Puppeteer, Trafilatura, Firecrawl, Browser Use, Stagehand, LangGraph, OpenAI Agents SDK, and Docling are third-party projects maintained by their own organizations or communities."
+              }
+            }
+          ]
+        },
+        breadcrumbFor(route)
+      ]
+    };
+  }
+
   const article = route.startsWith("/articles/") || route.startsWith("/releases/") || route.startsWith("/docs/") || route === "/docs/";
   return {
     "@context": "https://schema.org",
@@ -348,7 +443,9 @@ for (const file of await walk(publicRoot)) {
 
   const keywords = route === "/alternatives/"
     ? "Maqam alternatives, AI agent governance comparison, TypeScript agent governance, OpenAI Agents SDK, LangGraph, OPA, Cedar, NeMo Guardrails"
-    : "Maqam, AI agent governance, exact approval, tool gateway, execution receipts, TypeScript";
+    : route === "/articles/open-source-governed-agent-toolkit/"
+      ? "open-source governed AI agents, Qarinah, Maqam, Cockroach Browser, Cockroach Crawler, Playwright, LangGraph, agent governance toolkit"
+      : "Maqam, AI agent governance, exact approval, tool gateway, execution receipts, TypeScript";
   const metadata = [
     '  <meta name="theme-color" content="#050908">',
     '  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">',

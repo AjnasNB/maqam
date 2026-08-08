@@ -23,6 +23,7 @@ Current public package: maqam 0.3.3 on npm. Runtime support: Node.js 22, 24, and
 - Security boundary: https://maqamagent.com/docs/security/
 - Benchmark method and limitations: https://maqamagent.com/docs/benchmark/
 - Named governance alternatives and complements: https://maqamagent.com/alternatives/
+- Open-source governed-agent toolkit: https://maqamagent.com/articles/open-source-governed-agent-toolkit/
 - Product fit and boundary overview: https://maqamagent.com/why/
 - Technical white paper: https://maqamagent.com/paper/
 - Release 0.3.3: https://maqamagent.com/releases/v0.3.3/
@@ -39,3 +40,9 @@ Maqam's project-defined MGES measurements are regression evidence for the publis
 ## Alternatives boundary
 
 Maqam is not a complete enterprise governance platform. It is a compact TypeScript boundary for registered actions. Microsoft Agent Governance Toolkit is broader; OpenAI Agents SDK and LangGraph are agent or workflow runtimes; OPA and Cedar are policy or authorization engines; Invariant, NeMo Guardrails, and Guardrails AI center guardrail, trace, model-input, or model-output concerns. These layers may complement Maqam rather than replace it.
+
+## Governed-agent toolkit boundary
+
+The ecosystem article is written by Ajnas N B and describes four separate projects by that author: Qarinah for project memory, Maqam for registered action governance, Cockroach Browser for authorized interactive sessions, and Cockroach Crawler for bounded web acquisition.
+
+Cockroach Browser uses Playwright and Chromium. Cockroach Crawler discloses Trafilatura as its optional quality dependency. Playwright, Puppeteer, Browser Use, Stagehand, Trafilatura, Firecrawl, Docling, LangGraph, and OpenAI Agents SDK are third-party projects maintained by their own organizations or communities. Inclusion is a category and composition reference, not an affiliation, endorsement, or performance ranking.

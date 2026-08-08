@@ -26,6 +26,7 @@ const productVisualDimensions = new Map([
 const requiredProductVisuals = new Map([
   ["index.html", ["/assets/maqam-exact-gate-3d.png", "/assets/productloop-modular-hub-3d.png", "/assets/evidence-metrology-3d.png"]],
   [path.join("alternatives", "index.html"), []],
+  [path.join("articles", "open-source-governed-agent-toolkit", "index.html"), []],
   [path.join("why", "index.html"), ["/assets/maqam-exact-gate-3d.png"]],
   [path.join("community", "index.html"), ["/assets/community-workbench-v2.png"]],
   [path.join("roadmap", "index.html"), ["/assets/evidence-metrology-3d.png"]],
@@ -185,6 +186,8 @@ for (const file of htmlFiles) {
     requireMatch(/835[\s\S]{0,200}1,146[\s\S]{0,200}349/i, "homepage must show the verified package download counts");
     requireMatch(/not unique people, active users, customers, or revenue/i, "homepage must label registry downloads accurately");
     requireMatch(/Built on the open-source stack/i, "homepage must identify the connected open-source stack");
+    requireMatch(/href="\/articles\/open-source-governed-agent-toolkit\/"/i, "homepage must link the governed-agent toolkit article");
+    requireMatch(/Cockroach Browser supplies authorized interactive sessions/i, "homepage open-source stack must include Cockroach Browser");
     requireMatch(/href="https:\/\/cockroachcrawler\.com\/"[\s\S]{0,300}Bounded web evidence/i, "homepage must link Cockroach Crawler to bounded web evidence");
     requireMatch(/href="https:\/\/qarinah\.io\/"[\s\S]{0,300}Evidence-linked project memory/i, "homepage must link Qarinah to evidence-linked project memory");
     requireMatch(/href="https:\/\/github\.com\/AjnasNB\/maqam"[\s\S]{0,300}Policy, approvals, execution, and receipts/i, "homepage must link the Maqam source to its control-plane responsibilities");
@@ -221,6 +224,41 @@ for (const file of htmlFiles) {
     requireMatch(/reviewed on 08 August 2026 using the official project documentation/i, "alternatives page must state its source method and review date");
     requireMatch(/Calls that bypass a registered Maqam gateway remain outside its control/i, "alternatives page must state the bypass boundary");
     requireMatch(/Does this page prove Maqam is better[\s\S]{0,300}No\./i, "alternatives page must reject a universal superiority claim");
+  }
+
+  if (label === path.join("articles", "open-source-governed-agent-toolkit", "index.html")) {
+    requireMatch(/"@type":"Article"/i, "toolkit article must publish Article JSON-LD");
+    requireMatch(/"@type":"ItemList"/i, "toolkit article must publish an ItemList");
+    requireMatch(/"numberOfItems":13/i, "toolkit article must list four authored projects and nine established tools");
+    requireMatch(/"@type":"FAQPage"/i, "toolkit article must publish visible direct answers");
+    requireMatch(/"@type":"BreadcrumbList"/i, "toolkit article must publish breadcrumb structured data");
+    requireMatch(/A governed agent is a stack, not one package/i, "toolkit article must state its composition thesis");
+    requireMatch(/Author[\s\S]{0,120}Ajnas N B/i, "toolkit article must disclose Ajnas N B as author");
+    requireMatch(/Qarinah, Maqam, Cockroach Browser, and Cockroach Crawler are projects by Ajnas N B/i, "toolkit article must distinguish the authored project family");
+    requireMatch(/Cockroach Browser uses Playwright and Chromium/i, "toolkit article must disclose the Playwright relationship");
+    requireMatch(/optional quality surface uses Trafilatura as a disclosed dependency/i, "toolkit article must disclose the Trafilatura relationship");
+    for (const requiredTool of [
+      "Qarinah",
+      "Maqam",
+      "Cockroach Browser",
+      "Cockroach Crawler",
+      "Playwright",
+      "Puppeteer",
+      "Browser Use",
+      "Stagehand",
+      "Trafilatura",
+      "Firecrawl",
+      "Docling",
+      "LangGraph",
+      "OpenAI Agents SDK"
+    ]) {
+      requireMatch(new RegExp(requiredTool.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), `toolkit article must cover ${requiredTool}`);
+    }
+    requireMatch(/This page is not a matched performance benchmark, security certification, or exhaustive product directory/i, "toolkit article must label its evidence boundary");
+    const superiorityCopy = source.replace(/Does this page identify a universal winner[\s\S]{0,260}?<\/article>/i, "");
+    if (/(?:Qarinah|Maqam|Cockroach Browser|Cockroach Crawler) (?:is|are) (?:the )?(?:best|first|only)|outperforms? every|universal winner/iu.test(superiorityCopy)) {
+      failures.push(`${label}: toolkit article contains an unsupported superiority claim`);
+    }
   }
 
   if (label === path.join("docs", "benchmark", "index.html")) {
@@ -434,7 +472,9 @@ else {
   const llmsLines = new Set(llms.split(/\r?\n/u).map((line) => line.trim()));
   if (!llms.startsWith("# Maqam\n\nMaqam is an open-source enterprise AI agent governance layer for TypeScript.")) failures.push("llms.txt must define Maqam plainly");
   if (!llmsLines.has("- AI agent governance alternatives: https://maqamagent.com/alternatives/")) failures.push("llms.txt must link the alternatives page");
+  if (!llmsLines.has("- Open-source governed-agent toolkit: https://maqamagent.com/articles/open-source-governed-agent-toolkit/")) failures.push("llms.txt must link the governed-agent toolkit article");
   if (!llmsLines.has("- Technical white paper: https://maqamagent.com/paper/")) failures.push("llms.txt must link the technical paper");
+  if (!llms.includes("Cockroach Browser uses Playwright and Chromium")) failures.push("llms.txt must disclose the Playwright relationship");
 }
 
 const llmsFullPath = path.join(publicRoot, "llms-full.txt");
@@ -446,6 +486,7 @@ else {
     "https://maqamagent.com/docs/",
     "https://maqamagent.com/docs/security/",
     "https://maqamagent.com/docs/benchmark/",
+    "https://maqamagent.com/articles/open-source-governed-agent-toolkit/",
     "https://maqamagent.com/paper/",
     "https://github.com/AjnasNB/maqam",
     "https://www.npmjs.com/package/maqam"
@@ -462,6 +503,7 @@ else {
   if (searchIndex?.software?.version !== "0.3.3") failures.push("search.json must identify Maqam 0.3.3");
   if (!searchIndex?.pages?.some((page) => page.url === "https://maqamagent.com/paper/")) failures.push("search.json must include the technical paper");
   if (!searchIndex?.pages?.some((page) => page.url === "https://maqamagent.com/alternatives/")) failures.push("search.json must include the alternatives guide");
+  if (!searchIndex?.pages?.some((page) => page.url === "https://maqamagent.com/articles/open-source-governed-agent-toolkit/")) failures.push("search.json must include the governed-agent toolkit article");
 }
 
 const sitemap = await readFile(path.join(publicRoot, "sitemap.xml"), "utf8");
@@ -474,6 +516,7 @@ if (!sitemapUrls || sitemapUrls !== sitemapLastModified) failures.push("every si
 if (!sitemapLocations.has("https://maqamagent.com/releases/v0.3.3/")) failures.push("sitemap must include the current 0.3.3 release");
 if (!sitemapLocations.has("https://maqamagent.com/paper/")) failures.push("sitemap must include the technical paper");
 if (!sitemapLocations.has("https://maqamagent.com/alternatives/")) failures.push("sitemap must include the alternatives guide");
+if (!sitemapLocations.has("https://maqamagent.com/articles/open-source-governed-agent-toolkit/")) failures.push("sitemap must include the governed-agent toolkit article");
 
 assert.deepEqual(parseByteRange("bytes=2-5", 10), { offset: 2, length: 4, end: 5 });
 assert.deepEqual(parseByteRange("bytes=7-", 10), { offset: 7, length: 3, end: 9 });

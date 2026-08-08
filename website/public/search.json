@@ -1,6 +1,6 @@
 {
   "schema": "maqam.search-index/v1",
-  "updated": "2026-08-08",
+  "updated": "2026-08-09",
   "language": "en",
   "software": {
     "name": "Maqam",
@@ -20,6 +20,7 @@
     {"title": "MGES methodology", "url": "https://maqamagent.com/docs/benchmark/", "intent": "conformance and local-call measurement scope"},
     {"title": "Why Maqam", "url": "https://maqamagent.com/why/", "intent": "product fit, alternatives, and limitations"},
     {"title": "Maqam alternatives", "url": "https://maqamagent.com/alternatives/", "intent": "compare AI agent governance toolkits, agent runtimes, policy engines, and guardrail layers by product job"},
+    {"title": "Open-source governed-agent toolkit", "url": "https://maqamagent.com/articles/open-source-governed-agent-toolkit/", "intent": "compose Qarinah, Maqam, Cockroach Browser, and Cockroach Crawler with established agent, browser, web-data, and document tools"},
     {"title": "Maqam 0.3.3 release", "url": "https://maqamagent.com/releases/v0.3.3/", "intent": "artifact identity and release verification"}
   ],
   "boundaries": [
