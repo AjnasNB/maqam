@@ -16,7 +16,7 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 **Current stable release:** [`maqam@0.3.3`](https://www.npmjs.com/package/maqam/v/0.3.3). It carries the full 0.3 governance surface with an image-free npm README and current package metadata. Verify the immutable artifact with `npm view maqam@0.3.3 version gitHead dist.integrity`.
 
-[Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Technical white paper](https://maqamagent.com/paper/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
+[Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Technical white paper](https://maqamagent.com/paper/) · [Alternatives](https://maqamagent.com/alternatives/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
 
 The [Maqam technical white paper](https://maqamagent.com/paper/) documents the 0.3.3 architecture, exact-input approval protocol, adapters, verification evidence, MGES scope, and deployment limits. It is anchored to immutable tag [`v0.3.3`](https://github.com/AjnasNB/maqam/tree/v0.3.3) at commit `f43c2493084f8a6c8c755a50a3d9feb38d72ebcc`; it does not claim independent peer review, certification, or a new 0.3.3 benchmark result.
 
@@ -64,7 +64,7 @@ The exact-approval video is rendered from JSON emitted by the real `maqam demo a
 |---|---|
 | [Complete feature inventory](https://github.com/AjnasNB/maqam/blob/main/docs/FEATURES.md) | Every public runtime, policy, approval, evidence, adapter, browser, research, crawler, server, release, verification, and security capability, plus explicit non-goals |
 | [Five-minute quickstart](https://github.com/AjnasNB/maqam/blob/main/docs/quickstart.md) and [full usage guide](https://github.com/AjnasNB/maqam/blob/main/docs/usage.md) | Local proof, installation, APIs, cleanup, and deployment boundaries |
-| [Why Maqam](https://maqamagent.com/why/) and [detailed comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md) | Product fit, alternatives, differences, limitations, sources, and licenses |
+| [Maqam alternatives](https://maqamagent.com/alternatives/), [Why Maqam](https://maqamagent.com/why/), and [detailed comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md) | Product fit, alternatives, differences, limitations, sources, and licenses |
 | [ProductLoop package atlas](https://maqamagent.com/docs/productloop/) | Package-by-package roles, versions, examples, and Maqam relationship |
 | [ProductLoop Workbench guide](https://maqamagent.com/docs/workbench/) | Local dashboard, SQLite run ledger, exact review records, evidence and memory links, proof bundles, security boundary, and the separation between the public community package and private hosted services |
 | [Integration guide](https://maqamagent.com/docs/integrations/) and [Google ADK / Microsoft Agent 365 boundary](https://github.com/AjnasNB/maqam/blob/main/docs/integrations-google-adk-agent365.md) | Host adapters, prerequisites, copy-paste templates, and bypass warnings |
@@ -131,7 +131,7 @@ Use Maqam when that enforcement path matters more than adopting a larger platfor
 | Mature general policy-as-code | [Open Policy Agent](https://github.com/open-policy-agent/opa) | Use OPA as a decision engine while Maqam supplies the agent-specific enforcement and approval lifecycle. |
 | Browser automation or crawler operations | [Crawl4AI](https://github.com/unclecode/crawl4ai), [Firecrawl](https://github.com/firecrawl/firecrawl), or [Crawlee](https://github.com/apify/crawlee) | Put a separately installed connector behind Maqam; its built-in crawler remains deliberately smaller and HTTP-only. |
 
-See the [detailed, dated comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md), including limitations and source/license notes, before choosing a stack.
+See the [official-source alternatives guide](https://maqamagent.com/alternatives/) and the [detailed, dated comparison](https://github.com/AjnasNB/maqam/blob/main/docs/comparison.md), including limitations and source/license notes, before choosing a stack.
 
 ## What Ships
 
