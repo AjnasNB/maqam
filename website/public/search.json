@@ -1,0 +1,29 @@
+{
+  "schema": "maqam.search-index/v1",
+  "updated": "2026-08-08",
+  "language": "en",
+  "software": {
+    "name": "Maqam",
+    "version": "0.3.3",
+    "description": "Open-source TypeScript governance for registered AI-agent actions with policy-before-dispatch, exact-input approval, one-use consumption, and execution receipts.",
+    "repository": "https://github.com/AjnasNB/maqam",
+    "package": "https://www.npmjs.com/package/maqam/v/0.3.3"
+  },
+  "pages": [
+    {"title": "Maqam", "url": "https://maqamagent.com/", "intent": "AI agent governance overview"},
+    {"title": "Maqam technical white paper", "url": "https://maqamagent.com/paper/", "intent": "architecture, exact-input approval, evaluation, and limitations"},
+    {"title": "Maqam documentation", "url": "https://maqamagent.com/docs/", "intent": "installation and quickstart"},
+    {"title": "Governed research sources", "url": "https://maqamagent.com/docs/sources/", "intent": "source routing and research adapters"},
+    {"title": "Governed browser actions", "url": "https://maqamagent.com/docs/browser/", "intent": "structural browser contracts"},
+    {"title": "Maqam integrations", "url": "https://maqamagent.com/docs/integrations/", "intent": "function, object, CLI, SDK, HTTP, and MCP-style adapters"},
+    {"title": "Maqam security boundary", "url": "https://maqamagent.com/docs/security/", "intent": "threat boundaries and host responsibilities"},
+    {"title": "MGES methodology", "url": "https://maqamagent.com/docs/benchmark/", "intent": "conformance and local-call measurement scope"},
+    {"title": "Why Maqam", "url": "https://maqamagent.com/why/", "intent": "product fit, alternatives, and limitations"},
+    {"title": "Maqam 0.3.3 release", "url": "https://maqamagent.com/releases/v0.3.3/", "intent": "artifact identity and release verification"}
+  ],
+  "boundaries": [
+    "Only operations routed through a registered Maqam boundary are governed.",
+    "Maqam does not replace identity, operating-system isolation, a browser engine, durable storage, or service-specific authorization.",
+    "MGES is project-defined regression evidence, not a certification, competitor ranking, or production capacity result."
+  ]
+}

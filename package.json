@@ -33,8 +33,15 @@
     "docs/comparison.md",
     "docs/FEATURES.md",
     "docs/benchmarking.md",
+    "docs/brand-and-domain-protection.md",
+    "docs/whitepaper.md",
+    "docs/Maqam-Technical-White-Paper-v1.0.pdf",
+    "docs/Maqam-Technical-White-Paper-v1.0.sha256",
+    "docs/Maqam-Technical-White-Paper-v1.0.build.json",
+    "docs/Maqam-Technical-White-Paper-v1.0.publication.json",
     "docs/quickstart.md",
     "docs/why-maqam.md",
+    "TRADEMARKS.md",
     "docs/articles/exact-agent-approvals.md",
     "docs/articles/benchmarking-agent-governance.md",
     "docs/external-agents.md",
@@ -63,6 +70,7 @@
     "LICENSE_AUDIT.md",
     "src/",
     "README.md",
+    "CITATION.cff",
     "LICENSE"
   ],
   "scripts": {

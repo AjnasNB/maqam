@@ -11,7 +11,8 @@
     "audit:production": "npm audit --omit=dev"
   },
   "dependencies": {
-    "@google/adk": "1.4.0"
+    "@google/adk": "1.4.0",
+    "js-yaml": "file:compat/js-yaml-default-export"
   },
   "overrides": {
     "adm-zip": "0.6.0",
@@ -28,6 +29,7 @@
     "@opentelemetry/sdk-trace-base": "2.9.0",
     "@tootallnate/once": "3.0.1",
     "brace-expansion": "5.0.9",
+    "js-yaml": "$js-yaml",
     "sqlite3": "6.0.1",
     "tar": "7.5.22",
     "uuid": "14.0.1"

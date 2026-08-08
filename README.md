@@ -6,7 +6,7 @@
 
 **Give AI agents the power to act across real software. Keep the final authority.**
 
-Maqam is an open-source AI agent governance layer for TypeScript. Put a function, CLI worker, coding agent, crawler, browser connector, MCP-backed operation, or internal service behind one registered gateway. Maqam checks policy before dispatch, binds human approval to the exact input that will run, allows that approved call once, rejects altered input and replay, and leaves a verifiable receipt.
+Maqam is an open-source enterprise AI agent governance layer for TypeScript. Put a function, CLI worker, coding agent, crawler, browser connector, MCP-backed operation, or internal service behind one registered gateway. Maqam checks policy before dispatch, binds human approval to the exact input that will run, allows that approved call once, rejects altered input and replay, and leaves a verifiable receipt.
 
 Cockroach Crawler gives the stack bounded eyes on public sources. Qarinah gives it compact, evidence-linked memory. Maqam governs the hands that act. Only operations routed through a registered Maqam adapter are governed.
 
@@ -16,7 +16,9 @@ The crawler is not the product center; it is one built-in connector. Maqam gover
 
 **Current stable release:** [`maqam@0.3.3`](https://www.npmjs.com/package/maqam/v/0.3.3). It carries the full 0.3 governance surface with an image-free npm README and current package metadata. Verify the immutable artifact with `npm view maqam@0.3.3 version gitHead dist.integrity`.
 
-[Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
+[Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Technical white paper](https://maqamagent.com/paper/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
+
+The [Maqam technical white paper](https://maqamagent.com/paper/) documents the 0.3.3 architecture, exact-input approval protocol, adapters, verification evidence, MGES scope, and deployment limits. It is anchored to immutable tag [`v0.3.3`](https://github.com/AjnasNB/maqam/tree/v0.3.3) at commit `f43c2493084f8a6c8c755a50a3d9feb38d72ebcc`; it does not claim independent peer review, certification, or a new 0.3.3 benchmark result.
 
 ## Agent superpowers, governed by you
 
@@ -451,9 +453,9 @@ Before a new version is approved, the final clean commit must pass the complete 
 
 See the [0.3.3 release record](docs/release-0.3.3.md) for the patch boundary and verification commands. The [0.3.2](docs/release-0.3.2.md), [0.3.1](docs/release-0.3.1.md), [0.3.0](docs/release-0.3.0.md), and [0.2.4](https://github.com/AjnasNB/maqam/blob/main/docs/release-0.2.4-candidate.md) records remain historical evidence for their own artifacts.
 
-## License
+## License and brand
 
-MIT
+The source code is available under the [MIT License](LICENSE). The Maqam name, logo, official domains, package identity, and release channels are governed separately by the [brand policy](TRADEMARKS.md) and [domain-protection runbook](docs/brand-and-domain-protection.md). Open-source permission does not imply endorsement or permission to present a fork as an official Maqam release.
 
 ## Open Development
 

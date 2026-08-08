@@ -1,0 +1,12 @@
+{
+  "name": "maqam-js-yaml-default-export-compat",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ESM default-export compatibility wrapper for Google ADK over the maintained js-yaml line.",
+  "license": "MIT",
+  "type": "module",
+  "exports": "./index.mjs",
+  "dependencies": {
+    "js-yaml-upstream": "npm:js-yaml@5.2.3"
+  }
+}

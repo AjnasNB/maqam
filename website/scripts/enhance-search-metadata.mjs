@@ -8,6 +8,9 @@ const siteUrl = "https://maqamagent.com";
 const repository = "https://github.com/AjnasNB/maqam";
 const npmPackage = "https://www.npmjs.com/package/maqam";
 const defaultImage = `${siteUrl}/assets/maqam-exact-gate-3d.png`;
+const modifiedDate = "2026-08-08";
+const author = { "@type": "Person", name: "Ajnas N B", url: "https://github.com/AjnasNB" };
+const publisher = { "@type": "Organization", name: "Maqam", url: siteUrl };
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -39,6 +42,48 @@ function escapeAttribute(value) {
     .replaceAll(">", "&gt;");
 }
 
+function ensurePaperNavigation(html, className) {
+  const navigation = new RegExp(`(<nav\\s+class="${className}"[^>]*>)([\\s\\S]*?)(<\\/nav>)`, "i");
+  return html.replace(navigation, (whole, opening, content, closing) => {
+    if (/href="\/paper\/"/i.test(content)) return whole;
+    const link = '<a href="/paper/">Paper</a>';
+    if (/\s*<a href="\/releases\/v0\.3\.3\/">Release<\/a>/i.test(content)) {
+      content = content.replace(
+        /(\s*)(<a href="\/releases\/v0\.3\.3\/">Release<\/a>)/i,
+        `$1${link}$1$2`
+      );
+    } else {
+      content += `\n      ${link}`;
+    }
+    return opening + content + closing;
+  });
+}
+
+function breadcrumbFor(route) {
+  const labels = new Map([
+    ["articles", "Articles"], ["benchmarking-governance", "Benchmarking governance"],
+    ["exact-agent-approvals", "Exact agent approvals"], ["community", "Community"],
+    ["docs", "Documentation"], ["benchmark", "Benchmark"], ["browser", "Browser"],
+    ["integrations", "Integrations"], ["productloop", "ProductLoop OS"],
+    ["security", "Security"], ["sources", "Sources"], ["workbench", "Workbench"],
+    ["paper", "Technical paper"], ["releases", "Releases"], ["roadmap", "Roadmap"],
+    ["why", "Why Maqam"]
+  ]);
+  const parts = route.split("/").filter(Boolean);
+  const items = [{ "@type": "ListItem", position: 1, name: "Maqam", item: `${siteUrl}/` }];
+  let current = "";
+  for (const [index, part] of parts.entries()) {
+    current += `/${part}`;
+    items.push({
+      "@type": "ListItem",
+      position: index + 2,
+      name: labels.get(part) || part.replaceAll("-", " "),
+      item: `${siteUrl}${current}/`
+    });
+  }
+  return { "@type": "BreadcrumbList", itemListElement: items };
+}
+
 function jsonLdFor({ canonical, description, route, title }) {
   if (route === "/") {
     return {
@@ -49,7 +94,7 @@ function jsonLdFor({ canonical, description, route, title }) {
           name: "Maqam",
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Node.js 22, 24, or 26",
-          softwareVersion: "0.3.2",
+          softwareVersion: "0.3.3",
           license: "https://opensource.org/license/mit",
           codeRepository: repository,
           downloadUrl: npmPackage,
@@ -80,33 +125,93 @@ function jsonLdFor({ canonical, description, route, title }) {
           programmingLanguage: ["JavaScript", "TypeScript"],
           license: "https://opensource.org/license/mit",
           runtimePlatform: "Node.js 22, 24, or 26"
+        },
+        {
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "What is Maqam?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Maqam is an open-source TypeScript governance boundary for registered AI-agent tool calls. It evaluates policy before dispatch, can require approval for an exact input, and records execution receipts."
+              }
+            },
+            {
+              "@type": "Question",
+              name: "What does exact one-use approval mean?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Approval is bound to a run, tool name, and canonical input hash. Changed input is rejected, and the approval is consumed once by default so replay is rejected."
+              }
+            },
+            {
+              "@type": "Question",
+              name: "Does Maqam govern every action an AI agent can take?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "No. Maqam governs only operations deliberately routed through a registered Maqam boundary. Direct operating-system, network, provider, or unregistered calls remain outside its control."
+              }
+            }
+          ]
         }
       ]
     };
   }
 
-  if (route.startsWith("/articles/") || route.startsWith("/releases/")) {
+  if (route === "/paper/") {
     return {
       "@context": "https://schema.org",
-      "@type": "TechArticle",
-      headline: title,
-      description,
-      dateModified: "2026-07-23",
-      author: { "@type": "Person", name: "Ajnas N B" },
-      publisher: { "@type": "Organization", name: "Maqam", url: siteUrl },
-      mainEntityOfPage: canonical
+      "@graph": [
+        {
+          "@type": "ScholarlyArticle",
+          headline: "Maqam: Exact-Input Governance for Registered AI-Agent Actions",
+          description,
+          version: "1.0",
+          datePublished: modifiedDate,
+          dateModified: modifiedDate,
+          author,
+          publisher,
+          identifier: "https://doi.org/10.5281/zenodo.21851251",
+          sameAs: "https://doi.org/10.5281/zenodo.21851251",
+          license: "https://creativecommons.org/licenses/by/4.0/",
+          mainEntityOfPage: canonical,
+          url: canonical,
+          inLanguage: "en",
+          isBasedOn: "https://github.com/AjnasNB/maqam/tree/v0.3.3",
+          keywords: ["AI agent governance", "exact approval", "tool gateway", "execution receipts", "MGES"]
+        },
+        breadcrumbFor(route)
+      ]
     };
   }
 
+  const article = route.startsWith("/articles/") || route.startsWith("/releases/") || route.startsWith("/docs/") || route === "/docs/";
   return {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: title,
-    description,
-    url: canonical,
-    dateModified: "2026-07-23",
-    isPartOf: { "@type": "WebSite", name: "Maqam", url: siteUrl },
-    about: { "@type": "SoftwareApplication", name: "Maqam", url: siteUrl }
+    "@graph": [
+      article ? {
+        "@type": "TechArticle",
+        headline: title,
+        description,
+        dateModified: modifiedDate,
+        author,
+        publisher,
+        mainEntityOfPage: canonical,
+        inLanguage: "en",
+        about: { "@type": "SoftwareApplication", name: "Maqam", softwareVersion: "0.3.3", url: siteUrl }
+      } : {
+        "@type": "WebPage",
+        name: title,
+        description,
+        url: canonical,
+        dateModified: modifiedDate,
+        inLanguage: "en",
+        isPartOf: { "@type": "WebSite", name: "Maqam", url: siteUrl },
+        about: { "@type": "SoftwareApplication", name: "Maqam", softwareVersion: "0.3.3", url: siteUrl }
+      },
+      breadcrumbFor(route)
+    ]
   };
 }
 
@@ -128,17 +233,25 @@ for (const file of await walk(publicRoot)) {
   const schema = JSON.stringify(jsonLdFor({ canonical, description, route, title })).replaceAll("<", "\\u003c");
 
   html = html
+    .replace(/\s*<meta name="theme-color"[^>]*>\s*/gi, "\n")
     .replace(/\s*<meta name="robots"[^>]*>\s*/gi, "\n")
     .replace(/\s*<meta name="author"[^>]*>\s*/gi, "\n")
     .replace(/\s*<meta name="application-name"[^>]*>\s*/gi, "\n")
+    .replace(/\s*<meta name="keywords"[^>]*>\s*/gi, "\n")
     .replace(/\s*<meta property="og:[^"]+"[^>]*>\s*/gi, "\n")
     .replace(/\s*<meta name="twitter:[^"]+"[^>]*>\s*/gi, "\n")
+    .replace(/\s*<meta name="citation_[^"]+"[^>]*>\s*/gi, "\n")
+    .replace(/\s*<meta name="DC\.[^"]+"[^>]*>\s*/gi, "\n")
+    .replace(/\s*<link rel="alternate" hreflang="[^"]+"[^>]*>\s*/gi, "\n")
+    .replace(/\s*<link rel="search"[^>]*>\s*/gi, "\n")
     .replace(/\s*<script type="application\/ld\+json" data-search-metadata>[\s\S]*?<\/script>\s*/gi, "\n");
 
   const metadata = [
+    '  <meta name="theme-color" content="#050908">',
     '  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">',
     '  <meta name="author" content="Ajnas N B">',
     '  <meta name="application-name" content="Maqam">',
+    '  <meta name="keywords" content="Maqam, AI agent governance, exact approval, tool gateway, execution receipts, TypeScript">',
     `  <meta property="og:type" content="${article ? "article" : "website"}">`,
     '  <meta property="og:locale" content="en_US">',
     '  <meta property="og:site_name" content="Maqam">',
@@ -146,6 +259,7 @@ for (const file of await walk(publicRoot)) {
     `  <meta property="og:description" content="${escapeAttribute(description)}">`,
     `  <meta property="og:url" content="${escapeAttribute(canonical)}">`,
     `  <meta property="og:image" content="${defaultImage}">`,
+    '  <meta property="og:image:type" content="image/png">',
     '  <meta property="og:image:width" content="1586">',
     '  <meta property="og:image:height" content="992">',
     '  <meta property="og:image:alt" content="Maqam exact approval gate for governed AI agent actions">',
@@ -154,13 +268,25 @@ for (const file of await walk(publicRoot)) {
     `  <meta name="twitter:description" content="${escapeAttribute(description)}">`,
     `  <meta name="twitter:image" content="${defaultImage}">`,
     '  <meta name="twitter:image:alt" content="Maqam exact approval gate for governed AI agent actions">',
+    ...(route === "/paper/" ? [
+      '  <meta name="citation_title" content="Maqam: Exact-Input Governance for Registered AI-Agent Actions">',
+      '  <meta name="citation_author" content="Ajnas N B">',
+      '  <meta name="citation_publication_date" content="2026-08-08">',
+      '  <meta name="citation_doi" content="10.5281/zenodo.21851251">',
+      '  <meta name="citation_technical_report_institution" content="Maqam open-source project">',
+      '  <meta name="citation_pdf_url" content="https://maqamagent.com/paper/Maqam-Technical-White-Paper-v1.0.pdf">',
+      '  <meta name="DC.type" content="Text.TechnicalReport">',
+      '  <meta name="DC.language" content="en">'
+    ] : []),
     `  <script type="application/ld+json" data-search-metadata>${schema}</script>`
   ].join("\n");
 
   html = html.replace(
     /\s*<link rel="canonical" href="[^"]+">/i,
-    `\n${metadata}\n  <link rel="canonical" href="${escapeAttribute(canonical)}">`
+    `\n${metadata}\n  <link rel="canonical" href="${escapeAttribute(canonical)}">\n  <link rel="alternate" hreflang="en" href="${escapeAttribute(canonical)}">\n  <link rel="alternate" hreflang="x-default" href="${escapeAttribute(canonical)}">\n  <link rel="search" type="application/json" href="/search.json" title="Maqam content index">`
   );
+  html = ensurePaperNavigation(html, "desktop-nav");
+  html = ensurePaperNavigation(html, "mobile-nav");
   await writeFile(file, html.replace(/\n{3,}/g, "\n\n"), "utf8");
 }
 

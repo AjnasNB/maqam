@@ -1,0 +1,34 @@
+{
+  "schema": "maqam.whitepaper-publication/v1",
+  "paperVersion": "1.0",
+  "softwareVersion": "0.3.3",
+  "publishedAt": "2026-08-08T13:30:03Z",
+  "depositedCommit": "d1f785cf6e7928d5d0a16b1b8e81d00fcad71d32",
+  "record": {
+    "id": 21851251,
+    "url": "https://zenodo.org/records/21851251",
+    "doi": "10.5281/zenodo.21851251",
+    "conceptDoi": "10.5281/zenodo.21851250",
+    "resourceType": "publication/report",
+    "access": "open",
+    "license": "cc-by-4.0",
+    "language": "eng",
+    "creator": "N B, Ajnas"
+  },
+  "verification": {
+    "publicApi": "https://zenodo.org/api/records/21851251",
+    "doiHttpStatus": 200,
+    "conceptDoiHttpStatus": 200,
+    "filesRedownloaded": 7,
+    "allDownloadedBytesMatchLocalSha256": true
+  },
+  "files": {
+    "Maqam-Technical-White-Paper-v1.0.pdf": "800e10814f097347e0fde4986d0fd070bb2cddb674b9fcab969069013136c63d",
+    "Maqam-Technical-White-Paper-v1.0.sha256": "bf78718bbbd820cffe99839ecd5f286022ced80463d6e54777a8d71e8a89f753",
+    "Maqam-Technical-White-Paper-v1.0.build.json": "506aeb8a20fce8aa6d814dbf16785f790a22a579c7f7d5e26f05c0da87451199",
+    "whitepaper.md": "7411eae999e846ab3131fcc8169685d82367a2bfda3b182c2dfcd32508667a43",
+    "CITATION.cff": "3f2e2f26106e7be0f278e07712e1cb3cd1c7249aa3f31f035d4d91ee08544d94",
+    ".zenodo.json": "6d30e5734a792d260f3839207e608285bf3053cf25c595581b106808555ded76",
+    "build-whitepaper-pdf.py": "93c420d4844dfeb92b08af75da31f890b5e75b4da28e6059ddd383870d4e9926"
+  }
+}

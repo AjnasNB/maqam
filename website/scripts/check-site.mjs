@@ -85,6 +85,7 @@ const htmlFiles = files.filter((file) => file.endsWith(".html"));
 for (const file of htmlFiles) {
   const source = await readFile(file, "utf8");
   const label = path.relative(publicRoot, file);
+  if (/&mdash;|&#8212;|&#x2014;/i.test(source)) failures.push(`${label} contains an encoded em dash`);
   const requireMatch = (pattern, message) => {
     if (!pattern.test(source)) failures.push(`${label}: ${message}`);
   };
@@ -115,10 +116,16 @@ for (const file of htmlFiles) {
     requireMatch(/<meta\s+property="og:description"\s+content="[^"]+">/i, "missing Open Graph description");
     requireMatch(/<meta\s+property="og:url"\s+content="https:\/\/maqamagent\.com\/[^"]*">/i, "missing Open Graph URL");
     requireMatch(/<meta\s+property="og:image"\s+content="https:\/\/maqamagent\.com\/assets\/maqam-exact-gate-3d\.png">/i, "missing Open Graph image");
+    requireMatch(/<meta\s+property="og:image:type"\s+content="image\/png">/i, "missing Open Graph image type");
+    requireMatch(/<meta\s+property="og:image:alt"\s+content="[^"]+">/i, "missing Open Graph image alt text");
     requireMatch(/<meta\s+name="twitter:card"\s+content="summary_large_image">/i, "missing Twitter card");
     requireMatch(/<meta\s+name="twitter:title"\s+content="[^"]+">/i, "missing Twitter title");
     requireMatch(/<meta\s+name="twitter:description"\s+content="[^"]+">/i, "missing Twitter description");
     requireMatch(/<meta\s+name="twitter:image"\s+content="https:\/\/maqamagent\.com\/assets\/maqam-exact-gate-3d\.png">/i, "missing Twitter image");
+    requireMatch(/<meta\s+name="twitter:image:alt"\s+content="[^"]+">/i, "missing Twitter image alt text");
+    requireMatch(/<link\s+rel="alternate"\s+hreflang="en"\s+href="https:\/\/maqamagent\.com\/[^"]*">/i, "missing English hreflang");
+    requireMatch(/<link\s+rel="alternate"\s+hreflang="x-default"\s+href="https:\/\/maqamagent\.com\/[^"]*">/i, "missing x-default hreflang");
+    requireMatch(/<link\s+rel="search"\s+type="application\/json"\s+href="\/search\.json"/i, "missing machine-readable search index link");
     const jsonLdRecords = [...source.matchAll(/<script type="application\/ld\+json" data-search-metadata>([\s\S]*?)<\/script>/gi)];
     if (!jsonLdRecords.length) failures.push(`${label}: missing search JSON-LD`);
     for (const [, jsonLd] of jsonLdRecords) {
@@ -162,12 +169,14 @@ for (const file of htmlFiles) {
   }
 
   if (label === "index.html") {
+    requireMatch(/"softwareVersion":"0\.3\.3"/i, "homepage JSON-LD must identify Maqam 0.3.3");
+    requireMatch(/"@type":"FAQPage"/i, "homepage JSON-LD must include visible direct answers");
     requireMatch(/v0\.3\.3 is live/i, "homepage must identify 0.3.3 as the public release");
     requireMatch(/f43c2493084f8a6c8c755a50a3d9feb38d72ebcc/i, "homepage must identify the current registry source commit");
     requireMatch(/Trusted Publishing with provenance/i, "homepage must identify the completed release verification");
     requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.3/i, "homepage install command must retain a live-record verification reminder");
     requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
-    requireMatch(/Control what agents can access, remember, and do/i, "homepage must state the complete control-plane value proposition");
+    requireMatch(/Enterprise AI governance - at the execution boundary/i, "homepage must state the enterprise governance position");
     requireMatch(/2,330 downloads in npm's latest complete weekly window/i, "homepage must show the verified ecosystem download signal");
     requireMatch(/835[\s\S]{0,200}1,146[\s\S]{0,200}349/i, "homepage must show the verified package download counts");
     requireMatch(/not unique people, active users, customers, or revenue/i, "homepage must label registry downloads accurately");
@@ -179,6 +188,16 @@ for (const file of htmlFiles) {
     requireMatch(/Published 0\.3\.2 exact-main MGES evidence/i, "homepage must label the public 0.3.2 exact-main evidence");
     requireMatch(/Historical 0\.3\.1 measured-source MGES evidence/i, "homepage must retain and label the historical 0.3.1 measured-source evidence");
     requireMatch(/Previous public 0\.3\.0 MGES evidence/i, "homepage must retain and label the previous public 0.3.0 benchmark evidence");
+  }
+
+  if (label === path.join("paper", "index.html")) {
+    requireMatch(/"@type":"ScholarlyArticle"/i, "paper page must publish ScholarlyArticle JSON-LD");
+    requireMatch(/<meta\s+name="citation_title"\s+content="Maqam: Exact-Input Governance for Registered AI-Agent Actions">/i, "paper page must publish citation title metadata");
+    requireMatch(/<meta\s+name="citation_pdf_url"\s+content="https:\/\/maqamagent\.com\/paper\/Maqam-Technical-White-Paper-v1\.0\.pdf">/i, "paper page must publish citation PDF metadata");
+    requireMatch(/f43c2493084f8a6c8c755a50a3d9feb38d72ebcc/i, "paper page must identify the immutable implementation commit");
+    requireMatch(/does not claim a new MGES measurement/i, "paper page must preserve the 0.3.3 benchmark boundary");
+    requireMatch(/DOI 10\.5281\/zenodo\.21851251/i, "paper page must publish the archival DOI");
+    requireMatch(/CC BY 4\.0/i, "paper page must publish the manuscript license");
   }
 
   if (label === path.join("docs", "benchmark", "index.html")) {
@@ -389,15 +408,29 @@ const llmsPath = path.join(publicRoot, "llms.txt");
 if (!await exists(llmsPath)) failures.push("missing llms.txt");
 else {
   const llms = await readFile(llmsPath, "utf8");
-  if (!llms.includes("Maqam is an open-source AI agent governance layer for TypeScript.")) failures.push("llms.txt must define Maqam plainly");
-  if (!llms.includes("AI agent governance comparison: https://maqamagent.com/why/")) failures.push("llms.txt must link the comparison page");
+  const llmsLines = new Set(llms.split(/\r?\n/u).map((line) => line.trim()));
+  if (!llms.startsWith("# Maqam\n\nMaqam is an open-source enterprise AI agent governance layer for TypeScript.")) failures.push("llms.txt must define Maqam plainly");
+  if (!llmsLines.has("- AI agent governance comparison: https://maqamagent.com/why/")) failures.push("llms.txt must link the comparison page");
+  if (!llmsLines.has("- Technical white paper: https://maqamagent.com/paper/")) failures.push("llms.txt must link the technical paper");
+}
+
+const searchIndexPath = path.join(publicRoot, "search.json");
+if (!await exists(searchIndexPath)) failures.push("missing search.json");
+else {
+  const searchIndex = JSON.parse(await readFile(searchIndexPath, "utf8"));
+  if (searchIndex?.software?.version !== "0.3.3") failures.push("search.json must identify Maqam 0.3.3");
+  if (!searchIndex?.pages?.some((page) => page.url === "https://maqamagent.com/paper/")) failures.push("search.json must include the technical paper");
 }
 
 const sitemap = await readFile(path.join(publicRoot, "sitemap.xml"), "utf8");
 const sitemapUrls = (sitemap.match(/<url>/g) || []).length;
 const sitemapLastModified = (sitemap.match(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g) || []).length;
+const sitemapLocations = new Set(
+  [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/gu)].map(([, location]) => location.trim())
+);
 if (!sitemapUrls || sitemapUrls !== sitemapLastModified) failures.push("every sitemap URL must carry a reviewed lastmod date");
-if (!sitemap.includes("https://maqamagent.com/releases/v0.3.3/")) failures.push("sitemap must include the current 0.3.3 release");
+if (!sitemapLocations.has("https://maqamagent.com/releases/v0.3.3/")) failures.push("sitemap must include the current 0.3.3 release");
+if (!sitemapLocations.has("https://maqamagent.com/paper/")) failures.push("sitemap must include the technical paper");
 
 assert.deepEqual(parseByteRange("bytes=2-5", 10), { offset: 2, length: 4, end: 5 });
 assert.deepEqual(parseByteRange("bytes=7-", 10), { offset: 7, length: 3, end: 9 });
