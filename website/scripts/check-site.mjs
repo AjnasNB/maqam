@@ -406,9 +406,10 @@ const llmsPath = path.join(publicRoot, "llms.txt");
 if (!await exists(llmsPath)) failures.push("missing llms.txt");
 else {
   const llms = await readFile(llmsPath, "utf8");
-  if (!llms.includes("Maqam is an open-source AI agent governance layer for TypeScript.")) failures.push("llms.txt must define Maqam plainly");
-  if (!llms.includes("AI agent governance comparison: https://maqamagent.com/why/")) failures.push("llms.txt must link the comparison page");
-  if (!llms.includes("Technical white paper: https://maqamagent.com/paper/")) failures.push("llms.txt must link the technical paper");
+  const llmsLines = new Set(llms.split(/\r?\n/u).map((line) => line.trim()));
+  if (!llms.startsWith("# Maqam\n\nMaqam is an open-source AI agent governance layer for TypeScript.")) failures.push("llms.txt must define Maqam plainly");
+  if (!llmsLines.has("- AI agent governance comparison: https://maqamagent.com/why/")) failures.push("llms.txt must link the comparison page");
+  if (!llmsLines.has("- Technical white paper: https://maqamagent.com/paper/")) failures.push("llms.txt must link the technical paper");
 }
 
 const searchIndexPath = path.join(publicRoot, "search.json");
@@ -422,9 +423,12 @@ else {
 const sitemap = await readFile(path.join(publicRoot, "sitemap.xml"), "utf8");
 const sitemapUrls = (sitemap.match(/<url>/g) || []).length;
 const sitemapLastModified = (sitemap.match(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g) || []).length;
+const sitemapLocations = new Set(
+  [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/gu)].map(([, location]) => location.trim())
+);
 if (!sitemapUrls || sitemapUrls !== sitemapLastModified) failures.push("every sitemap URL must carry a reviewed lastmod date");
-if (!sitemap.includes("https://maqamagent.com/releases/v0.3.3/")) failures.push("sitemap must include the current 0.3.3 release");
-if (!sitemap.includes("https://maqamagent.com/paper/")) failures.push("sitemap must include the technical paper");
+if (!sitemapLocations.has("https://maqamagent.com/releases/v0.3.3/")) failures.push("sitemap must include the current 0.3.3 release");
+if (!sitemapLocations.has("https://maqamagent.com/paper/")) failures.push("sitemap must include the technical paper");
 
 assert.deepEqual(parseByteRange("bytes=2-5", 10), { offset: 2, length: 4, end: 5 });
 assert.deepEqual(parseByteRange("bytes=7-", 10), { offset: 7, length: 3, end: 9 });
