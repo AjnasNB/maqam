@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maqam technical white paper | Exact-input agent governance</title>
+  <meta name="description" content="Read the implementation-backed Maqam 0.3.3 technical white paper on policy-before-dispatch, exact-input approval, execution receipts, evidence links, MGES, and explicit limits.">
+  <meta name="theme-color" content="#050908">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="author" content="Ajnas N B">
+  <meta name="application-name" content="Maqam">
+  <meta name="keywords" content="Maqam, AI agent governance, exact approval, tool gateway, execution receipts, TypeScript">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Maqam">
+  <meta property="og:title" content="Maqam technical white paper | Exact-input agent governance">
+  <meta property="og:description" content="Read the implementation-backed Maqam 0.3.3 technical white paper on policy-before-dispatch, exact-input approval, execution receipts, evidence links, MGES, and explicit limits.">
+  <meta property="og:url" content="https://maqamagent.com/paper/">
+  <meta property="og:image" content="https://maqamagent.com/assets/maqam-exact-gate-3d.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1586">
+  <meta property="og:image:height" content="992">
+  <meta property="og:image:alt" content="Maqam exact approval gate for governed AI agent actions">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Maqam technical white paper | Exact-input agent governance">
+  <meta name="twitter:description" content="Read the implementation-backed Maqam 0.3.3 technical white paper on policy-before-dispatch, exact-input approval, execution receipts, evidence links, MGES, and explicit limits.">
+  <meta name="twitter:image" content="https://maqamagent.com/assets/maqam-exact-gate-3d.png">
+  <meta name="twitter:image:alt" content="Maqam exact approval gate for governed AI agent actions">
+  <meta name="citation_title" content="Maqam: Exact-Input Governance for Registered AI-Agent Actions">
+  <meta name="citation_author" content="Ajnas N B">
+  <meta name="citation_publication_date" content="2026-08-08">
+  <meta name="citation_technical_report_institution" content="Maqam open-source project">
+  <meta name="citation_pdf_url" content="https://maqamagent.com/paper/Maqam-Technical-White-Paper-v1.0.pdf">
+  <meta name="DC.type" content="Text.TechnicalReport">
+  <meta name="DC.language" content="en">
+  <script type="application/ld+json" data-search-metadata>{"@context":"https://schema.org","@graph":[{"@type":"ScholarlyArticle","headline":"Maqam: Exact-Input Governance for Registered AI-Agent Actions","description":"Read the implementation-backed Maqam 0.3.3 technical white paper on policy-before-dispatch, exact-input approval, execution receipts, evidence links, MGES, and explicit limits.","version":"1.0","datePublished":"2026-08-08","dateModified":"2026-08-08","author":{"@type":"Person","name":"Ajnas N B","url":"https://github.com/AjnasNB"},"publisher":{"@type":"Organization","name":"Maqam","url":"https://maqamagent.com"},"mainEntityOfPage":"https://maqamagent.com/paper/","url":"https://maqamagent.com/paper/","inLanguage":"en","isBasedOn":"https://github.com/AjnasNB/maqam/tree/v0.3.3","keywords":["AI agent governance","exact approval","tool gateway","execution receipts","MGES"]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Maqam","item":"https://maqamagent.com/"},{"@type":"ListItem","position":2,"name":"Technical paper","item":"https://maqamagent.com/paper/"}]}]}</script>
+  <link rel="canonical" href="https://maqamagent.com/paper/">
+  <link rel="alternate" hreflang="en" href="https://maqamagent.com/paper/">
+  <link rel="alternate" hreflang="x-default" href="https://maqamagent.com/paper/">
+  <link rel="search" type="application/json" href="/search.json" title="Maqam content index">
+<link rel="alternate" type="application/pdf" href="/paper/Maqam-Technical-White-Paper-v1.0.pdf" title="Maqam Technical White Paper v1.0">
+  <link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/paper/" aria-current="page">Paper</a><a href="/releases/v0.3.3/">Release</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a>
+      </nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden>
+      <a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/docs/productloop/">ProductLoop</a><a href="/why/">Why Maqam</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/paper/" aria-current="page">Paper</a><a href="/releases/v0.3.3/">Release</a><a href="https://github.com/AjnasNB/maqam">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <header class="page-hero">
+      <div class="shell">
+        <p class="eyebrow">Technical white paper &middot; version 1.0</p>
+        <h1>Exact-input governance for registered AI-agent actions.</h1>
+        <p>An implementation-backed account of Maqam 0.3.3, anchored to immutable tag <code>v0.3.3</code> and commit <code>f43c2493084f8a6c8c755a50a3d9feb38d72ebcc</code>.</p>
+        <div class="button-row">
+          <a class="button button-primary" href="/paper/Maqam-Technical-White-Paper-v1.0.pdf">Download the PDF</a>
+          <a class="button" href="https://github.com/AjnasNB/maqam/blob/main/docs/whitepaper.md">Read the source</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="shell article-shell">
+      <article class="article">
+        <div class="callout"><strong>Publication status</strong>This is a project-authored technical report. It has not undergone independent peer review, formal verification, penetration testing, or independent security certification. No DOI or manuscript license is assigned yet; the author must select the license and complete repository identity metadata before a Zenodo deposit can be published.</div>
+
+        <h2>What the paper establishes</h2>
+        <p>The report traces Maqam's registered call path from policy evaluation through canonical input snapshotting, exact run/tool/input approval, one-use consumption, handler dispatch, execution receipts, and explicit evidence links. Each claim is scoped to the tagged implementation or a named historical evidence artifact.</p>
+
+        <h2>What it does not claim</h2>
+        <p>Maqam does not govern direct calls that bypass its gateway. It does not authenticate reviewers, replace an operating-system sandbox, make injected drivers trustworthy, provide distributed durability, or prove that evidence-linked claims are true.</p>
+
+        <h2>Measurement boundary</h2>
+        <p>Version 0.3.3 does not claim a new MGES measurement. The paper preserves the latest relevant historical measured-source result under its 0.3.1 source identity: 14 of 14 project-defined conformance fixtures passed, and a narrow in-process governed-call fixture recorded a median of 129.849 microseconds per call on its disclosed environment.</p>
+        <p>That fixture excludes model inference, network and filesystem I/O, durable storage, browser behavior, human review, process startup, and concurrent load. It is not a competitor benchmark, security score, production capacity result, certification, or SLA.</p>
+
+        <h2>Reproducible publication files</h2>
+        <ul>
+          <li><a href="/paper/Maqam-Technical-White-Paper-v1.0.pdf">Technical white paper v1.0 (PDF)</a></li>
+          <li><a href="/paper/Maqam-Technical-White-Paper-v1.0.sha256">PDF SHA-256 record</a></li>
+          <li><a href="/paper/Maqam-Technical-White-Paper-v1.0.build.json">Machine-readable build receipt</a></li>
+          <li><a href="https://github.com/AjnasNB/maqam/tree/v0.3.3">Immutable software source tag</a></li>
+          <li><a href="https://github.com/AjnasNB/maqam/blob/v0.3.3/benchmarks/README.md">MGES methodology and claim limits</a></li>
+        </ul>
+
+        <h2>Citation status</h2>
+        <p>The repository includes <code>CITATION.cff</code> with the observed project author name and immutable software version. ORCID, affiliation, scholarly email, DOI, and manuscript license are intentionally absent until the author supplies or approves them.</p>
+      </article>
+      <aside class="article-meta" aria-label="Paper metadata">
+        <strong>Maqam white paper</strong>
+        <span>Version 1.0</span><br>
+        <span>8 August 2026</span><br>
+        <span>Ajnas N B</span><br>
+        <span>Software: Maqam 0.3.3</span><br>
+        <span>DOI: not assigned</span>
+        <a href="/releases/v0.3.3/">Release record</a>
+        <a href="/docs/benchmark/">Benchmark limits</a>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-grid"><div><h2>Maqam</h2><p>Focused governance for registered agent side effects.</p></div><div><h3>Paper</h3><a href="/paper/Maqam-Technical-White-Paper-v1.0.pdf">PDF</a><a href="/paper/Maqam-Technical-White-Paper-v1.0.build.json">Build receipt</a></div><div><h3>Verify</h3><a href="/docs/benchmark/">MGES methodology</a><a href="/releases/v0.3.3/">0.3.3 release</a></div><div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam">GitHub</a><a href="https://www.npmjs.com/package/maqam/v/0.3.3">npm</a></div></div></footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>

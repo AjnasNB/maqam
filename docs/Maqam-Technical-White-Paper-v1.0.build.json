@@ -1,0 +1,37 @@
+{
+  "schema": "maqam.whitepaper-build/v1",
+  "paperVersion": "1.0",
+  "softwareVersion": "0.3.3",
+  "softwareTag": "v0.3.3",
+  "softwareCommit": "f43c2493084f8a6c8c755a50a3d9feb38d72ebcc",
+  "builtAt": "2026-08-08T00:00:00Z",
+  "source": {
+    "path": "docs/whitepaper.md",
+    "sha256": "25b038c0ff34c932794486cc3297b72579e4fd949a664b9cacb1d61d72f45c1f"
+  },
+  "builder": {
+    "path": "scripts/build-whitepaper-pdf.py",
+    "sha256": "52661af37299338e3226f61299b533255cb5fc40681a7c544eeb773a04719ee8"
+  },
+  "pdf": {
+    "filename": "Maqam-Technical-White-Paper-v1.0.pdf",
+    "sha256": "4474014b8545f046eee71c08e031dc2eebf62fc3ab66be2bc51392ce4401e062",
+    "bytes": 159170,
+    "pages": 11
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "reportlab": "4.4.9",
+    "fonts": [
+      "C:\\Windows\\Fonts\\calibri.ttf",
+      "C:\\Windows\\Fonts\\calibrib.ttf",
+      "C:\\Windows\\Fonts\\calibrii.ttf",
+      "C:\\Windows\\Fonts\\consola.ttf"
+    ]
+  },
+  "claims": {
+    "peerReviewed": false,
+    "independentlySecurityCertified": false,
+    "newMgesResultForSoftwareVersion": false
+  }
+}
