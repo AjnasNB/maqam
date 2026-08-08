@@ -1,6 +1,6 @@
 # Maqam
 
-Maqam is an open-source AI agent governance layer for TypeScript. It sits between an agent and registered tools that can change real software. Maqam evaluates policy before dispatch, binds human approval to the exact run, tool, and canonical input, consumes that approval once by default, rejects altered input and replay, and records a verifiable execution receipt.
+Maqam is an open-source enterprise AI agent governance layer for TypeScript. It sits between an agent and registered tools that can change real software. Maqam evaluates policy before dispatch, binds human approval to the exact run, tool, and canonical input, consumes that approval once by default, rejects altered input and replay, and records a verifiable execution receipt.
 
 Use Maqam when an existing agent, coding agent, workflow, crawler, browser connector, SDK call, CLI worker, or internal service needs an application-side control point. Maqam does not replace the model, orchestrator, identity system, browser engine, durable workflow service, database, or operating-system sandbox. Calls that bypass a registered ToolGateway remain outside Maqam's control.
 

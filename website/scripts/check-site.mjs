@@ -85,6 +85,7 @@ const htmlFiles = files.filter((file) => file.endsWith(".html"));
 for (const file of htmlFiles) {
   const source = await readFile(file, "utf8");
   const label = path.relative(publicRoot, file);
+  if (/&mdash;|&#8212;|&#x2014;/i.test(source)) failures.push(`${label} contains an encoded em dash`);
   const requireMatch = (pattern, message) => {
     if (!pattern.test(source)) failures.push(`${label}: ${message}`);
   };
@@ -175,7 +176,7 @@ for (const file of htmlFiles) {
     requireMatch(/Trusted Publishing with provenance/i, "homepage must identify the completed release verification");
     requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.3/i, "homepage install command must retain a live-record verification reminder");
     requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
-    requireMatch(/Control what agents can access, remember, and do/i, "homepage must state the complete control-plane value proposition");
+    requireMatch(/Enterprise AI governance - at the execution boundary/i, "homepage must state the enterprise governance position");
     requireMatch(/2,330 downloads in npm's latest complete weekly window/i, "homepage must show the verified ecosystem download signal");
     requireMatch(/835[\s\S]{0,200}1,146[\s\S]{0,200}349/i, "homepage must show the verified package download counts");
     requireMatch(/not unique people, active users, customers, or revenue/i, "homepage must label registry downloads accurately");
@@ -408,7 +409,7 @@ if (!await exists(llmsPath)) failures.push("missing llms.txt");
 else {
   const llms = await readFile(llmsPath, "utf8");
   const llmsLines = new Set(llms.split(/\r?\n/u).map((line) => line.trim()));
-  if (!llms.startsWith("# Maqam\n\nMaqam is an open-source AI agent governance layer for TypeScript.")) failures.push("llms.txt must define Maqam plainly");
+  if (!llms.startsWith("# Maqam\n\nMaqam is an open-source enterprise AI agent governance layer for TypeScript.")) failures.push("llms.txt must define Maqam plainly");
   if (!llmsLines.has("- AI agent governance comparison: https://maqamagent.com/why/")) failures.push("llms.txt must link the comparison page");
   if (!llmsLines.has("- Technical white paper: https://maqamagent.com/paper/")) failures.push("llms.txt must link the technical paper");
 }
