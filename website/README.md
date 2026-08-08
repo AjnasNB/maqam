@@ -33,4 +33,4 @@ it.
 - External SDK examples are labeled as host integration sketches when they are not shipped or tested by this repository.
 - MGES is a project-defined regression suite, not a standard, certification, security score, competitor ranking, capacity benchmark, or SLA.
 
-The public information architecture includes the runnable quickstart, the exact package atlas, a category-based comparison, the public roadmap, unified release notes, security and integration documentation, benchmark methodology, technical articles, and community contribution paths. The site checker validates these internal routes together with the Worker redirect and media response semantics.
+The public information architecture includes the runnable quickstart, the exact package atlas, an official-source alternatives guide grouped by product job, the public roadmap, unified release notes, security and integration documentation, benchmark methodology, technical articles, and community contribution paths. The site checker validates these internal routes together with the Worker redirect and media response semantics.

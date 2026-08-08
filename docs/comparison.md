@@ -1,6 +1,8 @@
 # Maqam And Related Open-Source Or Source-Available Tools
 
-Last reviewed: 2026-07-16.
+Last reviewed: 2026-08-08.
+
+The public decision guide is available at [maqamagent.com/alternatives](https://maqamagent.com/alternatives/). It groups representative projects by their primary job before comparing their relationship to Maqam.
 
 This document compares product scope using official repositories and official documentation available on the review date. Most entries are open source; deprecated or source-available exceptions are identified explicitly. It is not a performance benchmark, security certification, endorsement, or legal opinion. Projects evolve; follow the links before making an adoption or license decision.
 
