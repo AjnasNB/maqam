@@ -364,8 +364,8 @@ def cover_story() -> list:
             "<b>Date:</b> 8 August 2026<br/>"
             "<b>Implementation:</b> v0.3.3 / f43c2493084f8a6c8c755a50a3d9feb38d72ebcc<br/>"
             "<b>Software license:</b> MIT<br/>"
-            "<b>Manuscript license:</b> Not assigned; author selection required before publication<br/>"
-            "<b>DOI:</b> Not assigned<br/>"
+            "<b>Manuscript license:</b> Creative Commons Attribution 4.0 International (CC BY 4.0)<br/>"
+            "<b>DOI:</b> 10.5281/zenodo.21851251<br/>"
             "<b>Status:</b> Project-authored technical report. No independent peer review, formal verification, penetration test, or independent security certification is claimed.",
             STYLES["cover-meta"],
         ),

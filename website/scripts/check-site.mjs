@@ -195,7 +195,8 @@ for (const file of htmlFiles) {
     requireMatch(/<meta\s+name="citation_pdf_url"\s+content="https:\/\/maqamagent\.com\/paper\/Maqam-Technical-White-Paper-v1\.0\.pdf">/i, "paper page must publish citation PDF metadata");
     requireMatch(/f43c2493084f8a6c8c755a50a3d9feb38d72ebcc/i, "paper page must identify the immutable implementation commit");
     requireMatch(/does not claim a new MGES measurement/i, "paper page must preserve the 0.3.3 benchmark boundary");
-    requireMatch(/No DOI or manuscript license is assigned yet/i, "paper page must preserve publication blockers");
+    requireMatch(/DOI 10\.5281\/zenodo\.21851251/i, "paper page must publish the archival DOI");
+    requireMatch(/CC BY 4\.0/i, "paper page must publish the manuscript license");
   }
 
   if (label === path.join("docs", "benchmark", "index.html")) {

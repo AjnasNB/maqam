@@ -7,16 +7,16 @@
   "builtAt": "2026-08-08T00:00:00Z",
   "source": {
     "path": "docs/whitepaper.md",
-    "sha256": "25b038c0ff34c932794486cc3297b72579e4fd949a664b9cacb1d61d72f45c1f"
+    "sha256": "7411eae999e846ab3131fcc8169685d82367a2bfda3b182c2dfcd32508667a43"
   },
   "builder": {
     "path": "scripts/build-whitepaper-pdf.py",
-    "sha256": "52661af37299338e3226f61299b533255cb5fc40681a7c544eeb773a04719ee8"
+    "sha256": "93c420d4844dfeb92b08af75da31f890b5e75b4da28e6059ddd383870d4e9926"
   },
   "pdf": {
     "filename": "Maqam-Technical-White-Paper-v1.0.pdf",
-    "sha256": "4474014b8545f046eee71c08e031dc2eebf62fc3ab66be2bc51392ce4401e062",
-    "bytes": 159170,
+    "sha256": "800e10814f097347e0fde4986d0fd070bb2cddb674b9fcab969069013136c63d",
+    "bytes": 159206,
     "pages": 11
   },
   "runtime": {

@@ -7,7 +7,8 @@
 **Author:** Ajnas N B
 **Date:** 8 August 2026
 **Status:** Implementation-backed project report. It has not undergone independent peer review, formal verification, penetration testing, or independent security certification.
-**Manuscript license:** Not assigned. Author selection is required before repository or Zenodo publication.
+**DOI:** [10.5281/zenodo.21851251](https://doi.org/10.5281/zenodo.21851251)
+**Manuscript license:** Creative Commons Attribution 4.0 International (CC BY 4.0).
 
 ## Abstract
 

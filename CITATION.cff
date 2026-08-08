@@ -20,4 +20,6 @@ preferred-citation:
       alias: "AjnasNB"
   version: "1.0"
   year: 2026
-  url: "https://maqamagent.com/paper/"
+  doi: "10.5281/zenodo.21851251"
+  license: CC-BY-4.0
+  url: "https://doi.org/10.5281/zenodo.21851251"

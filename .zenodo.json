@@ -10,6 +10,9 @@
   ],
   "version": "1.0",
   "publication_date": "2026-08-08",
+  "doi": "10.5281/zenodo.21851251",
+  "access_right": "open",
+  "license": "cc-by-4.0",
   "keywords": [
     "AI agent governance",
     "exact-input approval",
@@ -31,5 +34,5 @@
       "scheme": "url"
     }
   ],
-  "notes": "Draft deposit metadata. Before publication, the author must choose the manuscript license and access right, confirm author identity metadata, and review the final reserved DOI."
+  "notes": "Open-access project-authored technical report licensed under CC BY 4.0. DOI 10.5281/zenodo.21851251 was reserved in the author-controlled Zenodo draft before the final reproducible build. No independent peer review, formal verification, penetration testing, or independent security certification is claimed."
 }
