@@ -14,6 +14,9 @@ Current public package: maqam 0.3.3 on npm. Runtime support: Node.js 22, 24, and
 ## Public documentation
 
 - Product overview: https://maqamagent.com/
+- Product definition: https://maqamagent.com/what-is-maqam/
+- Source-backed feature map: https://maqamagent.com/features/
+- Installation and isolated exact-approval proof: https://maqamagent.com/install/
 - Quickstart and API: https://maqamagent.com/docs/
 - Governed sources: https://maqamagent.com/docs/sources/
 - Governed browser actions: https://maqamagent.com/docs/browser/

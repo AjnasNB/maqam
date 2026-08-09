@@ -150,6 +150,16 @@ for (const file of htmlFiles) {
   if (source.includes('class="site-header"') && !source.includes('href="/alternatives/"')) {
     failures.push(`${label}: primary navigation must link the alternatives guide`);
   }
+  if (label !== "404.html" && source.includes('class="site-header"')) {
+    for (const [route, name] of [
+      ["/what-is-maqam/", "What it is"],
+      ["/features/", "Features"],
+      ["/install/", "Install"],
+      ["/docs/", "Docs"]
+    ]) {
+      if (!source.includes(`href="${route}"`)) failures.push(`${label}: primary navigation must link ${name}`);
+    }
+  }
 
   if (/candidate pending exact release approval/i.test(source)) {
     failures.push(`${label}: contains stale pre-publication wording`);
@@ -208,6 +218,31 @@ for (const file of htmlFiles) {
     requireMatch(/Published 0\.3\.2 exact-main MGES evidence/i, "homepage must label the public 0.3.2 exact-main evidence");
     requireMatch(/Historical 0\.3\.1 measured-source MGES evidence/i, "homepage must retain and label the historical 0.3.1 measured-source evidence");
     requireMatch(/Previous public 0\.3\.0 MGES evidence/i, "homepage must retain and label the previous public 0.3.0 benchmark evidence");
+  }
+
+  if (label === path.join("what-is-maqam", "index.html")) {
+    requireMatch(/"@type":"AboutPage"/i, "product-definition page must publish AboutPage JSON-LD");
+    requireMatch(/"@type":"SoftwareApplication"/i, "product-definition page must identify the software");
+    requireMatch(/What is Maqam\?/i, "product-definition page must state the product question");
+    requireMatch(/policy before a handler runs/i, "product-definition page must explain pre-dispatch policy");
+    requireMatch(/does not intercept direct operating-system/i, "product-definition page must preserve the boundary");
+  }
+
+  if (label === path.join("features", "index.html")) {
+    requireMatch(/"@type":"CollectionPage"/i, "features page must publish CollectionPage JSON-LD");
+    requireMatch(/"@type":"ItemList"/i, "features page must publish ItemList JSON-LD");
+    requireMatch(/"numberOfItems":19/i, "features page must publish all 19 visible feature groups");
+    for (const featureGroup of ["Policy engine", "Exact one-use approvals", "Governed browser adapter contract", "Built-in bounded crawler", "Verification and benchmark surfaces"]) {
+      if (!source.includes(`<strong>${featureGroup}</strong>`)) failures.push(`${label}: missing visible feature group ${featureGroup}`);
+    }
+  }
+
+  if (label === path.join("install", "index.html")) {
+    requireMatch(/"@type":"HowTo"/i, "install page must publish visible-step HowTo JSON-LD");
+    requireMatch(/npm view maqam@0\.3\.3 version dist\.integrity gitHead/i, "install page must verify the public artifact");
+    requireMatch(/npx -y maqam@0\.3\.3 demo approval/i, "install page must run the isolated proof");
+    requireMatch(/npm install maqam@0\.3\.3/i, "install page must pin the current release");
+    requireMatch(/Installation does not intercept direct SDK/i, "install page must preserve the authority boundary");
   }
 
   if (label === path.join("paper", "index.html")) {
@@ -489,6 +524,9 @@ else {
   if (!llmsLines.has("- AI agent governance alternatives: https://maqamagent.com/alternatives/")) failures.push("llms.txt must link the alternatives page");
   if (!llmsLines.has("- Open-source governed-agent toolkit: https://maqamagent.com/articles/open-source-governed-agent-toolkit/")) failures.push("llms.txt must link the governed-agent toolkit article");
   if (!llmsLines.has("- Technical white paper: https://maqamagent.com/paper/")) failures.push("llms.txt must link the technical paper");
+  for (const route of ["what-is-maqam/", "features/", "install/", "docs/"]) {
+    if (!llms.includes(`https://maqamagent.com/${route}`)) failures.push(`llms.txt must link ${route}`);
+  }
   if (!llms.includes("Cockroach Browser uses Playwright and Chromium")) failures.push("llms.txt must disclose the Playwright relationship");
 }
 
@@ -498,6 +536,9 @@ else {
   const llmsFull = await readFile(llmsFullPath, "utf8");
   if (!llmsFull.startsWith("# Maqam - complete public documentation index\n")) failures.push("llms-full.txt must identify the complete Maqam index");
   for (const requiredUrl of [
+    "https://maqamagent.com/what-is-maqam/",
+    "https://maqamagent.com/features/",
+    "https://maqamagent.com/install/",
     "https://maqamagent.com/docs/",
     "https://maqamagent.com/docs/security/",
     "https://maqamagent.com/docs/benchmark/",
@@ -519,6 +560,9 @@ else {
   if (!searchIndex?.pages?.some((page) => page.url === "https://maqamagent.com/paper/")) failures.push("search.json must include the technical paper");
   if (!searchIndex?.pages?.some((page) => page.url === "https://maqamagent.com/alternatives/")) failures.push("search.json must include the alternatives guide");
   if (!searchIndex?.pages?.some((page) => page.url === "https://maqamagent.com/articles/open-source-governed-agent-toolkit/")) failures.push("search.json must include the governed-agent toolkit article");
+  for (const route of ["what-is-maqam/", "features/", "install/", "docs/"]) {
+    if (!searchIndex?.pages?.some((page) => page.url === `https://maqamagent.com/${route}`)) failures.push(`search.json must include ${route}`);
+  }
 }
 
 const sitemap = await readFile(path.join(publicRoot, "sitemap.xml"), "utf8");
@@ -532,6 +576,9 @@ if (!sitemapLocations.has("https://maqamagent.com/releases/v0.3.3/")) failures.p
 if (!sitemapLocations.has("https://maqamagent.com/paper/")) failures.push("sitemap must include the technical paper");
 if (!sitemapLocations.has("https://maqamagent.com/alternatives/")) failures.push("sitemap must include the alternatives guide");
 if (!sitemapLocations.has("https://maqamagent.com/articles/open-source-governed-agent-toolkit/")) failures.push("sitemap must include the governed-agent toolkit article");
+for (const route of ["what-is-maqam/", "features/", "install/", "docs/"]) {
+  if (!sitemapLocations.has(`https://maqamagent.com/${route}`)) failures.push(`sitemap must include ${route}`);
+}
 
 assert.deepEqual(parseByteRange("bytes=2-5", 10), { offset: 2, length: 4, end: 5 });
 assert.deepEqual(parseByteRange("bytes=7-", 10), { offset: 7, length: 3, end: 9 });

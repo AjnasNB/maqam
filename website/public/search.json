@@ -11,6 +11,9 @@
   },
   "pages": [
     {"title": "Maqam", "url": "https://maqamagent.com/", "intent": "AI agent governance overview"},
+    {"title": "What is Maqam?", "url": "https://maqamagent.com/what-is-maqam/", "intent": "plain-language product definition and authority boundary"},
+    {"title": "Maqam features", "url": "https://maqamagent.com/features/", "intent": "source-backed capability groups and operating boundaries"},
+    {"title": "Install Maqam", "url": "https://maqamagent.com/install/", "intent": "release verification, isolated proof, and package installation"},
     {"title": "Maqam technical white paper", "url": "https://maqamagent.com/paper/", "intent": "architecture, exact-input approval, evaluation, and limitations"},
     {"title": "Maqam documentation", "url": "https://maqamagent.com/docs/", "intent": "installation and quickstart"},
     {"title": "Governed research sources", "url": "https://maqamagent.com/docs/sources/", "intent": "source routing and research adapters"},
