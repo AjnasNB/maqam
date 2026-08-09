@@ -17,6 +17,9 @@ const approvedProductVisuals = new Set([
   "/assets/maqam-exact-gate-3d.png",
   "/assets/productloop-modular-hub-3d.png"
 ]);
+const approvedExternalRuntimeResources = new Set([
+  "https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=launched&amp;theme=light"
+]);
 const productVisualDimensions = new Map([
   ["/assets/evidence-metrology-3d.png", [1586, 992]],
   ["/assets/integration-dock-3d.png", [1586, 992]],
@@ -174,6 +177,16 @@ for (const file of htmlFiles) {
   }
 
   if (label === "index.html") {
+    for (const launchDirectoryMarkup of [
+      'href="https://fazier.com/launches/maqamagent.com"',
+      'target="_blank" rel="noopener noreferrer"',
+      'src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=launched&amp;theme=light"',
+      'width="120" alt="Fazier badge"'
+    ]) {
+      if (!source.includes(launchDirectoryMarkup)) {
+        failures.push(`index.html: launch recognition is missing ${launchDirectoryMarkup}`);
+      }
+    }
     requireMatch(/"softwareVersion":"0\.3\.3"/i, "homepage JSON-LD must identify Maqam 0.3.3");
     requireMatch(/"@type":"FAQPage"/i, "homepage JSON-LD must include visible direct answers");
     requireMatch(/v0\.3\.3 is live/i, "homepage must identify 0.3.3 as the public release");
@@ -433,7 +446,9 @@ for (const file of htmlFiles) {
 
   for (const match of source.matchAll(/<(?:script|img|source|track)\b[^>]*\bsrc="([^"]+)"/gi)) {
     const value = match[1];
-    if (/^(?:https?:)?\/\//i.test(value)) failures.push(`${label}: runtime resource is external: ${value}`);
+    if (/^(?:https?:)?\/\//i.test(value) && !approvedExternalRuntimeResources.has(value)) {
+      failures.push(`${label}: runtime resource is external: ${value}`);
+    }
   }
   for (const match of source.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"]+)"/gi)) {
     const value = match[1];
@@ -573,6 +588,7 @@ assert.equal(response.headers.get("Content-Length"), "10");
 assert.equal(response.headers.get("Accept-Ranges"), "bytes");
 assert.equal(response.headers.get("ETag"), '"etag-123"');
 assert.match(response.headers.get("Content-Security-Policy"), /default-src 'self'/);
+assert.match(response.headers.get("Content-Security-Policy"), /img-src 'self' data: https:\/\/fazier\.com/);
 
 response = await serveMedia(request({ Range: "bytes=2-5" }), env, descriptor);
 assert.equal(response.status, 206);
