@@ -10,8 +10,30 @@ const npmPackage = "https://www.npmjs.com/package/maqam";
 const defaultImage = `${siteUrl}/assets/maqam-exact-gate-3d.png`;
 const modifiedDate = "2026-08-08";
 const toolkitArticleDate = "2026-08-09";
+const productSurfaceDate = "2026-08-09";
 const author = { "@type": "Person", name: "Ajnas N B", url: "https://github.com/AjnasNB" };
 const publisher = { "@type": "Organization", name: "Maqam", url: siteUrl };
+const featureGroups = [
+  "Installation and runtime surfaces",
+  "Policy engine",
+  "Tool gateway and execution receipts",
+  "Exact one-use approvals",
+  "Evidence and claims",
+  "Workflow runtime",
+  "Skill registry",
+  "Agent and object adapters",
+  "Command-line worker adapters",
+  "Codex and Claude Code adapters",
+  "Governed browser adapter contract",
+  "Research document model",
+  "Governed source routing",
+  "Public research adapters",
+  "Built-in bounded crawler",
+  "Release gate",
+  "Local server and console",
+  "Security and hostile-input handling",
+  "Verification and benchmark surfaces"
+];
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -89,6 +111,25 @@ function ensureAlternativesNavigation(html, className, route) {
   });
 }
 
+function ensureProductNavigation(html, className, route) {
+  const navigation = new RegExp(`(<nav\\s+class="${className}"[^>]*>)([\\s\\S]*?)(<\\/nav>)`, "i");
+  return html.replace(navigation, (whole, opening, content, closing) => {
+    const destinations = [
+      ["/what-is-maqam/", "What it is"],
+      ["/features/", "Features"],
+      ["/install/", "Install"],
+      ["/docs/", "Docs"]
+    ];
+    for (const [href] of destinations) {
+      content = content.replace(new RegExp(`<a href="${href.replaceAll("/", "\\/")}"(?:\\s+aria-current="page")?>[^<]*<\\/a>`, "i"), "");
+    }
+    const links = destinations.map(([href, label]) =>
+      `<a href="${href}"${route === href ? ' aria-current="page"' : ""}>${label}</a>`
+    ).join("");
+    return opening + links + content.replace(/[ \t]+(?=\r?\n)/g, "") + closing;
+  });
+}
+
 function breadcrumbFor(route) {
   const labels = new Map([
     ["articles", "Articles"], ["benchmarking-governance", "Benchmarking governance"],
@@ -98,7 +139,8 @@ function breadcrumbFor(route) {
     ["integrations", "Integrations"], ["productloop", "ProductLoop OS"],
     ["security", "Security"], ["sources", "Sources"], ["workbench", "Workbench"],
     ["alternatives", "Alternatives"], ["paper", "Technical paper"], ["releases", "Releases"], ["roadmap", "Roadmap"],
-    ["why", "Why Maqam"]
+    ["why", "Why Maqam"], ["what-is-maqam", "What is Maqam"],
+    ["features", "Features"], ["install", "Install"]
   ]);
   const parts = route.split("/").filter(Boolean);
   const items = [{ "@type": "ListItem", position: 1, name: "Maqam", item: `${siteUrl}/` }];
@@ -129,6 +171,8 @@ function jsonLdFor({ canonical, description, route, title }) {
           license: "https://opensource.org/license/mit",
           codeRepository: repository,
           downloadUrl: npmPackage,
+          installUrl: `${siteUrl}/install/`,
+          url: siteUrl,
           sameAs: [repository, npmPackage],
           isAccessibleForFree: true,
           featureList: [
@@ -186,6 +230,90 @@ function jsonLdFor({ canonical, description, route, title }) {
             }
           ]
         }
+      ]
+    };
+  }
+
+  if (route === "/what-is-maqam/") {
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "AboutPage",
+          name: title,
+          description,
+          url: canonical,
+          inLanguage: "en",
+          dateModified: productSurfaceDate,
+          about: {
+            "@type": "SoftwareApplication",
+            name: "Maqam",
+            applicationCategory: "DeveloperApplication",
+            operatingSystem: "Node.js 22, 24, or 26",
+            softwareVersion: "0.3.3",
+            license: "https://opensource.org/license/mit",
+            codeRepository: repository,
+            downloadUrl: npmPackage,
+            installUrl: `${siteUrl}/install/`,
+            url: siteUrl,
+            isAccessibleForFree: true,
+            description
+          }
+        },
+        breadcrumbFor(route)
+      ]
+    };
+  }
+
+  if (route === "/features/") {
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          "@id": `${canonical}#features`,
+          name: title,
+          description,
+          url: canonical,
+          inLanguage: "en",
+          dateModified: productSurfaceDate,
+          about: { "@type": "SoftwareApplication", name: "Maqam", softwareVersion: "0.3.3", url: siteUrl }
+        },
+        {
+          "@type": "ItemList",
+          "@id": `${canonical}#feature-groups`,
+          name: "Maqam feature groups",
+          itemListOrder: "https://schema.org/ItemListUnordered",
+          numberOfItems: featureGroups.length,
+          itemListElement: featureGroups.map((name, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name
+          }))
+        },
+        breadcrumbFor(route)
+      ]
+    };
+  }
+
+  if (route === "/install/") {
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "HowTo",
+          name: "Install Maqam and run the exact-approval proof",
+          description,
+          url: canonical,
+          inLanguage: "en",
+          step: [
+            { "@type": "HowToStep", position: 1, name: "Verify the release", text: "Inspect the live npm version, integrity, gitHead, provenance, and matching source release." },
+            { "@type": "HowToStep", position: 2, name: "Run the isolated proof", text: "Run npx -y maqam@0.3.3 demo approval without adding a project dependency." },
+            { "@type": "HowToStep", position: 3, name: "Install the package", text: "Install the pinned maqam@0.3.3 package in a maintained Node.js project." },
+            { "@type": "HowToStep", position: 4, name: "Register one governed tool", text: "Define the tool effects, policy, exact review input, approval storage, idempotency, and recovery behavior before connecting a real side effect." }
+          ]
+        },
+        breadcrumbFor(route)
       ]
     };
   }
@@ -489,6 +617,8 @@ for (const file of await walk(publicRoot)) {
   html = ensurePaperNavigation(html, "mobile-nav");
   html = ensureAlternativesNavigation(html, "desktop-nav", route);
   html = ensureAlternativesNavigation(html, "mobile-nav", route);
+  html = ensureProductNavigation(html, "desktop-nav", route);
+  html = ensureProductNavigation(html, "mobile-nav", route);
   await writeFile(file, html.replace(/\n{3,}/g, "\n\n"), "utf8");
 }
 

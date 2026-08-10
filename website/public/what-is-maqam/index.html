@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What is Maqam? | Open-source AI agent governance</title>
+  <meta name="description" content="Maqam is an open-source TypeScript governance boundary that applies policy before registered tool execution, binds approval to exact input, and records receipts.">
+  <meta name="theme-color" content="#050908">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="author" content="Ajnas N B">
+  <meta name="application-name" content="Maqam">
+  <meta name="keywords" content="Maqam, AI agent governance, exact approval, tool gateway, execution receipts, TypeScript">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Maqam">
+  <meta property="og:title" content="What is Maqam? | Open-source AI agent governance">
+  <meta property="og:description" content="Maqam is an open-source TypeScript governance boundary that applies policy before registered tool execution, binds approval to exact input, and records receipts.">
+  <meta property="og:url" content="https://maqamagent.com/what-is-maqam/">
+  <meta property="og:image" content="https://maqamagent.com/assets/maqam-exact-gate-3d.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1586">
+  <meta property="og:image:height" content="992">
+  <meta property="og:image:alt" content="Maqam exact approval gate for governed AI agent actions">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What is Maqam? | Open-source AI agent governance">
+  <meta name="twitter:description" content="Maqam is an open-source TypeScript governance boundary that applies policy before registered tool execution, binds approval to exact input, and records receipts.">
+  <meta name="twitter:image" content="https://maqamagent.com/assets/maqam-exact-gate-3d.png">
+  <meta name="twitter:image:alt" content="Maqam exact approval gate for governed AI agent actions">
+  <script type="application/ld+json" data-search-metadata>{"@context":"https://schema.org","@graph":[{"@type":"AboutPage","name":"What is Maqam? | Open-source AI agent governance","description":"Maqam is an open-source TypeScript governance boundary that applies policy before registered tool execution, binds approval to exact input, and records receipts.","url":"https://maqamagent.com/what-is-maqam/","inLanguage":"en","dateModified":"2026-08-09","about":{"@type":"SoftwareApplication","name":"Maqam","applicationCategory":"DeveloperApplication","operatingSystem":"Node.js 22, 24, or 26","softwareVersion":"0.3.3","license":"https://opensource.org/license/mit","codeRepository":"https://github.com/AjnasNB/maqam","downloadUrl":"https://www.npmjs.com/package/maqam","installUrl":"https://maqamagent.com/install/","url":"https://maqamagent.com","isAccessibleForFree":true,"description":"Maqam is an open-source TypeScript governance boundary that applies policy before registered tool execution, binds approval to exact input, and records receipts."}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Maqam","item":"https://maqamagent.com/"},{"@type":"ListItem","position":2,"name":"What is Maqam","item":"https://maqamagent.com/what-is-maqam/"}]}]}</script>
+  <link rel="canonical" href="https://maqamagent.com/what-is-maqam/">
+  <link rel="alternate" hreflang="en" href="https://maqamagent.com/what-is-maqam/">
+  <link rel="alternate" hreflang="x-default" href="https://maqamagent.com/what-is-maqam/">
+  <link rel="search" type="application/json" href="/search.json" title="Maqam content index">
+<link rel="icon" href="/assets/maqam-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-row">
+      <a class="brand" href="/" aria-label="Maqam home"><img src="/assets/maqam-logo.svg" width="30" height="30" alt=""><span>MAQAM</span></a>
+      <nav class="desktop-nav" aria-label="Primary navigation"><a href="/what-is-maqam/" aria-current="page">What it is</a><a href="/features/">Features</a><a href="/install/">Install</a><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/alternatives/">Compare</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/paper/">Paper</a><a href="/releases/v0.3.3/">Release</a><a class="nav-action" href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile navigation" hidden><a href="/what-is-maqam/" aria-current="page">What it is</a><a href="/features/">Features</a><a href="/install/">Install</a><a href="/docs/">Docs</a><a href="/docs/sources/">Sources</a><a href="/alternatives/">Compare</a><a href="/docs/integrations/">Integrations</a><a href="/docs/benchmark/">Benchmark</a><a href="/paper/">Paper</a><a href="/releases/v0.3.3/">Release</a><a href="https://github.com/AjnasNB/maqam">GitHub</a></nav>
+  </header>
+  <main id="main" class="shell article-shell">
+    <article class="article">
+      <p class="eyebrow">Product definition</p>
+      <h1>What is Maqam?</h1>
+      <p class="lede">Maqam is an open-source TypeScript governance boundary for operations deliberately routed through registered tools.</p>
+      <p>It evaluates policy before a handler runs. When approval is required, Maqam binds that decision to the exact run, tool name, and canonical input hash. The approved call is consumed once by default, changed input and replay are rejected, and the result can be linked to trace and evidence records.</p>
+
+      <h2>Where Maqam sits</h2>
+      <dl class="definition-grid">
+        <dt>Before dispatch</dt><dd>Policy evaluates the registered tool, effects, origins, run, tenant ceilings, and requested input before the handler executes.</dd>
+        <dt>At approval</dt><dd>The approval request identifies the exact run, tool, and canonical input rather than a loose natural-language description.</dd>
+        <dt>At execution</dt><dd>The gateway consumes a valid approval before dispatch and rejects altered scope, a different run or tool, and replay.</dd>
+        <dt>After execution</dt><dd>Receipts, traces, evidence records, and claims can retain the reviewed input identity, decision, outcome, and source links.</dd>
+      </dl>
+
+      <h2>What it can govern</h2>
+      <ul class="issue-list">
+        <li><strong>Registered functions and SDK calls</strong><p>Wrap a host-owned function or adapter and declare its minimum effects and origins.</p></li>
+        <li><strong>Command-line workers and coding agents</strong><p>Run fixed executables without shell evaluation under explicit event, byte, token, environment, directory, and duration limits.</p></li>
+        <li><strong>Browser action contracts</strong><p>Govern structural observe, preview, apply, and submit plans through an injected browser driver that remains a separate host boundary.</p></li>
+        <li><strong>Research sources and bounded crawling</strong><p>Route configured sources through a governed caller and normalize bounded public-source evidence.</p></li>
+        <li><strong>Workflow side effects</strong><p>Apply the same policy, approval, execution, trace, and evidence path to selected workflow tasks.</p></li>
+      </ul>
+
+      <h2>What Maqam does not do</h2>
+      <p>Maqam does not intercept direct operating-system, network, provider, browser, SDK, or unregistered calls. It does not replace identity, authentication, durable approval storage, operating-system isolation, a browser engine, or service-specific authorization. A host must deliberately route an operation through the registered gateway and secure the surrounding infrastructure.</p>
+      <div class="button-row"><a class="button button-primary" href="/install/">Install and run the proof</a><a class="button" href="/features/">Explore features</a><a class="button" href="/docs/">Read the documentation</a></div>
+    </article>
+    <aside class="article-meta"><strong>Maqam 0.3.3</strong><span>MIT licensed</span><span>Node.js 22, 24, or 26</span><a href="https://github.com/AjnasNB/maqam">Source</a><a href="https://www.npmjs.com/package/maqam">npm</a></aside>
+  </main>
+  <footer class="site-footer"><div class="shell footer-grid"><div><h2>Maqam</h2><p>Focused governance for registered agent actions.</p></div><div><h3>Start</h3><a href="/what-is-maqam/">What it is</a><a href="/features/">Features</a><a href="/install/">Install</a><a href="/docs/">Documentation</a></div><div><h3>Verify</h3><a href="/docs/security/">Security</a><a href="/docs/benchmark/">MGES methodology</a><a href="/paper/">Paper</a></div><div><h3>Source</h3><a href="https://github.com/AjnasNB/maqam">GitHub</a><a href="https://www.npmjs.com/package/maqam">npm</a></div></div><div class="shell launch-recognition" aria-label="Launch directories"><span>Find Maqam on</span><a class="fazier-badge" href="https://fazier.com/launches/maqamagent.com" target="_blank" rel="noopener noreferrer"><img src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=launched&amp;theme=light" width="120" alt="Fazier badge"></a></div></footer>
+  <p class="live-region" data-live-region aria-live="polite"></p>
+</body>
+</html>
