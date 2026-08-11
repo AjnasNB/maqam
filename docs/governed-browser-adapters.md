@@ -66,6 +66,35 @@ registerGovernedBrowserTools(gateway, {
 
 The registration result and each tool's `browserAdapter` metadata publish the frozen prohibited-effect list for inspection. The driver receives the same list in a frozen, informational execution view containing the run, tool, canonical input hash, consumed approval identities/actions, the exact origins named by that request, and an optional abort signal. It does not receive a raw gateway context, approval queue, browser credential, or reusable authority token.
 
+## Cockroach Browser integration
+
+[`cockroach-browser`](https://github.com/AjnasNB/cockroach-browser) is an optional, separately installed AGPL-3.0-or-later browser runtime. It is not a Maqam runtime dependency and is not included in the MIT-licensed Maqam npm tarball. Its `createMaqamBrowserDriver` verifies both the execution envelope and the signed preview plan before entering its package-private governed dispatch path.
+
+Use the `createDriver` form to break the safe construction cycle. Maqam creates a host-only verifier bridge first, gives it to the synchronous factory, and activates it only around the exact registered driver call:
+
+```js
+import { createMaqamBrowserDriver } from "cockroach-browser/maqam";
+import { registerGovernedBrowserTools } from "maqam";
+
+registerGovernedBrowserTools(gateway, {
+  allowedOrigins: ["https://admin.example"],
+  createDriver(authority) {
+    return createMaqamBrowserDriver({
+      runtime,
+      resolveValueRef: (reference) => valueVault.resolve(reference),
+      verifyExecution: authority.verifyExecution,
+      verifyPlanToken: authority.verifyPlanToken
+    });
+  }
+});
+```
+
+The bridge is deliberately not returned in the public registration result. Outside an active, exact driver invocation both verifier methods return `false`. It cannot register tools, request or consume approvals, widen origins, change policy, dispatch a browser action, or mint plan tokens. Keep it inside the host process and never expose it through an agent tool, MCP transport, browser page, plugin payload, or worker message.
+
+After an approved mutation, Maqam performs its required structural re-observation as a derived read-only `browser.observe` driver call. That internal call keeps the originating run, input digest, signal, and exact origin scope but carries no mutation approval. It exists only inside the active apply/submit handler and does not create a second agent-call authority.
+
+The repository-only fixture under `integration-fixtures/cockroach-browser/` pins the public `cockroach-browser@0.1.0` package and exercises observe, preview, exact one-use approval, apply, post-action observation, plan tamper rejection, approval replay rejection, stale-target rejection, and inactive-verifier rejection without adding the AGPL package to Maqam's runtime graph.
+
 ## Observe and preview
 
 A target always names the exact session, page, canonical HTTP(S) origin, and driver-defined revision:

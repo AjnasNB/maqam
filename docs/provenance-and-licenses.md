@@ -1,6 +1,6 @@
 # Provenance and License Notes
 
-Last reviewed: 2026-07-20.
+Last reviewed: 2026-07-29.
 
 Maqam is an original Ajnas NB implementation distributed under the MIT license. The package implementation, API names, documentation, examples, tests, command-line behavior, product identity, and visual assets are maintained as Maqam work.
 
@@ -40,6 +40,8 @@ The `2026.07.04` Windows standalone used for the 2026-07-18 manual compatibility
 The fixture has its own lockfile and pins `@google/adk@1.4.0` under Apache-2.0. Its CI install command uses `npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts`; this is intentional because the resolved fixture tree contains packages that declare install scripts, including `@google/genai`, `protobufjs`, and `sqlite3`, while the offline callback test does not need install-time native compilation. The fixture lockfile uses npm `overrides` for audited vulnerable transitive paths and is checked by `npm run audit:google-adk-fixture`.
 
 The fixture audit observed no missing package-license fields in the resolved dependency tree. License identifiers present in the resolved tree include MIT, Apache-2.0, ISC, BSD-family identifiers, 0BSD, BlueOak-1.0.0, LGPL-2.1-or-later and Python-2.0. This record is dependency-surface evidence only; it is not legal advice and does not make Google ADK a Maqam runtime dependency.
+
+`integration-fixtures/cockroach-browser/` is a second private fixture workspace. It pins `cockroach-browser@0.1.0`, whose package declares AGPL-3.0-or-later, and validates the published Maqam driver boundary against this repository's current `ToolGateway`. The fixture stays outside the root `files` allowlist, is not imported by Maqam runtime source, and is not part of the public Maqam tarball. Its separate lockfile, audit, and test scripts make the development-only license boundary visible without turning Cockroach Browser into a required dependency of the MIT package.
 
 ## Upstream Inspection Log
 

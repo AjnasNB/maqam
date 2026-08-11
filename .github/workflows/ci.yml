@@ -41,6 +41,15 @@ jobs:
       - name: Test Google ADK integration fixture
         run: npm run test:google-adk-fixture
 
+      - name: Install Cockroach Browser integration fixture
+        run: npm run install:cockroach-browser-fixture
+
+      - name: Audit Cockroach Browser integration fixture dependency tree
+        run: npm run audit:cockroach-browser-fixture
+
+      - name: Test Cockroach Browser integration fixture
+        run: npm run test:cockroach-browser-fixture
+
       - name: Clean consumer TypeScript compile
         run: npm run test:consumer-types
 

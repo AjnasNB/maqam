@@ -1,6 +1,6 @@
 # License Audit
 
-Audit date: 2026-07-20.
+Audit date: 2026-07-29.
 
 ## Package License
 
@@ -54,6 +54,10 @@ The original Maqam video composition, narration, captions, and generated proof a
 The fixture is installed in CI with `npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts`, audited with `npm run audit:google-adk-fixture`, and tested with `npm run test:google-adk-fixture`. Install scripts are deliberately disabled because the resolved fixture tree contains install-script packages (`@google/genai`, `protobufjs`, `sqlite3`) while the offline FunctionTool fixture does not require native compilation or provider setup. The fixture lockfile uses npm `overrides` to keep audited vulnerable transitive paths on patched versions.
 
 The resolved fixture tree's package metadata reported no missing license fields during the 2026-07-20 audit. License identifiers observed in the tree include MIT, Apache-2.0, ISC, BSD-family identifiers, 0BSD, BlueOak-1.0.0, LGPL-2.1-or-later and Python-2.0. This fixture does not certify live Google ADK, Gemini, Google account, Tool Confirmation, MCPToolset or production behavior.
+
+## Repository-Only Cockroach Browser Fixture
+
+`integration-fixtures/cockroach-browser/` pins `cockroach-browser@0.1.0` under AGPL-3.0-or-later for an isolated compatibility test. It is excluded from Maqam's root package allowlist and is neither a runtime dependency nor distributed in the MIT-licensed `maqam` tarball. The fixture exercises the package's public Maqam driver using host-only active-dispatch verifiers; it does not copy Cockroach Browser source into Maqam.
 
 ## Inspected References, Not Dependencies
 

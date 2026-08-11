@@ -181,6 +181,11 @@ Status terms:
   modal effects.
 - Rejection of raw selectors, raw scripts, raw secret values, and unsupported
   effects in model-controlled plans.
+- Optional synchronous driver factory with active-call-only execution and
+  signed-plan verification callbacks for independently verifying host drivers.
+- A repository-only exact-version fixture for the separately installed
+  `cockroach-browser@0.1.0` package; the AGPL package is not a Maqam runtime
+  dependency or part of Maqam's MIT npm tarball.
 - The injected browser driver remains a host trust boundary.
 - Maqam does not bundle Chromium, Playwright, browser profiles, or a browser
   sandbox.
