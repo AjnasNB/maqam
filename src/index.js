@@ -990,6 +990,11 @@ export async function crawl(input = {}) {
 export { discoverSitemapUrls, normalizeUrl };
 export { AjnasFrameworkError, MaqamError, ApprovalRequiredError, PolicyDeniedError, toErrorRecord } from "./framework/errors.js";
 export { PolicyEngine } from "./framework/policy.js";
+export {
+  POLICY_PRESET_NAMES,
+  createPolicyPreset,
+  simulatePolicyWorkflow
+} from "./framework/policy-presets.js";
 export { EvidenceLedger } from "./framework/evidence-ledger.js";
 export { ToolGateway } from "./framework/tool-gateway.js";
 export { SkillRegistry } from "./framework/skill-registry.js";
