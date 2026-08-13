@@ -2,6 +2,20 @@
 
 All notable Maqam changes are tracked here before release.
 
+## 0.4.0-rc.1 - 2026-08-13
+
+Apache-2.0 Community release candidate with additive policy-design tools.
+
+### Added
+
+- Immutable fail-closed policy presets for local development, team delivery, and production.
+- Side-effect-free workflow simulation for goals and proposed tool calls.
+- Apache `NOTICE`, license-transition record, candidate release boundary, and DCO sign-off requirement.
+
+### Changed
+
+- Changed the `0.4` Community source line to Apache-2.0. Published versions through `0.3.3` retain their MIT grants.
+
 ## 0.3.3 - 2026-07-23
 
 Registry-presentation patch with no runtime policy, approval, browser, crawler,

@@ -4,7 +4,7 @@ Audit date: 2026-07-20.
 
 ## Package License
 
-Maqam is distributed under MIT. Market research and reference inspection do not change that license because no inspected upstream implementation was incorporated into this package.
+The Maqam `0.4` Community source line is distributed under Apache-2.0; published versions through `0.3.3` retain their MIT grants. Market research and reference inspection do not change those licenses because no inspected upstream implementation was incorporated into this package.
 
 ## Direct Runtime Dependencies
 
@@ -41,7 +41,7 @@ These integrations are not npm dependencies and are not distributed in the Maqam
 | `typescript` | 5.9.3 | Apache-2.0 | Repository-only type checking. |
 | `eslint`, `prettier` | 9.39.5, 3.8.1 | MIT | Repository-only linting and formatting. |
 
-The original Maqam video composition, narration, captions, and generated proof assets are covered by the root MIT project license. Third-party rendering software retains its own terms. See [`demo/remotion/ASSET_PROVENANCE.md`](demo/remotion/ASSET_PROVENANCE.md) and the [official Remotion license page](https://www.remotion.dev/docs/license/pricing). This project records Ajnas NB as an individual publisher; any larger organization must confirm its own eligibility before re-rendering or operationalizing the toolchain.
+The original Maqam video composition, narration, captions, and generated proof assets in the `0.4` source line are covered by the root Apache-2.0 project license; historical release assets retain the license attached to their release. Third-party rendering software retains its own terms. See [`demo/remotion/ASSET_PROVENANCE.md`](demo/remotion/ASSET_PROVENANCE.md) and the [official Remotion license page](https://www.remotion.dev/docs/license/pricing). This project records Ajnas NB as an individual publisher; any larger organization must confirm its own eligibility before re-rendering or operationalizing the toolchain.
 
 ## Repository-Only Google ADK Fixture
 
@@ -85,7 +85,7 @@ No source code, documentation text, examples, tests, prompts, assets, logos, or 
 - Maqam's published tarball may include only Maqam files and declared dependency metadata intended by `package.json`.
 - Nominative project names and links in comparison/provenance documentation are references, not bundled branding or endorsement claims.
 - Any future dependency, vendored file, port, patch, generated derivative, or copied documentation requires a new audit of the exact upstream version and obligations.
-- Firecrawl's AGPL core must not be copied into the MIT package without an explicit architecture and license decision.
+- Firecrawl's AGPL core must not be copied into this package without an explicit architecture and license decision.
 - Crawl4AI's additional attribution language must be evaluated before any incorporation or derivative use.
 - Agent Reach's permissive license does not make copied code part of Maqam automatically. Any future incorporation would still require exact-file provenance, copyright/license notice handling, modification records, and a new audit.
 - A network request to Exa or an operator-provided `yt-dlp` process is an external integration, not an incorporation claim. Bundling either implementation later would require a new exact-version audit.
@@ -93,6 +93,6 @@ No source code, documentation text, examples, tests, prompts, assets, logos, or 
 
 ## Result
 
-The inspected references add no third-party source to the current Maqam package and therefore do not alter its MIT license. The direct runtime dependencies listed above report MIT licenses. See [docs/provenance-and-licenses.md](docs/provenance-and-licenses.md) for the inspection record and [docs/comparison.md](docs/comparison.md) for the evidence-linked product comparison.
+The inspected references add no third-party source to the current Maqam package and therefore do not alter its Apache-2.0 license. The direct runtime dependencies listed above report MIT licenses. See [docs/provenance-and-licenses.md](docs/provenance-and-licenses.md) for the inspection record and [docs/comparison.md](docs/comparison.md) for the evidence-linked product comparison.
 
 This audit is an engineering record, not legal advice.

@@ -10,7 +10,7 @@ This runbook separates the open-source software license from control of the offi
 - Canonical npm package: `maqam`
 - Official paper: DOI `10.5281/zenodo.21851251`
 
-The software remains MIT-licensed. The official name, logo, repository, package identity, signing credentials, domains, and release channels remain controlled project assets. See [TRADEMARKS.md](../TRADEMARKS.md).
+The `0.4` Community source line is Apache-2.0 licensed; published versions through `0.3.3` retain their MIT grants. The official name, logo, repository, package identity, signing credentials, domains, and release channels remain controlled project assets. See [TRADEMARKS.md](../TRADEMARKS.md) and the [license transition](license-transition.md).
 
 ## Domain controls
 

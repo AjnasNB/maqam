@@ -5,6 +5,9 @@ import {
   AgentRuntime,
   EvidenceLedger,
   PolicyEngine,
+  POLICY_PRESET_NAMES,
+  createPolicyPreset,
+  simulatePolicyWorkflow,
   SkillRegistry,
   ToolGateway,
   ApprovalQueue,
@@ -52,6 +55,9 @@ test("framework primitives are exported without removing crawler exports", () =>
   assert.equal(typeof AgentRuntime, "function");
   assert.equal(typeof EvidenceLedger, "function");
   assert.equal(typeof PolicyEngine, "function");
+  assert.deepEqual([...POLICY_PRESET_NAMES], ["local-development", "team-delivery", "production"]);
+  assert.equal(typeof createPolicyPreset, "function");
+  assert.equal(typeof simulatePolicyWorkflow, "function");
   assert.equal(typeof SkillRegistry, "function");
   assert.equal(typeof ToolGateway, "function");
   assert.equal(typeof ApprovalQueue, "function");

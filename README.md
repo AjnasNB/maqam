@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/maqam.svg)](https://www.npmjs.com/package/maqam)
 [![CI](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml/badge.svg)](https://github.com/AjnasNB/maqam/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](https://github.com/AjnasNB/maqam/blob/main/LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-111827.svg)](https://github.com/AjnasNB/maqam/blob/main/LICENSE)
 
 **Give AI agents the power to act across real software. Keep the final authority.**
 
@@ -10,11 +10,13 @@ Maqam is an open-source enterprise AI agent governance layer for TypeScript. Put
 
 Cockroach Crawler gives the stack bounded eyes on public sources. Qarinah gives it compact, evidence-linked memory. Maqam governs the hands that act. Only operations routed through a registered Maqam adapter are governed.
 
-It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, governed browser contracts, and research-source routing in one MIT-licensed package.
+It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, governed browser contracts, and research-source routing in one open-source package. Stable `0.3.3` remains MIT-licensed; the `0.4` Community source line is Apache-2.0.
 
 The crawler is not the product center; it is one built-in connector. Maqam governs workers that enter through `ToolGateway`, including function agents, explicitly bound object agents, Codex CLI, Claude Code, generic command-line workers, browser and research adapters, internal services, and write actions that need human approval. Calls that bypass a registered adapter are outside Maqam's control.
 
 **Current stable release:** [`maqam@0.3.3`](https://www.npmjs.com/package/maqam/v/0.3.3). It carries the full 0.3 governance surface with an image-free npm README and current package metadata. Verify the immutable artifact with `npm view maqam@0.3.3 version gitHead dist.integrity`.
+
+**Current source candidate:** `0.4.0-rc.1` adds fail-closed policy presets, side-effect-free workflow simulation, and the Apache-2.0 Community boundary. It is not stable or published until the exact candidate passes review and the trusted release workflow.
 
 [Website](https://maqamagent.com/) · [Full documentation](https://maqamagent.com/docs/) · [Technical white paper](https://maqamagent.com/paper/) · [Alternatives](https://maqamagent.com/alternatives/) · [Why Maqam](https://maqamagent.com/why/) · [ProductLoop OS](https://maqamagent.com/docs/productloop/) · [Community](https://maqamagent.com/community/)
 
@@ -25,6 +27,8 @@ The [Maqam technical white paper](https://maqamagent.com/paper/) documents the 0
 - Put registered functions, object agents, Codex CLI, Claude Code, fixed command-line workers, browser actions, crawlers, research adapters, and internal services behind one inspectable control path.
 - Add a practical application-side control plane without replacing the model, orchestrator, agent SDK, or existing tool implementation.
 - Evaluate policy before a registered operation runs, including its declared effect, origin, time, output, call, and evidence boundaries.
+- Start from immutable local-development, team-delivery, or production policy presets without silently enabling every tool or origin.
+- Simulate an entire proposed workflow and see allow, deny, or review-required decisions without executing a tool.
 - Bind human approval to the exact run, tool, and canonical input instead of approving a vague future action.
 - Consume exact approval once by default, rejecting changed input and replay.
 - Turn successful dispatches, denials, approval use, and evidence links into reviewable execution records.
@@ -137,6 +141,7 @@ See the [official-source alternatives guide](https://maqamagent.com/alternatives
 
 - `AgentRuntime`: sequential workflow execution with opt-in retries, cancellation-aware deadlines, trace events, unique run ids, task outputs, and policy preflight.
 - `PolicyEngine`: fail-closed goal and tool-call decisions for allowed tools, origins, effects, clamped tenant limits, and approval gates.
+- `createPolicyPreset` and `simulatePolicyWorkflow` (`0.4` candidate): immutable starter policies and a no-dispatch policy preview for an entire proposed workflow.
 - `EvidenceLedger`: private, transactional provenance records with computed source hashes, same-run claim links, confidence, and unsupported-claim checks.
 - `ToolGateway`: a policy-required path with call ceilings, redacted traces, effective origin scope, non-downgradable handler effects and risk, fail-closed policy-decision validation, and exact one-time approval binding.
 - `ToolGateway.registerGuardedTool`: gives an adapter a private verifier for the exact active input, handler context, registration, decision, and consumed approval receipt without exposing a reusable capability.
@@ -154,6 +159,39 @@ See the [official-source alternatives guide](https://maqamagent.com/alternatives
 - `createResearchWorkflow`: crawler-backed source collection, bounded result validation, synthesis, and quality checks.
 - `maqam`: local web console for running governed research workflows.
 - `maqam-crawl`: bounded crawler CLI with per-origin delay, robots.txt enforcement, redirect validation, DNS pinning, and public-network-only defaults.
+
+### Preview a production policy without running tools (`0.4` candidate)
+
+```js
+import {
+  PolicyEngine,
+  createPolicyPreset,
+  simulatePolicyWorkflow
+} from "maqam";
+
+const policyEngine = new PolicyEngine(createPolicyPreset("production", {
+  allowedTools: ["release.publish"],
+  allowedOrigins: ["https://deploy.example.com"]
+}));
+
+const report = simulatePolicyWorkflow({
+  policyEngine,
+  goal: {
+    allowedTools: ["release.publish"],
+    allowedOrigins: ["https://deploy.example.com"]
+  },
+  calls: [{
+    toolName: "release.publish",
+    input: { url: "https://deploy.example.com/releases", artifact: "app-42" },
+    metadata: { effects: ["publish", "production"] }
+  }]
+});
+
+console.log(report.status);      // "needs_approval"
+console.log(report.dispatched);  // false
+```
+
+The adapter still has to declare truthful effects and network origins. A preset is a starter configuration, and a simulation is a design report—not an execution grant.
 
 ## Why It Matters
 
@@ -455,10 +493,10 @@ See the [0.3.3 release record](docs/release-0.3.3.md) for the patch boundary and
 
 ## License and brand
 
-The source code is available under the [MIT License](LICENSE). The Maqam name, logo, official domains, package identity, and release channels are governed separately by the [brand policy](TRADEMARKS.md) and [domain-protection runbook](docs/brand-and-domain-protection.md). Open-source permission does not imply endorsement or permission to present a fork as an official Maqam release.
+The `0.4` Community source line is available under the [Apache License 2.0](LICENSE). Published versions through `0.3.3` remain under their original MIT grant; see the [license transition](docs/license-transition.md). The Maqam name, logo, official domains, package identity, and release channels are governed separately by the [brand policy](TRADEMARKS.md) and [domain-protection runbook](docs/brand-and-domain-protection.md). Open-source permission does not imply endorsement or permission to present a fork as an official Maqam release.
 
 ## Open Development
 
-Maqam is open source under MIT. Start with the [community hub](https://maqamagent.com/community/) or [GitHub Discussions](https://github.com/AjnasNB/maqam/discussions) for questions, examples, and integration proposals. Changes should arrive through a fork or branch and a reviewed pull request; external contributors cannot merge directly to `main`.
+Maqam Community is open source under Apache-2.0 on the `0.4` line. Start with the [community hub](https://maqamagent.com/community/) or [GitHub Discussions](https://github.com/AjnasNB/maqam/discussions) for questions, examples, and integration proposals. Changes should arrive through a fork or branch and a reviewed pull request; external contributors cannot merge directly to `main`.
 
 Read [CONTRIBUTING.md](https://github.com/AjnasNB/maqam/blob/main/CONTRIBUTING.md), [GOVERNANCE.md](https://github.com/AjnasNB/maqam/blob/main/GOVERNANCE.md), [SUPPORT.md](https://github.com/AjnasNB/maqam/blob/main/SUPPORT.md), the [code of conduct](https://github.com/AjnasNB/maqam/blob/main/CODE_OF_CONDUCT.md), [security policy](https://github.com/AjnasNB/maqam/blob/main/SECURITY.md), and [public roadmap](https://github.com/AjnasNB/maqam/blob/main/ROADMAP.md) before opening a change.

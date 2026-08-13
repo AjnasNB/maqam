@@ -1,0 +1,12 @@
+objects/
+index/
+snapshots/
+locks/
+records/CHANGES.md
+
+!.gitignore
+!config.json
+
+# Community tracks the reviewable event, decision, context, graph, and dashboard
+# artifacts. The verbose changes view and SQLite search index remain derived and
+# are rebuilt by `qarinah build`.
