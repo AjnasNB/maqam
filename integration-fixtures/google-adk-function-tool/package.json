@@ -11,7 +11,7 @@
     "audit:production": "npm audit --omit=dev"
   },
   "dependencies": {
-    "@google/adk": "1.4.0",
+    "@google/adk": "2.0.0",
     "js-yaml": "file:compat/js-yaml-default-export"
   },
   "overrides": {
