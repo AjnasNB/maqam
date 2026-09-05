@@ -89,6 +89,7 @@ for (const file of textFiles) {
 const htmlFiles = files.filter((file) => file.endsWith(".html"));
 for (const file of htmlFiles) {
   const source = await readFile(file, "utf8");
+  if (!source.includes('href="https://fikeya.com/platform/#maqam"')) failures.push(`${file}: missing Fikeya platform connection`);
   const label = path.relative(publicRoot, file);
   if (/&mdash;|&#8212;|&#x2014;/i.test(source)) failures.push(`${label} contains an encoded em dash`);
   const requireMatch = (pattern, message) => {
@@ -204,7 +205,7 @@ for (const file of htmlFiles) {
     requireMatch(/Trusted Publishing with provenance/i, "homepage must identify the completed release verification");
     requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.3/i, "homepage install command must retain a live-record verification reminder");
     requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
-    requireMatch(/Enterprise AI governance - at the execution boundary/i, "homepage must state the enterprise governance position");
+    requireMatch(/Maqam: the governance component of Fikeya/i, "homepage must identify Maqam as a Fikeya component");
     requireMatch(/2,330 downloads in npm's latest complete weekly window/i, "homepage must show the verified ecosystem download signal");
     requireMatch(/835[\s\S]{0,200}1,146[\s\S]{0,200}349/i, "homepage must show the verified package download counts");
     requireMatch(/not unique people, active users, customers, or revenue/i, "homepage must label registry downloads accurately");
