@@ -7,7 +7,7 @@ const publicRoot = path.resolve(here, "..", "public");
 const siteUrl = "https://maqamagent.com";
 const repository = "https://github.com/AjnasNB/maqam";
 const npmPackage = "https://www.npmjs.com/package/maqam";
-const defaultImage = `${siteUrl}/assets/maqam-exact-gate-3d.png`;
+const defaultImage = `${siteUrl}/assets/maqam-authority-flow.png`;
 const modifiedDate = "2026-08-08";
 const toolkitArticleDate = "2026-08-09";
 const productSurfaceDate = "2026-08-09";
@@ -588,8 +588,8 @@ for (const file of await walk(publicRoot)) {
     `  <meta property="og:url" content="${escapeAttribute(canonical)}">`,
     `  <meta property="og:image" content="${defaultImage}">`,
     '  <meta property="og:image:type" content="image/png">',
-    '  <meta property="og:image:width" content="1586">',
-    '  <meta property="og:image:height" content="992">',
+    '  <meta property="og:image:width" content="1400">',
+    '  <meta property="og:image:height" content="820">',
     '  <meta property="og:image:alt" content="Maqam exact approval gate for governed AI agent actions">',
     '  <meta name="twitter:card" content="summary_large_image">',
     `  <meta name="twitter:title" content="${escapeAttribute(title)}">`,
