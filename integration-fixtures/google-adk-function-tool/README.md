@@ -15,6 +15,7 @@ This private workspace exercises one offline Google ADK `FunctionTool` call rout
 - Install command used by CI: `npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts`.
 - `--ignore-scripts` is intentional. The resolved tree contains packages that declare install scripts, including `@google/genai`, `protobufjs`, and `sqlite3`; the offline fixture does not require install-time native compilation.
 - The fixture uses npm `overrides` to keep vulnerable unused transitive paths on patched versions while preserving the `FunctionTool` API exercised here.
+- The September 5 security refresh pins MariaDB 3.4.7, MySQL2 3.24.3, and qs 6.16.0. The isolated FunctionTool fixture tests and full dependency audit must pass together; this does not claim database integration coverage.
 
 ## Verification commands
 

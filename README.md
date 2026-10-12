@@ -6,9 +6,11 @@
 
 **Give AI agents the power to act across real software. Keep the final authority.**
 
+Maqam is the main governance product between AI agents and enterprise tools. This repository contains the free, MIT-licensed **Maqam Community** toolkit. The separate **Maqam Enterprise** implementation remains private; its identity, infrastructure and production requirements are evaluated independently. [Explore the platform](https://maqamagent.com/#platform) or [contact the team](mailto:contact@cognifyr.co).
+
 Maqam is an open-source enterprise AI agent governance layer for TypeScript. Put a function, CLI worker, coding agent, crawler, browser connector, MCP-backed operation, or internal service behind one registered gateway. Maqam checks policy before dispatch, binds human approval to the exact input that will run, allows that approved call once, rejects altered input and replay, and leaves a verifiable receipt.
 
-Cockroach Crawler gives the stack bounded eyes on public sources. Qarinah gives it compact, evidence-linked memory. Maqam governs the hands that act. Only operations routed through a registered Maqam adapter are governed.
+Cockroach Crawler gives the stack bounded eyes on public sources. Cockroach Browser provides authorized interactive browser sessions. Qarinah provides compact, evidence-linked project memory. Fikeya is the separate coding-agent workspace. Maqam governs the hands that act. Each integration requires its own installation and configuration; only operations routed through a registered Maqam adapter are governed.
 
 It combines a local runtime, policy engine, evidence ledger, skill registry, tool gateway, exact human approvals, generic worker adapters, coding-agent CLI adapters, governed browser contracts, and research-source routing in one MIT-licensed package.
 

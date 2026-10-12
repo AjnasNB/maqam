@@ -14,7 +14,7 @@ const approvedProductVisuals = new Set([
   "/assets/evidence-article.png",
   "/assets/evidence-metrology-3d.png",
   "/assets/integration-dock-3d.png",
-  "/assets/maqam-exact-gate-3d.png",
+  "/assets/maqam-authority-flow.png",
   "/assets/productloop-modular-hub-3d.png"
 ]);
 const approvedExternalRuntimeResources = new Set([
@@ -23,14 +23,14 @@ const approvedExternalRuntimeResources = new Set([
 const productVisualDimensions = new Map([
   ["/assets/evidence-metrology-3d.png", [1586, 992]],
   ["/assets/integration-dock-3d.png", [1586, 992]],
-  ["/assets/maqam-exact-gate-3d.png", [1586, 992]],
+  ["/assets/maqam-authority-flow.png", [1400, 820]],
   ["/assets/productloop-modular-hub-3d.png", [1568, 1003]]
 ]);
 const requiredProductVisuals = new Map([
-  ["index.html", ["/assets/maqam-exact-gate-3d.png", "/assets/productloop-modular-hub-3d.png", "/assets/evidence-metrology-3d.png"]],
+  ["index.html", ["/assets/maqam-authority-flow.png", "/assets/productloop-modular-hub-3d.png", "/assets/evidence-metrology-3d.png"]],
   [path.join("alternatives", "index.html"), []],
   [path.join("articles", "open-source-governed-agent-toolkit", "index.html"), []],
-  [path.join("why", "index.html"), ["/assets/maqam-exact-gate-3d.png"]],
+  [path.join("why", "index.html"), ["/assets/maqam-authority-flow.png"]],
   [path.join("community", "index.html"), ["/assets/community-workbench-v2.png"]],
   [path.join("roadmap", "index.html"), ["/assets/evidence-metrology-3d.png"]],
   [path.join("releases", "v0.3.0", "index.html"), ["/assets/integration-dock-3d.png"]],
@@ -89,6 +89,7 @@ for (const file of textFiles) {
 const htmlFiles = files.filter((file) => file.endsWith(".html"));
 for (const file of htmlFiles) {
   const source = await readFile(file, "utf8");
+  if (!source.includes('href="https://maqamagent.com/#platform"')) failures.push(`${file}: missing Maqam platform connection`);
   const label = path.relative(publicRoot, file);
   if (/&mdash;|&#8212;|&#x2014;/i.test(source)) failures.push(`${label} contains an encoded em dash`);
   const requireMatch = (pattern, message) => {
@@ -120,13 +121,13 @@ for (const file of htmlFiles) {
     requireMatch(/<meta\s+property="og:title"\s+content="[^"]+">/i, "missing Open Graph title");
     requireMatch(/<meta\s+property="og:description"\s+content="[^"]+">/i, "missing Open Graph description");
     requireMatch(/<meta\s+property="og:url"\s+content="https:\/\/maqamagent\.com\/[^"]*">/i, "missing Open Graph URL");
-    requireMatch(/<meta\s+property="og:image"\s+content="https:\/\/maqamagent\.com\/assets\/maqam-exact-gate-3d\.png">/i, "missing Open Graph image");
+    requireMatch(/<meta\s+property="og:image"\s+content="https:\/\/maqamagent\.com\/assets\/maqam-authority-flow\.png">/i, "missing Open Graph image");
     requireMatch(/<meta\s+property="og:image:type"\s+content="image\/png">/i, "missing Open Graph image type");
     requireMatch(/<meta\s+property="og:image:alt"\s+content="[^"]+">/i, "missing Open Graph image alt text");
     requireMatch(/<meta\s+name="twitter:card"\s+content="summary_large_image">/i, "missing Twitter card");
     requireMatch(/<meta\s+name="twitter:title"\s+content="[^"]+">/i, "missing Twitter title");
     requireMatch(/<meta\s+name="twitter:description"\s+content="[^"]+">/i, "missing Twitter description");
-    requireMatch(/<meta\s+name="twitter:image"\s+content="https:\/\/maqamagent\.com\/assets\/maqam-exact-gate-3d\.png">/i, "missing Twitter image");
+    requireMatch(/<meta\s+name="twitter:image"\s+content="https:\/\/maqamagent\.com\/assets\/maqam-authority-flow\.png">/i, "missing Twitter image");
     requireMatch(/<meta\s+name="twitter:image:alt"\s+content="[^"]+">/i, "missing Twitter image alt text");
     requireMatch(/<link\s+rel="alternate"\s+hreflang="en"\s+href="https:\/\/maqamagent\.com\/[^"]*">/i, "missing English hreflang");
     requireMatch(/<link\s+rel="alternate"\s+hreflang="x-default"\s+href="https:\/\/maqamagent\.com\/[^"]*">/i, "missing x-default hreflang");
@@ -204,8 +205,11 @@ for (const file of htmlFiles) {
     requireMatch(/Trusted Publishing with provenance/i, "homepage must identify the completed release verification");
     requireMatch(/Verify the live npm and GitHub release records before use[\s\S]{0,120}maqam@0\.3\.3/i, "homepage install command must retain a live-record verification reminder");
     requireMatch(/historical 0\.2\.4 proof media/i, "homepage must label 0.2.4 proof media as historical");
-    requireMatch(/Enterprise AI governance - at the execution boundary/i, "homepage must state the enterprise governance position");
-    requireMatch(/2,330 downloads in npm's latest complete weekly window/i, "homepage must show the verified ecosystem download signal");
+    requireMatch(/Maqam\. The power to act\./i, "homepage must identify Maqam as the main product");
+    requireMatch(/governance layer between AI agents and enterprise tools/i, "homepage must state the execution-boundary positioning");
+    requireMatch(/Maqam Community[\s\S]*Maqam Enterprise/i, "homepage must distinguish public and enterprise editions");
+    requireMatch(/mailto:contact@cognifyr\.co/i, "homepage must offer a direct contact path");
+    requireMatch(/2,330 downloads in the recorded July 18-24 window/i, "homepage must show the verified ecosystem download signal");
     requireMatch(/835[\s\S]{0,200}1,146[\s\S]{0,200}349/i, "homepage must show the verified package download counts");
     requireMatch(/not unique people, active users, customers, or revenue/i, "homepage must label registry downloads accurately");
     requireMatch(/Built on the open-source stack/i, "homepage must identify the connected open-source stack");
