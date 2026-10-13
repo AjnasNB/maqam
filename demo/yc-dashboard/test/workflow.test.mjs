@@ -2,7 +2,17 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import test from "node:test";
-import { runYcWorkflow } from "../scripts/workflow.mjs";
+import { runYcWorkflow, YcWorkflowRun, MAX_DEMO_EVENTS } from "../scripts/workflow.mjs";
+
+test("the event history stays bounded and keeps monotonic sequence numbers", () => {
+  const run = new YcWorkflowRun({ worker: "fixture" });
+  for (let index = 0; index < MAX_DEMO_EVENTS + 30; index++) run.emit("progress", "task", { index });
+  const state = run.snapshot();
+  assert.equal(state.events.length, MAX_DEMO_EVENTS);
+  assert.equal(state.events[0].sequence, 31);
+  assert.equal(state.events.at(-1).sequence, MAX_DEMO_EVENTS + 30);
+  assert.equal(state.events.at(-1).index, MAX_DEMO_EVENTS + 29);
+});
 
 test("the YC workflow returns one evidence-linked exact execution", async () => {
   const proof = await runYcWorkflow();
