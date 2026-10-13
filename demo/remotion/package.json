@@ -14,7 +14,7 @@
     "@remotion/captions": "4.0.498",
     "@remotion/media": "4.0.498",
     "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react-dom": "19.2.8",
     "remotion": "4.0.498"
   },
   "devDependencies": {
