@@ -37,9 +37,9 @@ The `2026.07.04` Windows standalone used for the 2026-07-18 manual compatibility
 
 `integration-fixtures/google-adk-function-tool/` is a private npm workspace used to exercise an offline Google ADK `FunctionTool` callback routed through Maqam's `ToolGateway`. It is not listed in the root `files` allowlist and is not part of the published `maqam` npm tarball.
 
-The fixture has its own lockfile and pins `@google/adk@1.4.0` under Apache-2.0. Its CI install command uses `npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts`; this is intentional because the resolved fixture tree contains packages that declare install scripts, including `@google/genai`, `protobufjs`, and `sqlite3`, while the offline callback test does not need install-time native compilation. The fixture lockfile uses npm `overrides` for audited vulnerable transitive paths and is checked by `npm run audit:google-adk-fixture`.
+The fixture has its own lockfile and pins `@google/adk@2.2.1` under Apache-2.0 (dependency refresh reviewed October 13, 2026). It requires Node 22.17.0 or newer. Its CI install command uses `npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts`; the offline callback test needs no dependency install-time scripts or native compilation. The fixture retains a local YAML default-export compatibility wrapper, now backed by `js-yaml@5.4.3`, and removes obsolete database and OpenTelemetry overrides. Its lockfile is checked by `npm run audit:google-adk-fixture`.
 
-The fixture audit observed no missing package-license fields in the resolved dependency tree. License identifiers present in the resolved tree include MIT, Apache-2.0, ISC, BSD-family identifiers, 0BSD, BlueOak-1.0.0, LGPL-2.1-or-later and Python-2.0. This record is dependency-surface evidence only; it is not legal advice and does not make Google ADK a Maqam runtime dependency.
+The current fixture lockfile records MIT, Apache-2.0, ISC, BSD-2-Clause, BSD-3-Clause, Python-2.0 and Unlicense identifiers. This record is dependency-surface evidence only; it does not make Google ADK a Maqam runtime dependency.
 
 ## Upstream Inspection Log
 
