@@ -33,6 +33,8 @@ const runsDirectory = resolve(demoDirectory, ".runs");
 const proposalSchemaPath = resolve(demoDirectory, "fixtures", "proposal.schema.json");
 
 const TOOL_NAME = "apply_patch";
+export const MAX_DEMO_EVENTS = 512;
+const MAX_PROPOSAL_OUTPUT_BYTES = 1024 * 1024;
 const TASK = "Migrate the Acme Jobs client from v1 to v2. Preserve retry safety, run the real test suite, and do not write without exact approval.";
 
 const PATCHED_CLIENT = `import { randomUUID } from "node:crypto";
@@ -288,14 +290,30 @@ async function runCodexProposal({ workspace, contextMarkdown, evidence, onProgre
   let stdout = "";
   let stderr = "";
   let eventCount = 0;
+  let outputBytes = 0;
+  let outputLimitError = null;
   child.stdout.setEncoding("utf8");
   child.stderr.setEncoding("utf8");
   child.stdout.on("data", (chunk) => {
+    if (outputLimitError) return;
+    outputBytes += Buffer.byteLength(chunk);
+    if (outputBytes > MAX_PROPOSAL_OUTPUT_BYTES) {
+      outputLimitError = new Error("Proposal output exceeded the 1 MiB demo limit.");
+      child.kill();
+      return;
+    }
     stdout += chunk;
     eventCount += chunk.split("\n").filter(Boolean).length;
     onProgress?.(eventCount);
   });
   child.stderr.on("data", (chunk) => {
+    if (outputLimitError) return;
+    outputBytes += Buffer.byteLength(chunk);
+    if (outputBytes > MAX_PROPOSAL_OUTPUT_BYTES) {
+      outputLimitError = new Error("Proposal output exceeded the 1 MiB demo limit.");
+      child.kill();
+      return;
+    }
     stderr += chunk;
   });
   child.stdin.end(prompt);
@@ -310,6 +328,7 @@ async function runCodexProposal({ workspace, contextMarkdown, evidence, onProgre
       resolveExit(code ?? 1);
     });
   });
+  if (outputLimitError) throw outputLimitError;
   if (exitCode !== 0) {
     throw new Error(`Codex proposal failed (${exitCode}): ${stderr || stdout}`);
   }
@@ -359,6 +378,7 @@ export class YcWorkflowRun {
     this.vendorDocs = null;
     this.startedAt = Date.now();
     this.events = [];
+    this.eventSequence = 0;
     this.state = {
       schemaVersion: "maqam.yc-control-plane-live.v2",
       id: this.id,
@@ -379,12 +399,13 @@ export class YcWorkflowRun {
 
   emit(kind, stage, detail = {}) {
     const event = {
-      sequence: this.events.length + 1,
+      sequence: ++this.eventSequence,
       kind,
       stage,
       at: new Date().toISOString(),
       ...detail
     };
+    if (this.events.length >= MAX_DEMO_EVENTS) this.events.shift();
     this.events.push(event);
     this.state.stage = stage;
     this.state.events = this.events;
