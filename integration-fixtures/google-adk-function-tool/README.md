@@ -11,11 +11,11 @@ This private workspace exercises one offline Google ADK `FunctionTool` call rout
 
 ## Dependency posture
 
-- Direct dependency: `@google/adk@1.4.0`, Apache-2.0.
+- Direct dependency: `@google/adk@2.2.1`, Apache-2.0. This isolated fixture requires Node 22.17.0 or newer.
 - Install command used by CI: `npm --prefix integration-fixtures/google-adk-function-tool ci --ignore-scripts`.
-- `--ignore-scripts` is intentional. The resolved tree contains packages that declare install scripts, including `@google/genai`, `protobufjs`, and `sqlite3`; the offline fixture does not require install-time native compilation.
+- `--ignore-scripts` is intentional. The offline fixture does not require dependency install-time scripts or native compilation.
 - The fixture uses npm `overrides` to keep vulnerable unused transitive paths on patched versions while preserving the `FunctionTool` API exercised here.
-- The September 5 security refresh pins MariaDB 3.4.7, MySQL2 3.24.3, and qs 6.16.0. The isolated FunctionTool fixture tests and full dependency audit must pass together; this does not claim database integration coverage.
+- The October 13 refresh moves to the smaller ADK 2.2.1 tree, removes obsolete database and OpenTelemetry overrides, and updates the local YAML default-export compatibility wrapper to upstream 5.4.3. The isolated FunctionTool tests and full dependency audit must pass together; this does not claim live provider or database integration coverage.
 
 ## Verification commands
 

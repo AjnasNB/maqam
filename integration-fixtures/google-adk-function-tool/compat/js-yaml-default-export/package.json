@@ -7,6 +7,6 @@
   "type": "module",
   "exports": "./index.mjs",
   "dependencies": {
-    "js-yaml-upstream": "npm:js-yaml@5.2.3"
+    "js-yaml-upstream": "npm:js-yaml@5.4.3"
   }
 }

@@ -53,5 +53,10 @@
   },
   "sideEffects": [
     "*.css"
-  ]
+  ],
+  "overrides": {
+    "@remotion/eslint-config-flat": {
+      "typescript-eslint": "8.71.1"
+    }
+  }
 }
