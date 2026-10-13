@@ -14,6 +14,13 @@ test("the event history stays bounded and keeps monotonic sequence numbers", () 
   assert.equal(state.events.at(-1).index, MAX_DEMO_EVENTS + 29);
 });
 
+test("pacing is bounded and mutation cannot create an unbounded timer", async () => {
+  const run = new YcWorkflowRun({ worker: "fixture", paceMs: 1e12 });
+  assert.equal(run.paceMs, 1000);
+  run.paceMs = 1e12;
+  await assert.rejects(run.pace(), /between 0 and 1000/);
+});
+
 test("the YC workflow returns one evidence-linked exact execution", async () => {
   const proof = await runYcWorkflow();
 

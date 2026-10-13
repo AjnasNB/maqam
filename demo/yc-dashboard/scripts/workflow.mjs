@@ -366,7 +366,7 @@ export class YcWorkflowRun {
     const suffix = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
     this.id = `run_vendor_v2_${suffix}_${randomUUID().slice(0, 6)}`;
     this.workerMode = worker;
-    this.paceMs = Number.isFinite(paceMs) ? Math.max(0, paceMs) : 0;
+    this.paceMs = Number.isFinite(paceMs) ? Math.min(1000, Math.max(0, paceMs)) : 0;
     this.workspace = resolve(runsDirectory, this.id);
     this.executions = 0;
     this.gateway = null;
@@ -417,8 +417,12 @@ export class YcWorkflowRun {
   }
 
   async pace() {
-    if (this.paceMs > 0) {
-      await new Promise((resolveWait) => setTimeout(resolveWait, this.paceMs));
+    const delay = this.paceMs;
+    if (!Number.isFinite(delay) || delay < 0 || delay > 1000) {
+      throw new RangeError("Demo pacing must be between 0 and 1000 ms.");
+    }
+    if (delay > 0) {
+      await new Promise((resolveWait) => setTimeout(resolveWait, delay));
     }
   }
 
