@@ -32,6 +32,14 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Install and audit YC demo dependencies
+        run: |
+          npm --prefix demo/yc-dashboard ci --ignore-scripts
+          npm --prefix demo/yc-dashboard audit
+
+      - name: Verify bounded YC demo and exact execution
+        run: npm --prefix demo/yc-dashboard run check
+
       - name: Install Google ADK integration fixture
         run: npm run install:google-adk-fixture
 
