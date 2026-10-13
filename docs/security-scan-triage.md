@@ -11,6 +11,11 @@ emits more than the limit and checks both bounded retention and ordering. The
 proposal process also stops when combined stdout/stderr exceeds 1 MiB; its
 90-second execution timeout remains in force.
 
+The reported resource-exhaustion dataflow also reached the demo pacing timer.
+Operator/query-supplied pacing is now clamped to 0–1000 ms, with a second check at
+the timer boundary. A regression verifies that a later mutation cannot schedule
+an unbounded delay.
+
 ## Trusted operator inputs
 
 - `src/framework/cli-agent-tool.js`: the constructor receives a fixed command and
