@@ -1,13 +1,14 @@
 # Maqam Feature Inventory
 
-This is the source-backed inventory for Maqam `0.3.3` and the documentation
-changes proposed after that release. It describes behavior that is represented
+This is the source-backed inventory for stable Maqam `0.3.3` and the `0.4.0-rc.1`
+source candidate. It describes behavior that is represented
 by public code, public types, tests, or an explicit host contract. It does not
 turn roadmap ideas into release claims.
 
 Status terms:
 
 - **Public 0.3.3** means the feature exists in the current npm package.
+- **0.4 candidate** means the feature exists on the reviewed candidate source branch but is not stable or published yet.
 - **Optional** means the feature requires an explicitly configured executable,
   credential, network reader, browser driver, or host component.
 - **Documentation update** means the implementation is already public and the
@@ -33,6 +34,8 @@ Status terms:
 
 - Tool allowlists and denylists.
 - Effect allowlists and denylists.
+- **0.4 candidate:** immutable local-development, team-delivery, and production starter policies that remain fail-closed until exact tools and origins are supplied.
+- **0.4 candidate:** side-effect-free workflow simulation with per-call allow, deny, and review-required results; simulation never dispatches a registered handler.
 - Origin allowlists and denylists.
 - Total tool-call budgets.
 - Goal-level token and tool-call ceilings.

@@ -6,7 +6,7 @@ on:
       version:
         description: Exact package version to publish
         required: true
-        default: 0.3.3
+        default: 0.4.0-rc.1
         type: string
       expected_git_commit:
         description: Approved full Git commit from the main CI release manifest
@@ -50,6 +50,7 @@ jobs:
       EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
       EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
       EXPECTED_INTEGRITY: ${{ inputs.expected_integrity }}
+      STABLE_VERSION: 0.3.3
       CONFIRMATION: ${{ inputs.confirmation }}
     steps:
       - name: Validate dispatch
@@ -210,6 +211,7 @@ jobs:
       EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
       EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
       EXPECTED_INTEGRITY: ${{ inputs.expected_integrity }}
+      STABLE_VERSION: 0.3.3
     steps:
       - name: Checkout verified commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -279,7 +281,12 @@ jobs:
         # Directory publishing records the checked-out commit as npm gitHead.
         # Scripts are intentionally disabled: the verify job already ran them,
         # and the OIDC-enabled job should execute no dependency lifecycle code.
-        run: npm publish --access public --ignore-scripts --provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          publish_tag="latest"
+          if [[ "${EXPECTED_VERSION}" == *-* ]]; then publish_tag="next"; fi
+          npm publish --access public --ignore-scripts --provenance --tag "${publish_tag}"
 
       - name: Verify npm registry identity
         shell: bash
@@ -312,6 +319,19 @@ jobs:
             echo "integrity=${published_integrity:-missing}" >&2
             echo "provenance predicate=${published_predicate:-missing}" >&2
             exit 1
+          fi
+
+          if [[ "${EXPECTED_VERSION}" == *-* ]]; then
+            published_next="$(npm view maqam dist-tags.next 2>/dev/null || true)"
+            published_latest="$(npm view maqam dist-tags.latest 2>/dev/null || true)"
+            if [[ "${published_next}" != "${EXPECTED_VERSION}" ]]; then
+              echo "Prerelease was not assigned to npm next." >&2
+              exit 1
+            fi
+            if [[ "${published_latest}" != "${STABLE_VERSION}" ]]; then
+              echo "Prerelease changed npm latest from ${STABLE_VERSION} to ${published_latest:-missing}." >&2
+              exit 1
+            fi
           fi
 
           registry_dir="${RUNNER_TEMP}/registry-pack"

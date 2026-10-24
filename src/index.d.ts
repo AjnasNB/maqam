@@ -679,6 +679,55 @@ export class PolicyEngine {
   authorizationScope(goal?: WorkflowGoal): PolicyAuthorizationScope;
 }
 
+export type PolicyPresetName = "local-development" | "team-delivery" | "production";
+
+export const POLICY_PRESET_NAMES: readonly PolicyPresetName[];
+
+export interface PolicyPresetOptions {
+  allowedTools?: string[];
+  deniedTools?: string[];
+  allowedOrigins?: string[];
+  deniedOrigins?: string[];
+  approvalRequiredTools?: string[];
+  defaultLimits?: JsonObject;
+  maxToolCalls?: number;
+}
+
+export function createPolicyPreset(
+  name: PolicyPresetName,
+  options?: PolicyPresetOptions
+): Readonly<PolicyEngineConfig>;
+
+export interface PolicyWorkflowSimulationCall {
+  toolName: string;
+  input?: unknown;
+  context?: unknown;
+  metadata?: ToolMetadata;
+}
+
+export interface PolicyWorkflowSimulationReport {
+  readonly status: PolicyDecision["status"];
+  readonly dispatched: false;
+  readonly goalDecision: Readonly<PolicyDecision>;
+  readonly calls: readonly {
+    readonly index: number;
+    readonly toolName: string;
+    readonly decision: Readonly<PolicyDecision>;
+  }[];
+  readonly summary: Readonly<{
+    allowed: number;
+    denied: number;
+    needsApproval: number;
+    skipped: number;
+  }>;
+}
+
+export function simulatePolicyWorkflow(input: {
+  policyEngine: PolicyEngine;
+  goal?: WorkflowGoal;
+  calls?: PolicyWorkflowSimulationCall[];
+}): Readonly<PolicyWorkflowSimulationReport>;
+
 export interface EvidenceInput {
   evidenceId?: string;
   runId?: string | null;

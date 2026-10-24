@@ -12,3 +12,11 @@ Thumbs.db
 .impeccable/
 demo/yc-dashboard/.runs/
 tmp/pdfs/
+# Qarinah's agent-hook files are machine-local. The reviewable ledger stays
+# under .qarinah; contributors run `qarinah setup` on their own machine.
+.codex/
+.claude/
+.mcp.json
+.agents/plugins/qarinah/
+.kimi-code/
+.kimi/

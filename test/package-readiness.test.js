@@ -23,6 +23,10 @@ const release03 = readFileSync(new URL("../docs/release-0.3.0.md", import.meta.u
 const release031 = readFileSync(new URL("../docs/release-0.3.1.md", import.meta.url), "utf8");
 const release032 = readFileSync(new URL("../docs/release-0.3.2.md", import.meta.url), "utf8");
 const release033 = readFileSync(new URL("../docs/release-0.3.3.md", import.meta.url), "utf8");
+const release040rc1 = readFileSync(new URL("../docs/release-0.4.0-rc.1.md", import.meta.url), "utf8");
+const licenseTransition = readFileSync(new URL("../docs/license-transition.md", import.meta.url), "utf8");
+const license = readFileSync(new URL("../LICENSE", import.meta.url), "utf8");
+const notice = readFileSync(new URL("../NOTICE", import.meta.url), "utf8");
 const rootReleaseGuide = readFileSync(new URL("../RELEASE_CHECKLIST.md", import.meta.url), "utf8");
 const roadmap = readFileSync(new URL("../ROADMAP.md", import.meta.url), "utf8");
 const technicalArticle = readFileSync(new URL("../docs/articles/exact-agent-approvals.md", import.meta.url), "utf8");
@@ -35,10 +39,10 @@ const publishWorkflow = readFileSync(new URL("../.github/workflows/publish-npm.y
 
 test("package metadata is ready for Maqam npm publishing", () => {
   assert.equal(packageJson.name, "maqam");
-  assert.equal(packageJson.version, "0.3.3");
-  assert.equal(packageLockJson.version, "0.3.3");
-  assert.equal(packageLockJson.packages[""].version, "0.3.3");
-  assert.equal(packageJson.license, "MIT");
+  assert.equal(packageJson.version, "0.4.0-rc.1");
+  assert.equal(packageLockJson.version, "0.4.0-rc.1");
+  assert.equal(packageLockJson.packages[""].version, "0.4.0-rc.1");
+  assert.equal(packageJson.license, "Apache-2.0");
   assert.equal(packageJson.author, "Ajnas NB");
   assert.match(packageJson.description, /open-source AI agent governance for TypeScript/i);
   assert.match(packageJson.description, /exact one-use approvals/i);
@@ -79,6 +83,10 @@ test("package metadata is ready for Maqam npm publishing", () => {
   assert.ok(packageJson.files.includes("docs/release-0.3.1.md"));
   assert.ok(packageJson.files.includes("docs/release-0.3.2.md"));
   assert.ok(packageJson.files.includes("docs/release-0.3.3.md"));
+  assert.ok(packageJson.files.includes("docs/release-0.4.0-rc.1.md"));
+  assert.ok(packageJson.files.includes("docs/license-transition.md"));
+  assert.ok(packageJson.files.includes("docs/project-memory.md"));
+  assert.ok(packageJson.files.includes("NOTICE"));
   assert.ok(packageJson.files.includes("examples/"));
   assert.ok(packageJson.files.includes("benchmarks/"));
   assert.ok(packageJson.files.includes("ROADMAP.md"));
@@ -207,6 +215,13 @@ test("public docs and brand assets match Maqam identity", () => {
   assert.match(release033, /^# Maqam 0\.3\.3/m);
   assert.match(release033, /registry-presentation patch/i);
   assert.match(release033, /No policy, approval, evidence, browser, crawler, source-routing, network, or[\s\S]{0,80}tool-dispatch behavior changes/i);
+  assert.match(release040rc1, /^# Maqam 0\.4\.0-rc\.1/m);
+  assert.match(release040rc1, /Apache-2\.0 Maqam Community line/i);
+  assert.match(release040rc1, /side-effect-free workflow simulation/i);
+  assert.match(licenseTransition, /versions through and including `0\.3\.3` were released under the MIT License/i);
+  assert.match(licenseTransition, /Beginning with the `0\.4\.0` source line/i);
+  assert.match(license, /Apache License[\s\S]+Version 2\.0, January 2004/);
+  assert.match(notice, /Copyright 2026 Ajnas NB/);
   assert.match(governedBrowser, /^# Governed browser adapters/m);
   assert.match(governedBrowser, /only origins named by the exact/i);
   assert.match(governedBrowser, /external protocols[\s\S]{0,250}modal dialogs/i);
@@ -312,7 +327,9 @@ test("release governance docs require approval before publishing", () => {
   assert.match(publishWorkflow, /GITHUB_SHA[^\n]+EXPECTED_GIT_COMMIT/);
   assert.match(publishWorkflow, /expected_sha256/);
   assert.match(publishWorkflow, /expected_integrity/);
-  assert.match(publishWorkflow, /default: 0\.3\.3/);
+  assert.match(publishWorkflow, /default: 0\.4\.0-rc\.1/);
+  assert.match(publishWorkflow, /--tag "\$\{publish_tag\}"/);
+  assert.match(publishWorkflow, /published_latest[\s\S]{0,400}STABLE_VERSION/);
   assert.match(publishWorkflow, /registry-pack-cache-\$\{attempt\}/);
   assert.match(publishWorkflow, /--prefer-online/);
   assert.match(publishWorkflow, /Registry tarball download did not converge/);

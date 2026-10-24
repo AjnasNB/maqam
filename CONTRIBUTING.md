@@ -98,4 +98,4 @@ test: replicate MGES on Linux arm64
 
 Maintainers may request changes, close out-of-scope proposals, or split a large pull request. A pull request is not accepted until a maintainer explicitly merges it.
 
-By contributing, you agree that your contribution is licensed under the repository's MIT license.
+By contributing, you agree that your contribution is licensed under the repository's Apache License 2.0. Sign off each commit with `git commit -s` to certify the [Developer Certificate of Origin 1.1](DCO). Do not submit code you are not authorized to contribute.
