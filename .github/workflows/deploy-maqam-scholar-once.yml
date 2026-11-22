@@ -1,0 +1,46 @@
+name: Deploy merged Maqam Scholar metadata once
+on:
+  push:
+    branches:
+      - ops/maqam-scholar-deploy-2026-11-22
+    paths:
+      - .github/workflows/deploy-maqam-scholar-once.yml
+permissions:
+  contents: read
+concurrency: maqam-scholar-deploy-once
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 7c2975daefbd58a67f4190ce9d57474c499c2c80
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+      - run: npm --prefix website ci --ignore-scripts
+      - run: npm --prefix website run check
+      - name: Verify and deploy the existing Worker version
+        env:
+          DEPLOY_CREDENTIAL: ${{ secrets.MAQAM_SCHOLAR_DEPLOY_ONCE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "7c2975daefbd58a67f4190ce9d57474c499c2c80"
+          grep -Fq 'name="citation_publication_date" content="2026/08/08"' website/public/paper/index.html
+          test -n "$DEPLOY_CREDENTIAL"
+          CLOUDFLARE_API_TOKEN=$(jq -er .token <<< "$DEPLOY_CREDENTIAL")
+          CLOUDFLARE_ACCOUNT_ID=$(jq -er .account <<< "$DEPLOY_CREDENTIAL")
+          printf '::add-mask::%s\n' "$CLOUDFLARE_API_TOKEN"
+          printf '::add-mask::%s\n' "$CLOUDFLARE_ACCOUNT_ID"
+          export CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID
+          unset DEPLOY_CREDENTIAL
+          npx --yes wrangler@4.166.0 versions upload --config website/wrangler.jsonc --keep-vars --dry-run
+          npx --yes wrangler@4.166.0 versions upload --config website/wrangler.jsonc --keep-vars --message "Maqam Scholar metadata from 7c2975d" | tee "$RUNNER_TEMP/maqam-version.log"
+          version=$(sed -nE 's/^.*Version ID: ([0-9a-fA-F-]{36}).*$/\1/p' "$RUNNER_TEMP/maqam-version.log" | tail -n 1)
+          test -n "$version"
+          npx --yes wrangler@4.166.0 versions deploy "$version@100%" --config website/wrangler.jsonc --yes --message "Deploy reviewed Maqam Scholar metadata from 7c2975d"
+          unset CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID
+          printf 'Deployed reviewed Maqam commit 7c2975d as version %s\n' "$version" >> "$GITHUB_STEP_SUMMARY"
